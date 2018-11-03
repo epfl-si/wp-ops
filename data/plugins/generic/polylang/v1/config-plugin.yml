@@ -1,5 +1,0 @@
-src: generic/polylang/v1/polylang.zip
-activate: yes
-config_class: wordpress.plugins.custom.polylang.WPPolylangConfig
-config_custom:
-  lang_list: !from_csv langs

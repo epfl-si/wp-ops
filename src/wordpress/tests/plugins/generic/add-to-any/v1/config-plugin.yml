@@ -1,8 +1,0 @@
-src: web
-activate: yes
-tables:
-  options:
-  - autoload: 'yes'
-    option_id: 130
-    option_name: addtoany_options
-    option_value: test

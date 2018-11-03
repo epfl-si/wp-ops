@@ -1,8 +1,0 @@
-src: ../wp/wp-content/plugins/EPFL-settings
-activate: yes
-tables:
-  options:
-  - autoload: 'yes'
-    option_id: 300
-    option_name: epfl:custom_breadcrumb
-    option_value: ''
