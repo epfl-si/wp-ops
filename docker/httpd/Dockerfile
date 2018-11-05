@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsb-release \
     apt-transport-https \
     modsecurity-crs \
+    libcgi-pm-perl \
+    libio-all-lwp-perl \
+    libreadonly-perl \
     vim \
   && \
     apt-get -y autoremove && \
@@ -42,7 +45,8 @@ COPY 403 /var/www/error/
 COPY modsecurity.conf /etc/modsecurity/
 COPY modsecurity-whitelist.conf /etc/modsecurity/
 COPY docker-entrypoint.sh /
-RUN chmod a+x /docker-entrypoint.sh
+COPY health.cgi /
+RUN chmod a+x /docker-entrypoint.sh /health.cgi
 
 EXPOSE 8080 8443
 
