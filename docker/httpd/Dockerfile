@@ -35,6 +35,8 @@ RUN  apt-get -y update && \
     apt-get -y autoremove && \
     apt-get clean
 
+RUN a2enmod cgi
+
 # directory for custom error pages
 RUN mkdir /var/www/error
 
@@ -45,8 +47,8 @@ COPY 403 /var/www/error/
 COPY modsecurity.conf /etc/modsecurity/
 COPY modsecurity-whitelist.conf /etc/modsecurity/
 COPY docker-entrypoint.sh /
-COPY health.cgi /
-RUN chmod a+x /docker-entrypoint.sh /health.cgi
+COPY health.cgi /usr/lib/cgi-bin
+RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
 
 EXPOSE 8080 8443
 

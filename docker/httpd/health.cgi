@@ -1,5 +1,13 @@
 #!/usr/bin/env perl
 
+print <<"XXX_MOVE_ALONG_NOTHING_TO_SEE_HERE"; exit(0);
+Status: 200 OK
+Server: health.cgi
+Content-Type: text/plain; version=0.0.4
+
+Move along - Nothing to see here.
+XXX_MOVE_ALONG_NOTHING_TO_SEE_HERE
+
 use strict;
 use warnings;
 
@@ -57,7 +65,6 @@ ALL_DONE_BYE
 #################################################################
 
 sub ensure_background_task_running {
-  return;  # XXX
   my $pid_io = io($pid_file)->mode(O_RDWR);
   "" > $pid_io;  # Open it
   flock($pid_io->io_handle, LOCK_EX) or die <<FLOCK_IT;
