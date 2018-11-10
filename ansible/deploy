@@ -15,7 +15,7 @@
 # - https://www.ansible.com/overview/how-ansible-works
 # - https://github.com/jdauphant/awesome-ansible
 
-thisdir="$(dirname "$(realpath "$0")")"
+cd "$(dirname "$(realpath "$0")")"
 
 inventories="-i ansible/hosts-dev"
 # One can override these overrides on the command line
@@ -33,4 +33,4 @@ done
 
 thisdir="$(dirname "$(realpath "$0")")"
 
-ansible-playbook $default_plays $inventories "$@" "$thisdir"/playbooks/wordpress-main.yml
+ansible-playbook $default_plays $inventories "$@" playbooks/wordpress-main.yml

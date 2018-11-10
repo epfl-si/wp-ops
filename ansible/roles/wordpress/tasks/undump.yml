@@ -33,7 +33,8 @@
     path: "{{ undump_remote_tmpdir }}"
     recurse: yes
 
-- copy:
+- name: "Copy XML files from {{ undump_local_dir }}"
+  copy:
     src: "{{ item }}"
     dest: "{{ undump_remote_tmpdir }}"
   with_fileglob:
