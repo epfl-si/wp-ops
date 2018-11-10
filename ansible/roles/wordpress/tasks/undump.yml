@@ -27,17 +27,17 @@
   command: "{{ wp_cli_command }} plugin install --activate wordpress-importer"
   when: "'wp-importer' not in wp_plugin_list.stdout"
 
-- copy:
-    src: "{{ item }}"
-    dest: "{{ undump_remote_tmpdir }}"
-  with_fileglob:
-    - "{{ undump_local_dir }}/*.xml"
-
 - name: "Create {{ undump_remote_tmpdir }}"
   file:
     state: directory
     path: "{{ undump_remote_tmpdir }}"
     recurse: yes
+
+- copy:
+    src: "{{ item }}"
+    dest: "{{ undump_remote_tmpdir }}"
+  with_fileglob:
+    - "{{ undump_local_dir }}/*.xml"
 
 - name: Copy importer.php
   copy:
