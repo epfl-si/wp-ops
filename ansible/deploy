@@ -15,14 +15,14 @@
 
 cd "$(dirname "$(realpath "$0")")"
 
-inventories="-i ansible/hosts-dev"
+inventories="-i hosts-dev"
 # One can override these overrides on the command line
 default_plays="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
 
 while [ -n "$1" ]; do
     case "$1" in
         --prod)
-            inventories="$inventories -i ansible/hosts-prod"
+            inventories="$inventories -i hosts-prod"
             shift ;;
         *)
             break ;;
