@@ -17,13 +17,8 @@
   when: "wp_can.write_code and _epfl_plugin_zip is changed"
   register: _epfl_plugin_zip_install
 
-- name: deactivate EPFL plug-in
-  command: "{{ wp_cli_command }} plugin deactivate"
-  when: _epfl_plugin_zip_install.changed and play_unload_reload_plugins is match("yes")
-  failed_when: false
-
-- name: reactivate EPFL plug-in
-  command: "{{ wp_cli_command }} plugin activate"
+- name: deactivate/reactivate EPFL plug-in
+  shell: "set -x; {{ wp_cli_command }} plugin deactivate ; {{ wp_cli_command }} plugin activate"
   when: _epfl_plugin_zip_install.changed and play_unload_reload_plugins is match("yes")
 
 - name: Zip file for the EPFL 2018 theme
