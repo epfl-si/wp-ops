@@ -2,8 +2,7 @@
 # This is an Ansible playbook to dump sites in the WXR format, and
 # recover the spoils to localhost.
 #
-# Usage: this script expects to be invoked from the top
-#        of the source tree.
+# Usage:
 #
 #     ./ansible/dump -e "to=/some/where"
 #
