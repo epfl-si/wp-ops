@@ -61,7 +61,7 @@ RUN mkdir /var/run/sshd && \
     rm -rf /tmp/openshift && \
     mkdir /root/.ssh
 
-COPY ./bash_profile /var/www/.bash_profile
+COPY jahia2wp.sh /etc/profile.d/
 COPY ./docker-entrypoint.sh /
 
 # setup access rights
@@ -83,6 +83,7 @@ RUN chmod a+x /usr/local/bin/wp && \
     su www-data -c "/usr/local/bin/wp package install /tmp/polylang-cli-master.zip" && \
     su www-data -c "/usr/local/bin/wp package install /tmp/wp-cli-polylang-master.zip"
 
+RUN ln -s /srv/bin/vjahia2wp /usr/local/bin/
 
 
 # this line should come after the installation of other packages
