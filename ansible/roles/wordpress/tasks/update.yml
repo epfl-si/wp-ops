@@ -9,13 +9,15 @@
     path: "{{ epfl_plugin_dir }}"
     exclude_path: "{{ epfl_ignore_files_pattern }}"
   register: _epfl_plugin_zip
+  when: 
 
 - name: Install EPFL plug-in
   unarchive:
     src: "{{ epfl_plugin_zip_file }}"
     dest: "{{ wp_plugins_dir }}"
-  when: "wp_can.write_code and _epfl_plugin_zip is changed"
   register: _epfl_plugin_zip_install
+  when: wp_can.write_code and _epfl_plugin_zip is changed and play_update_plugin is match("yes")
+
 
 - name: deactivate/reactivate EPFL plug-in
   shell: "set -x; {{ wp_cli_command }} plugin deactivate ; {{ wp_cli_command }} plugin activate"
@@ -30,9 +32,10 @@
     path: "{{ epfl_theme2018_dir }}"
     exclude_path: "{{ epfl_ignore_files_pattern }}"
   register: _epfl_theme_zip
+  when: play_update_theme is match("yes")
 
 - name: Install EPFL 2018 theme
   unarchive:
     src: "{{ epfl_theme2018_zip_file }}"
     dest: "{{ wp_themes_dir }}"
-  when: "wp_can.write_code and _epfl_theme_zip is changed"
+  when: wp_can.write_code and _epfl_theme_zip is changed and play_update_theme is match("yes")

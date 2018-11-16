@@ -29,3 +29,5 @@ play_create_or_restore: "no"
 play_unload_reload_plugins: "yes"    # Ancillary to play_update
 play_wp_configure: "yes"             # Used in ../../tasks/create-or-restore.yml
 play_check_working_wordpress: "yes"  # Ditto
+play_update_theme: "yes"
+play_update_plugin: "yes"
