@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:stretch AS httpd-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 \
@@ -35,6 +35,13 @@ RUN  apt-get -y update && \
     apt-get -y autoremove && \
     apt-get clean
 
+FROM httpd-base AS httpd-build
+RUN apt-get -y install php7.1-dev build-essential git
+
+
+
+FROM httpd-base
+
 RUN a2enmod cgi
 
 # directory for custom error pages
@@ -53,3 +60,4 @@ RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
 EXPOSE 8080 8443
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
