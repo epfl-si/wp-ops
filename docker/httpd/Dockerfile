@@ -1,4 +1,4 @@
-FROM ubuntu:bionic AS httpd-base
+FROM ubuntu:bionic
 
 ENV DEBIAN_FRONTEND=noninteractive
 
