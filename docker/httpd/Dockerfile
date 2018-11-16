@@ -44,7 +44,7 @@ RUN BUILDDEPS='php7.2-dev build-essential git liblttng-ust-dev' ;\
     mkdir /build; cd /build; \
     git clone https://github.com/naser/LTTng-php-tracing-module.git ; \
     cd /build/LTTng-php-tracing-module; \
-    phpize; ./configure; make; sudo make install; \
+    phpize; ./configure; make; make install; \
     echo '; extension=lttng.so' > /etc/php/7.2/cli/conf.d/90-curl.ini; \
     rm -rf /build; \
     apt-get remove -y --purge $BUILDDEPS; \
