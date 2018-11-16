@@ -50,9 +50,6 @@ RUN BUILDDEPS='php7.2-dev build-essential git liblttng-ust-dev' ;\
     apt-get remove -y --purge $BUILDDEPS; \
     apt-get autoremove -y --purge; apt-get clean
 
-
-FROM httpd-base
-
 RUN a2enmod cgi
 
 # directory for custom error pages
