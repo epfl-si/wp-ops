@@ -1,4 +1,6 @@
-FROM debian:stretch AS httpd-base
+FROM ubuntu:bionic AS httpd-base
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 \
@@ -16,28 +18,37 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get -y autoremove && \
     apt-get clean
 
-RUN curl https://packages.sury.org/php/apt.gpg > /etc/apt/trusted.gpg.d/php.gpg
-RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 # The following goodies have dependencies above this line, and
 # thus must be installed in another round of apt-get
 RUN  apt-get -y update && \
   apt-get -y install nodejs \
-    libapache2-mod-php7.1 \
-    php7.1 \
-    php7.1-gd \
-    php7.1-cli \
-    php7.1-curl \
-    php7.1-ldap \
-    php7.1-mysql \
-    php7.1-xml \
-    php7.1-zip \
+    libapache2-mod-php7.2 \
+    php7.2 \
+    php7.2-gd \
+    php7.2-cli \
+    php7.2-curl \
+    php7.2-ldap \
+    php7.2-mysql \
+    php7.2-xml \
+    php7.2-zip \
+    lttng-tools \
   && \
     apt-get -y autoremove && \
     apt-get clean
 
-FROM httpd-base AS httpd-build
-RUN apt-get -y install php7.1-dev build-essential git
-
+# See https://github.com/naser/LTTng-enabled-PHP
+# Also, https://github.com/openshift/origin/issues/19198 says we
+# cannot use multi-stage builds yet.
+RUN BUILDDEPS='php7.2-dev build-essential git liblttng-ust-dev' ;\
+   set -e -x; apt-get -y install $BUILDDEPS ; \
+    mkdir /build; cd /build; \
+    git clone https://github.com/naser/LTTng-php-tracing-module.git ; \
+    cd /build/LTTng-php-tracing-module; \
+    phpize; ./configure; make; sudo make install; \
+    echo '; extension=lttng.so' > /etc/php/7.2/cli/conf.d/90-curl.ini; \
+    rm -rf /build; \
+    apt-get remove -y --purge $BUILDDEPS; \
+    apt-get autoremove -y --purge; apt-get clean
 
 
 FROM httpd-base
