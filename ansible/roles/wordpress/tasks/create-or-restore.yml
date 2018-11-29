@@ -23,6 +23,6 @@
   include_tasks: '{{ "configure.yml" if _play_wp_configure else "noop.yml" }}'
 
 - name: Check whether WordPress is working
-  command: wp --path={{ wp_dir }} eval '1;'
+  command: "{{ wp_cli_command }} eval '1;'"
   when: play_check_working_wordpress is match("yes")
   changed_when: false
