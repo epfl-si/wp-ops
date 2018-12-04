@@ -23,6 +23,7 @@
   shell: "set -x; {{ wp_cli_command }} plugin deactivate ; {{ wp_cli_command }} plugin activate"
   when: _epfl_plugin_zip_install.changed and play_unload_reload_plugins is match("yes")
 
+
 - name: Zip file for the EPFL 2018 theme
   run_once: true
   local_action:
@@ -39,3 +40,26 @@
     src: "{{ epfl_theme2018_zip_file }}"
     dest: "{{ wp_themes_dir }}"
   when: wp_can.write_code and _epfl_theme_zip is changed and play_update_theme is match("yes")
+
+
+- name: Download the latest EPFL 2018 theme from Github
+  run_once: true
+  local_action:
+    module: get_url
+    url: "https://github.com/epfl-idevelop/wp-theme-2018/archive/master.zip"
+    dest: "/tmp/wp-theme-2018-master.zip"
+  register: _epfl_theme_github_download_zip
+  when: play_update_theme is match("yes")
+
+
+- name: Deploy EPFL 2018 theme from downloaded zip
+  copy:
+    src: "/tmp/wp-theme-2018-master.zip"
+    dest: "{{ansible_remote_tmp}}/wp-theme-2018-master.zip"
+  register: _epfl_theme_github_deploy_zip
+  when: play_update_theme is match("yes")
+
+
+- name: CLI Install EPFL 2018 theme from zip
+  shell: "set -x; {{ wp_cli_command }} theme install --activate --force {{ansible_remote_tmp}}/wp-theme-2018-master.zip"
+  when: wp_can.write_code and _epfl_theme_github_deploy_zip is changed and play_update_theme is match("yes")
