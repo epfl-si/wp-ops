@@ -1,4 +1,5 @@
 - include_vars: update-vars.yml
+- include_vars: wp-destructive.yml
 
 - name: Zip file for the EPFL plug-in
   run_once: true
