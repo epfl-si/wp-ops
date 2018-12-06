@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libapache2-mod-security2 \
     lsb-release \
     apt-transport-https \
-    modsecurity-crs \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
@@ -31,6 +30,7 @@ RUN  apt-get -y update && \
     php7.2-mysql \
     php7.2-xml \
     php7.2-zip \
+    php7.2-apcu \
     lttng-tools \
   && \
     apt-get -y autoremove && \
@@ -59,8 +59,6 @@ COPY apache2.conf /etc/apache2/
 COPY ports.conf /etc/apache2/
 COPY error-pages.conf /etc/apache2/conf-enabled/
 COPY 403 /var/www/error/
-COPY modsecurity.conf /etc/modsecurity/
-COPY modsecurity-whitelist.conf /etc/modsecurity/
 COPY docker-entrypoint.sh /
 COPY health.cgi /usr/lib/cgi-bin
 RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
