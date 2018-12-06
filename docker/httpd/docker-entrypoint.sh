@@ -12,6 +12,9 @@ LogFormat "%V %a %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\" %T %D
 CustomLog "| /usr/bin/rotatelogs /srv/${WP_ENV}/logs/access_log.$(hostname).%Y%m%d 86400" vcommon
 CustomLog "/dev/stdout" vcommon
 
+LogFormat "%t \"%r\" %>s %b %{epfl_php_perf_notes}n" perf
+CustomLog "| /usr/bin/rotatelogs /srv/${WP_ENV}/logs/perf_log.$(hostname).%Y%m%d 86400" perf
+
 ErrorLog "| /usr/bin/rotatelogs /srv/${WP_ENV}/logs/error_log.$(hostname).%Y%m%d 86400"
 
 VirtualDocumentRoot "/srv/${WP_ENV}/%0/htdocs"
