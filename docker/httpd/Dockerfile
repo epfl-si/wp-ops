@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libapache2-mod-security2 \
     lsb-release \
     apt-transport-https \
-    modsecurity-crs \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
@@ -60,8 +59,6 @@ COPY apache2.conf /etc/apache2/
 COPY ports.conf /etc/apache2/
 COPY error-pages.conf /etc/apache2/conf-enabled/
 COPY 403 /var/www/error/
-COPY modsecurity.conf /etc/modsecurity/
-COPY modsecurity-whitelist.conf /etc/modsecurity/
 COPY docker-entrypoint.sh /
 COPY health.cgi /usr/lib/cgi-bin
 RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
