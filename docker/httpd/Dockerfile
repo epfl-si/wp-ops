@@ -50,7 +50,7 @@ RUN BUILDDEPS='php7.2-dev build-essential git liblttng-ust-dev' ;\
     apt-get remove -y --purge $BUILDDEPS; \
     apt-get autoremove -y --purge; apt-get clean
 
-COPY php.ini /etc/php/7.2/cli/conf.d/95-epfl.ini
+COPY php.ini /etc/php/7.2/apache2/conf.d/95-epfl.ini
 
 RUN a2enmod cgi
 
