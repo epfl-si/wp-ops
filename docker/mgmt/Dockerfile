@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM ubuntu:bionic
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
     apt-transport-https \
