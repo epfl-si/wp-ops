@@ -22,8 +22,7 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     screen \
     software-properties-common \
     unzip \
-    vim \   
-    ca-certificates \
+    vim \
   && \
     apt-get -y autoremove && \
     apt-get clean
