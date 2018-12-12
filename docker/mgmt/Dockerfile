@@ -22,13 +22,14 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     screen \
     software-properties-common \
     unzip \
-    vim \
+    vim \   
+    ca-certificates \
   && \
     apt-get -y autoremove && \
     apt-get clean
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN curl https://packages.sury.org/php/apt.gpg > /etc/apt/trusted.gpg.d/php.gpg
+RUN curl -sL https://packages.sury.org/php/apt.gpg > /etc/apt/trusted.gpg.d/php.gpg
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 RUN apt-get -y update
 # The following goodies have dependencies above this line, and
