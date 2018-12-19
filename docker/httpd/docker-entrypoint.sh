@@ -24,6 +24,11 @@ VirtualDocumentRoot "/srv/${WP_ENV}/%0/htdocs"
   SSLCertificateFile "/etc/apache2/ssl/server.cert"
   SSLCertificateKeyFile "/etc/apache2/ssl/server.key"
 </VirtualHost>
+
+<VirtualHost *:9980>
+  VirtualDocumentRoot "/srv/${WP_ENV}/${WP_ENV}-metrics/htdocs"
+  ProxyPreserveHost On
+</VirtualHost>
 EOF
 
 /bin/mkdir -p /srv/${WP_ENV}/logs
@@ -50,6 +55,9 @@ sed -i "s/post_max_size = .*/post_max_size = 300M/" /etc/php/7.2/cli/php.ini
 /usr/sbin/a2enmod ssl
 /usr/sbin/a2enmod rewrite
 /usr/sbin/a2enmod vhost_alias
+/usr/sbin/a2enmod proxy
+/usr/sbin/a2enmod proxy_http
+/usr/sbin/a2enmod headers
 /usr/sbin/a2enmod status
 /usr/sbin/a2enmod remoteip
 /usr/sbin/a2enconf dyn-vhost
