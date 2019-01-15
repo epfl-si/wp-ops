@@ -21,7 +21,7 @@
 
 
 - name: deactivate/reactivate EPFL plug-in
-  shell: "set -x; {{ wp_cli_command }} plugin deactivate ; {{ wp_cli_command }} plugin activate"
+  shell: "set -x; {{ wp_cli_command }} plugin deactivate epfl; {{ wp_cli_command }} plugin activate epfl"
   when: _epfl_plugin_zip_install.changed and play_unload_reload_plugins is match("yes")
 
 - name: Zip file for the EPFL 2018 theme
