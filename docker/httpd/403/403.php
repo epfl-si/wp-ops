@@ -13,7 +13,7 @@
   $request_id  = $_SERVER["UNIQUE_ID"];
   $request_uri = $_SERVER["REQUEST_URI"];
   // If using CloudFlare, we retrieve original client IP in 'HTTP_CF_CONNECTING_IP'. The content of 'REMOTE_ADDR' is a CloudFlare IP.
-  $request_ip  = (array_key_exists("HTTP_CF_CONNECTING_IP", $_SERVER))?$_SERVER["HTTP_CF_CONNECTING_IP"]:$_SERVER["REMOTE_ADDR"];
+  $request_ip  = (array_key_exists("HTTP_CF_CONNECTING_IP", $_SERVER)) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER["REMOTE_ADDR"];
 
   // ip protocol version & regex to check if inside EPFL campus
   $ip_v = "IPv4";
