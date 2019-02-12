@@ -8,8 +8,8 @@ RUN git clone https://github.com/epfl-idevelop/jahia2wp.git
 WORKDIR /root/jahia2wp/src
 RUN cp ../requirements/*.txt .
 RUN mv local.txt requirements.txt
-RUN pip install -r requirements.txt
-RUN pyinstaller jahia2wp.py
+RUN /root/.pyenv/shims/pip install -r requirements.txt
+RUN /root/.pyenv/shims/pyinstaller jahia2wp.py
 
 FROM debian:stretch
 
