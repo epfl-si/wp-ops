@@ -1,3 +1,16 @@
+FROM cdrx/pyinstaller-linux
+
+# /src appears to be a volume or something - Its contents
+# won't "stick" from one Dockerfile step to the next:
+WORKDIR /root
+RUN git clone https://github.com/epfl-idevelop/jahia2wp.git
+
+WORKDIR /root/jahia2wp/src
+RUN cp ../requirements/*.txt .
+RUN mv local.txt requirements.txt
+RUN pip install -r requirements.txt
+RUN pyinstaller jahia2wp.py
+
 FROM debian:stretch
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
@@ -61,7 +74,7 @@ RUN mkdir /var/run/sshd && \
     rm -rf /tmp/openshift && \
     mkdir /root/.ssh
 
-COPY jahia2wp.sh /etc/profile.d/
+COPY vpsi-wordpress.sh /etc/profile.d/
 COPY ./docker-entrypoint.sh /
 
 # setup access rights
@@ -83,8 +96,9 @@ RUN chmod a+x /usr/local/bin/wp && \
     su www-data -c "/usr/local/bin/wp package install /tmp/polylang-cli-master.zip" && \
     su www-data -c "/usr/local/bin/wp package install /tmp/wp-cli-polylang-master.zip"
 
-RUN ln -s /srv/bin/vjahia2wp /usr/local/bin/
-
+COPY --from=0 /root/jahia2wp/src/dist/jahia2wp /usr/local/jahia2wp
+RUN (echo "#!/bin/sh"; echo 'exec /usr/local/jahia2wp/jahia2wp "$@"') > /usr/local/bin/jahia2wp
+RUN chmod 0755 /usr/local/bin/jahia2wp
 
 # this line should come after the installation of other packages
 # otherwise, it creates /var/www/.wp-cli with incorrect permission
