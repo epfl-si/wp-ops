@@ -651,8 +651,9 @@ spec:
                   OUTDIR=/srv/batch/disk-usage-report
                   TARGET=/srv
                   exec >> $OUTDIR/log.txt 2>&1; set -e -x; date; id
-                  /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.gz.NEW
-                  mv $OUTDIR/qdirstat.gz.NEW $OUTDIR/qdirstat.gz
+                  /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.NEW
+                  gzip -c $OUTDIR/qdirstat.NEW > $OUTDIR/qdirstat.gz
+                  rm $OUTDIR/qdirstat.NEW
               volumeMounts:
                 - name: scripts
                   mountPath: /scripts
