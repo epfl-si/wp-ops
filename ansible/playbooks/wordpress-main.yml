@@ -20,4 +20,4 @@
     - name: Gathering facts (delayed after Ansible pre-configuration)
       setup:
   roles:
-    - { role: ../roles/wordpress }
+    - role: ../roles/wordpress-instance
