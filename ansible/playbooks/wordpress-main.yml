@@ -35,8 +35,9 @@
   roles:
     - role: ../roles/wordpress-instance
 
-# Likewise, members of all-nas-shares are NAS shares, not hosts
-- name: NAS shares
-  hosts: all-nas-shares
+# Likewise, members of all-openshift-namespaces are OpenShift
+# namespaces, not hosts
+- name: OpenShift namespaces
+  hosts: all-openshift-namespaces
   roles:
-    - role: ../roles/wordpress-nas-share
+    - role: ../roles/wordpress-openshift-namespace

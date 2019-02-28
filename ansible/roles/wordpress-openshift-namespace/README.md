@@ -1,7 +1,7 @@
 Role Name
 =========
 
-wordpress-nas-share — A WordPress NAS share within the EPFL WordPress project
+wordpress-openshift-namespace — A WordPress NAS share within the EPFL WordPress project
 
 Enumeration
 -----------
