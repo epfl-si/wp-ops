@@ -304,6 +304,11 @@ class KubeManager(object):
         return self._execute(cmd)
 
     def _is_kube_object_subset(self, a, b):
+        if a == [] or a == {}:
+            # User has explicitly set an empty data structure in their
+            # Ansible-side config. Interpret that as wanting the same
+            # data structure to be empty in on the live (b) side as well.
+            return not b
         if isinstance(a, types.ListType) and isinstance(b, types.ListType):
             if len(a) != len(b):
                 return False
@@ -313,13 +318,12 @@ class KubeManager(object):
             return True
         elif isinstance(a, types.DictType) and isinstance(b, types.DictType):
             for k in a.keys():
-                if k not in b:
-                    return False
-                if not self._is_kube_object_subset(a[k], b[k]):
+                if not self._is_kube_object_subset(a[k], b.get(k, None)):
                     return False
             return True
-        elif type(a) == type(b) and type(a) in [float, int, bool,
-                                                str, unicode, bytes]:
+        elif type(a) == type(b) and type(a) in (float, int, bool,
+                                                str, unicode, bytes,
+                                                types.NoneType):
             if a == b:
                 return True
             else:
