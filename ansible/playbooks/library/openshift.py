@@ -3,6 +3,9 @@
 
 # Imported from the Kubespray project and modified; see ../../../LICENSE
 
+import json
+import re
+
 from ansible.module_utils.basic import *  # noqa
 try:
     from ansible.errors import AnsibleError
@@ -178,6 +181,22 @@ class KubeManager(object):
 
 
     def replace(self, force=True):
+        rc, out, err = self.module.run_command(self.base_cmd + ['get', '--no-headers', '-o', 'json'] + self._get_oc_flags())
+        if not rc:
+            current_state = json.loads(out)
+            cmd = self.base_cmd + ['create', '--dry-run', '-o', 'json']
+            if self.content is not None:
+                cmd.extend(['-f', '-'])
+                rc, out, err = self.module.run_command(cmd, data=self.content)
+            elif self.filename:
+                cmd.append('--filename=' + ','.join(self.filename))
+                rc, out, err = self.module.run_command(cmd)
+            if rc:
+                raise AnsibleError('Unable to apply --dry-run the provided configuration\n' + out + err)
+            new_state = json.loads(out)
+
+            if self._is_same_kube_objects(current_state, new_state):
+                return self.module.exit_json(changed=False)
 
         cmd = ['apply']
 
@@ -222,9 +241,8 @@ class KubeManager(object):
 
         return self._execute(cmd)
 
-    def exists(self):
-        cmd = ['get']
-
+    def _get_oc_flags(self):
+        cmd = []
         if self.filename:
             cmd.append('--filename=' + ','.join(self.filename))
         else:
@@ -242,9 +260,10 @@ class KubeManager(object):
             if self.all:
                 cmd.append('--all-namespaces')
 
-        cmd.append('--no-headers')
+        return cmd
 
-        return self._execute_nofail(cmd)
+    def exists(self):
+        return self._execute_nofail(['get', '--no-headers'] + self._get_oc_flags())
 
     # TODO: This is currently unused, perhaps convert to 'scale' with a replicas param?
     def stop(self):
@@ -275,6 +294,10 @@ class KubeManager(object):
                 cmd.append('--ignore-not-found')
 
         return self._execute(cmd)
+
+    def _is_same_kube_objects(self, a, b):
+        # TODO: improve.
+        return json.dumps(a['data']) == json.dumps(b['data'])
 
 
 def main():
