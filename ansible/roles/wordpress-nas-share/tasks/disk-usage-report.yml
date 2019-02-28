@@ -103,7 +103,9 @@
                     items:
                       - key: qdirstat-cache-writer
                         path: qdirstat-cache-writer
-                        mode: 493
+                        {# "Owing to JSON limitations, you must specify the
+                         # mode in decimal notation." -#}
+                        mode: {{ "0755" | int }}
                 - name: srv
                   persistentVolumeClaim:
                     claimName: wordpress-0
