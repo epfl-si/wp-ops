@@ -34,12 +34,12 @@ options:
     required: false
     default: null
     description:
-      - The plain-text YAML to pass to "kubectl create"'s standard input
-  kubectl:
+      - The plain-text YAML to pass to "oc create"'s standard input
+  oc:
     required: false
     default: null
     description:
-      - The path to the kubectl bin
+      - The path to the oc bin
   namespace:
     required: false
     default: null
@@ -74,7 +74,7 @@ options:
     required: false
     default: 0
     description:
-      - Indicates the level of verbosity of logging by kubectl.
+      - Indicates the level of verbosity of logging by oc.
   state:
     required: false
     choices: ['present', 'absent', 'latest', 'reloaded', 'stopped']
@@ -86,7 +86,7 @@ options:
         reloaded handles updating resource(s) definition using definition file,
         stopped handles stopping resource(s) based on other options.
 requirements:
-  - kubectl
+  - oc
 author: "Kenny Jones (@kenjones-cisco)"
 """
 
@@ -120,10 +120,10 @@ class KubeManager(object):
 
         self.module = module
 
-        self.kubectl = module.params.get('kubectl')
-        if self.kubectl is None:
-            self.kubectl =  module.get_bin_path('kubectl', True, ['/opt/bin'])
-        self.base_cmd = [self.kubectl]
+        self.oc = module.params.get('oc')
+        if self.oc is None:
+            self.oc = module.get_bin_path('oc', True, ['/opt/bin'])
+        self.base_cmd = [self.oc]
 
         if module.params.get('server'):
             self.base_cmd.append('--server=' + module.params.get('server'))
@@ -147,10 +147,10 @@ class KubeManager(object):
             rc, out, err = self.module.run_command(args, **kwargs)
             if rc != 0:
                 raise AnsibleError(
-                    'error running kubectl (%s) command (rc=%d), out=\'%s\', err=\'%s\'' % (' '.join(args), rc, out, err))
+                    'error running oc (%s) command (rc=%d), out=\'%s\', err=\'%s\'' % (' '.join(args), rc, out, err))
         except Exception as exc:
             raise AnsibleError(
-                'error running kubectl (%s) command: %s' % (' '.join(args), str(exc)))
+                'error running oc (%s) command: %s' % (' '.join(args), str(exc)))
         return self.module.exit_json(changed=True, rc=rc, stdout=out)
 
     def _execute_nofail(self, cmd):
@@ -286,7 +286,7 @@ def main():
             resource=dict(),
             label=dict(),
             server=dict(),
-            kubectl=dict(),
+            oc=dict(),
             force=dict(default=False, type='bool'),
             all=dict(default=False, type='bool'),
             log_level=dict(default=0, type='int'),
