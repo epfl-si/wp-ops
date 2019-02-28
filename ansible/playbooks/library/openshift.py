@@ -5,6 +5,7 @@
 
 import json
 import re
+import types
 
 from ansible.module_utils.basic import *  # noqa
 try:
@@ -82,12 +83,19 @@ options:
     required: false
     choices: ['present', 'absent', 'latest', 'reloaded', 'stopped']
     default: present
-    description:
-      - present handles checking existence or creating if definition file provided,
-        absent handles deleting resource(s) based on other options,
-        latest handles creating or updating based on existence,
-        reloaded handles updating resource(s) definition using definition file,
-        stopped handles stopping resource(s) based on other options.
+    description: |
+      present handles checking existence or creating if definition file provided,
+      absent handles deleting resource(s) based on other options,
+      latest handles creating or updating based on field-by-field diff,
+      reloaded handles updating resource(s) definition using definition file,
+      stopped handles stopping resource(s) based on other options.
+      
+      Note that "latest" is really only useful for "simple" Kubernetes objects,
+      such as ConfigMaps. Even though the diff operator avoids comparing known-
+      volatile keys such as "metadata" and "state", Kubernetes does default-value
+      substitution at admission time. Therefore, in order for "latest" to show
+      no diff, your YAML needs to include every single setting, even those
+      unchanged from their default value.
 requirements:
   - oc
 author: "Kenny Jones (@kenjones-cisco)"
@@ -195,7 +203,7 @@ class KubeManager(object):
                 raise AnsibleError('Unable to apply --dry-run the provided configuration\n' + out + err)
             new_state = json.loads(out)
 
-            if self._is_same_kube_objects(current_state, new_state):
+            if self._is_identical_kube_objects(current_state, new_state):
                 return self.module.exit_json(changed=False)
 
         cmd = ['apply']
@@ -295,9 +303,32 @@ class KubeManager(object):
 
         return self._execute(cmd)
 
-    def _is_same_kube_objects(self, a, b):
-        # TODO: improve.
-        return json.dumps(a['data']) == json.dumps(b['data'])
+    def _is_identical_kube_objects(self, a, b):
+        if isinstance(a, types.ListType) and isinstance(b, types.ListType):
+            if len(a) != len(b):
+                return False
+            for (aa, bb) in zip(a, b):
+                if not self._is_identical_kube_objects(aa, bb):
+                    return False
+            return True
+        elif isinstance(a, types.DictType) and isinstance(b, types.DictType):
+            for k in set(a.keys()).union(b.keys()):
+                if k == "metadata" or k == "status":
+                    continue
+                if k not in a or k not in b:
+                    return False
+                if not self._is_identical_kube_objects(a[k], b[k]):
+                    return False
+            return True
+        elif type(a) == type(b) and type(a) in [float, int, bool,
+                                                str, unicode, bytes]:
+            if a == b:
+                return True
+            else:
+                return False
+
+        else:
+            return False
 
 
 def main():
