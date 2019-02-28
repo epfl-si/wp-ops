@@ -8,7 +8,7 @@ UseCanonicalName Off
 RemoteIPHeader X-Forwarded-For
 RemoteIPInternalProxy 172.31.0.0/16 10.180.21.0/24 127.0.0.0/8
 
-LogFormat "%V %a %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\" \"%{X-EPFL-Trace-Id}i\" %T %D" vcommon
+LogFormat "%V %a %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\" \"%{X-EPFL-Trace-Id}i\" %{CF-Connecting-IP}i %T %D" vcommon
 CustomLog "| /usr/bin/rotatelogs /srv/${WP_ENV}/logs/access_log.$(hostname).%Y%m%d 86400" vcommon
 CustomLog "/dev/stdout" vcommon
 
