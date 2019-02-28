@@ -203,7 +203,7 @@ class KubeManager(object):
                 raise AnsibleError('Unable to apply --dry-run the provided configuration\n' + out + err)
             new_state = json.loads(out)
 
-            if self._is_identical_kube_objects(current_state, new_state):
+            if self._is_kube_object_subset(new_state, current_state):
                 return self.module.exit_json(changed=False)
 
         cmd = ['apply']
@@ -303,21 +303,19 @@ class KubeManager(object):
 
         return self._execute(cmd)
 
-    def _is_identical_kube_objects(self, a, b):
+    def _is_kube_object_subset(self, a, b):
         if isinstance(a, types.ListType) and isinstance(b, types.ListType):
             if len(a) != len(b):
                 return False
             for (aa, bb) in zip(a, b):
-                if not self._is_identical_kube_objects(aa, bb):
+                if not self._is_kube_object_subset(aa, bb):
                     return False
             return True
         elif isinstance(a, types.DictType) and isinstance(b, types.DictType):
-            for k in set(a.keys()).union(b.keys()):
-                if k == "metadata" or k == "status":
-                    continue
-                if k not in a or k not in b:
+            for k in a.keys():
+                if k not in b:
                     return False
-                if not self._is_identical_kube_objects(a[k], b[k]):
+                if not self._is_kube_object_subset(a[k], b[k]):
                     return False
             return True
         elif type(a) == type(b) and type(a) in [float, int, bool,

@@ -2,7 +2,7 @@
 
 - name: BuildConfig for the customized Perl Docker image
   openshift:
-    state: present
+    state: latest
     resource: BuildConfig
     name: perl-disk-usage-report
     namespace: "{{ openshift_namespace }}"
@@ -56,7 +56,7 @@
 
 - name: Cron job
   openshift:
-    state: present
+    state: latest
     resource: CronJob
     name: srv-disk-usage-report
     namespace: "{{ openshift_namespace }}"
