@@ -1,0 +1,2 @@
+# The path where to find the plugins/ and mu-plugins/ directories
+wp_data_path: '{{ playbook_dir }}/../../../data/wp/wp-content'

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This is an Ansible playbook to do or redo all the things.
+# This is a wrapper to ansible-playbook to do or redo all the things.
 #
 # Usage:
 #
@@ -18,7 +18,6 @@ cd "$(dirname "$(realpath "$0")")"
 inventories="-i hosts-dev"
 # One can override these overrides on the command line
 default_plays="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
-wp_path_args=
 
 fatal() {
     if [ -n "$1" ]; then
@@ -29,21 +28,6 @@ fatal() {
     exit 1
 }
 
-find_wp() {
-    local default_wp_data_path="$(dirname "$(dirname "$PWD")")"/data/wp/wp-content
-    if [ -n "$wp_data_path" ]; then
-        wp_path_args="-e wp_data_path=$wp_data_path"
-    elif [ -d "$default_wp_data_path" ]; then
-        wp_path_args="-e wp_data_path=$default_wp_data_path"
-    else
-        fatal <<EOF
-Cannot find WordPress plugins and themes automatically; please pass
-the --wp-data-path flag.
-
-EOF
-    fi
-}
-
 ###########################################################################
 
 while [ -n "$1" ]; do
@@ -51,16 +35,9 @@ while [ -n "$1" ]; do
         --prod)
             inventories="$inventories -i hosts-prod"
             shift ;;
-        --wp-data-path=*)
-            wp_data_path="$(echo "$1" |cut -d= -f2-)"
-            shift ;;
-        --wp-data-path)
-            wp_data_path="$2"
-            shift; shift ;;
         *)
             break ;;
     esac
 done
 
-find_wp
-ansible-playbook $default_plays $inventories $wp_path_args "$@" playbooks/wordpress-main.yml
+ansible-playbook $default_plays $inventories "$@" playbooks/wordpress-main.yml

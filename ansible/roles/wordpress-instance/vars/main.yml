@@ -2,7 +2,7 @@
 #
 # Define variables that are used throughout this role.
 #
-# See ../defaults/main.yml for the variables the user is expected to
+# See ../defaults/main/*.yml for the variables the user is expected to
 # provide (either through the inventory file, so-called "group_vars",
 # or on the command line)
 #

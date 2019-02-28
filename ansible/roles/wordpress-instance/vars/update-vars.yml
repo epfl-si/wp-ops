@@ -1,7 +1,7 @@
 epfl_ignore_files_pattern: "*~*"
 
-# wp_data_path is passed through the command line by the "deploy"
-# wrapper script
+# wp_data_path is set in ../defaults/main/source-code-vars.yml (unless
+# overridden on the command line)
 epfl_plugin_dir: "{{ wp_data_path }}/plugins/epfl"
 epfl_plugin_zip_file: "{{ epfl_plugin_dir }}.zip"
 
