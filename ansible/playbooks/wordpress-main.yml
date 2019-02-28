@@ -39,5 +39,6 @@
 # namespaces, not hosts
 - name: OpenShift namespaces
   hosts: all-openshift-namespaces
+  gather_facts: no   # Useless here, afaict
   roles:
     - role: ../roles/wordpress-openshift-namespace
