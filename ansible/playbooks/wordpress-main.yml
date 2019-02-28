@@ -1,15 +1,25 @@
-# Ansible playbook for WordPress deployments
+# Ansible playbook for the EPFL WordPress stack
 
-# "hosts" are not really hosts; rather, they are WordPress instances
-# See the list in hosts/wordpress-instances
-- hosts: all-wordpresses
-  gather_facts: no   # Delayed, see below
-  pre_tasks:
+- name: Initial checks
+  hosts: all
+  gather_facts: no   # Not yet
+  tasks:
     - name: Check Ansible version
+      run_once: true
       assert:
         that: "ansible_version.full is version_compare('2.6', '>=')"
         msg: |
           You must update Ansible to at least 2.6 to use this playbook.
+
+# In this play, "hosts" are not really hosts; rather, they are
+# WordPress instances. See the list in
+# ../hosts-dev/wordpress-instances (a plain file) and
+# ../hosts-prod/prod-wordpresses (an executable script, that lists
+# them on standard output)
+- name: WordPress instances
+  hosts: all-wordpresses
+  gather_facts: no   # Delayed again until "setup:" below
+  pre_tasks:
     - name: Ansible pre-configuration
       set_fact:
         ansible_user: www-data
@@ -24,3 +34,9 @@
       setup:
   roles:
     - role: ../roles/wordpress-instance
+
+# Likewise, members of all-nas-shares are NAS shares, not hosts
+- name: NAS shares
+  hosts: all-nas-shares
+  roles:
+    - role: ../roles/wordpress-nas-share
