@@ -184,12 +184,14 @@ class KubeManager(object):
         if force:
             cmd.append('--force')
 
-        if not self.filename:
+        if self.content is not None:
+            cmd.extend(['-f', '-'])
+            return self._execute(cmd, data=self.content)
+        elif self.filename:
+            cmd.append('--filename=' + ','.join(self.filename))
+            return self._execute(cmd)
+        else:
             raise AnsibleError('filename required to reload')
-
-        cmd.append('--filename=' + ','.join(self.filename))
-
-        return self._execute(cmd)
 
     def delete(self):
 
