@@ -4,7 +4,6 @@
 # Imported from the Kubespray project and modified; see ../../../LICENSE
 
 import json
-import re
 import types
 
 from ansible.module_utils.basic import *  # noqa
