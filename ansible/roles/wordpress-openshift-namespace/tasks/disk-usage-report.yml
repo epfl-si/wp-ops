@@ -43,16 +43,14 @@
         namespace: "{{ openshift_namespace }}"
       data:
         qdirstat-cache-writer: |
-          {# You can't just use a Jinja include here, because Jinja
-           # thwarts path traversal attacks and the permitted path
-           # isn't set to anything useful. The Ansible "lookup"
+          {# A Jinja "include" doesn't work here, because the include
+           # directory is random and Jinja forbids leaving it with ../
+           # or / (think path traversal attacks). The Ansible "lookup"
            # function comes to the rescue: -#}
           {{ lookup("file", "templates/qdirstat-cache-writer") | indent(width=4) }}
-          {# When working out the indent width in the previous line,
-           # beware that we are under multiple nested "|" verbatim
-           # constructs; you need to count relative to the innermost
-           # one (i.e. the "a" of "apiVersion" - on the other hand,
-           # too much indent hardly matters in a Perl script) #}
+          {# Indent width is relative to the outermost ": |" construct,
+           # i.e. the "a" of "apiVersion" (on the other hand,
+           # too much indent would hardly matter in a Perl script) #}
 
 - name: Cron job
   openshift:
