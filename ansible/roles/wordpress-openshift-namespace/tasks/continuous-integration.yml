@@ -15,9 +15,11 @@
       apiVersion: v1
       metadata:
         name: "{{ item.name }}"
-        {% if "labels" in item -%}
+      {# Be sure to align the "if" constructs under the k of kind:, above,
+       # or you'll have to deal with %- / -% madness #}
+      {% if "labels" in item %}
         labels: {{ item.labels | to_yaml | indent(width=2) }}
-        {%- endif -%}
+      {% endif %}
         namespace: "{{ openshift_namespace }}"
   with_items:
     - name: "{{ ci_jenkins_image_name }}"
@@ -60,6 +62,38 @@
             kind: ImageStreamTag
             name: "{{ ci_jenkins_image_name }}:latest"
 
+- name: Jenkins services
+  with_items:
+    - name: jenkins
+      portName: web
+      servicePort: 80
+      targetPort: 8080
+    - name: jenkins-jnlp
+      portName: agent
+      servicePort: 5000
+      targetPort: 5000
+  openshift:
+    state: latest
+    resource: Service
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: {{ item.name }}
+        namespace: "{{ openshift_namespace }}"
+        labels:
+          app: jenkins
+      spec:
+        type: ClusterIP
+        ports:
+          - name: {{ item.portName }}
+            port: {{ item.servicePort }}
+            protocol: TCP
+            targetPort: {{ item.targetPort }}
+        selector:
+          name: jenkins
 
 - name: Jenkins pipeline (BuildConfig)
   openshift:
