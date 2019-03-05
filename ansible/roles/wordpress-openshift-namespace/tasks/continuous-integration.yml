@@ -8,19 +8,27 @@
   openshift:
     state: latest
     resource: ImageStream
-    name: "{{ item }}"
+    name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
       kind: ImageStream
       apiVersion: v1
       metadata:
-        name: "{{ item }}"
+        name: "{{ item.name }}"
+        {% if "labels" in item -%}
+        labels: {{ item.labels | to_yaml | indent(width=2) }}
+        {%- endif -%}
         namespace: "{{ openshift_namespace }}"
   with_items:
-    - "{{ ci_jenkins_image_name }}"
-    - "httpd"
-    - "mgmt"
-    - "varnish"
+    - name: "{{ ci_jenkins_image_name }}"
+      labels:
+        app: "jenkins"
+    - name: "httpd"
+      # Multiple apps use httpd, so no labels
+    - name: "mgmt"
+      # Ditto
+    - name: "varnish"
+      # Ditto
 
 - name: Jenkins Docker image (BuildConfig)
   openshift:
@@ -32,6 +40,8 @@
       apiVersion: build.openshift.io/v1
       kind: BuildConfig
       metadata:
+        labels:
+          app: jenkins
         name: "{{ ci_jenkins_image_name }}"
         namespace: "{{ openshift_namespace }}"
       spec:
@@ -61,6 +71,8 @@
       kind: BuildConfig
       apiVersion: v1
       metadata:
+        labels:
+          app: jenkins
         name: "{{ ci_buildconfig_name }}"
         namespace: "{{ openshift_namespace }}"
       spec:
