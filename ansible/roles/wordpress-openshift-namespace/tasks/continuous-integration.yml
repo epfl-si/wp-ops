@@ -95,6 +95,28 @@
         selector:
           name: jenkins
 
+- name: PersistentVolumeClaim/"{{ ci_jenkins_persistent_volume_claim_name }}"
+  openshift:
+    state: latest
+    resource: PersistentVolumeClaim
+    name: "{{ ci_jenkins_persistent_volume_claim_name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        labels:
+          app: jenkins
+        name: "{{ ci_jenkins_persistent_volume_claim_name }}"
+        namespace: wwp-test
+      spec:
+        volumeName: "{{ ci_jenkins_persistent_volume_name }}"
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
