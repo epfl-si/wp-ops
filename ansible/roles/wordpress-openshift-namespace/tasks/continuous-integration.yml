@@ -22,7 +22,7 @@
     - "mgmt"
     - "varnish"
 
-- name: Jenkins BuildConfig
+- name: Jenkins Docker image (BuildConfig)
   openshift:
     state: latest
     resource: BuildConfig
@@ -51,7 +51,7 @@
             name: "{{ ci_jenkins_image_name }}:latest"
 
 
-- name: Jenkins pipeline
+- name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
     resource: BuildConfig
