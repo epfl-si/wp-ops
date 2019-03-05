@@ -156,3 +156,27 @@
                   }  // failure
                 }  // post
               }  // pipeline
+
+- name: Jenkins route
+  openshift:
+    state: latest
+    resource: Route
+    name: jenkins
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: jenkins
+        namespace: "{{ openshift_namespace }}"
+        labels:
+          app: jenkins
+      spec:
+        host: "{{ ci_jenkins_public_hostname }}"
+        tls:
+          insecureEdgeTerminationPolicy: Redirect
+          termination: edge
+        to:
+          kind: Service
+          name: jenkins
+

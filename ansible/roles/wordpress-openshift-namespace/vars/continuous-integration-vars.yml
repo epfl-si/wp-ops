@@ -1,4 +1,5 @@
 ci_jenkins_image_name: jenkins-openshift-epfl
+ci_jenkins_public_hostname: jenkins-wwp-test.epfl.ch
 
 ci_name_stem: httpd-jenkins
 ci_prod_or_dev : "{{ 'prod' if openshift_namespace == 'wwp' else 'dev' }}"
