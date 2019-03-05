@@ -3,3 +3,7 @@
 
 - name: "Disk usage report microservice"
   include: disk-usage-report.yml
+
+- name: "Continuous integration"
+  when: openshift_namespace == "wwp-test"
+  include: continuous-integration.yml
