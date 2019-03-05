@@ -41,6 +41,10 @@
             uri: 'https://github.com/epfl-idevelop/wp-ops'
             ref: wwp-continuous-integration
           contextDir: docker/jenkins
+        strategy:
+          type: Docker
+          dockerStrategy:
+            noCache: true
         output:
           to:
             kind: ImageStreamTag
