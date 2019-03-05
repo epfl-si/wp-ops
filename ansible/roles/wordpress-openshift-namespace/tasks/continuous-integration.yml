@@ -93,7 +93,8 @@
             protocol: TCP
             targetPort: {{ item.targetPort }}
         selector:
-          name: jenkins
+          app: jenkins
+          deploymentconfig: jenkins
 
 - name: PersistentVolumeClaim/"{{ ci_jenkins_persistent_volume_claim_name }}"
   openshift:
@@ -133,10 +134,14 @@
         namespace: "{{ openshift_namespace }}"
       spec:
         replicas: 1
+        selector:
+          app: jenkins
+          deploymentconfig: jenkins
         template:
           metadata:
             labels:
-              name: jenkins
+              app: jenkins
+              deploymentconfig: jenkins
           spec:
             containers:
               - name: jenkins
