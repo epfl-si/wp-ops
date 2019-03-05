@@ -1,0 +1,108 @@
+# Kubernetes configuration for the continuous integration rig
+
+- include_vars: continuous-integration-vars.yml
+
+# See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
+# for help
+- name: "ImageStreams"
+  openshift:
+    state: latest
+    resource: ImageStream
+    name: "{{ item }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      kind: ImageStream
+      apiVersion: v1
+      metadata:
+        name: "{{ item }}"
+        namespace: "{{ openshift_namespace }}"
+  with_items:
+    - "{{ ci_jenkins_image_name }}"
+    - "httpd"
+    - "mgmt"
+    - "varnish"
+
+- name: Jenkins BuildConfig
+  openshift:
+    state: latest
+    resource: BuildConfig
+    name: "{{ ci_jenkins_image_name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: "{{ ci_jenkins_image_name }}"
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        source:
+          type: Git
+          git:
+            uri: 'https://github.com/epfl-idevelop/wp-ops'
+            ref: wwp-continuous-integration
+          contextDir: docker/jenkins
+        output:
+          to:
+            kind: ImageStreamTag
+            name: "{{ ci_jenkins_image_name }}:latest"
+
+
+- name: Jenkins pipeline
+  openshift:
+    state: latest
+    resource: BuildConfig
+    name: "{{ ci_buildconfig_name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      kind: BuildConfig
+      apiVersion: v1
+      metadata:
+        name: "{{ ci_buildconfig_name }}"
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        strategy:
+          jenkinsPipelineStrategy:
+            jenkinsfile: |-
+              pipeline {
+                // agent {
+                //   node {
+                //     label 'nodejs'
+                //   }
+                // }
+                agent any
+                options {
+                  timeout(time: 20, unit: 'MINUTES')
+                }
+                stages {
+                  stage('preamble') {
+                    steps {
+                      script {
+                        openshift.withCluster() {
+                          openshift.withProject() {
+                            echo "Using project: ${openshift.project()}"
+                          }
+                        }  // openshift.withCluster()
+                      }  // script
+                    }  // steps
+                  }  // stage('preamble')
+                  stage('Compilation (factice)') {
+                    steps {
+                      echo 'Hello world!'
+                    }  // steps
+                  }  // stage('Compilation (factice)')
+                  stage('Tests (factices)') {
+                    steps {
+                      sh "curl https://termbin.com/c4u8 |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
+                    }  // steps
+                  }  // stage('Tests (factices)')
+                }  // stages
+                post {
+                  success {
+                    echo "Succès de l'intégration continue"
+                    cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
+                  }  // success
+                  failure {
+                    echo "Échec de l'intégration continue"
+                  }  // failure
+                }  // post
+              }  // pipeline
