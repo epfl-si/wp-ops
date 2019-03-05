@@ -60,7 +60,7 @@
         output:
           to:
             kind: ImageStreamTag
-            name: "{{ ci_jenkins_image_name }}:latest"
+            name: "{{ ci_jenkins_image_name_tagged }}"
 
 - name: Jenkins services
   with_items:
@@ -117,6 +117,91 @@
           requests:
             storage: 100Gi
 
+- name: Jenkins application proper (DeploymentConfig)
+  openshift:
+    state: latest
+    resource: DeploymentConfig
+    name: jenkins
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: v1
+      kind: DeploymentConfig
+      metadata:
+        labels:
+          app: jenkins
+        name: jenkins
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              name: jenkins
+          spec:
+            containers:
+              - name: jenkins
+                env:
+                - name: OPENSHIFT_ENABLE_OAUTH
+                  value: "true"
+                - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+                  value: "true"
+                - name: DISABLE_ADMINISTRATIVE_MONITORS
+                  value: "false"
+                - name: KUBERNETES_MASTER
+                  value: https://kubernetes.default:443
+                - name: KUBERNETES_TRUST_CERTIFICATES
+                  value: "true"
+                - name: JENKINS_SERVICE_NAME
+                  value: jenkins
+                - name: JNLP_SERVICE_NAME
+                  value: jenkins-jnlp
+                # "image" gets set thanks to triggers → ImageChange, below
+                imagePullPolicy: IfNotPresent
+                readinessProbe:
+                  failureThreshold: 3
+                  httpGet:
+                    path: /login
+                    port: 8080
+                    scheme: HTTP
+                  initialDelaySeconds: 3
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 240
+                livenessProbe:
+                  failureThreshold: 2
+                  httpGet:
+                    path: /login
+                    port: 8080
+                    scheme: HTTP
+                  initialDelaySeconds: 420
+                  periodSeconds: 360
+                  successThreshold: 1
+                  timeoutSeconds: 240
+                resources:
+                  limits:
+                    memory: 512Mi
+                volumeMounts:
+                - mountPath: /var/lib/jenkins
+                  name: jenkins-data
+            securityContext: {}
+            serviceAccount: jenkins
+            serviceAccountName: jenkins
+            volumes:
+      {# TODO: use the PersistentVolumeClaim #}
+            - emptyDir: {}
+              name: jenkins-data
+        triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+            - jenkins
+            from:
+              kind: ImageStreamTag
+              name: "{{ ci_jenkins_image_name_tagged }}"
+              namespace: "{{ openshift_namespace }}"
+
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
@@ -164,7 +249,7 @@
                   }  // stage('Compilation (factice)')
                   stage('Tests (factices)') {
                     steps {
-                      sh "curl https://termbin.com/c4u8 |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
+                      sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
                     }  // steps
                   }  // stage('Tests (factices)')
                 }  // stages
