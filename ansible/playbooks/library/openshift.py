@@ -397,8 +397,8 @@ def main():
             log_level=dict(default=0, type='int'),
             state=dict(default='present', choices=['present', 'absent', 'latest', 'reloaded', 'stopped']),
             ),
-            mutually_exclusive=[['filename', 'content']]
-        )
+        mutually_exclusive=[['filename', 'content']]
+    )
 
     manager = KubeManager(module)
     state = module.params.get('state')
