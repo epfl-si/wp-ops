@@ -16,7 +16,7 @@
       metadata:
         name: "{{ item.name }}"
       {# Be sure to align the "if" constructs under the k of kind:, above,
-       # or you'll have to deal with %- / -% madness #}
+       # or deal with %- / -% madness #}
       {% if "labels" in item %}
         labels: {{ item.labels | to_yaml | indent(width=2) }}
       {% endif %}
