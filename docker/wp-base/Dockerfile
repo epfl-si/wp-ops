@@ -3,27 +3,28 @@ FROM ubuntu:bionic
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update && \
-    apt-get -y install curl ca-certificates apt-transport-https gnupg && \
+    apt-get -y install curl ca-certificates \
+               software-properties-common apt-transport-https gnupg && \
     apt-get -y autoremove && \
     apt-get clean
 
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
-
+RUN add-apt-repository ppa:ondrej/php
 RUN apt-get -y update && apt-get  -y install --no-install-recommends \
     composer \
     git \
     jq \
     less \
     nodejs \
-    php7.2 \
-    php7.2-apcu \
-    php7.2-cli \
-    php7.2-curl \
-    php7.2-gd \
-    php7.2-ldap \
-    php7.2-mysql \
-    php7.2-xml \
-    php7.2-zip \
+    php7.3 \
+    php7.3-apcu \
+    php7.3-cli \
+    php7.3-curl \
+    php7.3-gd \
+    php7.3-ldap \
+    php7.3-mysql \
+    php7.3-xml \
+    php7.3-zip \
     unzip \
     vim \
   && \
