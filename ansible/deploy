@@ -17,16 +17,32 @@ cd "$(dirname "$(realpath "$0")")"
 
 inventories="-i hosts-dev"
 # One can override these overrides on the command line
-default_plays="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
+default_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
 
-fatal() {
+warn () {
     if [ -n "$1" ]; then
         echo "$@" >&2
     else
         cat >&2
     fi
+}
+
+fatal () {
+    warn "$@"
     exit 1
 }
+
+which keybase >/dev/null || warn <<NO_KEYBASE
+
+WARNING: keybase is not installed, cannot decipher and push secrets.
+
+NO_KEYBASE
+
+which eyaml >/dev/null || warn <<NO_EYAML
+
+WARNING: eyaml is not installed, cannot decipher and push secrets.
+
+NO_EYAML
 
 ###########################################################################
 
@@ -40,4 +56,4 @@ while [ -n "$1" ]; do
     esac
 done
 
-ansible-playbook $default_plays $inventories "$@" playbooks/wordpress-main.yml
+ansible-playbook $default_flags $inventories "$@" playbooks/wordpress-main.yml
