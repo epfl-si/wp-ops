@@ -42,6 +42,9 @@ RUN chown -R www-data:www-data /var/www/.wp-cli
 RUN su -s /bin/sh www-data -c "wp package install https://github.com/diggy/polylang-cli.git"
 RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/wp-cli-polylang.git"
 
-# Install a copy of WordPress into /wp
+# Install a copy of WordPress into /wp and populate it with our plugins
 RUN mkdir /wp
 RUN wp --allow-root --path=/wp core download
+ADD plugins.csv install-plugins.sh /tmp/
+RUN sh /tmp/install-plugins.sh < /tmp/plugins.csv; \
+        rm /tmp/install-plugins.sh /tmp/plugins.csv
