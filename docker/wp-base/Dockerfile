@@ -1,6 +1,7 @@
 FROM ubuntu:bionic
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PHP_VERSION=7.3
 
 RUN apt-get -y update && \
     apt-get -y install curl ca-certificates \
@@ -16,15 +17,15 @@ RUN apt-get -y update && apt-get  -y install --no-install-recommends \
     jq \
     less \
     nodejs \
-    php7.3 \
-    php7.3-apcu \
-    php7.3-cli \
-    php7.3-curl \
-    php7.3-gd \
-    php7.3-ldap \
-    php7.3-mysql \
-    php7.3-xml \
-    php7.3-zip \
+    php${PHP_VERSION} \
+    php${PHP_VERSION}-apcu \
+    php${PHP_VERSION}-cli \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-ldap \
+    php${PHP_VERSION}-mysql \
+    php${PHP_VERSION}-xml \
+    php${PHP_VERSION}-zip \
     unzip \
     vim \
   && \

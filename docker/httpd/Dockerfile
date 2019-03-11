@@ -2,7 +2,7 @@ FROM epflidevelop/os-wp-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 \
-    libapache2-mod-php7.3 \
+    libapache2-mod-php${PHP_VERSION} \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
@@ -11,10 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get -y autoremove && \
     apt-get clean
 
-COPY php.ini /etc/php/7.3/apache2/conf.d/95-epfl.ini
+COPY php.ini /etc/php/95-epfl.ini
+RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/apache2/conf.d
 
 RUN a2dismod mpm_event mpm_worker
-RUN a2enmod mpm_prefork php7.3 cgi
+RUN a2enmod mpm_prefork php${PHP_VERSION} cgi
 
 # directory for custom error pages
 RUN mkdir /var/www/error
