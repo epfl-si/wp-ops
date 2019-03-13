@@ -214,8 +214,8 @@
     name: "{{ ci_buildconfig_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
-      kind: BuildConfig
       apiVersion: v1
+      kind: BuildConfig
       metadata:
         labels:
           app: jenkins
@@ -224,50 +224,10 @@
       spec:
         strategy:
           jenkinsPipelineStrategy:
-            jenkinsfile: |-
-              pipeline {
-                // agent {
-                //   node {
-                //     label 'nodejs'
-                //   }
-                // }
-                agent any
-                options {
-                  timeout(time: 20, unit: 'MINUTES')
-                }
-                stages {
-                  stage('preamble') {
-                    steps {
-                      script {
-                        openshift.withCluster() {
-                          openshift.withProject() {
-                            echo "Using project: ${openshift.project()}"
-                          }
-                        }  // openshift.withCluster()
-                      }  // script
-                    }  // steps
-                  }  // stage('preamble')
-                  stage('Compilation (factice)') {
-                    steps {
-                      echo 'Hello world!'
-                    }  // steps
-                  }  // stage('Compilation (factice)')
-                  stage('Tests (factices)') {
-                    steps {
-                      sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
-                    }  // steps
-                  }  // stage('Tests (factices)')
-                }  // stages
-                post {
-                  success {
-                    echo "Succès de l'intégration continue"
-                    cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
-                  }  // success
-                  failure {
-                    echo "Échec de l'intégration continue"
-                  }  // failure
-                }  // post
-              }  // pipeline
+            jenkinsfile: |
+              {{ lookup("template", "Jenkinsfile") | indent(width=8) }}
+              {# Indent width is relative to the outermost ": |" construct,
+               # i.e. the "a" of "apiVersion" #}
 
 - name: Jenkins route
   openshift:

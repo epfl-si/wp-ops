@@ -1,0 +1,50 @@
+// Jenkinsfile for continuous integration / push-on-green in the
+// wwp-test namespace
+//
+// Documentation on writing an OpenShift-specific Jenkinsfile is sparse;
+// the best I found is https://github.com/openshift/jenkins-client-plugin .
+// Supposedly the Jenkins UI gives more.
+
+pipeline {
+  // agent {
+  //   node {
+  //     label 'nodejs'
+  //   }
+  // }
+  agent any
+  options {
+    timeout(time: 20, unit: 'MINUTES')
+  }
+  stages {
+    stage('preamble') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              echo "Using project: ${openshift.project()}"
+            }
+          }  // openshift.withCluster()
+        }  // script
+      }  // steps
+    }  // stage('Compilation')
+    stage('Compilation (factice)') {
+      steps {
+        echo 'Hello world!'
+      }  // steps
+    }  // stage('Compilation (factice)')
+    stage('Tests (factices)') {
+      steps {
+        sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
+      }  // steps
+    }  // stage('Tests (factices)')
+  }  // stages
+  post {
+    success {
+      echo "Succès de l'intégration continue"
+      cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
+    }  // success
+    failure {
+      echo "Échec de l'intégration continue"
+    }  // failure
+  }  // post
+}  // pipeline
