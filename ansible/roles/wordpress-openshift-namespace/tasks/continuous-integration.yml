@@ -192,9 +192,9 @@
             serviceAccount: jenkins
             serviceAccountName: jenkins
             volumes:
-      {# TODO: use the PersistentVolumeClaim #}
-            - emptyDir: {}
-              name: jenkins-data
+            - name: jenkins-data
+              persistentVolumeClaim:
+                claimName: "{{ ci_jenkins_persistent_volume_claim_name }}"
         triggers:
         - type: ConfigChange
         - type: ImageChange
