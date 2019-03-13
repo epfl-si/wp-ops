@@ -1,10 +1,6 @@
-ci_jenkins_image_name: jenkins-openshift-epfl
 ci_jenkins_public_hostname: jenkins-wwp-test.epfl.ch
 ci_jenkins_persistent_volume_name: wordpress-test-volume-jenkins
 ci_jenkins_persistent_volume_claim_name: wordpress-jenkins
-
-ci_jenkins_image_name_tagged: "{{ ci_jenkins_image_name }}:latest"
-
 
 ci_name_stem: httpd-jenkins
 ci_prod_or_dev : "{{ 'prod' if openshift_namespace == 'wwp' else 'dev' }}"
