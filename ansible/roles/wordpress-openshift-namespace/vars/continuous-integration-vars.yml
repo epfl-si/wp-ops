@@ -4,7 +4,6 @@ ci_jenkins_persistent_volume_name: wordpress-test-volume-jenkins
 ci_jenkins_persistent_volume_claim_name: wordpress-jenkins
 
 ci_jenkins_image_name_tagged: "{{ ci_jenkins_image_name }}:latest"
-ci_jenkins_image_name_fully_qualified: "docker-registry.default.svc:5000/{{openshift_namespace}}/{{ ci_jenkins_image_name }}@latest"
 
 
 ci_name_stem: httpd-jenkins
