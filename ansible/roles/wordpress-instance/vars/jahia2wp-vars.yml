@@ -1,4 +1,4 @@
-# file: roles/wordpress/vars/jahia2wp-vars.yml
+# file: roles/wordpress-instance/vars/jahia2wp-vars.yml
 #
 # See main.yml in the same directory for required variables (used in
 # the definitions below)

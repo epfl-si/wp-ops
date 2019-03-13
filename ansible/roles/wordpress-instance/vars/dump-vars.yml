@@ -1,4 +1,4 @@
-# file: roles/wordpress/vars/dump-vars.yml
+# file: roles/wordpress-instance/vars/dump-vars.yml
 #
 # What ../tasks/dump.yml, ../tasks/undump.yml & friends need to know
 # in order to function

@@ -1,4 +1,4 @@
-# file: roles/wordpress/tasks/main.yml
+# file: roles/wordpress-instance/tasks/main.yml
 #
 # What to do to install and configure a WordPress instance
 #
