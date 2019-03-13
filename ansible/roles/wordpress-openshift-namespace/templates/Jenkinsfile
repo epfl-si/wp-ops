@@ -1,9 +1,14 @@
 // Jenkinsfile for continuous integration / push-on-green in the
 // wwp-test namespace
 //
-// Documentation on writing an OpenShift-specific Jenkinsfile is sparse;
-// the best I found is https://github.com/openshift/jenkins-client-plugin .
-// Supposedly the Jenkins UI gives more.
+// Documentation on writing an OpenShift-specific Jenkinsfile is
+// sparse; the best I found are
+// https://docs.openshift.com/container-platform/3.11/dev_guide/dev_tutorials/openshift_pipeline.html
+// (as a tutorial), and
+// https://github.com/openshift/jenkins-client-plugin and
+// https://github.com/openshift/jenkins-client-plugin/blob/master/examples/jenkins-image-sample.groovy
+// The Jenkins UI also provides some clues; try
+// https://YOURJENKINSADDRESS/job/wwp-test/job/wwp-test-httpd-jenkins-dev/pipeline-syntax/globals
 
 pipeline {
   // agent {
@@ -16,22 +21,16 @@ pipeline {
     timeout(time: 20, unit: 'MINUTES')
   }
   stages {
-    stage('preamble') {
+    stage('Compilation') {
       steps {
         script {
-          openshift.withCluster() {
-            openshift.withProject() {
-              echo "Using project: ${openshift.project()}"
-            }
-          }  // openshift.withCluster()
+          buildImage('bc/wp-base')
+        }  // script
+        script {
+          buildImage(['bc/httpd', 'bc/mgmt', 'bc/varnish'])
         }  // script
       }  // steps
     }  // stage('Compilation')
-    stage('Compilation (factice)') {
-      steps {
-        echo 'Hello world!'
-      }  // steps
-    }  // stage('Compilation (factice)')
     stage('Tests (factices)') {
       steps {
         sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
@@ -48,3 +47,30 @@ pipeline {
     }  // failure
   }  // post
 }  // pipeline
+
+void buildImage (selector) {
+  openshift.withCluster() {
+    openshift.withProject('{{ openshift_namespace }}') {
+      banner "Building ${selector} in namespace ${openshift.project()}"
+      def bc = openshift.selector(selector)
+      bc.describe()
+      def buildSelector = bc.startBuild()
+      buildSelector.logs('-f')  // Synchronous
+      def failed = 0
+      buildSelector.withEach {
+        if (it.object().status.phase != 'Complete') {
+          failed = failed + 1
+        }
+      }
+      if (failed > 0) {
+        def errMsg = "${failed} failed builds"
+        banner(errMsg)
+        sh "exit 1"  // https://stackoverflow.com/a/51642273/435004
+      }
+    }  // openshift.withProject()
+  }  // openshift.withCluster()
+}
+
+void banner (msg) {
+  echo "=================================================================\n${msg}\n================================================================="
+}
