@@ -1,0 +1,72 @@
+# Kubernetes configuration for production-related image builds
+#
+# See also continuous-integration.yml (which has its own set of images)
+# ImageStream is in continuous-integration.yml
+
+- include_vars: image-vars.yml
+
+- name: "production ImageStreams"
+  openshift:
+    state: latest
+    resource: ImageStream
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      kind: ImageStream
+      apiVersion: v1
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ openshift_namespace }}"
+      {# Be sure to align the "if" constructs under the k of kind:, above,
+       # or deal with %- / -% madness #}
+      {% if "labels" in item %}
+        labels: {{ item.labels | to_yaml | indent(width=2) }}
+      {% endif %}
+  with_items:
+    - name: "{{ varnish_image_name }}"
+      labels:
+        app: varnish
+# Note: the way we use "apps" in EPFL WordPress (e.g.
+# "unmanaged", "www" etc), these images don't belong to any
+# particular app - Hence no labels
+    - name: "{{ wp_base_image_name }}"
+    - name: "{{ httpd_image_name }}"
+    - name: "{{ mgmt_image_name }}"
+
+- name: Production Docker images (BuildConfigs)
+  openshift:
+    state: latest
+    resource: BuildConfig
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        source:
+          type: Git
+          git:
+            uri: "{{ wp_ops_git_uri }}"
+            ref: "{{ wp_ops_git_branch }}"
+          contextDir: "{{ item.subdir }}"
+        strategy:
+          type: Docker
+          dockerStrategy:
+            noCache: true
+        output:
+          to:
+            kind: ImageStreamTag
+            name: "{{ item.image_stream_tag }}"
+  with_items:
+    - name: "{{ wp_base_image_name }}"
+      image_stream_tag: "{{ wp_base_image_stream_tag }}"
+      subdir: docker/wp-base
+    - name: "{{ mgmt_image_name }}"
+      image_stream_tag: "{{ mgmt_image_stream_tag }}"
+      subdir: docker/mgmt
+    - name: "{{ httpd_image_name }}"
+      image_stream_tag: "{{ httpd_image_stream_tag }}"
+      subdir: docker/httpd
