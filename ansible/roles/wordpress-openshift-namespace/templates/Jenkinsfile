@@ -59,7 +59,7 @@ void buildImage (selector) {
       def failed = 0
       buildSelector.withEach {
         if (it.object().status.phase != 'Complete') {
-          failed = failed + 1
+          failed++
         }
       }
       if (failed > 0) {
