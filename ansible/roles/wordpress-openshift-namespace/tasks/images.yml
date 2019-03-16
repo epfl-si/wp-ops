@@ -33,7 +33,43 @@
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
 
-- name: Production Docker images (BuildConfigs)
+- name: wp-base and varnish Docker images (BuildConfigs)
+  openshift:
+    state: latest
+    resource: BuildConfig
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    content: |
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        source:
+          type: Git
+          git:
+            uri: "{{ wp_ops_git_uri }}"
+            ref: "{{ wp_ops_git_branch }}"
+          contextDir: "{{ item.subdir }}"
+        strategy:
+          type: Docker
+          dockerStrategy:
+            from: ~
+            noCache: true
+        output:
+          to:
+            kind: ImageStreamTag
+            name: "{{ item.image_stream_tag }}"
+  with_items:
+  - name: "{{ wp_base_image_name }}"
+    image_stream_tag: "{{ wp_base_image_stream_tag }}"
+    subdir: docker/wp-base
+  - name: "{{ varnish_image_name }}"
+    image_stream_tag: "{{ varnish_image_stream_tag }}"
+    subdir: docker/varnish
+
+- name: Docker images (BuildConfigs) derived from wp-base
   openshift:
     state: latest
     resource: BuildConfig
@@ -56,14 +92,15 @@
           type: Docker
           dockerStrategy:
             noCache: true
+            from:
+              # Here comes the part which differs from above:
+              kind: ImageStreamTag
+              name: "{{ wp_base_image_stream_tag }}"
         output:
           to:
             kind: ImageStreamTag
             name: "{{ item.image_stream_tag }}"
   with_items:
-    - name: "{{ wp_base_image_name }}"
-      image_stream_tag: "{{ wp_base_image_stream_tag }}"
-      subdir: docker/wp-base
     - name: "{{ mgmt_image_name }}"
       image_stream_tag: "{{ mgmt_image_stream_tag }}"
       subdir: docker/mgmt
