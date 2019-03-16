@@ -3,15 +3,15 @@ FROM ubuntu:bionic
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PHP_VERSION=7.3
 
-RUN apt-get -y update && \
-    apt-get -y install curl ca-certificates \
+RUN apt-get -qy update && \
+    apt-get -qy install curl ca-certificates \
                software-properties-common apt-transport-https gnupg && \
-    apt-get -y autoremove && \
+    apt-get -qy autoremove && \
     apt-get clean
 
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
 RUN add-apt-repository ppa:ondrej/php
-RUN apt-get -y update && apt-get  -y install --no-install-recommends \
+RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     composer \
     git \
     jq \
@@ -29,7 +29,7 @@ RUN apt-get -y update && apt-get  -y install --no-install-recommends \
     unzip \
     vim \
   && \
-    apt-get -y autoremove && \
+    apt-get -qy autoremove && \
     apt-get clean
 
 # Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
