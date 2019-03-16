@@ -66,14 +66,27 @@ void buildImage (selector) {
         def hint = (
           ["You can follow the build logs more comfortably from within OpenShift:"]
           + buildUrls
-        ).collect { line -> line + "\n" }.join("")
+        ).join("\n")
         banner hint
       }
 
       buildSelector.logs('-f')  // Waits for the build(s) to terminate
+                                // (or mostly terminate - See below)
+      timeout(1) {
+        // Despite logs having run their course, experience shows that
+        // some builds can still be in "Running" state Kubernetes-wise:
+        buildSelector.withEach {
+          it.untilEach {
+            return it.object().status.phase != "Running"
+          }
+        }
+      }
+
       def failed = 0
       buildSelector.withEach {
-        if (it.object().status.phase != 'Complete') {
+        def status = it.object().status.phase
+        if (status != 'Complete') {
+          echo "Bad status for ${it.name()}: expected <Complete>, got <${status}>"
           failed++
         }
       }
