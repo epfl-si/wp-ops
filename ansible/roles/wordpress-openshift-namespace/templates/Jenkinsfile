@@ -54,8 +54,23 @@ void buildImage (selector) {
       banner "Building ${selector} in namespace ${openshift.project()}"
       def bc = openshift.selector(selector)
       bc.describe()
+
       def buildSelector = bc.startBuild()
-      buildSelector.logs('-f')  // Synchronous
+      buildSelector.describe()
+
+      def buildUrls = []
+      buildSelector.withEach {
+        buildUrls.push "https://pub-os-exopge.epfl.ch/console/project/${openshift.project()}/browse/builds/${it.object().metadata.annotations['openshift.io/build-config.name']}/${it.object().metadata.name}?tab=logs"
+      }
+      if (buildUrls.size() > 0) {
+        def hint = (
+          ["You can follow the build logs more comfortably from within OpenShift:"]
+          + buildUrls
+        ).collect { line -> line + "\n" }.join("")
+        banner hint
+      }
+
+      buildSelector.logs('-f')  // Waits for the build(s) to terminate
       def failed = 0
       buildSelector.withEach {
         if (it.object().status.phase != 'Complete') {
