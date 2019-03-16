@@ -4,8 +4,8 @@
 // Documentation on writing an OpenShift-specific Jenkinsfile is
 // sparse; the best I found are
 // https://docs.openshift.com/container-platform/3.11/dev_guide/dev_tutorials/openshift_pipeline.html
-// (as a tutorial), and
-// https://github.com/openshift/jenkins-client-plugin and
+// as a tutorial, and the following two as a reference manual of
+// sorts: https://github.com/openshift/jenkins-client-plugin and
 // https://github.com/openshift/jenkins-client-plugin/blob/master/examples/jenkins-image-sample.groovy
 // The Jenkins UI also provides some clues; try
 // https://YOURJENKINSADDRESS/job/wwp-test/job/wwp-test-httpd-jenkins-dev/pipeline-syntax/globals
