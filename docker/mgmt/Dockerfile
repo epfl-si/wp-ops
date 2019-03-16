@@ -1,6 +1,6 @@
 FROM epflidevelop/os-wp-base
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
+RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \
     htop \
     less \
@@ -18,7 +18,7 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     unzip \
     vim \
   && \
-    apt-get -y autoremove && \
+    apt-get -qy autoremove && \
     apt-get clean
 
 

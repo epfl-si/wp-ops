@@ -1,6 +1,6 @@
 FROM epflidevelop/os-wp-base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apache2 \
     libapache2-mod-php${PHP_VERSION} \
     libcgi-pm-perl \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libreadonly-perl \
     vim \
   && \
-    apt-get -y autoremove && \
+    apt-get -qy autoremove && \
     apt-get clean
 
 COPY php.ini /etc/php/95-epfl.ini
