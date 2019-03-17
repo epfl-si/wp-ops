@@ -33,7 +33,7 @@
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
 
-- name: wp-base and varnish Docker images (BuildConfigs)
+- name: Production Docker images (BuildConfigs)
   openshift:
     state: latest
     resource: BuildConfig
@@ -55,55 +55,30 @@
         strategy:
           type: Docker
           dockerStrategy:
-            from: ~
+            from: {{ (item.from | to_yaml) if item.from else "~" }}
             noCache: true
         output:
-          to:
+          to: 
             kind: ImageStreamTag
-            name: "{{ item.image_stream_tag }}"
+            name: {{ item.to_ImageStreamTag }}
   with_items:
   - name: "{{ wp_base_image_name }}"
-    image_stream_tag: "{{ wp_base_image_stream_tag }}"
+    from: ~
     subdir: docker/wp-base
+    to_ImageStreamTag: "{{ wp_base_image_stream_tag }}"
   - name: "{{ varnish_image_name }}"
-    image_stream_tag: "{{ varnish_image_stream_tag }}"
+    from: ~
     subdir: docker/varnish
-
-- name: Docker images (BuildConfigs) derived from wp-base
-  openshift:
-    state: latest
-    resource: BuildConfig
-    name: "{{ item.name }}"
-    namespace: "{{ openshift_namespace }}"
-    content: |
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
-      metadata:
-        name: "{{ item.name }}"
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        source:
-          type: Git
-          git:
-            uri: "{{ wp_ops_git_uri }}"
-            ref: "{{ wp_ops_git_branch }}"
-          contextDir: "{{ item.subdir }}"
-        strategy:
-          type: Docker
-          dockerStrategy:
-            noCache: true
-            from:
-              # Here comes the part which differs from above:
-              kind: ImageStreamTag
-              name: "{{ wp_base_image_stream_tag }}"
-        output:
-          to:
-            kind: ImageStreamTag
-            name: "{{ item.image_stream_tag }}"
-  with_items:
-    - name: "{{ mgmt_image_name }}"
-      image_stream_tag: "{{ mgmt_image_stream_tag }}"
-      subdir: docker/mgmt
-    - name: "{{ httpd_image_name }}"
-      image_stream_tag: "{{ httpd_image_stream_tag }}"
-      subdir: docker/httpd
+    to_ImageStreamTag: "{{ varnish_image_stream_tag }}"
+  - name: "{{ mgmt_image_name }}"
+    from:
+      kind: ImageStreamTag
+      name: "{{ wp_base_image_stream_tag }}"
+    subdir: docker/mgmt
+    to_ImageStreamTag: "{{ mgmt_image_stream_tag }}"
+  - name: "{{ httpd_image_name }}"
+    from:
+      kind: ImageStreamTag
+      name: "{{ wp_base_image_stream_tag }}"
+    subdir: docker/httpd
+    to_ImageStreamTag: "{{ httpd_image_stream_tag }}"
