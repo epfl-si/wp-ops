@@ -48,6 +48,7 @@ pipeline {
   }  // post
 }  // pipeline
 
+
 void buildImage (selector) {
   openshift.withCluster() {
     openshift.withProject('{{ openshift_namespace }}') {
@@ -91,14 +92,16 @@ void buildImage (selector) {
         }
       }
       if (failed > 0) {
-        def errMsg = "${failed} failed builds"
-        banner(errMsg)
+        banner "${failed} failed builds"
         sh "exit 1"  // https://stackoverflow.com/a/51642273/435004
       }
     }  // openshift.withProject()
   }  // openshift.withCluster()
 }
 
+
 void banner (msg) {
-  echo "=================================================================\n${msg}\n================================================================="
+  def equals = "=" * ([msg.length() + 2, 40].max())
+  msg = [equals, msg, equals].join("\n")
+  echo msg
 }
