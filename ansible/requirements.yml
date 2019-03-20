@@ -1,1 +1,1 @@
-- src: https://github.com/epfl-idevelop/ansible-module-openshift
+- src: epfl_idevelop.ansible_module_openshift
