@@ -56,4 +56,5 @@ while [ -n "$1" ]; do
     esac
 done
 
+ansible-galaxy install -r requirements.yml
 ansible-playbook $default_flags $inventories "$@" playbooks/wordpress-main.yml
