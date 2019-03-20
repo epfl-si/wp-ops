@@ -3,3 +3,4 @@ ansible/**/*.retry
 data/wp/wp-content/plugins/epfl.zip
 data/wp/wp-content/themes/wp-theme-2018.zip
 __pycache__
+ansible/roles/epfl-idevelop.*
