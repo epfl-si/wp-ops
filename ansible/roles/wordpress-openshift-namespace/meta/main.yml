@@ -1,2 +1,2 @@
 dependencies:
-  - name: ansible-module-openshift
+  - name: epfl_idevelop.ansible_module_openshift
