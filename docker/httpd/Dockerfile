@@ -31,6 +31,7 @@ RUN  apt-get -y update && \
     php7.2-xml \
     php7.2-zip \
     php7.2-apcu \
+    php7.2-mbstring \
     lttng-tools \
   && \
     apt-get -y autoremove && \
