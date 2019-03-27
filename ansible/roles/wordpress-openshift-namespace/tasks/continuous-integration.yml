@@ -1,30 +1,29 @@
 # Kubernetes configuration for the continuous integration rig
 
-- include_vars: image-vars.yml
 - include_vars: continuous-integration-vars.yml
 
 # See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
 # for help
-- name: "Jenkins ImageStream"
+- name: "Jenkins master ImageStream"
   openshift:
     state: latest
     resource: ImageStream
-    name: "{{ ci_jenkins_image_name }}"
+    name: "{{ ci_jenkins_master_image_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
       kind: ImageStream
       apiVersion: v1
       metadata:
-        name: "{{ ci_jenkins_image_name }}"
+        name: "{{ ci_jenkins_master_image_name }}"
         namespace: "{{ openshift_namespace }}"
         labels:
           app: jenkins
 
-- name: Jenkins Docker image (BuildConfig)
+- name: Jenkins master image (BuildConfig)
   openshift:
     state: latest
     resource: BuildConfig
-    name: "{{ ci_jenkins_image_name }}"
+    name: "{{ ci_jenkins_master_image_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
       apiVersion: build.openshift.io/v1
@@ -32,7 +31,7 @@
       metadata:
         labels:
           app: jenkins
-        name: "{{ ci_jenkins_image_name }}"
+        name: "{{ ci_jenkins_master_image_name }}"
         namespace: "{{ openshift_namespace }}"
       spec:
         source:
@@ -48,7 +47,7 @@
         output:
           to:
             kind: ImageStreamTag
-            name: "{{ ci_jenkins_image_stream_tag }}"
+            name: "{{ ci_jenkins_master_image_stream_tag }}"
 
 - name: Jenkins services
   with_items:
@@ -192,7 +191,7 @@
             - jenkins
             from:
               kind: ImageStreamTag
-              name: "{{ ci_jenkins_image_stream_tag }}"
+              name: "{{ ci_jenkins_master_image_stream_tag }}"
               namespace: "{{ openshift_namespace }}"
 
 - name: Jenkins pipeline (BuildConfig)

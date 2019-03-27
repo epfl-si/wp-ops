@@ -1,10 +1,8 @@
-ci_jenkins_image_name: jenkins-openshift-epfl
 httpd_image_name: httpd
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 varnish_image_name: varnish
 
-ci_jenkins_image_stream_tag: "{{ ci_jenkins_image_name }}:latest"
 wp_base_image_stream_tag:    "{{ wp_base_image_name    }}:latest"
 httpd_image_stream_tag:      "{{ httpd_image_name      }}:latest"
 mgmt_image_stream_tag:       "{{ mgmt_image_name       }}:latest"
