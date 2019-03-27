@@ -5,3 +5,6 @@ ci_jenkins_persistent_volume_claim_name: wordpress-jenkins
 ci_name_stem: httpd-jenkins
 ci_prod_or_dev : "{{ 'prod' if openshift_namespace == 'wwp' else 'dev' }}"
 ci_buildconfig_name: "{{ ci_name_stem }}-{{ ci_prod_or_dev }}"
+
+ci_jenkins_master_image_name: jenkins-openshift-epfl
+ci_jenkins_master_image_stream_tag: "{{ ci_jenkins_master_image_name }}:latest"
