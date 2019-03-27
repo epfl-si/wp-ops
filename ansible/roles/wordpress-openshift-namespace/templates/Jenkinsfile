@@ -101,7 +101,14 @@ void buildImage (selector) {
 
 
 void banner (msg) {
-  def equals = "=" * ([msg.length() + 2, 40].max())
+  def length = msg.length() + 2
+  if (length < 40) {
+    length = 40
+  }
+  if (length > 80) {
+    length = 80
+  }
+  def equals = "=" * length
   msg = [equals, msg, equals].join("\n")
   echo msg
 }
