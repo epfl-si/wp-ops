@@ -24,10 +24,6 @@
       set_fact:
         ansible_user: www-data
         ansible_python_interpreter: "/srv/{{wp_env}}/venv/bin/python"
-    - name: EPFL source code is required
-      run_once: true
-      local_action: "shell test -d {{ wp_data_path }}"
-      changed_when: false
     - name: Create and use remote temporary directory (if required)
       include_tasks: '{{ "../tasks/remote-tempdir.yml" if play_dump is match("yes") else "../tasks/noop.yml" }}'
     - name: Gathering facts (delayed after Ansible pre-configuration)
