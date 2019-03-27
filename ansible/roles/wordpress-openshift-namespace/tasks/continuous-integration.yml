@@ -2,6 +2,7 @@
 
 - include_vars: continuous-integration-vars.yml
 
+
 # See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
 # for help
 - name: "Jenkins master ImageStream"
@@ -18,6 +19,7 @@
         namespace: "{{ openshift_namespace }}"
         labels:
           app: jenkins
+
 
 - name: Jenkins master image (BuildConfig)
   openshift:
@@ -48,6 +50,7 @@
           to:
             kind: ImageStreamTag
             name: "{{ ci_jenkins_master_image_stream_tag }}"
+
 
 - name: Jenkins services
   with_items:
@@ -83,6 +86,7 @@
           app: jenkins
           deploymentconfig: jenkins
 
+
 - name: PersistentVolumeClaim/"{{ ci_jenkins_persistent_volume_claim_name }}"
   openshift:
     state: latest
@@ -104,6 +108,7 @@
         resources:
           requests:
             storage: 100Gi
+
 
 - name: Jenkins application proper (DeploymentConfig)
   openshift:
@@ -194,6 +199,7 @@
               name: "{{ ci_jenkins_master_image_stream_tag }}"
               namespace: "{{ openshift_namespace }}"
 
+
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
@@ -215,6 +221,7 @@
               {{ lookup("template", "Jenkinsfile") | indent(width=8) }}
               {# Indent width is relative to the outermost ": |" construct,
                # i.e. the "a" of "apiVersion" #}
+
 
 - name: Jenkins route
   openshift:
