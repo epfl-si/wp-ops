@@ -142,7 +142,7 @@
             storage: 100Gi
 
 
-- name: Jenkins application proper (DeploymentConfig)
+- name: Jenkins master (DeploymentConfig)
   openshift:
     state: latest
     resource: DeploymentConfig
@@ -166,6 +166,7 @@
             labels:
               app: jenkins
               deploymentconfig: jenkins
+              jenkins: master
           spec:
             containers:
               - name: jenkins
