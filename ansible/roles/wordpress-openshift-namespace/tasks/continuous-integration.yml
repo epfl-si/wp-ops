@@ -8,7 +8,7 @@
 - name: "Jenkins master ImageStream"
   openshift:
     state: latest
-    resource: ImageStream
+    kind: ImageStream
     name: "{{ ci_jenkins_master_image_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -24,7 +24,7 @@
 - name: Jenkins master image (BuildConfig)
   openshift:
     state: latest
-    resource: BuildConfig
+    kind: BuildConfig
     name: "{{ ci_jenkins_master_image_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -96,7 +96,7 @@
       targetPort: 5000
   openshift:
     state: latest
-    resource: Service
+    kind: Service
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -122,7 +122,7 @@
 - name: PersistentVolumeClaim/"{{ ci_jenkins_persistent_volume_claim_name }}"
   openshift:
     state: latest
-    resource: PersistentVolumeClaim
+    kind: PersistentVolumeClaim
     name: "{{ ci_jenkins_persistent_volume_claim_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -145,7 +145,7 @@
 - name: Jenkins master (DeploymentConfig)
   openshift:
     state: latest
-    resource: DeploymentConfig
+    kind: DeploymentConfig
     name: jenkins
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -236,7 +236,7 @@
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
-    resource: BuildConfig
+    kind: BuildConfig
     name: "{{ ci_buildconfig_name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -259,7 +259,7 @@
 - name: Jenkins route
   openshift:
     state: latest
-    resource: Route
+    kind: Route
     name: jenkins
     namespace: "{{ openshift_namespace }}"
     content: |

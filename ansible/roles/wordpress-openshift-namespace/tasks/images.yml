@@ -8,7 +8,7 @@
 - name: "production ImageStreams"
   openshift:
     state: latest
-    resource: ImageStream
+    kind: ImageStream
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
@@ -36,7 +36,7 @@
 - name: Production Docker images (BuildConfigs)
   openshift:
     state: latest
-    resource: BuildConfig
+    kind: BuildConfig
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
     content: |
