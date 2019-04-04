@@ -19,7 +19,9 @@ eyaml_keys:
 # https://puppet.com/blog/encrypt-your-data-using-hiera-eyaml first.
 # The edit command goes like this,
 #
-#   eyaml edit -d --pkcs7-public-key wp-ops/ansible/eyaml/epfl_wp_test_pubkey.pem
+#   eyaml edit -d \
+#     --pkcs7-public-key ansible/eyaml/epfl_wp_test_pubkey.pem \
+#     ansible/hosts-dev/group_vars/openshift-namespaces-dev
 #
 # 💡 This *will not* decrypt anything for you because chances are, you
 # don't need to decrypt secrets (YA RLY). For those cases where you
