@@ -26,11 +26,11 @@ mgmt_secret_contents:
   # These secrets are consumed by
   # ../../../../docker/mgmt/docker-entrypoint.sh
   authorized_keys: "{{ mgmt_access_list[openshift_namespace] | maplookup(ssh_public_keys) | join_lines | b64encode }}"
-  ssh_host_ecdsa_key: "{{ mgmt_sshd_keys.ssh_host_ecdsa_key.priv | eyaml(eyaml_keys) | b64encode }}"
-  "ssh_host_ecdsa_key.pub": "{{ mgmt_sshd_keys.ssh_host_ecdsa_key.pub  | b64encode }}"
+  ssh_host_ecdsa_key: "{{ mgmt_sshd_keys.ssh_host_ecdsa_key.priv | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+  "ssh_host_ecdsa_key.pub": "{{ mgmt_sshd_keys.ssh_host_ecdsa_key.pub  | trim_lines | b64encode }}"
 
-  ssh_host_rsa_key: "{{ mgmt_sshd_keys.ssh_host_rsa_key.priv | eyaml(eyaml_keys) | b64encode }}"
-  "ssh_host_rsa_key.pub": "{{ mgmt_sshd_keys.ssh_host_rsa_key.pub | b64encode }}"
+  ssh_host_rsa_key: "{{ mgmt_sshd_keys.ssh_host_rsa_key.priv | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+  "ssh_host_rsa_key.pub": "{{ mgmt_sshd_keys.ssh_host_rsa_key.pub | trim_lines | b64encode }}"
 
-  ssh_host_ed25519_key: "{{ mgmt_sshd_keys.ssh_host_ed25519_key.priv | eyaml(eyaml_keys) | b64encode }}"
-  "ssh_host_ed25519_key.pub": "{{ mgmt_sshd_keys.ssh_host_ed25519_key.pub | b64encode }}"
+  ssh_host_ed25519_key: "{{ mgmt_sshd_keys.ssh_host_ed25519_key.priv | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+  "ssh_host_ed25519_key.pub": "{{ mgmt_sshd_keys.ssh_host_ed25519_key.pub | trim_lines | b64encode }}"
