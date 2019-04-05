@@ -8,9 +8,6 @@
 - name: "production ImageStreams"
   openshift:
     state: latest
-    kind: ImageStream
-    name: "{{ item.name }}"
-    namespace: "{{ openshift_namespace }}"
     content: |
       kind: ImageStream
       apiVersion: v1
@@ -36,9 +33,6 @@
 - name: Production Docker images (BuildConfigs)
   openshift:
     state: latest
-    kind: BuildConfig
-    name: "{{ item.name }}"
-    namespace: "{{ openshift_namespace }}"
     content: |
       apiVersion: build.openshift.io/v1
       kind: BuildConfig
