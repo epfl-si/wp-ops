@@ -57,6 +57,7 @@
           dockerStrategy:
             from: {{ (item.from | to_yaml) if item.from else "~" }}
             noCache: true
+            {{ "forcePull: true" if item.from else "" }}
         output:
           to: 
             kind: ImageStreamTag
