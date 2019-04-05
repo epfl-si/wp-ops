@@ -3,9 +3,6 @@
 - name: BuildConfig for the customized Perl Docker image
   openshift:
     state: latest
-    kind: BuildConfig
-    name: perl-disk-usage-report
-    namespace: "{{ openshift_namespace }}"
     content: |
       apiVersion: build.openshift.io/v1
       kind: BuildConfig
@@ -32,9 +29,6 @@
 - name: Perl script as a ConfigMap
   openshift:
     state: latest
-    kind: ConfigMap
-    name: srv-disk-usage-report-scripts
-    namespace: "{{ openshift_namespace }}"
     content: |
       apiVersion: v1
       kind: ConfigMap
@@ -55,9 +49,6 @@
 - name: Cron job
   openshift:
     state: latest
-    kind: CronJob
-    name: srv-disk-usage-report
-    namespace: "{{ openshift_namespace }}"
     content: |
       apiVersion: batch/v1beta1
       kind: CronJob
