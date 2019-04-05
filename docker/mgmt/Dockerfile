@@ -8,6 +8,7 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     git \
     gnupg \
     htop \
+    jq \
     less \
     lsb-release \
     make \
@@ -70,26 +71,17 @@ RUN sed -ir 's#www-data.*:/usr/sbin/nologin#www-data:x:33:33:www-data:/var/www:/
     chown -R www-data: /var/www && \
     chmod 700 /var/www/.ssh
 
-# install wp-cli packages, downloaded from
-# Do not use "Code -> Releases" page to download ZIP files. Use "Code -> Download" option on "Code" tab.
-# https://github.com/diggy/polylang-cli
-# https://github.com/cortneyray/wp-cli-polylang
-
-COPY ./wp-packages/wp-cli-1.4.1.phar /usr/local/bin/wp
-COPY ./wp-packages/polylang-cli-master.zip /tmp/polylang-cli-master.zip
-COPY ./wp-packages/wp-cli-polylang-master.zip /tmp/wp-cli-polylang-master.zip
-
-RUN chmod a+x /usr/local/bin/wp && \
-    su www-data -c "/usr/local/bin/wp package install /tmp/polylang-cli-master.zip" && \
-    su www-data -c "/usr/local/bin/wp package install /tmp/wp-cli-polylang-master.zip"
+# Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
+# won't install):
+RUN curl -o /usr/local/bin/wp -L `curl https://api.github.com/repos/wp-cli/wp-cli/releases | jq -r '[.[] | select (.tag_name | startswith("v1.5"))][0] | .assets[0].browser_download_url'`
+RUN chmod a+x /usr/local/bin/wp
 
 RUN ln -s /srv/bin/vjahia2wp /usr/local/bin/
 
-
-# this line should come after the installation of other packages
-# otherwise, it creates /var/www/.wp-cli with incorrect permission
-# and makes the other installations fail
 COPY ./config.yml /var/www/.wp-cli/config.yml
+RUN chown -R www-data:www-data /var/www/.wp-cli
+RUN su -s /bin/sh www-data -c "wp package install https://github.com/diggy/polylang-cli.git"
+RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/wp-cli-polylang.git"
 
 EXPOSE 22
 ENTRYPOINT ["/docker-entrypoint.sh"]
