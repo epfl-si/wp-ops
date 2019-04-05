@@ -119,7 +119,7 @@ void buildImage (selector) {
       }
       if (buildUrls.size() > 0) {
         def hint = (
-          ["You can follow the build logs more comfortably from within OpenShift:"]
+          ["Vous pouvez suivre la compilation plus confortablement depuis OpenShift :"]
           + buildUrls
         ).join("\n")
         banner hint
