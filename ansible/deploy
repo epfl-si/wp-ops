@@ -57,5 +57,5 @@ while [ -n "$1" ]; do
 done
 
 set -e
-ansible-galaxy install -r requirements.yml >/dev/null 2>&1
+ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
 ansible-playbook $default_flags $inventories "$@" playbooks/wordpress-main.yml
