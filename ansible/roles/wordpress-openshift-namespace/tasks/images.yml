@@ -1,79 +1,30 @@
 # Kubernetes configuration for production-related image builds
 #
 # See also continuous-integration.yml (which has its own set of images)
-# ImageStream is in continuous-integration.yml
 
 - include_vars: image-vars.yml
 
 - name: "production ImageStreams"
-  openshift:
-    state: latest
-    content: |
-      kind: ImageStream
-      apiVersion: v1
-      metadata:
-        name: "{{ item.name }}"
-        namespace: "{{ openshift_namespace }}"
-      {# Be sure to align the "if" constructs under the k of kind:, above,
-       # or deal with %- / -% madness #}
-      {% if "labels" in item %}
-        labels: {{ item.labels | to_yaml | indent(width=2) }}
-      {% endif %}
+  openshift_imagestream:
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    metadata: "{{ item.metadata | default({}) }}"
+    from: "{{ item.from | default(None) }}"
+    git:
+        repository: "{{ wp_ops_git_uri }}"
+        ref: "{{ wp_ops_git_branch }}"
+        path: "{{ item.git_path }}"
   with_items:
     - name: "{{ varnish_image_name }}"
-      labels:
-        app: varnish
-# Note: the way we use "apps" in EPFL WordPress (e.g.
-# "unmanaged", "www" etc), these images don't belong to any
-# particular app - Hence no labels
-    - name: "{{ wp_base_image_name }}"
-    - name: "{{ httpd_image_name }}"
-    - name: "{{ mgmt_image_name }}"
-
-- name: Production Docker images (BuildConfigs)
-  openshift:
-    state: latest
-    content: |
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
       metadata:
-        name: "{{ item.name }}"
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        source:
-          type: Git
-          git:
-            uri: "{{ wp_ops_git_uri }}"
-            ref: "{{ wp_ops_git_branch }}"
-          contextDir: "{{ item.subdir }}"
-        strategy:
-          type: Docker
-          dockerStrategy:
-            from: {{ (item.from | to_yaml) if item.from else "~" }}
-            noCache: true
-            {{ "forcePull: true" if item.from else "" }}
-        output:
-          to: 
-            kind: ImageStreamTag
-            name: {{ item.to_ImageStreamTag }}
-  with_items:
-  - name: "{{ wp_base_image_name }}"
-    from: ~
-    subdir: docker/wp-base
-    to_ImageStreamTag: "{{ wp_base_image_stream_tag }}"
-  - name: "{{ varnish_image_name }}"
-    from: ~
-    subdir: docker/varnish
-    to_ImageStreamTag: "{{ varnish_image_stream_tag }}"
-  - name: "{{ mgmt_image_name }}"
-    from:
-      kind: ImageStreamTag
-      name: "{{ wp_base_image_stream_tag }}"
-    subdir: docker/mgmt
-    to_ImageStreamTag: "{{ mgmt_image_stream_tag }}"
-  - name: "{{ httpd_image_name }}"
-    from:
-      kind: ImageStreamTag
-      name: "{{ wp_base_image_stream_tag }}"
-    subdir: docker/httpd
-    to_ImageStreamTag: "{{ httpd_image_stream_tag }}"
+        labels:
+          app: varnish
+      git_path: docker/varnish
+    - name: "{{ wp_base_image_name }}"
+      git_path: docker/wp-base
+    - name: "{{ httpd_image_name }}"
+      git_path: docker/httpd
+      from: "{{ wp_base_image_name }}"
+    - name: "{{ mgmt_image_name }}"
+      git_path: docker/mgmt
+      from: "{{ wp_base_image_name }}"

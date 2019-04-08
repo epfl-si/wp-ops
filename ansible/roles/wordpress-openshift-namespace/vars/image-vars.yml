@@ -3,11 +3,6 @@ mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 varnish_image_name: varnish
 
-wp_base_image_stream_tag:    "{{ wp_base_image_name    }}:latest"
-httpd_image_stream_tag:      "{{ httpd_image_name      }}:latest"
-mgmt_image_stream_tag:       "{{ mgmt_image_name       }}:latest"
-varnish_image_stream_tag:    "{{ varnish_image_name    }}:latest"
-
 wp_ops_git_uri: https://github.com/epfl-idevelop/wp-ops
 # wp_ops_git_branch is defined in
 # ../../../hosts-{dev,prod}/group_vars/openshift-namespaces-{dev,prod}

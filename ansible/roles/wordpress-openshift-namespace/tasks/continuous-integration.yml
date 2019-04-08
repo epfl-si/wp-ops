@@ -2,78 +2,38 @@
 
 - include_vars: continuous-integration-vars.yml
 
-
 # See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
 # for help
-- name: "Jenkins master ImageStream"
-  openshift:
-    state: latest
-    content: |
-      kind: ImageStream
-      apiVersion: v1
-      metadata:
-        name: "{{ ci_jenkins_master_image_name }}"
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: jenkins
+- name: "Jenkins master ImageStream and BuildConfig"
+  openshift_imagestream:
+    name: "{{ ci_jenkins_master_image_name }}"
+    namespace: "{{ openshift_namespace }}"
+    git:
+      repository: 'https://github.com/epfl-idevelop/wp-ops'
+      ref: wwp-continuous-integration
+      path: docker/jenkins
+    metadata:
+      labels:
+        app: jenkins
 
-
-- name: Jenkins master image (BuildConfig)
-  openshift:
-    state: latest
-    content: |
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
-      metadata:
-        labels:
-          app: jenkins
-        name: "{{ ci_jenkins_master_image_name }}"
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        source:
-          type: Git
-          git:
-            uri: 'https://github.com/epfl-idevelop/wp-ops'
-            ref: wwp-continuous-integration
-          contextDir: docker/jenkins
-        strategy:
-          type: Docker
-          dockerStrategy:
-            noCache: true
-        output:
-          to:
-            kind: ImageStreamTag
-            name: "{{ ci_jenkins_master_image_stream_tag }}"
-
-
-# This ImageStream is intended to be picked up by the OpenShift Sync
-# Jenkins plug-in (because it has a "role: jenkins-slave" label), then
-# passed to the Kubernetes Jenkins plug-in as a so-called "Kubernetes
-# plug-in pod template", that the Jenkinsfile can reference (or even
-# inheritFrom). See details here:
+# This ImageStream is intended as a so-called "Kubernetes plug-in pod
+# template", that the Jenkinsfile can reference (or inheritFrom, in
+# our case). See details here:
 # https://docs.openshift.com/container-platform/3.11/using_images/other_images/jenkins.html#configuring-the-jenkins-kubernetes-plug-in
 # Note that the built-in "nodejs" templates etc. documented on that
 # page, don't work (at least for us at EPFL) because they reference a
 # Docker image on a nonexistent, non-standard in-cluster Docker
 # registry.
-- name: Jenkins slaves ImageStream
-  openshift:
-    state: latest
-    content: |
-      kind: ImageStream
-      apiVersion: image.openshift.io/v1
-      metadata:
-        name: "{{ ci_jenkins_slave_imagestream_name }}"
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          role: jenkins-slave
-      spec:
-        tags:
-        - name: latest
-          from:
-            kind: DockerImage
-            name: "{{ ci_jenkins_slave_docker_image }}"
-
+- name: "Jenkins slave (pulled from {{ ci_jenkins_slave_docker_image }})"
+  openshift_imagestream:
+    name: "{{ ci_jenkins_slave_image_name }}"
+    namespace: "{{ openshift_namespace }}"
+    from: "{{ ci_jenkins_slave_docker_image }}"
+    metadata:
+      labels:
+        # This causes the Jenkins OpenShift Sync plug-in to pick up
+        # this ImageStream (and pass it to the Kubernetes plug-in):
+        role: jenkins-slave
 
 - name: Jenkins services
   with_items:
