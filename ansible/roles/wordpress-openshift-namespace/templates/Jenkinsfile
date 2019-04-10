@@ -47,11 +47,11 @@ metadata:
     some-label: some-label-value
 spec:
   containers:
-  - name: busybox
-    image: busybox
+  - name: {{ ci_jenkins_test_sidekick_image_name }}
+    image: docker-registry.default.svc:5000/{{ openshift_namespace }}/{{ ci_jenkins_test_sidekick_image_name }}:latest
     command:
-    - cat
-    tty: true
+    - sleep
+    - infinity
 
 {#   # Besides the normal Kubernetes semantics, workingDir is also
      # where the Kubernetes Jenkins plug-in mounts the
@@ -95,8 +95,8 @@ spec:
 
     stage('Tests') {
       steps {
-        container('busybox') {
-          sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
+        container('{{ ci_jenkins_test_sidekick_image_name }}') {
+          sh "/opt/app/bin/docker-entrypoint --test-target https://migration-wp.epfl.ch/www.epfl.ch/"
         }
       }
     }  // stage('Tests')
