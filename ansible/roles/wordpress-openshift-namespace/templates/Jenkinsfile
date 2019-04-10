@@ -17,6 +17,14 @@ pipeline {
     timeout(time: 20, unit: 'MINUTES')
   }
 
+  // Here we say that this is to be a nightly build
+  triggers {
+    // See https://jenkins.io/doc/book/pipeline/syntax/#cron-syntax
+    // Note: the time zone is GMT (add 1 or 2 hours to get European
+    // time, depending on season)
+    cron('H H(2-3) * * *')
+  }
+
   // Here we express where we want the pipeline to execute.
   agent {
     // We want the pipeline to run on a dynamically-run Jenkins slave
