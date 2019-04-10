@@ -171,7 +171,7 @@
             - jenkins
             from:
               kind: ImageStreamTag
-              name: "{{ ci_jenkins_master_image_stream_tag }}"
+              name: "{{ ci_jenkins_master_image_name }}:latest"
               namespace: "{{ openshift_namespace }}"
 
 
