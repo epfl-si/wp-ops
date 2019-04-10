@@ -75,20 +75,32 @@ spec:
         // openshift.withCluster and friends) can only happen in a
         // "script".
         script {
-          watchBuild(buildImage('bc/wp-base'))
-        }  // script
-        script {
-          watchBuild(buildImage(['bc/httpd', 'bc/mgmt', 'bc/varnish']))
+          openshift.withCluster() {
+            openshift.withProject('{{ openshift_namespace }}') {
+              parallel (
+                build_varnish: {
+                  watchBuild(buildImage('bc/varnish'))
+                },
+                build_others: {
+                  def wpBaseBuild = buildImage('bc/wp-base')
+                  watchBuild(wpBaseBuild)
+                  watchBuild(awaitTriggeredBuildsStarted(wpBaseBuild, 2))
+                }
+              )  // parallel
+            }  // openshift.withProject
+          }  // openshift.withCluster
         }  // script
       }  // steps
     }  // stage('Compilation')
+
     stage('Tests') {
       steps {
         container('busybox') {
           sh "curl https://termbin.com/xmwf |perl -e 'while(<>) { last if m/^[[]/ }; print; print while <>' > cucumber-report.json"
         }
       }
-    }  // stage('Tests (factices)')
+    }  // stage('Tests')
+
   }  // stages
 
   // Here we set up some post-pipeline hooks to present the results.
@@ -104,61 +116,52 @@ spec:
 }  // pipeline
 
 def buildImage (bcSpec) {
-  openshift.withCluster() {
-    openshift.withProject('{{ openshift_namespace }}') {
-      banner "Building ${bcSpec} in namespace ${openshift.project()}"
-      def bc = openshift.selector(bcSpec)
-      bc.describe()
-      def buildSelector = bc.startBuild()
-      buildSelector.describe()
-      return buildSelector
-    }
-  }
+  banner "Building ${bcSpec} in namespace ${openshift.project()}"
+  def bc = openshift.selector(bcSpec)
+  bc.describe()
+  def buildSelector = bc.startBuild()
+  buildSelector.describe()
+  return buildSelector
 }
 
 void watchBuild(buildSelector) {
-  openshift.withCluster() {
-    openshift.withProject('{{ openshift_namespace }}') {
-      def buildUrls = []
-      buildSelector.withEach {
-        buildUrls.push "https://pub-os-exopge.epfl.ch/console/project/${openshift.project()}/browse/builds/${it.object().metadata.annotations['openshift.io/build-config.name']}/${it.object().metadata.name}?tab=logs"
-      }
-      if (buildUrls.size() > 0) {
-        def hint = (
-          ["Vous pouvez suivre la compilation plus confortablement depuis OpenShift :"]
-          + buildUrls
-        ).join("\n")
-        banner hint
-      }
+  def buildUrls = []
+  buildSelector.withEach {
+    buildUrls.push "https://pub-os-exopge.epfl.ch/console/project/${openshift.project()}/browse/builds/${it.object().metadata.annotations['openshift.io/build-config.name']}/${it.object().metadata.name}?tab=logs"
+  }
+  if (buildUrls.size() > 0) {
+    def hint = (
+      ["Vous pouvez suivre la compilation plus confortablement depuis OpenShift :"]
+      + buildUrls
+    ).join("\n")
+    banner hint
+  }
 
-      buildSelector.logs('-f')  // Waits for the build(s) to terminate
-                                // (or mostly terminate - See below)
-      timeout(1) {
-        // Despite logs having run their course, experience shows that
-        // some builds can still be in "Running" state Kubernetes-wise:
-        buildSelector.withEach {
-          it.untilEach {
-            return it.object().status.phase != "Running"
-          }
-        }
+  buildSelector.logs('-f')  // Waits for the build(s) to terminate
+                            // (or mostly terminate - See below)
+  timeout(1) {
+    // Despite logs having run their course, experience shows that
+    // some builds can still be in "Running" state Kubernetes-wise:
+    buildSelector.withEach {
+      it.untilEach {
+        return it.object().status.phase != "Running"
       }
+    }
+  }
 
-      def failed = 0
-      buildSelector.withEach {
-        def status = it.object().status.phase
-        if (status != 'Complete') {
-          echo "Bad status for ${it.name()}: expected <Complete>, got <${status}>"
-          failed++
-        }
-      }
-      if (failed > 0) {
-        banner "${failed} failed builds"
-        sh "exit 1"  // https://stackoverflow.com/a/51642273/435004
-      }
-    }  // openshift.withProject()
-  }  // openshift.withCluster()
+  def failed = 0
+  buildSelector.withEach {
+    def status = it.object().status.phase
+    if (status != 'Complete') {
+      echo "Bad status for ${it.name()}: expected <Complete>, got <${status}>"
+      failed++
+    }
+  }
+  if (failed > 0) {
+    banner "${failed} failed builds"
+    sh "exit 1"  // https://stackoverflow.com/a/51642273/435004
+  }
 }
-
 
 void banner (msg) {
   def length = msg.length() + 2
@@ -172,3 +175,38 @@ void banner (msg) {
   msg = [equals, msg, equals].join("\n")
   echo msg
 }
+
+void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
+  Set imageIDs = []
+  buildSelector.withEach {
+    def status = it.object().status
+    if (status && status.output && status.output.to
+        && status.output.to.imageDigest) {
+      imageIDs.add(status.output.to.imageDigest)
+    }
+  }
+
+  def triggeredBuilds = []
+
+  timeout(2) {
+    for (build in openshift.selector("build").objects()) {
+      if (build.spec && build.spec.triggeredBy) {
+        for (triggered in build.spec.triggeredBy) {
+          if (triggered.imageChangeBuild &&
+              triggered.imageChangeBuild.imageID &&
+              imageIDs.contains(
+              triggered.imageChangeBuild.imageID.replaceFirst('.*@', '')))
+          {
+            triggeredBuilds.add("build/${build.metadata.name}")
+          }
+        }  // for
+      }  // if
+    }  // for
+
+    def size = triggeredBuilds.size()
+    echo "Found ${size} build(s) triggered by ${buildSelector}: ${triggeredBuilds}"
+    return size == expectedSize  // timeout() exit condition
+  }  // timeout
+
+  return openshift.selector(triggeredBuilds)
+}  // void awaitTriggeredBuildsStarted()
