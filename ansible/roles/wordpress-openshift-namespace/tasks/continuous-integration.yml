@@ -4,17 +4,19 @@
 
 # See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
 # for help
-- name: "Jenkins master ImageStream and BuildConfig"
+- name: "Jenkins infrastructure ImageStreams and builds"
   openshift_imagestream:
-    name: "{{ ci_jenkins_master_image_name }}"
+    name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
-    git:
-      repository: 'https://github.com/epfl-idevelop/wp-ops'
-      ref: wwp-continuous-integration
-      path: docker/jenkins
+    git: "{{ item.git }}"
     metadata:
       labels:
         app: jenkins
+  with_items:
+    - name: "{{ ci_jenkins_master_image_name }}"
+      git: "{{ ci_jenkins_master_git_build }}"
+    - name: "{{ ci_jenkins_test_sidekick_image_name }}"
+      git: "{{ ci_jenkins_test_sidekick_git_build }}"
 
 # This ImageStream is intended as a so-called "Kubernetes plug-in pod
 # template", that the Jenkinsfile can reference (or inheritFrom, in
