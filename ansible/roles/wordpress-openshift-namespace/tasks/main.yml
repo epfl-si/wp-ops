@@ -3,10 +3,13 @@
 
 - name: "Disk usage report microservice"
   include: disk-usage-report.yml
+  tags: diskusage
 
 - name: "Images and builds"
   include: images.yml
+  tags: images
 
 - name: "Continuous integration"
   when: openshift_namespace == "wwp-test"
   include: continuous-integration.yml
+  tags: jenkins
