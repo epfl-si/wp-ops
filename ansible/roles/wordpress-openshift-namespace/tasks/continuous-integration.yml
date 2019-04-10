@@ -2,8 +2,8 @@
 
 - include_vars: continuous-integration-vars.yml
 
-# See https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
-# for help
+# Inspired from
+# https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
 - name: "Jenkins infrastructure ImageStreams and builds"
   openshift_imagestream:
     name: "{{ item.name }}"
@@ -26,7 +26,7 @@
 # page, don't work (at least for us at EPFL) because they reference a
 # Docker image on a nonexistent, non-standard in-cluster Docker
 # registry.
-- name: "Jenkins slave (pulled from {{ ci_jenkins_slave_docker_image }})"
+- name: "is/{{ ci_jenkins_slave_image_name }} (pulled from {{ ci_jenkins_slave_docker_image }})"
   openshift_imagestream:
     name: "{{ ci_jenkins_slave_image_name }}"
     namespace: "{{ openshift_namespace }}"
