@@ -75,10 +75,10 @@ spec:
         // openshift.withCluster and friends) can only happen in a
         // "script".
         script {
-          buildImage('bc/wp-base')
+          watchBuild(buildImage('bc/wp-base'))
         }  // script
         script {
-          buildImage(['bc/httpd', 'bc/mgmt', 'bc/varnish'])
+          watchBuild(buildImage(['bc/httpd', 'bc/mgmt', 'bc/varnish']))
         }  // script
       }  // steps
     }  // stage('Compilation')
@@ -103,17 +103,22 @@ spec:
   }  // post
 }  // pipeline
 
-
-void buildImage (selector) {
+def buildImage (bcSpec) {
   openshift.withCluster() {
     openshift.withProject('{{ openshift_namespace }}') {
-      banner "Building ${selector} in namespace ${openshift.project()}"
-      def bc = openshift.selector(selector)
+      banner "Building ${bcSpec} in namespace ${openshift.project()}"
+      def bc = openshift.selector(bcSpec)
       bc.describe()
-
       def buildSelector = bc.startBuild()
       buildSelector.describe()
+      return buildSelector
+    }
+  }
+}
 
+void watchBuild(buildSelector) {
+  openshift.withCluster() {
+    openshift.withProject('{{ openshift_namespace }}') {
       def buildUrls = []
       buildSelector.withEach {
         buildUrls.push "https://pub-os-exopge.epfl.ch/console/project/${openshift.project()}/browse/builds/${it.object().metadata.annotations['openshift.io/build-config.name']}/${it.object().metadata.name}?tab=logs"
