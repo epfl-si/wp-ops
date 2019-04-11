@@ -56,7 +56,8 @@ metadata:
 spec:
   containers:
   - name: {{ ci_jenkins_test_sidekick_image_name }}
-    image: docker-registry.default.svc:5000/{{ openshift_namespace }}/{{ ci_jenkins_test_sidekick_image_name }}:latest
+    image: {{ ci_jenkins_test_sidekick_image_name |
+              docker_registry_path_qualified(namespace=openshift_namespace) }}
     command:
     - sleep
     - infinity
