@@ -19,3 +19,6 @@ ci_jenkins_test_sidekick_git_build:
 
 ci_jenkins_slave_image_name: "jenkins-agent"
 ci_jenkins_slave_docker_image: quay.io/openshift/origin-jenkins-agent-base
+
+ci_jenkins_openshift_console_base_url: https://pub-os-exopge.epfl.ch/console
+ci_jenkins_test_target: https://migration-wp.epfl.ch/www.epfl.ch/
