@@ -113,13 +113,9 @@ spec:
 
   // Here we set up some post-pipeline hooks to present the results.
   post {
-    success {
-      echo "Succès de l'intégration continue"
+    always {
       cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
-    }  // success
-    failure {
-      echo "Échec de l'intégration continue"
-    }  // failure
+    }  // always
   }  // post
 }  // pipeline
 
