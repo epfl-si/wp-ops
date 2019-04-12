@@ -82,7 +82,7 @@ spec:
         // "script".
         script {
           openshift.withCluster() {
-            openshift.withProject('{{ openshift_namespace }}') {
+            openshift.withProject() {
               parallel (
                 build_varnish: {
                   watchBuild(buildImage('bc/varnish'))
