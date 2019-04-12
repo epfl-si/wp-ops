@@ -99,6 +99,20 @@ spec:
       }  // steps
     }  // stage('Compilation')
 
+    stage('Déploiement') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              def rollout = openshift.selector('dc', 'httpd-dev').rollout()
+              rollout.latest()
+              rollout.status()
+            }  // openshift.withProject
+          }  // openshift.withCluster
+        }  // script
+      }  // steps
+    }
+
     stage('Tests') {
       steps {
         container('{{ ci_jenkins_test_sidekick_image_name }}') {
