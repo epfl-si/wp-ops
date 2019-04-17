@@ -26,6 +26,8 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     php${PHP_VERSION}-mysql \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
+    python3-yaml \
+    python3-requests \
     unzip \
     vim \
   && \
@@ -47,8 +49,11 @@ RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/
 # and patch it to support our symlink-based serving layout
 RUN mkdir /wp
 RUN wp --allow-root --path=/wp core download
-ADD plugins.csv install-plugins.sh wordpress-anywhere.patch /tmp/
+
+ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
-RUN sh /tmp/install-plugins.sh < /tmp/plugins.csv
-RUN rm /tmp/install-plugins.sh /tmp/plugins.csv \
-           /tmp/wordpress-anywhere.patch
+
+ADD install-plugins.py /tmp/
+RUN python3 /tmp/install-plugins.py
+
+RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
