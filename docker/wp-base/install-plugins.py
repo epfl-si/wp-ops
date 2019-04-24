@@ -191,11 +191,10 @@ class GitHubPlugin(Plugin):
         return GitHubCheckout.is_valid(url)
 
     def __init__(self, name, url):
-        super(GitHubPlugin, self).__init__(name, url)
         self._git = GitHubCheckout(url)
 
     def install(self, target_dir):
-        self._copytree_install(self._git.checkout().source_dir, target_dir)
+        self._copytree_install(self._git.clone().source_dir, target_dir)
 
 
 class WordpressOfficialPlugin(Plugin):
