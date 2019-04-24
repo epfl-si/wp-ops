@@ -15,7 +15,7 @@
 
 cd "$(dirname "$(realpath "$0")")"
 
-inventories="-i hosts-dev"
+inventories="-i inventory/test"
 # One can override these overrides on the command line
 default_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
 
@@ -49,7 +49,7 @@ NO_EYAML
 while [ -n "$1" ]; do
     case "$1" in
         --prod)
-            inventories="$inventories -i hosts-prod"
+            inventories="$inventories -i inventory/prod"
             shift ;;
         *)
             break ;;

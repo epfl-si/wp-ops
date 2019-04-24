@@ -21,7 +21,7 @@ eyaml_keys:
 #
 #   eyaml edit -d \
 #     --pkcs7-public-key ansible/eyaml/epfl_wp_test_pubkey.pem \
-#     ansible/hosts-dev/group_vars/openshift-namespaces-dev
+#     ansible/inventory/test/group_vars/openshift-namespaces-dev
 #
 # 💡 This *will not* decrypt anything for you because chances are, you
 # don't need to decrypt secrets (YA RLY). For those cases where you
