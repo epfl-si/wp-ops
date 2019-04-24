@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+"""Install WordPress plugins and themes from various locations."""
+
 import atexit
 from collections import namedtuple
 import inspect
