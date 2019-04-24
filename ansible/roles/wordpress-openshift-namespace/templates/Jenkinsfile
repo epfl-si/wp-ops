@@ -116,7 +116,7 @@ spec:
     stage('Tests') {
       steps {
         container('{{ ci_jenkins_test_sidekick_image_name }}') {
-          sh "/opt/app/bin/docker-entrypoint --test-target {{ ci_jenkins_test_target }}"
+          sh "/opt/app/bin/docker-entrypoint --test-target {{ ci_jenkins_test_target }} --screenshot-always"
         }
       }
     }  // stage('Tests')
