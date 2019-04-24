@@ -3,6 +3,7 @@ FROM epflidevelop/os-wp-base
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apache2 \
     libapache2-mod-php${PHP_VERSION} \
+    php${PHP_VERSION}-apcu \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \

@@ -18,7 +18,6 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     less \
     nodejs \
     php${PHP_VERSION} \
-    php${PHP_VERSION}-apcu \
     php${PHP_VERSION}-cli \
     php${PHP_VERSION}-curl \
     php${PHP_VERSION}-gd \
