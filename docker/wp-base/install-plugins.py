@@ -354,4 +354,6 @@ if __name__ == '__main__':
         for plugin in Jahia2wp.singleton().plugins():
             plugin.install(WP_IMAGE_INSTALL_DIR)
     else:
-        print("TODO: this doesn't quite work yet.")
+        name = sys.argv[0]
+        url = sys.argv[1]
+        Plugin(name, url).install('.')
