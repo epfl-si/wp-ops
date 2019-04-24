@@ -10,7 +10,11 @@ RUN apt-get -qy update && \
     apt-get clean
 
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
+
+# “The main PPA for supported PHP versions[...]”, see
+# https://launchpad.net/~ondrej/+archive/ubuntu/php
 RUN add-apt-repository ppa:ondrej/php
+
 RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     composer \
     git \
