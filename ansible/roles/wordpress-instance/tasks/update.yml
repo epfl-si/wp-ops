@@ -40,5 +40,5 @@
 - name: Install EPFL 2018 theme
   unarchive:
     src: "{{ epfl_theme2018_zip_file }}"
-    dest: "{{ wp_themes_dir }}/wp-theme-2018"
+    dest: "{{ wp_themes_dir }}"
   when: wp_can.write_code and _epfl_theme_zip is changed and play_update_theme is match("yes")
