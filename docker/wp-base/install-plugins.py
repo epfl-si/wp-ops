@@ -11,6 +11,7 @@ import requests
 import shutil
 from six import string_types
 import subprocess
+import sys
 import tempfile
 import yaml
 from zipfile import ZipFile
@@ -346,5 +347,10 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
 
 
 if __name__ == '__main__':
-    for plugin in Jahia2wp.singleton().plugins():
-        plugin.install()
+    if sys.argv[0].endswith('.py'):
+        sys.argv.pop(0)
+    if sys.argv[0] == 'auto':
+        for plugin in Jahia2wp.singleton().plugins():
+            plugin.install()
+    else:
+        print("TODO: this doesn't quite work yet.")

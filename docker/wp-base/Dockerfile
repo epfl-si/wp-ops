@@ -57,6 +57,6 @@ ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
 ADD install-plugins.py /tmp/
-RUN python3 /tmp/install-plugins.py
+RUN python3 /tmp/install-plugins.py auto
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
