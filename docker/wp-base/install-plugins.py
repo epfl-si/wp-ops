@@ -329,6 +329,12 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
             return Jahia2wpLegacyYAMLLoader.load(inputfile)
 
     def __yaml_from_csv(self, *unused_args, **unused_kwargs):
+        # TODO: Right now we only care about plugin metadata insofar
+        # as it helps us make a decision related to installing it into
+        # the image or not. The bits formerly included from CSV
+        # currently have no bearing on that; furthermore we will
+        # probably want to refactor these parts of the YAML setup to
+        # be more Ansible-like.
         return "UNUSED"
 
     @classmethod
