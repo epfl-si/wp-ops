@@ -104,7 +104,7 @@ spec:
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              def rollout = openshift.selector('dc', 'httpd-dev').rollout()
+              def rollout = openshift.selector('dc', 'httpd-int').rollout()
               rollout.latest()
               rollout.status()
             }  // openshift.withProject
