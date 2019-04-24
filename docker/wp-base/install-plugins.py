@@ -158,10 +158,8 @@ class Plugin(namedtuple('Plugin', ['name', 'url'])):
         raise Exception(
             "Don't know how to handle plug-in URL: {}".format(url))
 
-    INSTALL_DIR = '/wp/wp-content/plugins'
-
-    def _copytree_install(self, from_path):
-        to_path = os.path.join(self.INSTALL_DIR, os.path.basename(from_path))
+    def _copytree_install(self, from_path, to_path):
+        to_path = os.path.join(to_path, os.path.basename(from_path))
         progress('Copying {} to {}'.format(from_path, to_path))
         shutil.copytree(from_path, to_path)
 
@@ -177,13 +175,13 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def install(self):
+    def install(self, target_dir):
         if self.url.startswith("http"):
             zip = ZipFile(BytesIO(requests.get(self.url).content))
         else:
             zip = ZipFile(Jahia2wp.data_plugins_path_relative(self.url))
         progress("Unzipping {}".format(self.url))
-        zip.extractall(path=self.INSTALL_DIR)
+        zip.extractall(path=target_dir)
 
 
 class GitHubPlugin(Plugin):
@@ -196,8 +194,8 @@ class GitHubPlugin(Plugin):
         super(GitHubPlugin, self).__init__(name, url)
         self._git = GitHubCheckout(url)
 
-    def install(self):
-        self._copytree_install(self._git.checkout().source_dir)
+    def install(self, target_dir):
+        self._copytree_install(self._git.checkout().source_dir, target_dir)
 
 
 class WordpressOfficialPlugin(Plugin):
@@ -216,8 +214,8 @@ class WordpressOfficialPlugin(Plugin):
             raise Exception("WordPress plugin not found: {}".format(self.name))
         return json.loads(api_json)
 
-    def install(self):
-        ZipPlugin(self.name, self.api_struct['download_link']).install()
+    def install(self, target_dir):
+        ZipPlugin(self.name, self.api_struct['download_link']).install(target_dir)
 
 
 class Jahia2wpSubdirectoryPlugin(Plugin):
@@ -235,8 +233,8 @@ class Jahia2wpSubdirectoryPlugin(Plugin):
         return Jahia2wp.wp_content_plugins_path_relative(
             self._parse(self.url).group(1))
 
-    def install(self):
-        self._copytree_install(self.plugin_dir)
+    def install(self, target_dir):
+        self._copytree_install(self.plugin_dir, target_dir)
 
 
 class Jahia2wp:
@@ -346,11 +344,14 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
         return cls(filename_or_stream).get_single_data()
 
 
+WP_IMAGE_INSTALL_DIR = '/wp/wp-content/plugins'
+
+
 if __name__ == '__main__':
     if sys.argv[0].endswith('.py'):
         sys.argv.pop(0)
     if sys.argv[0] == 'auto':
         for plugin in Jahia2wp.singleton().plugins():
-            plugin.install()
+            plugin.install(WP_IMAGE_INSTALL_DIR)
     else:
         print("TODO: this doesn't quite work yet.")
