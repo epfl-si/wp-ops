@@ -116,7 +116,7 @@ spec:
     stage('Tests') {
       steps {
         container('{{ ci_jenkins_test_sidekick_image_name }}') {
-          sh "/opt/app/bin/docker-entrypoint --test-target {{ ci_jenkins_test_target }} --screenshot-always"
+          sh "/opt/app/bin/docker-entrypoint --test-target {{ ci_jenkins_test_target }} --screenshot-always || true"
         }
       }
     }  // stage('Tests')
@@ -126,7 +126,12 @@ spec:
   // Here we set up some post-pipeline hooks to present the results.
   post {
     always {
-      cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
+      cucumber fileIncludePattern: '**/cucumber-report.json',
+               sortingMethod: 'ALPHABETICAL',
+               pendingStepsNumber: -1, skippedStepsNumber: -1,
+               // We don't account scenarios and features - Only
+               // individual steps can cause a test failure:
+               failedFeaturesNumber: -1, failedScenariosNumber: -1
     }  // always
   }  // post
 }  // pipeline
