@@ -1,0 +1,13 @@
+--- volumes/wp/wp-load.php.ORIG	2019-03-14 08:30:45.000000000 +0100
++++ volumes/wp/wp-load.php	2019-03-14 08:52:13.000000000 +0100
+@@ -41,6 +41,10 @@
+ 	/** The config file resides one level above ABSPATH but is not part of another installation */
+ 	require_once( dirname( ABSPATH ) . '/wp-config.php' );
+ 
++} elseif ( @file_exists($wp_config = dirname($_SERVER["SCRIPT_FILENAME"]) . "/wp-config.php")) {
++    require_once($wp_config);
++} elseif ( @file_exists($wp_config = dirname(dirname($_SERVER["SCRIPT_FILENAME"])) . "/wp-config.php")) {
++    require_once($wp_config);
+ } else {
+ 
+ 	// A config file doesn't exist
