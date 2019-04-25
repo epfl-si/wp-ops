@@ -83,16 +83,9 @@ spec:
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              parallel (
-                build_varnish: {
-                  watchBuild(buildImage('bc/varnish'))
-                },
-                build_others: {
-                  def wpBaseBuild = buildImage('bc/wp-base')
-                  watchBuild(wpBaseBuild)
-                  watchBuild(awaitTriggeredBuildsStarted(wpBaseBuild, 2))
-                }
-              )  // parallel
+              def wpBaseBuild = buildImage('bc/wp-base')
+              watchBuild(wpBaseBuild)
+              watchBuild(awaitTriggeredBuildsStarted(wpBaseBuild, 2))
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
