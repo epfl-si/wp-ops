@@ -12,7 +12,7 @@ wp_ops_git_branch: wwp-mgmt-in-openshift
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
-  pub: "{{ playbook_dir }}/../keys/eyaml-epfl_wp_test.pem"
+  pub: "{{ playbook_dir }}/../eyaml/epfl_wp_test.pem"
 
 # To edit the encrypted secrets below, you need eyaml installed.
 # Familiarize yourself with
@@ -20,7 +20,7 @@ eyaml_keys:
 # The edit command goes like this,
 #
 #   eyaml edit -d \
-#     --pkcs7-public-key ansible/eyaml/epfl_wp_test_pubkey.pem \
+#     --pkcs7-public-key ansible/eyaml/epfl_wp_test.pem \
 #     ansible/inventory/test/group_vars/openshift-namespaces-dev
 #
 # 💡 This *will not* decrypt anything for you because chances are, you
