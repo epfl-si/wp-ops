@@ -6,3 +6,38 @@ ansible_host: prod-ssh-wwp.epfl.ch
 ansible_port: 32222
 ansible_connection: local  # Unless stipulated otherwise in a task
 openshift_namespace: wwp
+
+DeploymentConfigs:
+  httpd:
+    # TODO: Obtain from the truth source
+    - name: httpd-cron
+    - name: httpd-form
+    - name: httpd-inside
+    - name: httpd-labs
+    - name: httpd-manager
+    - name: httpd-subdomains
+    - name: httpd-sandbox
+      autopush: true
+    - name: httpd-www
+    - name: httpd-unm-blockchain-school2019
+    - name: httpd-unm-cmis2020
+    - name: httpd-unm-drosophoto
+    - name: httpd-unm-eee
+    - name: httpd-unm-futureup
+    - name: httpd-unm-hobelblog
+    - name: httpd-unm-icresearchday
+    - name: httpd-unm-icrp
+    - name: httpd-unm-igluna
+    - name: httpd-unm-journeeindustrie
+    - name: httpd-unm-lasur15
+    - name: httpd-unm-ldmblogs
+    - name: httpd-unm-library
+    - name: httpd-unm-ml
+    - name: httpd-unm-network-science
+    - name: httpd-unm-nmc2019
+    - name: httpd-unm-nrg2019
+    - name: httpd-unm-nss2019
+    - name: httpd-unm-phdsummit
+    - name: httpd-unm-rapportannuel
+    - name: httpd-unm-synuclein
+    - name: httpd-unm-wordpress

@@ -9,6 +9,17 @@
   include: images.yml
   tags: images
 
+- name: "DeploymentConfigs (previously known as pods)"
+  include_tasks:
+    file: deploymentconfig-httpd.yml
+    apply:
+      tags: ["dc"] # Tags don't seem to work the same way within /
+                   # without a loop, #smellslikeabug
+  loop: "{{ DeploymentConfigs.httpd }}"
+  loop_control:
+    loop_var: dc
+  tags: dc
+
 - name: "Continuous integration"
   when: openshift_namespace == "wwp-test"
   include_tasks:

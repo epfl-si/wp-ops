@@ -1,0 +1,27 @@
+# Set up (a cautious subset of) one DeploymentConfig/httpd-* object,
+# described by the {{ dc }} variable.
+
+- include_vars: image-vars.yml              # For httpd_image_name
+
+- name: "dc/{{ dc.name }}"
+  openshift:
+   state: latest
+   content: |
+     apiVersion: apps.openshift.io/v1
+     kind: DeploymentConfig
+     metadata:
+       name: "{{ dc.name }}"
+       namespace: "{{ openshift_namespace }}"
+       labels:
+         serving_role: httpd
+     spec:
+       triggers:
+       - type: ImageChange
+         imageChangeParams:
+           {{ 'automatic: true' if (dc.autopush | default(None)) else '' }}
+           containerNames:
+           - "{{ dc.name }}"
+           from:
+             kind: ImageStreamTag
+             name: {{ httpd_image_name }}:{{ openshift_registry_tag }}
+             namespace: "{{ openshift_namespace }}"
