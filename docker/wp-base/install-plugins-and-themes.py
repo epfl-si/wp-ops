@@ -1,6 +1,26 @@
 #!/usr/bin/python3
 
-"""Install WordPress plugins and themes from various locations."""
+"""Install WordPress plugins and themes from various locations.
+
+Usage:
+
+  install-plugins-and-themes.py auto
+
+    Install all plugins (and in the future, also mu-plugins and themes)
+    into /wp. The list and addresses of plugins to install is determined
+    from the current state of the source code (currently, by
+    interpreting data/plugins/generic/config-lot1.yml out of branch
+    `release2018` in https://github.com/epfl-idevelop/jahia2wp)
+
+  install-plugins-and-themes.py <name> <URL>
+
+    Install one plugin or theme into the current directory. <name> is
+    the name of the subdirectory to create. <URL> can point to a ZIP
+    file, a GitHub URL (possibly pointing to a particular branch and
+    subdirectory), or it can be the string "web" to mean that the
+    plug-in named <name> shall be downloaded from the WordPress plugin
+    repository.
+"""
 
 import atexit
 from collections import namedtuple
