@@ -56,7 +56,7 @@ RUN mkdir /wp
 RUN wp --allow-root --path=/wp core download \
   --version=$(curl https://api.wordpress.org/core/version-check/1.7/   \
             | jq -r '.offers[].current                                 \
-                      | select(match("${WORDPRESS_VERSION_LINEAGE}"))' \
+                      | select(match("'${WORDPRESS_VERSION_LINEAGE}'"))' \
             |sort -n -r |head -1)
 
 ADD wordpress-anywhere.patch /tmp/
