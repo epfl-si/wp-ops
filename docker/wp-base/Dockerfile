@@ -26,6 +26,7 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     php${PHP_VERSION}-curl \
     php${PHP_VERSION}-gd \
     php${PHP_VERSION}-ldap \
+    php${PHP_VERSION}-mbstring \
     php${PHP_VERSION}-mysql \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
