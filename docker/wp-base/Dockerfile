@@ -1,7 +1,8 @@
 FROM ubuntu:bionic
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PHP_VERSION=7.3
+ARG PHP_VERSION=7.3
+ARG WORDPRESS_VERSION_LINEAGE=4.9
 
 RUN apt-get -qy update && \
     apt-get -qy install curl ca-certificates \
@@ -52,7 +53,11 @@ RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/
 # Install a copy of WordPress into /wp, populate it with our plugins,
 # and patch it to support our symlink-based serving layout
 RUN mkdir /wp
-RUN wp --allow-root --path=/wp core download
+RUN wp --allow-root --path=/wp core download \
+  --version=$(curl https://api.wordpress.org/core/version-check/1.7/   \
+            | jq -r '.offers[].current                                 \
+                      | select(match("${WORDPRESS_VERSION_LINEAGE}"))' \
+            |sort -n -r |head -1)
 
 ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
