@@ -1,8 +1,10 @@
 FROM ubuntu:bionic
 
-ENV DEBIAN_FRONTEND=noninteractive
-ARG PHP_VERSION=7.3
+# Version pins are defined here:
+ENV PHP_VERSION=7.3
 ARG WORDPRESS_VERSION_LINEAGE=4.9
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
     apt-get -qy install curl ca-certificates \
