@@ -15,8 +15,6 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     virtualenv \
     screen \
     software-properties-common \
-    unzip \
-    vim \
   && \
     apt-get -qy autoremove && \
     apt-get clean
