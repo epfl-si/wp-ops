@@ -7,7 +7,6 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
-    vim \
   && \
     apt-get -qy autoremove && \
     apt-get clean
