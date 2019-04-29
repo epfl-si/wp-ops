@@ -2,15 +2,35 @@
 ---
 sudo: required
 
+env:
+  global:
+    - GITHUB_API_USER=domq
+    # This is the GitHub API token; it may be decrypted only using a
+    # Travis-owned private key. To regenerate it:
+    #
+    # 1. Create a token as per
+    #    https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
+    #    You don't need or want to grant any additional permissions
+    #    (checkboxes in the Web UI) to this token
+    # 2. `cd` to the wp-ops Git work tree, type `travis login` and
+    #    authenticate using your GitHub credentials
+    # 3. Type
+    #
+    #       travis encrypt GITHUB_API_TOKEN=aaaaabbbbbbcccccc
+    #
+    #    replacing `aaaaabbbbbbcccccc` with the token you obtained at step 1
+    - secure: "PZd/0E0sbNpyb1LCfreRpq1z/ojG+8IiW5RL7A4pn1Bk6/ZRFFXCs6tk047CyADFCtlwWSOAKI/BOB/eHmBuyIgBV7ImWNJl6pR6NjRwjbuV94r3OTRslIXzU/sCP8CAbtSiUDwMIqKah7sdEFHDfHNsGqJd/jlFrPNhD7rjwNSY4NQUMxZXAbX6GMghzNVDK2bqw4xpqiyQ2P3Ch0BR77O2pyQBUYSbd1doQz3GEAO7ap5lls3lrMWB8bdDBMJjnoYsWkYMEPNyLCpk60rNLFkCr/4W6uv76EugYAjfiMTsPmjgSV9dANeg2A9647haMK412+vY6HsQw6UntfIYSEF3Vb3olaofIXOUiFgI/Fdjw1KQ1Objb/Sh63PuDwJ5Ipirlm5ryIt/fuuJ6oKBBethhs7LNJcxiOHz3qEgbrfegtgc7MGFQ5QZ2u61BFHPSglgBBTTrBpl7HyifkVbZ3c2faycfzgz7FzIBDQ+3tCRx8BhGzMbETxCbv8c7z3nfR3M6k7ymnS2HVllKGNQOTiF7W8iK3eZ81Lyx4ZPOl+MqDiC50dy5aT1x+xLnyVek7j49LuOenucRuOEWeKhNM8qmJ34qC2GsuVRMB5TWPUFXNA3jckZwj7ZrypBZjoQorw1n9rtcJ23+qeqJmJp50QcoqvHMB/9chdAmAj9caA="
+
 services:
 - docker
-
-before_install:
-- docker pull ubuntu:bionic
 
 script:
 # Build wp-base first (because other images depend on it)
 - |
   set -e -x
-  docker build -t epflidevelop/os-wp-base docker/wp-base
+  docker pull ubuntu:bionic
+  docker build \
+     --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"   \
+     --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}" \
+     -t epflidevelop/os-wp-base docker/wp-base
   find docker -mindepth 1 -maxdepth 1 -type d | xargs -t docker build
