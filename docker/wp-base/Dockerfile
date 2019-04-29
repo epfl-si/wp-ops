@@ -57,7 +57,7 @@ RUN wp --allow-root --path=/wp core download
 ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
-ADD install-plugins.py /tmp/
-RUN python3 /tmp/install-plugins.py auto
+ADD install-plugins-and-themes.py /tmp/
+RUN python3 /tmp/install-plugins-and-themes.py auto
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
