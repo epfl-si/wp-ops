@@ -1,8 +1,10 @@
 FROM ubuntu:bionic
 
-ENV DEBIAN_FRONTEND=noninteractive
-ARG PHP_VERSION=7.3
+# Version pins are defined here:
+ENV PHP_VERSION=7.3
 ARG WORDPRESS_VERSION_LINEAGE=4.9
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
     apt-get -qy install curl ca-certificates \
@@ -41,7 +43,12 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
 
 # Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
 # won't install):
-RUN curl -o /usr/local/bin/wp -L `curl https://api.github.com/repos/wp-cli/wp-cli/releases | jq -r '[.[] | select (.tag_name | startswith("v1.5"))][0] | .assets[0].browser_download_url'`
+RUN curl -o /usr/local/bin/wp -L $(                                  \
+   curl https://api.github.com/repos/wp-cli/wp-cli/releases          \
+   | jq -r 'if type == "object" then error                           \
+            else [.[] | select (.tag_name | startswith("v1.5"))][0]  \
+                      | .assets[0].browser_download_url              \
+            end')
 RUN chmod 755 /usr/local/bin/wp
 
 # Add Polylang-related extension packages to wp-cli
@@ -54,8 +61,8 @@ RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/
 # and patch it to support our symlink-based serving layout
 RUN mkdir /wp
 RUN wp --allow-root --path=/wp core download \
-  --version=$(curl https://api.wordpress.org/core/version-check/1.7/   \
-            | jq -r '.offers[].current                                 \
+  --version=$(curl https://api.wordpress.org/core/version-check/1.7/     \
+            | jq -r '.offers[].current                                   \
                       | select(match("'${WORDPRESS_VERSION_LINEAGE}'"))' \
             |sort -n -r |head -1)
 
