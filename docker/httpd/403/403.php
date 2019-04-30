@@ -34,7 +34,7 @@
   $is_inside_epfl_string = $is_inside_epfl ? "inside EPFL" : "outside EPFL";
 
   // the error types supported by this page
-  $error_types = ["default", "accred"];
+  $error_types = ["default", "accred", "inside"];
 
   // the current error type
   $error_type = "default";
