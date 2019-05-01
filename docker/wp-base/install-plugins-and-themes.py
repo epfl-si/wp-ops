@@ -270,6 +270,11 @@ class Themes:
                    'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
         )
 
+def MuPlugins():
+    return Plugin(
+    'mu-plugins',
+    'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
+
 
 class Jahia2wpSubdirectoryPlugin(Plugin):
     """A plug-in whose source code lives in the jahia2wp source tree."""
@@ -397,14 +402,16 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
         return cls(filename_or_stream).get_single_data()
 
 
-WP_PLUGINS_INSTALL_DIR = '/wp/wp-content/plugins'
-WP_THEMES_INSTALL_DIR = '/wp/wp-content/themes'
+WP_INSTALL_DIR = '/wp/wp-content'
+WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
+WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')
 
 
 if __name__ == '__main__':
     if sys.argv[0].endswith('.py'):
         sys.argv.pop(0)
     if sys.argv[0] == 'auto':
+        MuPlugins().install(WP_INSTALL_DIR)
         for plugin in Jahia2wp.singleton().plugins():
             plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
