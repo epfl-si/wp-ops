@@ -1,12 +1,14 @@
 #!/bin/sh
 #
-# This is a wrapper to ansible-playbook to do or redo all the things.
+# This is a wrapper around ansible / ansible-playbook.
 #
-# Usage:
+# Usage ("ansible" mode):
 #
-# ./ansible/deploy
+#   ansible/wpsible -m raw www-wordpresses -a 'echo {{ wp_dir }}'
 #
-# ./ansible/deploy -l charte-wp-dcsl
+# Usage ("ansible-playbook" mode):
+#
+#   ansible/wpsible -l charte-wp-dcsl
 #
 #
 # If you are unfamiliar with Ansible, read up on it at
@@ -16,8 +18,9 @@
 cd "$(dirname "$(realpath "$0")")"
 
 inventories="-i inventory/test"
-# One can override these overrides on the command line
-default_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
+# One can override these on the command line
+playbook_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
+ansible_flags="-e @roles/wordpress-instance/vars/main.yml"
 
 warn () {
     if [ -n "$1" ]; then
@@ -46,16 +49,27 @@ NO_EYAML
 
 ###########################################################################
 
+mode=ansible-playbook
+
 while [ -n "$1" ]; do
     case "$1" in
         --prod)
             inventories="$inventories -i inventory/prod"
             shift ;;
+        -m) mode=ansible; break ;;
         *)
             break ;;
     esac
 done
 
 set -e
-ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
-ansible-playbook $default_flags $inventories "$@" playbooks/wordpress-main.yml
+
+case "$mode" in
+    ansible-playbook)
+        ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
+        ansible-playbook $playbook_flags $inventories "$@" playbooks/wordpress-main.yml
+        ;;
+    ansible)
+        ansible $inventories $ansible_flags $common_flags "$@"
+        ;;
+esac
