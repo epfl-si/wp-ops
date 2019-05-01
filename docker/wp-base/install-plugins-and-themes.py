@@ -158,7 +158,7 @@ class GitHubCheckout:
 
 
 class Plugin(namedtuple('Plugin', ['name', 'url'])):
-    """A WordPress plug-in."""
+    """A WordPress plug-in or theme."""
     def __new__(cls, name, url):
         if cls is Plugin:
             cls = cls._find_handler(url)
@@ -253,6 +253,22 @@ class WordpressOfficialPlugin(Plugin):
 
     def install(self, target_dir):
         ZipPlugin(self.name, self.api_struct['download_link']).install(target_dir)
+
+
+class Themes:
+    """The set of themes offered as part of the EPFL WordPress project."""
+    @classmethod
+    def all(cls):
+        return (
+            Plugin('wp-theme-2018',
+                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018'),
+            Plugin('wp-theme-light',
+                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light'),
+            Plugin('epfl-blank',
+                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank'),
+            Plugin('epfl-master',
+                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
+        )
 
 
 class Jahia2wpSubdirectoryPlugin(Plugin):
@@ -381,7 +397,8 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
         return cls(filename_or_stream).get_single_data()
 
 
-WP_IMAGE_INSTALL_DIR = '/wp/wp-content/plugins'
+WP_PLUGINS_INSTALL_DIR = '/wp/wp-content/plugins'
+WP_THEMES_INSTALL_DIR = '/wp/wp-content/themes'
 
 
 if __name__ == '__main__':
@@ -389,7 +406,9 @@ if __name__ == '__main__':
         sys.argv.pop(0)
     if sys.argv[0] == 'auto':
         for plugin in Jahia2wp.singleton().plugins():
-            plugin.install(WP_IMAGE_INSTALL_DIR)
+            plugin.install(WP_PLUGINS_INSTALL_DIR)
+        for theme in Themes.all():
+            theme.install(WP_THEMES_INSTALL_DIR)
     else:
         name = sys.argv[0]
         url = sys.argv[1]
