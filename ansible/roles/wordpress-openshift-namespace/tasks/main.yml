@@ -1,5 +1,5 @@
 ---
-# tasks for WordPress NAS shares
+# tasks for WordPress OpenShift namespaces
 
 - name: "Disk usage report microservice"
   include: disk-usage-report.yml
