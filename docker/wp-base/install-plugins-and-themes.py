@@ -181,7 +181,7 @@ class Plugin(namedtuple('Plugin', ['name', 'url'])):
             "Don't know how to handle plug-in URL: {}".format(url))
 
     def _copytree_install(self, from_path, to_path):
-        to_path = os.path.join(to_path, os.path.basename(from_path))
+        to_path = os.path.join(to_path, self.name)
         progress('Copying {} to {}'.format(from_path, to_path))
         shutil.copytree(from_path, to_path)
 
@@ -198,12 +198,28 @@ class ZipPlugin(Plugin):
         return url.endswith(".zip")
 
     def install(self, target_dir):
+        """Unzip into a subdirectory `target_dir` named `self.name`."""
         if self.url.startswith("http"):
             zip = ZipFile(BytesIO(requests.get(self.url).content))
         else:
             zip = ZipFile(Jahia2wp.data_plugins_path_relative(self.url))
         progress("Unzipping {}".format(self.url))
-        zip.extractall(path=target_dir)
+        for member in zip.namelist():
+            zipinfo = zip.getinfo(member)
+            if zipinfo.filename[-1] == '/':
+                continue
+
+            targetpathelts = os.path.normpath(zipinfo.filename).split('/')
+            targetpathelts[0] = self.name
+
+            targetpath = os.path.join(target_dir, *targetpathelts)
+
+            upperdirs = os.path.dirname(targetpath)
+            if upperdirs and not os.path.exists(upperdirs):
+                os.makedirs(upperdirs)
+
+            with zip.open(zipinfo) as source, open(targetpath, "wb") as target:
+                shutil.copyfileobj(source, target)
 
 
 class GitHubPlugin(Plugin):
