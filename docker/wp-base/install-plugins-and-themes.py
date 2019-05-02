@@ -1,10 +1,30 @@
 #!/usr/bin/python3
 
-"""Install WordPress plugins and themes from various locations.
+"""Install WordPress plugins and themes from various locations."""
 
+import atexit
+from collections import namedtuple
+import getopt
+import inspect
+from io import BytesIO
+import json
+import os
+import re
+import requests
+import shutil
+from six import string_types
+import subprocess
+import sys
+import tempfile
+import yaml
+from zipfile import ZipFile
+
+
+def usage():
+    print("""
 Usage:
 
-  install-plugins-and-themes.py auto
+  install-plugins-and-themes.py auto [--exclude <plugin-name> ...]
 
     Install all plugins (and in the future, also mu-plugins and themes)
     into /wp. The list and addresses of plugins to install is determined
@@ -20,23 +40,13 @@ Usage:
     subdirectory), or it can be the string "web" to mean that the
     plug-in named <name> shall be downloaded from the WordPress plugin
     repository.
-"""
 
-import atexit
-from collections import namedtuple
-import inspect
-from io import BytesIO
-import json
-import os
-import re
-import requests
-import shutil
-from six import string_types
-import subprocess
-import sys
-import tempfile
-import yaml
-from zipfile import ZipFile
+Options:
+
+  --exclude <plugin-name>
+
+    Exclude that plugin when in "auto" mode
+""")
 
 
 def progress(string):
@@ -272,8 +282,8 @@ class Themes:
 
 def MuPlugins():
     return Plugin(
-    'mu-plugins',
-    'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
+        'mu-plugins',
+        'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
 
 
 class Jahia2wpSubdirectoryPlugin(Plugin):
@@ -402,18 +412,38 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
         return cls(filename_or_stream).get_single_data()
 
 
+class Flags:
+    """Command-line parser"""
+    def __init__(self, argv=sys.argv[:]):
+        if argv[0].endswith('.py'):
+            argv.pop(0)
+
+        self.auto = argv[0] == 'auto'
+        if self.auto:
+            try:
+                opts, args = getopt.getopt(argv[1:], "e:v", ["exclude="])
+            except getopt.GetoptError:
+                usage()
+                sys.exit(1)
+            self.exclude = set(a for o, a in opts if o in ("-e", "--exclude"))
+        else:
+            self.name = argv[0]
+            self.path = argv[1]
+
+
 WP_INSTALL_DIR = '/wp/wp-content'
 WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
 WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')
 
 
 if __name__ == '__main__':
-    if sys.argv[0].endswith('.py'):
-        sys.argv.pop(0)
-    if sys.argv[0] == 'auto':
+    flags = Flags()
+
+    if flags.auto:
         MuPlugins().install(WP_INSTALL_DIR)
         for plugin in Jahia2wp.singleton().plugins():
-            plugin.install(WP_PLUGINS_INSTALL_DIR)
+            if plugin.name not in flags.exclude:
+                plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
     else:

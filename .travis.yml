@@ -30,7 +30,8 @@ script:
   set -e -x
   docker pull ubuntu:bionic
   docker build \
-     --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"   \
-     --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}" \
+     --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"           \
+     --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
+     --build-arg "INSTALL_AUTO_FLAGS=--exclude=wp-media-folder" \
      -t epflidevelop/os-wp-base docker/wp-base
   find docker -mindepth 1 -maxdepth 1 -type d | xargs -t docker build

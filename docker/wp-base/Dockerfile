@@ -5,8 +5,9 @@ ENV PHP_VERSION=7.3
 ARG WORDPRESS_VERSION_LINEAGE=4.9
 
 # Travis-specific arguments — See ../../.travis.yml
-ARG GITHUB_API_USER=
-ARG GITHUB_API_TOKEN=
+ARG GITHUB_API_USER
+ARG GITHUB_API_TOKEN
+ARG INSTALL_AUTO_FLAGS
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -87,6 +88,6 @@ ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
 ADD install-plugins-and-themes.py /tmp/
-RUN python3 /tmp/install-plugins-and-themes.py auto
+RUN set -x; python3 /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
