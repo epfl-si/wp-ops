@@ -16,4 +16,4 @@
 
 cd "$(dirname "$(realpath "$0")")"
 
-ansible-playbook -e "play_dump=yes" -e "dump_local_dir={{ to }}" -i hosts-dev "$@" playbooks/wordpress-main.yml
+ansible-playbook -e "play_dump=yes" -e "dump_local_dir={{ to }}" -i inventory/test "$@" playbooks/wordpress-main.yml

@@ -6,7 +6,7 @@ use utf8;
 
 =head1 NAME
 
-wordpresses-prod - Dynamic (executable) Ansible inventory of production Wordpresses
+wordpress-instances - Dynamic (executable) Ansible inventory of production Wordpresses
 
 =head1 DESCRIPTION
 

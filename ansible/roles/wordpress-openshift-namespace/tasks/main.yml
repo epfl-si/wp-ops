@@ -3,3 +3,22 @@
 
 - name: "Disk usage report microservice"
   include: disk-usage-report.yml
+  tags: diskusage
+
+- name: "Images and builds"
+  include: images.yml
+  tags: images
+
+- name: "Continuous integration"
+  when: openshift_namespace == "wwp-test"
+  include_tasks:
+    file: continuous-integration.yml
+    apply:
+      tags:
+        - ci
+  # Multi-level tagging: `-t ci` will run all of continuous-integration.yml,
+  # while `-t ci.jenkinsfile` will only load the BuildConfig with the
+  # Jenkinsfile inside
+  tags:
+    - ci
+    - ci.jenkinsfile

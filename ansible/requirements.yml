@@ -1,0 +1,2 @@
+- src: epfl_idevelop.ansible_module_openshift
+- src: epfl_idevelop.ansible_module_eyaml

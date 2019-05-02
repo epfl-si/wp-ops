@@ -1,0 +1,30 @@
+# Kubernetes configuration for production-related image builds
+#
+# See also continuous-integration.yml (which has its own set of images)
+
+- include_vars: image-vars.yml
+
+- name: "production ImageStreams"
+  openshift_imagestream:
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    metadata: "{{ item.metadata | default({}) }}"
+    from: "{{ item.from | default(None) }}"
+    git:
+        repository: "{{ wp_ops_git_uri }}"
+        ref: "{{ wp_ops_git_branch }}"
+        path: "{{ item.git_path }}"
+  with_items:
+    - name: "{{ varnish_image_name }}"
+      metadata:
+        labels:
+          app: varnish
+      git_path: docker/varnish
+    - name: "{{ wp_base_image_name }}"
+      git_path: docker/wp-base
+    - name: "{{ httpd_image_name }}"
+      git_path: docker/httpd
+      from: "{{ wp_base_image_name }}"
+    - name: "{{ mgmt_image_name }}"
+      git_path: docker/mgmt
+      from: "{{ wp_base_image_name }}"

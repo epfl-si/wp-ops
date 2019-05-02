@@ -1,12 +1,12 @@
 Role Name
 =========
 
-wordpress-openshift-namespace — A WordPress NAS share within the EPFL WordPress project
+wordpress-openshift-namespace — An OpenShift namespace within the EPFL WordPress project
 
 Enumeration
 -----------
 
-WordPress NAS shares are hard-coded under ../../hosts-dev/ and ../../hosts-prod/.
+WordPress OpenShift namespaces are hard-coded under ../../inventory/
 
 License
 -------
