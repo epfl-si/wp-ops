@@ -34,4 +34,4 @@ script:
      --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
      --build-arg "INSTALL_AUTO_FLAGS=--exclude=wp-media-folder" \
      -t epflidevelop/os-wp-base docker/wp-base
-  find docker -mindepth 1 -maxdepth 1 -type d | xargs -t docker build
+  find docker -mindepth 1 -maxdepth 1 -type d | xargs -t -n 1 docker build
