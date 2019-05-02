@@ -158,7 +158,7 @@ class GitHubCheckout:
 
 
 class Plugin(namedtuple('Plugin', ['name', 'url'])):
-    """A WordPress plug-in."""
+    """A WordPress plug-in or theme."""
     def __new__(cls, name, url):
         if cls is Plugin:
             cls = cls._find_handler(url)
@@ -181,7 +181,7 @@ class Plugin(namedtuple('Plugin', ['name', 'url'])):
             "Don't know how to handle plug-in URL: {}".format(url))
 
     def _copytree_install(self, from_path, to_path):
-        to_path = os.path.join(to_path, os.path.basename(from_path))
+        to_path = os.path.join(to_path, self.name)
         progress('Copying {} to {}'.format(from_path, to_path))
         shutil.copytree(from_path, to_path)
 
@@ -198,12 +198,28 @@ class ZipPlugin(Plugin):
         return url.endswith(".zip")
 
     def install(self, target_dir):
+        """Unzip into a subdirectory `target_dir` named `self.name`."""
         if self.url.startswith("http"):
             zip = ZipFile(BytesIO(requests.get(self.url).content))
         else:
             zip = ZipFile(Jahia2wp.data_plugins_path_relative(self.url))
         progress("Unzipping {}".format(self.url))
-        zip.extractall(path=target_dir)
+        for member in zip.namelist():
+            zipinfo = zip.getinfo(member)
+            if zipinfo.filename[-1] == '/':
+                continue
+
+            targetpathelts = os.path.normpath(zipinfo.filename).split('/')
+            targetpathelts[0] = self.name
+
+            targetpath = os.path.join(target_dir, *targetpathelts)
+
+            upperdirs = os.path.dirname(targetpath)
+            if upperdirs and not os.path.exists(upperdirs):
+                os.makedirs(upperdirs)
+
+            with zip.open(zipinfo) as source, open(targetpath, "wb") as target:
+                shutil.copyfileobj(source, target)
 
 
 class GitHubPlugin(Plugin):
@@ -237,6 +253,27 @@ class WordpressOfficialPlugin(Plugin):
 
     def install(self, target_dir):
         ZipPlugin(self.name, self.api_struct['download_link']).install(target_dir)
+
+
+class Themes:
+    """The set of themes offered as part of the EPFL WordPress project."""
+    @classmethod
+    def all(cls):
+        return (
+            Plugin('wp-theme-2018',
+                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018'),
+            Plugin('wp-theme-light',
+                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light'),
+            Plugin('epfl-blank',
+                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank'),
+            Plugin('epfl-master',
+                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
+        )
+
+def MuPlugins():
+    return Plugin(
+    'mu-plugins',
+    'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
 
 
 class Jahia2wpSubdirectoryPlugin(Plugin):
@@ -365,15 +402,20 @@ class Jahia2wpLegacyYAMLLoader(yaml.Loader):
         return cls(filename_or_stream).get_single_data()
 
 
-WP_IMAGE_INSTALL_DIR = '/wp/wp-content/plugins'
+WP_INSTALL_DIR = '/wp/wp-content'
+WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
+WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')
 
 
 if __name__ == '__main__':
     if sys.argv[0].endswith('.py'):
         sys.argv.pop(0)
     if sys.argv[0] == 'auto':
+        MuPlugins().install(WP_INSTALL_DIR)
         for plugin in Jahia2wp.singleton().plugins():
-            plugin.install(WP_IMAGE_INSTALL_DIR)
+            plugin.install(WP_PLUGINS_INSTALL_DIR)
+        for theme in Themes.all():
+            theme.install(WP_THEMES_INSTALL_DIR)
     else:
         name = sys.argv[0]
         url = sys.argv[1]
