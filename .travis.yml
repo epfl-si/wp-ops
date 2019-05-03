@@ -5,8 +5,9 @@ sudo: required
 env:
   global:
     - GITHUB_API_USER=domq
-    # This is the GitHub API token; it may be decrypted only using a
-    # Travis-owned private key. To regenerate it:
+    # This is the GitHub API token, encrypted (so that it can be
+    # safely stored on GitHub) with a public key whose corresponding
+    # private key is owned by Travis. To regenerate it:
     #
     # 1. Create a token as per
     #    https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
