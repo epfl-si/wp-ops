@@ -280,6 +280,7 @@ class Themes:
                    'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
         )
 
+
 def MuPlugins():
     return Plugin(
         'mu-plugins',
@@ -447,6 +448,4 @@ if __name__ == '__main__':
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
     else:
-        name = sys.argv[0]
-        url = sys.argv[1]
-        Plugin(name, url).install('.')
+        Plugin(flags.name, flags.path).install('.')
