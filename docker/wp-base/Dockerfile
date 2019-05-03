@@ -4,6 +4,11 @@ FROM ubuntu:bionic
 ENV PHP_VERSION=7.3
 ARG WORDPRESS_VERSION_LINEAGE=4.9
 
+# Travis-specific arguments — See ../../.travis.yml
+ARG GITHUB_API_USER
+ARG GITHUB_API_TOKEN
+ARG INSTALL_AUTO_FLAGS
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
@@ -43,19 +48,30 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
 
 # Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
 # won't install):
-RUN curl -o /usr/local/bin/wp -L $(                                  \
-   curl https://api.github.com/repos/wp-cli/wp-cli/releases          \
-   | jq -r 'if type == "object" then error                           \
-            else [.[] | select (.tag_name | startswith("v1.5"))][0]  \
-                      | .assets[0].browser_download_url              \
-            end')
+RUN set -x;                                                              \
+   curl -o /usr/local/bin/wp -L                                          \
+        $(curl $(if [ -n "${GITHUB_API_TOKEN}" ]; then                   \
+                echo -u "${GITHUB_API_USER}":"${GITHUB_API_TOKEN}";      \
+              fi)                                                        \
+        https://api.github.com/repos/wp-cli/wp-cli/releases              \
+       | jq -r 'if type == "object" then error                           \
+                else [.[] | select (.tag_name | startswith("v1.5"))][0]  \
+                          | .assets[0].browser_download_url              \
+                end')
 RUN chmod 755 /usr/local/bin/wp
 
 # Add Polylang-related extension packages to wp-cli
 COPY ./config.yml /var/www/.wp-cli/config.yml
-RUN chown -R www-data:www-data /var/www/.wp-cli
-RUN su -s /bin/sh www-data -c "wp package install https://github.com/diggy/polylang-cli.git"
-RUN su -s /bin/sh www-data -c "wp package install https://github.com/cortneyray/wp-cli-polylang.git"
+RUN mkdir /var/www/.composer; \
+    chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
+RUN su -s /bin/sh www-data -c " \
+    set -e -x;                                                            \
+    if [ -n '${GITHUB_API_TOKEN}' ]; then                                 \
+        composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
+    fi;                                                                   \
+    wp package install https://github.com/diggy/polylang-cli.git ;        \
+    wp package install https://github.com/cortneyray/wp-cli-polylang.git; \
+    rm -f ~/.composer/auth.json"
 
 # Install a copy of WordPress into /wp, populate it with our plugins,
 # and patch it to support our symlink-based serving layout
@@ -72,6 +88,6 @@ ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
 ADD install-plugins-and-themes.py /tmp/
-RUN python3 /tmp/install-plugins-and-themes.py auto
+RUN set -x; python3 /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
