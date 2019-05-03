@@ -12,7 +12,6 @@
     from: "{{ item.from | default(None) }}"
     git:
         repository: "{{ wp_ops_git_uri }}"
-        ref: "{{ wp_ops_git_branch }}"
         path: "{{ item.git_path }}"
   with_items:
     - name: "{{ varnish_image_name }}"

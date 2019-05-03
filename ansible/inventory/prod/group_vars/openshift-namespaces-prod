@@ -6,5 +6,3 @@ ansible_host: prod-ssh-wwp.epfl.ch
 ansible_port: 32222
 ansible_connection: local  # Unless stipulated otherwise in a task
 openshift_namespace: wwp
-
-wp_ops_git_branch: prod
