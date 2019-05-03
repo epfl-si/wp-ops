@@ -280,6 +280,7 @@ class Themes:
                    'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
         )
 
+
 def MuPlugins():
     return Plugin(
         'mu-plugins',
