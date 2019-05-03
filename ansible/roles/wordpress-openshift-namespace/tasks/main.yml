@@ -22,3 +22,8 @@
   tags:
     - ci
     - ci.jenkinsfile
+
+- name: "Management container (ssh server, PHP CLI)"
+  when: openshift_namespace == "wwp-test"
+  include: mgmt.yml
+  tags: mgmt

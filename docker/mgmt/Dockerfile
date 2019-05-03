@@ -3,6 +3,7 @@ FROM epflidevelop/os-wp-base
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \
     htop \
+    inotify-tools \
     less \
     make \
     mysql-client \
@@ -47,4 +48,3 @@ RUN ln -s /srv/bin/vjahia2wp /usr/local/bin/
 
 EXPOSE 22
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["/usr/sbin/sshd", "-D"]
