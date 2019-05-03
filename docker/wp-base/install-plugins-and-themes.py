@@ -448,6 +448,4 @@ if __name__ == '__main__':
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
     else:
-        name = sys.argv[0]
-        url = sys.argv[1]
-        Plugin(name, url).install('.')
+        Plugin(flags.name, flags.path).install('.')
