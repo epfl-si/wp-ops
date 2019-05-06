@@ -18,10 +18,12 @@ def route_probe():
     return metrics.as_flask_response()
 
 
-if len(sys.argv) > 0 and sys.argv[0].endswith(".py"):
-    sys.argv.pop(0)
+argv = sys.argv.copy()
 
-if len(sys.argv) == 0:
+if len(argv) > 0 and argv[0].endswith(".py"):
+    argv.pop(0)
+
+if len(argv) == 0:
     app.run(host='0.0.0.0', port=8080, debug=True)
 else:
     from cachier import cachier
@@ -32,5 +34,5 @@ else:
         return requests.get(url).json()
 
     metrics = Metrics()
-    probe(sys.argv[0], metrics, inject_get_json=get_json)
+    probe(argv[0], metrics, inject_get_json=get_json)
     print(metrics)
