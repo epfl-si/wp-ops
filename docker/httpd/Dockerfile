@@ -1,4 +1,7 @@
-FROM epflidevelop/os-wp-base
+# This line is used only for local build (docker-compose build).
+# When using OpenShift environment, we can configure builds to use an existing image stream
+# which is, in our case : wwp-test/wp-base:latest
+FROM jahia2wp_wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apache2 \
