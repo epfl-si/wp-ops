@@ -1,10 +1,14 @@
-# Kubernetes configuration for production-related image builds
+# Kubernetes configuration for production-related images and their builds
+#
+# Builds happen in the wwp-test namespace *only.* The images are then
+# promoted using `oc tag` or an equivalent API call.
 #
 # See also continuous-integration.yml (which has its own set of images)
 
 - include_vars: image-vars.yml
 
-- name: "production ImageStreams"
+- name: "Testing ImageStreams and their build information"
+  when: not openshift_is_production
   openshift_imagestream:
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
@@ -14,11 +18,6 @@
         repository: "{{ wp_ops_git_uri }}"
         path: "{{ item.git_path }}"
   with_items:
-    - name: "{{ varnish_image_name }}"
-      metadata:
-        labels:
-          app: varnish
-      git_path: docker/varnish
     - name: "{{ wp_base_image_name }}"
       git_path: docker/wp-base
     - name: "{{ httpd_image_name }}"
@@ -27,3 +26,13 @@
     - name: "{{ mgmt_image_name }}"
       git_path: docker/mgmt
       from: "{{ wp_base_image_name }}"
+
+- name: "Production ImageStreams"
+  when: openshift_is_production
+  openshift_imagestream:
+    name: "{{ item.name }}"
+    namespace: "{{ openshift_namespace }}"
+    metadata: "{{ item.metadata | default({}) }}"
+  with_items:
+    - name: "{{ httpd_image_name }}"
+    - name: "{{ mgmt_image_name }}"

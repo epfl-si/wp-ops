@@ -7,6 +7,19 @@ ansible_port: 32222
 ansible_connection: local  # Unless stipulated otherwise in a task
 openshift_namespace: wwp-test
 
+DeploymentConfigs:
+  httpd:
+    - name: httpd-cburki
+    - name: httpd-dev
+    - name: httpd-gcharmier
+    - name: httpd-int
+      autopush: true
+    - name: httpd-lchaboudez
+    - name: httpd-lvenries
+
+# TODO: unfork to master
+wp_ops_git_branch: wwp-mgmt-in-openshift
+
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
   pub: "{{ playbook_dir }}/../eyaml/epfl_wp_test.pem"
@@ -31,8 +44,7 @@ mgmt_sshd_keys:
     priv: |
       ENC[PKCS7,MIICbQYJKoZIhvcNAQcDoIICXjCCAloCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAXjgTbmCfFnzO/nO1d3Nbvg45SWUAwlpiH2qQ55rZYw09RqE3Ne5dmqaUE6cmpRrqV2b3Hx0C5DmpS1y18JZRUuQ7qtYrdWnaf29e9xTsfoUwUJUv8yxrFsVPahFu8GVsRZb4IbL6GOJEvp9yK+1ibaOp7SU1R923Fthrwczo6qx+aykEwJ1SboQ+NuR1+fV+usyEd3NJkwu90yem4Y+hpX7/ISpHFRCL6tMnFLDR7Q8g06MwtbSrD8A8ylZvq7vu0j5uClK4C0x+Oe7oig/4saJ32Sq4692OTG6cCFRhnzQIPK/qi2cYSCYdANy5cNbjt6KYyNOscDDtxePmwsdZZTCCAS4GCSqGSIb3DQEHATAdBglghkgBZQMEASoEEPfCU3++1CA5szKIMOxQG+2AggEA5KaV3AuXDhztsvbxSMQy2C93WGh0H3Gf6U613vA//AF7Flfgk9ju8Jx9eDgyqBVbz8zbUEEgJi8Jw8ZZu4SZ+Ltw6Cko5Aw1P+NR2YAO07PMnvgslGssYboABPuzEd6awiVTdCxSM9zZRnVNmpoeoO03GNIrK0yF72y2A8uW5kKMH4YhDJXlB/tN6VKUvNJFqcxxiSx3QAPqY84vnpoWHv9NK4Rxt5HNwy2ulcoDYj4CVMs6migoy1uTocLXDx+L8KZr+7LOZiL5vEQ/4JfX/8iKlMcL8d9GYy3+YphG9fT2CI2T2dsbI9P0hubdpc2s6N16wv/dilbWHqmIAiwthQ==]
   ssh_host_ed25519_key:
-    pub:
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFS1Ybrtf3b5h7WKccCF/k1YXVxvL7UFY2vg1N3pVvMu root@mgmt-22-build
+    pub: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFS1Ybrtf3b5h7WKccCF/k1YXVxvL7UFY2vg1N3pVvMu root@mgmt-22-build
     priv: |
       ENC[PKCS7,MIIDLQYJKoZIhvcNAQcDoIIDHjCCAxoCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAQkMPYLuMcAhFFHZg6PfQjDaQOwifNlE/Xt1/1dimPd97MVlB0bfID4AI560gdiC2GklXTRrFXvQGNOY6b6XswbM4RVojAikJchC+CjjHLlrAebE+RbQLxy7/RUWcFv3mUsp3AhPFCqdCwZra8UGnx5iRSrD/omRZ6b+1pAxw0Qkh8EZ606cGy9TAqt58l3Zc6adghlerJSKrpYhgFE5NMrHXaBnuIvMw5BkgBVpyVwFN/43hlneEGUGxOPonh4dMNKqPRCb47+aMm8tdtPV/XV0fzVNY3GHwc1cAuiKcEcFnUwUEU+E3soMTCXxoXQhbJ2UKIFzxdrhGuuXnaJE3ETCCAe4GCSqGSIb3DQEHATAdBglghkgBZQMEASoEEH55QUGcJwwOgPrKfcbjZbqAggHAdrkMbxbj5/79OjIGS8+OfyY01LJ3XNJ0k2RJkLfheoTBn76VOSr6rXOzyHiqo3vCGt/oz/0MvOT6+xFn5STDVp3TcA2lAKZ/AuMXDG+ueHufVgpIKYvpBvn4qcIiZP/uD0ySjS3qGRlULzKTXmKmeqQQPSXQJLOqrX9+G+udIJb2JdhFcBrg6A3qEYcUI7gOaLpREMuLZK4gWL7z9OYFrUi5jsGKoPpCHK/LlZtCUEBZ7dF7cBJflwixEXh7XNBHJBBzRHbpBcywTe8tf0Us7gnMrvVLHt73/HTbPRe85guD5d5cA8/5fW5LCBu1wAMd/otq+kAmXOJTyIBYi+OXIf5JgQG/tWTskFaWkY/UH5aZQ1kqKBSh3pgYP/GF6i1EssOl5HlY3dPGr26uH1pAtlXIIyTDAVw6ToMnMl5+4+Ssz+ilZ7pt2boYgJ2i18WI4pO6JdG2VAXIkfAA9gzd2aP7xX2iCxUB/TYHrtKx6Ho6spivIHdU57ebrmKbANrM9M+8gf+WOktpfp+siMquZ9cDLhV9BpbBev2J2Qa4KyfhJRlkNvt1GPBcnHnopXag0zJp5EKx0b0AMAKO+TVxAQ==]
   ssh_host_rsa_key:

@@ -1,6 +1,5 @@
 httpd_image_name: httpd
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
-varnish_image_name: varnish
 
 wp_ops_git_uri: https://github.com/epfl-idevelop/wp-ops

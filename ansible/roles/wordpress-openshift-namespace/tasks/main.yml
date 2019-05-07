@@ -1,5 +1,5 @@
 ---
-# tasks for WordPress NAS shares
+# tasks for WordPress OpenShift namespaces
 
 - name: "Disk usage report microservice"
   include: disk-usage-report.yml
@@ -8,6 +8,17 @@
 - name: "Images and builds"
   include: images.yml
   tags: images
+
+- name: "DeploymentConfigs (previously known as pods)"
+  include_tasks:
+    file: deploymentconfig-httpd.yml
+    apply:
+      tags: ["dc"] # Tags don't seem to work the same way within /
+                   # without a loop, #smellslikeabug
+  loop: "{{ DeploymentConfigs.httpd }}"
+  loop_control:
+    loop_var: dc
+  tags: dc
 
 - name: "Continuous integration"
   when: openshift_namespace == "wwp-test"
@@ -24,6 +35,5 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
-  when: openshift_namespace == "wwp-test"
   include: mgmt.yml
   tags: mgmt

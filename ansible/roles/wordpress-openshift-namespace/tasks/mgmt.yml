@@ -49,6 +49,10 @@
                 mountPath: /srv
               - name: ssh
                 mountPath: /var/lib/secrets/ssh
+      {% if openshift_is_production %}
+              - name: backups
+                mountPath: /backups
+      {% endif %}
             serviceAccount: {{ mgmt_service_account }}
             serviceAccountName: {{ mgmt_service_account }}
             volumes:
@@ -58,6 +62,11 @@
             - name: ssh
               secret:
                 secretName: "{{ mgmt_secret_name }}"
+      {% if openshift_is_production %}
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups-0
+      {% endif %}
         triggers:
         - type: ConfigChange
         - type: ImageChange
@@ -67,5 +76,5 @@
             - mgmt
             from:
               kind: ImageStreamTag
-              name: "{{ mgmt_image_name }}:latest"
+              name: "{{ mgmt_image_name }}:{{ openshift_registry_tag }}"
               namespace: "{{ openshift_namespace }}"
