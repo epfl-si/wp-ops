@@ -88,6 +88,10 @@ ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
 ADD install-plugins-and-themes.py /tmp/
-RUN set -x; python3 /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+RUN set -e -x;                                                           \
+    cd /wp/wp-content/plugins;                                           \
+    rm -rf polylang;                                                     \
+    /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
