@@ -2,6 +2,8 @@
   WordPress @ EPFL: DevOps Boogaloo
 </h1>
 
+[![Build Status](https://travis-ci.org/epfl-idevelop/wp-ops.svg?branch=master)](https://travis-ci.org/epfl-idevelop/wp-ops)
+
 In this repository you will find:
 
 - The Dockerfiles and build dependencies for all custom-made Docker images
