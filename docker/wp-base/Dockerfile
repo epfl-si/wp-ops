@@ -88,6 +88,13 @@ ADD wordpress-anywhere.patch /tmp/
 RUN cd /; git apply < /tmp/wordpress-anywhere.patch
 
 ADD install-plugins-and-themes.py /tmp/
-RUN set -x; python3 /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+# Get all plugins and themes ("auto" mode) from the jahia2wp manifest:
+RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+# jahia2wp uses an ancient version of Polylang (for reasons that have
+# no bearing on the task at hand). Upgrade it:
+RUN set -e -x;                                                           \
+    cd /wp/wp-content/plugins;                                           \
+    rm -rf polylang;                                                     \
+    /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
 
 RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch

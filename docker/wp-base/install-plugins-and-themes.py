@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 """Install WordPress plugins and themes from various locations."""
 
@@ -37,9 +37,9 @@ Usage:
     Install one plugin or theme into the current directory. <name> is
     the name of the subdirectory to create. <URL> can point to a ZIP
     file, a GitHub URL (possibly pointing to a particular branch and
-    subdirectory), or it can be the string "web" to mean that the
-    plug-in named <name> shall be downloaded from the WordPress plugin
-    repository.
+    subdirectory), or it can be the string "web" or the string
+    "wordpress.org/plugins", both meaning that the plug-in named
+    <name> shall be downloaded from the WordPress plugin repository.
 
 Options:
 
@@ -249,7 +249,7 @@ class WordpressOfficialPlugin(Plugin):
     """A plug-in to download from the official plug-in repository."""
     @classmethod
     def handles(cls, url):
-        return url == 'web'
+        return url == 'web' or url == 'wordpress.org/plugins'
 
     @property
     def api_struct(self):
