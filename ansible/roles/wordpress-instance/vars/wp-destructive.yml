@@ -30,11 +30,15 @@ _my_wp_destructive: "{{ wp_destructive[inventory_hostname] if (inventory_hostnam
 _group_wp_destructive_0: "{{ wp_destructive[group_names[0]] if ((group_names | length > 0) and (group_names[0] in wp_destructive)) else None }}"
 _group_wp_destructive_1: "{{ wp_destructive[group_names[1]] if ((group_names | length > 1) and (group_names[1] in wp_destructive)) else None }}"
 _group_wp_destructive_2: "{{ wp_destructive[group_names[2]] if ((group_names | length > 2) and (group_names[2] in wp_destructive)) else None }}"
+_group_wp_destructive_3: "{{ wp_destructive[group_names[3]] if ((group_names | length > 3) and (group_names[3] in wp_destructive)) else None }}"
+_group_wp_destructive_4: "{{ wp_destructive[group_names[4]] if ((group_names | length > 4) and (group_names[4] in wp_destructive)) else None }}"
 
 _effective_wp_destructive: "{{ _my_wp_destructive if _my_wp_destructive else (
     _group_wp_destructive_0 if _group_wp_destructive_0 else (
     _group_wp_destructive_1 if _group_wp_destructive_1 else (
-    _group_wp_destructive_2))) }}"
+    _group_wp_destructive_2 if _group_wp_destructive_2 else (
+    _group_wp_destructive_3 if _group_wp_destructive_3 else (
+    _group_wp_destructive_4))))) }}"
 
 _wp_can_any: "{{ not not _effective_wp_destructive }}"
 _wp_can_wipe: "{{ _effective_wp_destructive == 'wipe' }}"
