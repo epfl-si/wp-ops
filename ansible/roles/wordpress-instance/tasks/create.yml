@@ -1,4 +1,6 @@
 # Create a WordPress site out of thin air
+#
+# TODO: This uses jahia2wp and we don't want to do things this way anymore.
 
 - include_vars: jahia2wp-vars.yml
 - include_vars: wp-destructive.yml
