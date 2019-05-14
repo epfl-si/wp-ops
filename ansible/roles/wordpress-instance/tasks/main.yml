@@ -5,22 +5,59 @@
 # Variables:: (in addition to those defined or documented in
 #              ../vars/*.yml)
 
+- include_vars: wp-destructive.yml
+
+- name: "Backup"
+  include: "backup.yml"
+  tags:
+    - never  # That is, skip unless "-t backup" or "-t wipe" is
+             # passed on the command line
+    - wipe
+    - backup
+
+- name: "Wipe"
+  include: "wipe.yml"
+  tags:
+    - never
+    - wipe
+
 - name: Check whether WordPress is already installed
   stat:
     path: "{{ wp_path_config_php }}"
   register: _wp_config_php_stat
 
-- name: "Backup"
-  include: '{{ "backup.yml" if play_backup is match("yes") else "noop.yml" }}'
+- name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
+  include: "create.yml"
+  when: not _wp_config_php_stat.stat.exists
 
-- name: "Create or restore (if requested)"
-  include: '{{ "create-or-restore.yml" if play_create_or_restore is match("yes") else "noop.yml" }}'
+- name: Restore
+  include: "restore.yml"
+  when: wp_restore_from is defined
+  tags:
+    - never
+    - restore-from-backup
 
-- name: "Update themes and plugins (if requested)"
-  include: '{{ "update.yml" if play_update is match("yes") else "noop.yml" }}'
+- name: Check that WordPress is working
+  command: "{{ wp_cli_command }} eval '1;'"
+  changed_when: false
 
-- name: "Dump (if requested)"
-  include: '{{ "dump.yml" if (play_dump is match("yes") and dump_local_dir is defined) else "noop.yml" }}'
+- name: Configure
+  include: "configure.yml"
+  when: wp_can.write_data
+  tags: configure
 
-- name: "Undump WXR (if requested)"
-  include: '{{ "undump.yml" if (play_undump is match("yes") and undump_local_dir is defined and wp_can.write_data) else "noop.yml" }}'
+#################################################################
+# Special-purpose tasks
+#################################################################
+
+# These tasks are used in "ventilation" (site move) workflows only
+- name: "Dump WXR"
+  include: "dump.yml"
+  tags:
+    - never
+    - dump
+- name: "Undump WXR"
+  include: "undump.yml"
+  tags:
+    - never
+    - undump
