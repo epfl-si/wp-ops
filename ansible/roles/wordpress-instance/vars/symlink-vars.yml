@@ -1,0 +1,65 @@
+# Things Ansible should know about symlinks to PHP code on NFS
+#
+# Please have all variable names start with `symlinks` or `_symlinks`.
+
+symlinks_paths_wp:
+  - wp-admin
+  - wp-cron.php
+  - wp-includes
+  - wp-load.php
+  - wp-login.php
+  - wp-settings.php
+  # These index.php files are meant to prevent information disclosure
+  # (when folks idly edit out the end their URL bar, and Apache
+  # obligingly serves them a directory index)
+  - wp-content/plugins/index.php
+  - wp-content/themes/index.php
+  - wp-content/mu-plugins/index.php
+
+symlinks_plugins:
+  - EPFL-Content-Filter
+  - EPFL-settings
+  - accred
+  - cache-control
+  - epfl
+  - epfl-404
+  - ewww-image-optimizer
+  - feedzy-rss-feeds
+  - mainwp-child
+  - pdfjs-viewer-shortcode
+  - polylang
+  - remote-content-shortcode
+  - shortcode-ui
+  - shortcode-ui-richtext
+  - simple-sitemap
+  - svg-support
+  - tequila
+  - tinymce-advanced
+  - varnish-http-purge
+  - very-simple-meta-description
+  - wp-media-folder
+
+symlinks_themes:
+  - epfl-blank
+  - epfl-master
+  - wp-theme-2018
+  - wp-theme-light
+
+# TODO: actually, It Depends™
+symlinks_muplugins:
+  - EPFL_custom_editor_menu.php
+  - EPFL_disable_comments.php
+  - EPFL_enable_updates_automatic.php
+  - EPFL_google_analytics_hook.php
+  - EPFL_installs_locked.php
+  - EPFL_jahia_redirect.php
+  - EPFL_quota_loader.php
+  - EPFL_stats_loader.php
+  - epfl-functions.php
+  - epfl-quota
+  - epfl-stats
+
+symlinks_all_paths: "{{ symlinks_paths_wp                               \
+    + ('wp-content/plugins/%s'    | map_format(symlinks_plugins))       \
+    + ('wp-content/mu-plugins/%s' | map_format(symlinks_muplugins))     \
+    + ('wp-content/themes/%s'     | map_format(symlinks_themes))        }}"

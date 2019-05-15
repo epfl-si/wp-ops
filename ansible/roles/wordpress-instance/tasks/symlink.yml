@@ -1,0 +1,32 @@
+# Serving from symlinks: WordPress directories on NFS (aka have your cake),
+# but with all PHP code symlinked from /wp (aka eat it too).
+
+- include_vars: symlink-vars.yml
+  tags: always
+
+- name: "Make symlinks"
+  tags: symlink
+  check_mode: no   # Does The Right Thing under ansible-playbook --check
+  shell:
+    cmd: |
+      set -e -x
+      cd "{{ wp_dir }}"
+      changed=
+      ansible_check_mode="{{ ansible_check_mode }}"
+      for path in {{ symlinks_all_paths | join(" ") }}; do
+        target="/wp/$path"
+        [ "$(readlink $path 2>/dev/null || true)" = $target ] && continue
+
+        if [ -z "$changed" ]; then
+          echo SYMLINK_CHANGED
+          changed=1
+        fi
+        [ "$ansible_check_mode" = "True" ] && continue
+
+        rm -rf "$path"
+        dir="$(dirname "$path")"
+        test -d "$dir" || mkdir -p "$dir"
+        ln -s "$target" "$path"
+      done
+  register: symlink_script
+  changed_when: '"SYMLINK_CHANGED" in symlink_script.stdout'

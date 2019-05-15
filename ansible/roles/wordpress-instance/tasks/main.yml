@@ -54,6 +54,15 @@
 # Special-purpose tasks
 #################################################################
 
+- name: "Set up / revert “symlink” serving discipline"
+  tags:
+    - never
+    - symlink
+    - unsymlink
+  # We include_tasks (not import_tasks) here, because we do *not* want
+  # to propagate tags.
+  include_tasks: "symlink.yml"
+
 # These tasks are used in "ventilation" (site move) workflows only
 - name: "Dump WXR"
   import_tasks: "dump.yml"
