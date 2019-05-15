@@ -6,9 +6,10 @@
 #              ../vars/*.yml)
 
 - include_vars: wp-destructive.yml
+  tags: always
 
 - name: "Backup"
-  include: "backup.yml"
+  import_tasks: "backup.yml"
   tags:
     - never  # That is, skip unless "-t backup" or "-t wipe" is
              # passed on the command line
@@ -16,7 +17,7 @@
     - backup
 
 - name: "Wipe"
-  include: "wipe.yml"
+  import_tasks: "wipe.yml"
   tags:
     - never
     - wipe
@@ -27,24 +28,27 @@
   register: _wp_config_php_stat
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
-  include: "create.yml"
+  include_tasks: "create.yml"
   when: not _wp_config_php_stat.stat.exists
 
 - name: Restore
-  include: "restore.yml"
-  when: wp_restore_from is defined
+  import_tasks: "restore.yml"
   tags:
     - never
-    - restore-from-backup
+    - restore
 
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
 
 - name: Configure
-  include: "configure.yml"
-  when: wp_can.write_data
-  tags: configure
+  when: wp_can.any
+  tags: config
+  include_tasks:
+    file: "configure.yml"
+    # Because `include_tasks` is dynamic, tags don't auto-inherit.
+    apply:
+      tags: ["config"]
 
 #################################################################
 # Special-purpose tasks
@@ -52,12 +56,12 @@
 
 # These tasks are used in "ventilation" (site move) workflows only
 - name: "Dump WXR"
-  include: "dump.yml"
+  import_tasks: "dump.yml"
   tags:
     - never
     - dump
 - name: "Undump WXR"
-  include: "undump.yml"
+  import_tasks: "undump.yml"
   tags:
     - never
     - undump
