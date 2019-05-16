@@ -8,6 +8,10 @@
 - include_vars: wp-destructive.yml
   tags: always
 
+- name: WordPress facts
+  import_tasks: setup.yml
+  tags: always
+
 - name: "Backup"
   import_tasks: "backup.yml"
   tags:
@@ -22,14 +26,9 @@
     - never
     - wipe
 
-- name: Check whether WordPress is already installed
-  stat:
-    path: "{{ wp_path_config_php }}"
-  register: _wp_config_php_stat
-
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"
-  when: not _wp_config_php_stat.stat.exists
+  when: "'wipe' in ansible_run_tags or not wp_is_installed"
 
 - name: Restore
   import_tasks: "restore.yml"
