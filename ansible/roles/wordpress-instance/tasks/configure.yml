@@ -1,6 +1,7 @@
 # Set a sane configuration for this WordPress instance
 
 - include_vars: wp-destructive.yml
+- include_vars: symlink-vars.yml
 
 - assert:
     that:
@@ -14,3 +15,17 @@
 - name: Unset ping_sites
   command: "{{ wp_cli_command }} option set ping_sites ''"
   when: "_wp_config_ping_sites.stdout != ''"
+
+- name: Set up index.php
+  copy:
+    content: "{{ lookup('template', 'wordpress-index.php') }}"
+    dest: "{{ wp_dir }}/index.php"
+
+- name: WP_CONTENT_DIR line in wp-config.php
+  lineinfile:
+    state: "{{ 'present' if wp_is_symlinked else 'absent' }}"
+    path: "{{ wp_dir }}/wp-config.php"
+    insertafter: table_prefix
+    regexp: WP_CONTENT_DIR
+    line: |
+      define('WP_CONTENT_DIR', '{{ wp_dir }}/wp-content');

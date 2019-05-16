@@ -1,5 +1,14 @@
 # Serving from symlinks: WordPress directories on NFS (aka have your cake),
 # but with all PHP code symlinked from /wp (aka eat it too).
+#
+# This is an *optional* set of tasks that only run when either `-t
+# symlink` or `-t unsymlink` is specified. Note that these tags are
+# *not* auto-propagated by caller; therefore, each task must
+# explicitly specify under which circumstances (= set of tags) it is
+# to run.
+#
+# Being (or not being) a symlinked site also has consequences w.r.t.
+# templated configuration files; see configure.yml for details.
 
 - include_vars: symlink-vars.yml
   tags: always
@@ -28,5 +37,35 @@
         test -d "$dir" || mkdir -p "$dir"
         ln -s "$target" "$path"
       done
-  register: symlink_script
-  changed_when: '"SYMLINK_CHANGED" in symlink_script.stdout'
+  register: _symlink_script
+  changed_when: '"SYMLINK_CHANGED" in _symlink_script.stdout'
+
+- name: "Unsymlink (copy from /wp)"
+  tags: unsymlink
+  check_mode: no
+  shell:
+    cmd: |
+      set -e -x
+      cd {{ wp_dir }}
+      if [ "" = "$(find . -name uploads -prune -false -o -type l)" ]; then
+        echo NO_SYMLINKS
+        exit 0
+      fi
+
+      [ "$ansible_check_mode" = "True" ] && exit 0
+
+      for subdir in wp-content/themes wp-content/plugins \
+                    wp-content/mu-plugins; do
+        if ! [ -L "$subdir" ]; then
+          find "$subdir" -type l -delete
+        fi
+      done
+      find . wp-content -maxdepth 1 -type l -delete
+
+      (cd /wp; tar clf - .) | tar xpvf -
+  register: _unsymlink_script
+  changed_when: '"NO_SYMLINKS" not in _unsymlink_script.stdout'
+
+- name: Refresh wp_is_symlinked fact
+  tags: always
+  import_tasks: setup.yml

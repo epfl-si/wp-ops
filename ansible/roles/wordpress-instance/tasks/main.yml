@@ -40,19 +40,6 @@
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
 
-- name: Configure
-  when: wp_can.any
-  tags: config
-  include_tasks:
-    file: "configure.yml"
-    # Because `include_tasks` is dynamic, tags don't auto-inherit.
-    apply:
-      tags: ["config"]
-
-#################################################################
-# Special-purpose tasks
-#################################################################
-
 - name: "Set up / revert “symlink” serving discipline"
   when: wp_can.configure
   tags:
@@ -60,7 +47,9 @@
     - symlink
     - unsymlink
   # We include_tasks (not import_tasks) here, because we do *not* want
-  # to propagate tags.
+  # to propagate tags - Within symlink.yml, tasks shall be
+  # individually marked with either (or both) the `symlink` and
+  # `unsymlink` tags (or alternatively, the `always` tag).
   include_tasks: "symlink.yml"
 
 - name: Configure
@@ -85,7 +74,7 @@
   tags:
     - never
     - dump
-- name: "Undump WXR"
+- name: "Undump from WXR for ventilation"
   import_tasks: "undump.yml"
   tags:
     - never
