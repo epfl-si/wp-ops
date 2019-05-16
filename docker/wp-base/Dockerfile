@@ -104,6 +104,7 @@ RUN set -e -x;                                                           \
     /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
 
 # For importing sites from the WXR XML format (e.g. "ventilation" operations)
-RUN /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
+RUN cd /wp/wp-content/plugins;                                           \
+    /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
 
 RUN rm -rf /tmp/install-plugins*
