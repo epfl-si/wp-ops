@@ -85,11 +85,17 @@ RUN wp --allow-root --path=/wp core download \
 RUN rm -rf /wp/wp-content/plugins/akismet /wp/wp-content/plugins/hello.php
 
 ADD wordpress-anywhere.patch /tmp/
-RUN cd /; git apply < /tmp/wordpress-anywhere.patch
+RUN set -e -x; cd /; git apply < /tmp/wordpress-anywhere.patch;          \
+    rm /tmp/wordpress-anywhere.patch
 
 ADD install-plugins-and-themes.py /tmp/
 # Get all plugins and themes ("auto" mode) from the jahia2wp manifest:
 RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+
+######################################################################
+# Manually override themes and plugins
+######################################################################
+
 # jahia2wp uses an ancient version of Polylang (for reasons that have
 # no bearing on the task at hand). Upgrade it:
 RUN set -e -x;                                                           \
@@ -97,4 +103,7 @@ RUN set -e -x;                                                           \
     rm -rf polylang;                                                     \
     /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
 
-RUN rm -rf /tmp/install-plugins* /tmp/wordpress-anywhere.patch
+# For importing sites from the WXR XML format (e.g. "ventilation" operations)
+RUN /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
+
+RUN rm -rf /tmp/install-plugins*
