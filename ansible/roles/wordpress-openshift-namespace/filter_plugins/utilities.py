@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 """Toolbelt of Jinja filters for the wordpress-openshift_namespace role."""
 
 
