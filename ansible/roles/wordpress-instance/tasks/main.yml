@@ -54,6 +54,7 @@
 #################################################################
 
 - name: "Set up / revert “symlink” serving discipline"
+  when: wp_can.configure
   tags:
     - never
     - symlink
@@ -62,8 +63,24 @@
   # to propagate tags.
   include_tasks: "symlink.yml"
 
-# These tasks are used in "ventilation" (site move) workflows only
-- name: "Dump WXR"
+- name: Configure
+  when: wp_can.configure
+  tags:
+    - config
+    # Also forced if symlinking / unsymlinking — Otherwise the site
+    # won't work:
+    - symlink
+    - unsymlink
+  include_tasks:    # Required because of the "when" clause
+    file: "configure.yml"
+    # Because `include_tasks` is dynamic, tags don't auto-inherit.
+    apply:
+      tags: ["config", "symlink", "unsymlink"]
+
+################################
+# "Ventilation"-related tasks
+################################
+- name: "Dump to WXR for ventilation"
   import_tasks: "dump.yml"
   tags:
     - never
