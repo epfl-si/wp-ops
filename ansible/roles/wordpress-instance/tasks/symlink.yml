@@ -15,6 +15,7 @@
 
 - name: "Make symlinks"
   tags: symlink
+  when: wp_can.configure or ansible_check_mode
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   shell:
     cmd: |
@@ -42,6 +43,7 @@
 
 - name: "Unsymlink (copy from /wp)"
   tags: unsymlink
+  when: wp_can.configure or ansible_check_mode
   check_mode: no
   shell:
     cmd: |
