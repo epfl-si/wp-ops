@@ -10,6 +10,10 @@
 # Being (or not being) a symlinked site also has consequences w.r.t.
 # templated configuration files; see configure.yml for details.
 
+# Required by _symlinks_muplugins_yaml in symlink-vars.yml:
+- include_vars: category-vars.yml
+  tags: always
+
 - include_vars: symlink-vars.yml
   tags: always
 

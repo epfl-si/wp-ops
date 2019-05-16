@@ -45,19 +45,28 @@ symlinks_themes:
   - wp-theme-2018
   - wp-theme-light
 
-# TODO: actually, It Depends™
-symlinks_muplugins:
+_symlinks_muplugins_always:
   - EPFL_custom_editor_menu.php
   - EPFL_disable_comments.php
-  - EPFL_enable_updates_automatic.php
   - EPFL_google_analytics_hook.php
-  - EPFL_installs_locked.php
   - EPFL_jahia_redirect.php
   - EPFL_quota_loader.php
   - EPFL_stats_loader.php
   - epfl-functions.php
   - epfl-quota
   - epfl-stats
+
+_symlinks_muplugins_managed:
+     - EPFL_enable_updates_automatic.php
+     - EPFL_installs_locked.php
+
+_symlinks_muplugins_yaml: |
+  {{ _symlinks_muplugins_always | to_nice_yaml }}
+  {% if wp_is_managed %}{#    From category-vars.yml  #}
+  {{ _symlinks_muplugins_managed | to_nice_yaml }}
+  {% endif %}
+
+symlinks_muplugins: "{{ _symlinks_muplugins_yaml | from_yaml }}"
 
 symlinks_all_paths: "{{ symlinks_paths_wp                               \
     + ('wp-content/plugins/%s'    | map_format(symlinks_plugins))       \
