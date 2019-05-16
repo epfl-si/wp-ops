@@ -25,11 +25,13 @@ iwait() {
 
 ################################################
 
+/usr/sbin/sshd -D &
+SSHD_PID=$!
+
 if [ -d "$SECRETS_DIR" ]; then
     sync_keys
 
-    /usr/sbin/sshd -D &
-    SSHD_PID=$!
+
     while iwait -t 300 -r /var/lib/secrets/ssh; do
         sync_keys
         kill -HUP $SSHD_PID  # Will fail, and cause the whole script to exit,
