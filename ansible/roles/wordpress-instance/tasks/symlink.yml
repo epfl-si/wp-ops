@@ -23,27 +23,43 @@
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   shell:
     cmd: |
+      {{ lookup("template", "symlinks-lib.sh") }}
+
       set -e -x
+
+      if make_symlinks_to_wp {{ symlinks_all_paths | join(" ") }}; then :; else
+          case "$?" in
+              1) echo "SYMLINKS_CHANGED" ;;
+              *) exit $?                 ;;
+          esac
+      fi
+
+      # Trim all files at top level, except for a whitelist
       cd "{{ wp_dir }}"
-      changed=
-      ansible_check_mode="{{ ansible_check_mode }}"
-      for path in {{ symlinks_all_paths | join(" ") }}; do
-        target="/wp/$path"
-        [ "$(readlink $path 2>/dev/null || true)" = $target ] && continue
+      files_trimmed=
+      for top_level_file in *; do
+          case "$top_level_file" in
+              .ht*) continue ;;
+              wp-config.php|index.php) continue ;;
+              {{ symlinks_all_paths | join('|') }}) continue ;;
+          esac
+          if [ -d "$top_level_file" ]; then continue; fi
 
-        if [ -z "$changed" ]; then
-          echo SYMLINK_CHANGED
-          changed=1
-        fi
-        [ "$ansible_check_mode" = "True" ] && continue
-
-        rm -rf "$path"
-        dir="$(dirname "$path")"
-        test -d "$dir" || mkdir -p "$dir"
-        ln -s "$target" "$path"
+          if [ -z "$files_trimmed" ]; then
+              echo FILES_TRIMMED
+              files_trimmed=1
+          fi
+      {% if ansible_check_mode %}
+          echo >&2 "$top_level_file needs trimming"
+      {% else %}
+          rm -f "$top_level_file"
+      {% endif %}
       done
+      
   register: _symlink_script
-  changed_when: '"SYMLINK_CHANGED" in _symlink_script.stdout'
+  changed_when:
+    - '"SYMLINKS_CHANGED" in _symlink_script.stdout'
+    - '"FILES_TRIMMED" in _symlink_script.stdout'
 
 - name: "Unsymlink (copy from /wp)"
   tags: unsymlink
