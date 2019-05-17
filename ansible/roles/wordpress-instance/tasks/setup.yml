@@ -33,3 +33,10 @@
       {{ (_wp_plugin_list_json.stdout if _wp_plugin_list_json.rc == 0
                                       else '[]')
          | from_json }}
+
+- tags: ["never", "_debug_setup"]
+  debug:
+    msg:
+      - "{{ wp_is_installed }}"
+      - "{{ wp_is_symlinked }}"
+      - "{{ wp_plugin_list }}"
