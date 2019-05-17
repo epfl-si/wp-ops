@@ -32,7 +32,27 @@
               *) exit $?                 ;;
           esac
       fi
+  register: _symlink_script
+  changed_when: '"SYMLINKS_CHANGED" in _symlink_script.stdout'
 
+- name: "Set wp_is_symlinked"
+  tags: symlink
+  set_fact:
+    wp_is_symlinked: true
+
+# Minimize downtime:
+- name: "Reconfigure"
+  tags: symlink
+  include_tasks:
+    file: configure.yml
+    apply:
+      tags: ["symlink"]
+
+- name: "Clean up top-level files on symlinked site"
+  tags: symlink
+  check_mode: no
+  shell:
+    cmd: |
       # Trim all files at top level, except for a whitelist
       cd "{{ wp_dir }}"
       files_trimmed=
@@ -55,10 +75,8 @@
       {% endif %}
       done
       
-  register: _symlink_script
-  changed_when:
-    - '"SYMLINKS_CHANGED" in _symlink_script.stdout'
-    - '"FILES_TRIMMED" in _symlink_script.stdout'
+  register: _symlink_cleanup_script
+  changed_when: '"FILES_TRIMMED" in _symlink_cleanup_script.stdout'
 
 - name: "Unsymlink (copy from /wp)"
   tags: unsymlink
