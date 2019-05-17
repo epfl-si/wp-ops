@@ -8,8 +8,14 @@
 - include_vars: wp-destructive.yml
   tags: always
 
+- name: Ansible pre-configuration
+  tags: always
+  set_fact:
+    ansible_user: www-data
+    ansible_python_interpreter: "/srv/{{wp_env}}/venv/bin/python"
+
 - name: WordPress facts
-  import_tasks: setup.yml
+  import_tasks: facts.yml
   tags: always
 
 - name: "Backup"

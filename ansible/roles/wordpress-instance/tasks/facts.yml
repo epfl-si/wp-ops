@@ -1,16 +1,4 @@
-# Ansible pre-configuration and fact gathering
-#
-# The name is to be understood in the Ansible sense (like the `setup`
-# task); the tasks in this file don't actually set up or mutate
-# anything.
-
-- name: Ansible pre-configuration
-  set_fact:
-    ansible_user: www-data
-    ansible_python_interpreter: "/srv/{{wp_env}}/venv/bin/python"
-
-- name: Gathering facts (delayed after Ansible pre-configuration)
-  setup:
+# Collect WordPress-specific Ansible facts
 
 - name: Inspect WordPress installed files
   stat:
@@ -34,7 +22,7 @@
                                       else '[]')
          | from_json }}
 
-- tags: ["never", "_debug_setup"]
+- tags: ["never", "_debug_facts"]
   debug:
     msg:
       - "{{ wp_is_installed }}"

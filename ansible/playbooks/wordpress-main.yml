@@ -2,7 +2,7 @@
 
 - name: Initial checks
   hosts: all
-  gather_facts: no   # Not yet
+  gather_facts: no    # Ansible facts are useless for this play
   tasks:
     - name: Check Ansible version
       run_once: true
@@ -18,7 +18,7 @@
 # them on standard output)
 - name: WordPress instances
   hosts: all-wordpresses
-  gather_facts: no   # Delayed, see ../roles/wordpress-instance/tasks/setup.yml
+  gather_facts: no   # But see ../roles/wordpress-instance/tasks/facts.yml
   roles:
     - role: ../roles/wordpress-instance
 
@@ -26,6 +26,6 @@
 # namespaces, not hosts
 - name: OpenShift namespaces
   hosts: all-openshift-namespaces
-  gather_facts: no   # Useless here, afaict
+  gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/wordpress-openshift-namespace
