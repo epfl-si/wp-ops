@@ -19,7 +19,6 @@
 
 - name: "Make symlinks"
   tags: symlink
-  when: wp_can.configure or ansible_check_mode
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   shell:
     cmd: |
@@ -88,6 +87,16 @@
   register: _unsymlink_script
   changed_when: '"NO_SYMLINKS" not in _unsymlink_script.stdout'
 
-- name: Refresh wp_is_symlinked fact
-  tags: always
-  import_tasks: setup.yml
+- name: "Reset wp_is_symlinked"
+  tags: unsymlink
+  set_fact:
+    wp_is_symlinked: false
+
+# Minimize downtime:
+- name: "Reconfigure"
+  tags: unsymlink
+  include_tasks:
+    file: configure.yml
+    apply:
+      tags: ["unsymlink"]
+

@@ -41,7 +41,7 @@
   changed_when: false
 
 - name: "Set up / revert “symlink” serving discipline"
-  when: wp_can.configure
+  when: wp_can.configure or ansible_check_mode
   tags:
     - never
     - symlink
@@ -56,15 +56,11 @@
   when: wp_can.configure
   tags:
     - config
-    # Also forced if symlinking / unsymlinking — Otherwise the site
-    # won't work:
-    - symlink
-    - unsymlink
   include_tasks:    # Required because of the "when" clause
     file: "configure.yml"
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
-      tags: ["config", "symlink", "unsymlink"]
+      tags: ["config"]
 
 ################################
 # "Ventilation"-related tasks
