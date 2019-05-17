@@ -1,4 +1,8 @@
-# Ansible pre-configuration and fact gathering 
+# Ansible pre-configuration and fact gathering
+#
+# The name is to be understood in the Ansible sense (like the `setup`
+# task); the tasks in this file don't actually set up or mutate
+# anything.
 
 - name: Ansible pre-configuration
   set_fact:
@@ -8,7 +12,7 @@
 - name: Gathering facts (delayed after Ansible pre-configuration)
   setup:
 
-- name: Examine WordPress install
+- name: Inspect WordPress installed files
   stat:
     path: "{{ item }}"
   with_items:
@@ -16,6 +20,16 @@
     - "{{ wp_path_wpadmin }}"
   register: _wp_stat
 
+- name: Inspect WordPress plug-ins
+  shell: wp --path="{{ wp_dir }}" plugin list --format=json
+  register: _wp_plugin_list_json
+  changed_when: false
+  failed_when: false
+
 - set_fact:
     wp_is_installed: "{{ _wp_stat.results[0].stat.exists }}"
     wp_is_symlinked: "{{ _wp_stat.results[1].stat.islnk }}"
+    wp_plugin_list: >-
+      {{ (_wp_plugin_list_json.stdout if _wp_plugin_list_json.rc == 0
+                                      else '[]')
+         | from_json }}
