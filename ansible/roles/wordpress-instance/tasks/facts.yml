@@ -1,26 +1,81 @@
 # Collect WordPress-specific Ansible facts
 
-- name: Inspect WordPress installed files
-  stat:
-    path: "{{ item }}"
-  with_items:
-    - "{{ wp_path_config_php }}"
-    - "{{ wp_path_wpadmin }}"
-  register: _wp_stat
+# The TL;DR of this charade is that Ansible's set_fact, well, doesn't.
+# You do have to go through a fact script on the remote end if you
+# want to share facts across the inventory (through
+# hostvars[some_hostname]["ansible_facts"]["ansible_local"]). See
+# https://medium.com/@jezhalford/ansible-custom-facts-1e1d1bf65db8
+- name: Fact directory
+  tags: always
+  # Speed matters here - Since we must make the facts available to the
+  # rest of the Ansible code no matter the tags (that's what tags:
+  # always means on the line above), we must strive to keep the
+  # execution time small, lest even the simple tasks get penalized.
+  # That's why we must create the facts.d and its inhabiting scripts
+  # in the same task.
+  shell: |
+    set -e -x
+    exec 3>&1 >&2
 
-- name: Inspect WordPress plug-ins
-  shell: wp --path="{{ wp_dir }}" plugin list --format=json
-  register: _wp_plugin_list_json
+    factsdir="$(mktemp -d ansible-wordpress-XXXXXX-facts.d)"
+    cleanup_on_error() {
+      [ -n "$factsdir" ] && rm -rf "$factsdir"
+    }
+    trap cleanup_on_error EXIT INT QUIT HUP
+
+    make_fact_script() {
+      cat >"$factsdir/$1.fact"
+      chmod 755 "$1"
+    }
+
+    make_fact_script wp_is_installed <<WP_INSTALLED_SCRIPT
+    if [ -f "{{ wp_path_config_php }}" ]; then
+      echo true
+    else
+      echo false
+    fi
+    WP_INSTALLED_SCRIPT
+
+    make_fact_script wp_is_symlinked <<WP_SYMLINKED_SCRIPT
+    if [ -f "{{ wp_path_wpadmin }}" ]; then
+      echo true
+    else
+      echo false
+    fi
+    WP_SYMLINKED_SCRIPT
+
+    make_fact_script wp_plugin_list <<WP_PLUGINS_SCRIPT
+    wp --path="{{ wp_dir }}" plugin list --format=json
+    WP_PLUGINS_SCRIPT
+
+    echo "$factsdir" >&3
+    unset factsdir  # So that cleanup_on_error() won't
+  register: _facts_dir
   changed_when: false
-  failed_when: false
 
-- set_fact:
-    wp_is_installed: "{{ _wp_stat.results[0].stat.exists }}"
-    wp_is_symlinked: "{{ _wp_stat.results[1].stat.islnk }}"
-    wp_plugin_list: >-
-      {{ (_wp_plugin_list_json.stdout if _wp_plugin_list_json.rc == 0
-                                      else '[]')
-         | from_json }}
+- setup:
+    gather_subset: "!all"    # pronounced "f..k-all", as we only
+                             # care about our own facts
+    fact_path: "{{ _facts_tmpdir.path }}"
+  tags: always
+
+############# Debugging support #############################
+# Pass -t _debug_facts on the command line to enable this section
+
+- tags: ["never", "_debug_facts"]
+  shell: |
+    "{{ _facts_tmpdir.path }}/wordpress.fact"
+  register: _run_fact_scripts_directly
+  changed_when: false
+
+- tags: ["never", "_debug_facts"]
+  debug:
+    msg: "{{ _run_fact_scripts_directly }}"
+
+- tags: ["never", "_debug_facts"]
+  debug:
+    msg:
+      - "{{ hostvars[inventory_hostname] }}"
 
 - tags: ["never", "_debug_facts"]
   debug:
@@ -28,3 +83,16 @@
       - "{{ wp_is_installed }}"
       - "{{ wp_is_symlinked }}"
       - "{{ wp_plugin_list }}"
+
+
+############# All done, clean up #############################
+
+# That's perhaps a matter of taste but I'd rather have to create and
+# clean up all these yadda-yadda-facts.d directories within a few
+# seconds, than have them litter the entire serving tree.
+- name: Delete fact directory
+  tags: always
+  file:
+    path: "{{ _facts_dir.stdout }}"
+    state: absent
+  changed_when: false
