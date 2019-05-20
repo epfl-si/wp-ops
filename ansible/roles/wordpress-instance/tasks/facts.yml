@@ -60,8 +60,14 @@
   changed_when: false
 
 - setup:
-    gather_subset: "!all"    # pronounced "f..k-all", as we only
-                             # care about our own facts
+    gather_subset:
+      # "Standard" facts are just noise to us.
+      # ⚠ Running `setup` with a limited `gather_subset` won't clean
+      # up the fact cache for you, which can be confusing under `-t
+      # _debug_facts` - Try `rm -rf ~/.ansible/facts`
+      - "!all"
+      - "!min"
+      - local
     fact_path: "{{ _facts_dir.stdout }}"
   tags: always
 
