@@ -50,6 +50,7 @@
 
     echo "$factsdir" >&3
     unset factsdir  # So that cleanup_on_error() won't
+    # '  # https://github.com/ansible/ansible/issues/28674 - Sad
   register: _facts_dir
   changed_when: false
 
