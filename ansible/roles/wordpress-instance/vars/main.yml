@@ -34,3 +34,8 @@ wp_base_url: "https://{{ wp_hostname }}/{{ wp_path }}"
 
 wp_themes_dir:  "{{ wp_dir }}/wp-content/themes"
 wp_plugins_dir: "{{ wp_dir }}/wp-content/plugins"
+
+# Shortcuts to facts collected by ../tasks/facts.yml
+wp_is_installed: "{{ ansible_facts.ansible_local.wp_is_installed }}"
+wp_is_symlinked: "{{ ansible_facts.ansible_local.wp_is_symlinked }}"
+wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
