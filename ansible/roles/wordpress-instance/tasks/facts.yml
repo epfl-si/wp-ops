@@ -66,30 +66,27 @@
   tags: always
 
 ############# Debugging support #############################
-# Pass -t _debug_facts on the command line to enable this section
+# Pass `-t _debug_facts` or `-t _debug2_facts` on the command line to
+# enable this section
 
-- tags: ["never", "_debug_facts"]
+- tags: ["never", "_debug2_facts"]
+  name: Run fact scripts directly for debug
   shell: |
-    "{{ _facts_dir.stdout }}/wordpress.fact"
+    set -e -x
+    for script in {{ _facts_dir.stdout }}/*.fact; do sh -x $script; done
   register: _run_fact_scripts_directly
   changed_when: false
 
-- tags: ["never", "_debug_facts"]
+- tags: ["never", "_debug2_facts"]
+  name: Result of above (_run_fact_scripts_directly)
   debug:
     msg: "{{ _run_fact_scripts_directly }}"
 
-- tags: ["never", "_debug_facts"]
+- tags: ["never", "_debug_facts", "_debug2_facts"]
+  name: Debug ansible_facts
   debug:
     msg:
-      - "{{ hostvars[inventory_hostname] }}"
-
-- tags: ["never", "_debug_facts"]
-  debug:
-    msg:
-      - "{{ wp_is_installed }}"
-      - "{{ wp_is_symlinked }}"
-      - "{{ wp_plugin_list }}"
-
+      - '{{ ansible_facts }}'
 
 ############# All done, clean up #############################
 
@@ -97,7 +94,7 @@
 # clean up all these yadda-yadda-facts.d directories within a few
 # seconds, than have them litter the entire serving tree.
 - name: Delete fact directory
-  tags: always
+  when: '"_debug2_facts" not in ansible_run_tags'
   file:
     path: "{{ _facts_dir.stdout }}"
     state: absent
