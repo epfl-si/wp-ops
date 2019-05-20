@@ -69,8 +69,10 @@
       tags: ["config"]
 
 ################################
-# "Ventilation"-related tasks
+# Special-purpose tasks
 ################################
+
+# "Ventilation"-related
 - name: "Dump to WXR for ventilation"
   import_tasks: "dump.yml"
   tags:
@@ -81,3 +83,12 @@
   tags:
     - never
     - undump
+
+- name: CSV inventory report
+  tags:
+    - never
+    - reportcsv
+  local_action:
+    module: copy
+    dest: "./report.csv"
+    content: '{{ hostvars | wp_inventory_csv_report }}'
