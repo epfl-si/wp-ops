@@ -18,7 +18,7 @@
   import_tasks: facts.yml
   tags: always
 
-- name: "Backup"
+- name: Backup
   import_tasks: "backup.yml"
   tags:
     - never  # That is, skip unless "-t backup" or "-t wipe" is
@@ -26,7 +26,7 @@
     - wipe
     - backup
 
-- name: "Wipe"
+- name: Wipe
   import_tasks: "wipe.yml"
   tags:
     - never
