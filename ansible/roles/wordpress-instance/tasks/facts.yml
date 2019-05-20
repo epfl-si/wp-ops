@@ -7,57 +7,62 @@
 # https://medium.com/@jezhalford/ansible-custom-facts-1e1d1bf65db8
 - name: Fact directory
   tags: always
-  # Speed matters here - Since we must make the facts available to the
-  # rest of the Ansible code no matter the tags (that's what tags:
-  # always means on the line above), we must strive to keep the
-  # execution time small, lest even the simple tasks get penalized.
-  # That's why we must create the facts.d and its inhabiting scripts
-  # in the same task.
-  shell: |
-    set -e -x
-    exec 3>&1 >&2
+  # Speed matters here, when running short tasks (with -t) - We don't
+  # want (mandatory) facts collection time to dominate the execution
+  # time in that case, so we want to populate the whole facts.d
+  # directory in a single task.
+  shell:
+    # Must use undocumented "cmd" parameter to ward off spurious
+    # indents that break here-docs - See
+    # https://stackoverflow.com/a/40230416/435004
+    cmd: |
+      set -e -x
+      exec 3>&1 >&2
 
-    factsdir="$(mktemp -d ansible-wordpress-XXXXXX-facts.d)"
-    cleanup_on_error() {
-      [ -n "$factsdir" ] && rm -rf "$factsdir"
-    }
-    trap cleanup_on_error EXIT INT QUIT HUP
+      factsdir="$(mktemp -d "/tmp/wordpress-XXXXXX-facts.d")"
+      cleanup_on_error() {
+        if [ -n "$factsdir" ]; then rm -rf "$factsdir"; fi
+      }
+      trap cleanup_on_error EXIT INT QUIT HUP
 
-    make_fact_script() {
-      cat >"$factsdir/$1.fact"
-      chmod 755 "$1"
-    }
+      make_fact_script() {
+        local scriptname
+        scriptname="$factsdir/$1.fact"
+        (echo "#!/bin/sh"; echo) > "$scriptname"
+        cat >> "$scriptname"
+        if ! chmod 755 "$scriptname"; then echo "OUCH"; fi
+      }
 
-    make_fact_script wp_is_installed <<WP_INSTALLED_SCRIPT
-    if [ -f "{{ wp_path_config_php }}" ]; then
-      echo true
-    else
-      echo false
-    fi
-    WP_INSTALLED_SCRIPT
+      make_fact_script wp_is_installed <<WP_INSTALLED_SCRIPT
+      if [ -f "{{ wp_path_config_php }}" ]; then
+        echo true
+      else
+        echo false
+      fi
+      WP_INSTALLED_SCRIPT
 
-    make_fact_script wp_is_symlinked <<WP_SYMLINKED_SCRIPT
-    if [ -f "{{ wp_path_wpadmin }}" ]; then
-      echo true
-    else
-      echo false
-    fi
-    WP_SYMLINKED_SCRIPT
+      make_fact_script wp_is_symlinked <<WP_SYMLINKED_SCRIPT
+      if [ -f "{{ wp_path_wpadmin }}" ]; then
+        echo true
+      else
+        echo false
+      fi
+      WP_SYMLINKED_SCRIPT
 
-    make_fact_script wp_plugin_list <<WP_PLUGINS_SCRIPT
-    wp --path="{{ wp_dir }}" plugin list --format=json
-    WP_PLUGINS_SCRIPT
+      make_fact_script wp_plugin_list <<WP_PLUGINS_SCRIPT
+      wp --path="{{ wp_dir }}" plugin list --format=json
+      WP_PLUGINS_SCRIPT
 
-    echo "$factsdir" >&3
-    unset factsdir  # So that cleanup_on_error() won't
-    # '  # https://github.com/ansible/ansible/issues/28674 - Sad
+      echo "$factsdir" >&3
+      unset factsdir  # So that cleanup_on_error() won't
+      # '  # https://github.com/ansible/ansible/issues/28674 - Sad
   register: _facts_dir
   changed_when: false
 
 - setup:
     gather_subset: "!all"    # pronounced "f..k-all", as we only
                              # care about our own facts
-    fact_path: "{{ _facts_tmpdir.path }}"
+    fact_path: "{{ _facts_dir.stdout }}"
   tags: always
 
 ############# Debugging support #############################
@@ -65,7 +70,7 @@
 
 - tags: ["never", "_debug_facts"]
   shell: |
-    "{{ _facts_tmpdir.path }}/wordpress.fact"
+    "{{ _facts_dir.stdout }}/wordpress.fact"
   register: _run_fact_scripts_directly
   changed_when: false
 
