@@ -105,8 +105,7 @@ class ReportModel(object):
                 return wp_plugin_list_entry["status"] == "must-use"
 
 
-
-################################  TEST SUITE ###########################
+# TEST SUITE #########################################################
 if __name__ == '__main__':
     hostvars = {
         "www-ventil2": {
