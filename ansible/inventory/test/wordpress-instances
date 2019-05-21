@@ -39,7 +39,7 @@ sub categorize {
     $wp_env eq "form"       ? "formation" :
     $wp_env =~ m/^unm-/     ? "unmanaged" :
                               $wp_env;
-  return "prod-$cat_nickname";
+  return "test-$cat_nickname";
 }
 
 =for Perl wizards only beyond this point =====================================
@@ -86,10 +86,10 @@ sub collect_wordpress_installs_over_ssh {
   while(<$ssh_fd>) {
     chomp;
     do { warn "Bizarre line in $ssh_mantra: $_"; next } unless
-      my ($wp_env, $hostname, $path) = m|/srv/(.*)/(.*)/htdocs/(.*)wp-config.php$|;
+      my ($wp_env, $hostname, $wp_path) = m|/srv/([^/]*)/([^/]*)/htdocs/(.*?)/?wp-config.php$|;
 
     push @retval,
-      { wp_env => $wp_env, wp_hostname => $hostname, wp_path => $path };
+      { wp_env => $wp_env, wp_hostname => $hostname, wp_path => $wp_path };
   }
   return @retval;
 }
@@ -103,8 +103,8 @@ sub as_ansible_struct {
 
   # https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
   return {
-    "all-wordpresses" => { "children" => [ "prod-wordpresses" ] },
-    "prod-wordpresses" => {
+    "all-wordpresses" => { "children" => [ "test-wordpresses" ] },
+    "test-wordpresses" => {
       "children" => [ keys %$wordpresses ]
     },
 
