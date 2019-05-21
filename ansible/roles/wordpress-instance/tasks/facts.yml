@@ -32,7 +32,7 @@
         if ! chmod 755 "$scriptname"; then echo "OUCH"; fi
       }
 
-      make_fact_script wp_is_installed <<WP_INSTALLED_SCRIPT
+      make_fact_script wp_is_installed <<'WP_INSTALLED_SCRIPT'
       if [ -f "{{ wp_path_config_php }}" ]; then
         echo true
       else
@@ -40,7 +40,7 @@
       fi
       WP_INSTALLED_SCRIPT
 
-      make_fact_script wp_is_symlinked <<WP_SYMLINKED_SCRIPT
+      make_fact_script wp_is_symlinked <<'WP_SYMLINKED_SCRIPT'
       if [ -f "{{ wp_path_wpadmin }}" ]; then
         echo true
       else
@@ -48,7 +48,7 @@
       fi
       WP_SYMLINKED_SCRIPT
 
-      make_fact_script wp_plugin_list <<WP_PLUGINS_SCRIPT
+      make_fact_script wp_plugin_list <<'WP_PLUGINS_SCRIPT'
       wp --path="{{ wp_dir }}" plugin list --format=json | jq .
       WP_PLUGINS_SCRIPT
 
