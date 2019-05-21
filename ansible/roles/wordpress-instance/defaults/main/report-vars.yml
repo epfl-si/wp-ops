@@ -1,0 +1,3 @@
+# Where to output the report made by `wpsible -t reportcsv`
+wpsible_cwd: "."
+report_csv_out: "{{ wpsible_cwd }}/report.csv"

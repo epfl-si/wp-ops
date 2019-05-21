@@ -88,5 +88,5 @@
   run_once: true
   local_action:
     module: copy
-    dest: "./report.csv"
+    dest: "{{ report_csv_out }}"
     content: '{{ hostvars | wp_inventory_csv_report }}'

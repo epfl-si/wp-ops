@@ -67,7 +67,9 @@ set -e
 case "$mode" in
     ansible-playbook)
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
-        ansible-playbook $playbook_flags $inventories "$@" playbooks/wordpress-main.yml
+        ansible-playbook $playbook_flags $inventories "$@" \
+                         -e "wpsible_cwd=$OLDPWD" \
+                         playbooks/wordpress-main.yml
         ;;
     ansible)
         ansible $inventories $ansible_flags $common_flags "$@"
