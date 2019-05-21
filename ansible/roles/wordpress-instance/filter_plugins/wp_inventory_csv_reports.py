@@ -33,8 +33,12 @@ class FilterModule(object):
 
     def plugin_versions_report(self, hostvars, with_header_line=True):
         m = ReportModel(hostvars)
-        fields = ['name', 'group'] + ['plugin_version_%s' % n
-                                      for n in m.all_plugin_names]
+
+        def get_column_name(plugin_name):
+            return 'plugin_version_%s' % plugin_name
+
+        fields = ['name', 'group'] + [get_column_name(p.name)
+                                      for p in m.plugins]
 
         output = _StringIO()
         csv = CSV.DictWriter(output, fieldnames=fields)
@@ -44,7 +48,7 @@ class FilterModule(object):
         for name, host in m.iterhosts():
             csvrow = {'name': name, 'group': host.group}
             for p in host.plugins:
-                csvrow['plugin_version_%s' % p.name] = 'v%s' % p.version
+                csvrow[get_column_name(p.name)] = 'v%s' % p.version
             csv.writerow(csvrow)
 
         return output.getvalue()
@@ -80,9 +84,16 @@ class ReportModel(object):
         self.hostvars = hostvars
 
     @memoize_property
-    def all_plugin_names(self):
-        return sorted(set(p.name for _unused, h in self.iterhosts()
-                          for p in h.plugins))
+    def plugins(self):
+        plugins = {}
+        for _unused, h in self.iterhosts():
+            for p in h.plugins:
+                if p.name not in plugins:
+                    plugins[p.name] = self.PluginColumn(p.name)
+                    plugins[p.name].use_count = 0
+                plugins[p.name].use_count += 1
+
+        return sorted(plugins.values(), key=lambda p: p.use_count, reverse=True)
 
     def iterhosts(self):
         for host, vars in self.hostvars.items():
@@ -91,6 +102,7 @@ class ReportModel(object):
                 yield host, obj
 
     class Host(object):
+        """Model for a host (a line in the CSV reports)"""
         @classmethod
         def construct(cls, name, vars):
             if "ansible_facts" not in vars:
@@ -128,6 +140,7 @@ class ReportModel(object):
                 self.version = wp_plugin_list_entry["version"]
 
         class Plugin(PluginBase):
+            """Model for one plugin in one host"""
             @classmethod
             def fits(cls, wp_plugin_list_entry):
                 return wp_plugin_list_entry["status"] == "active"
@@ -136,6 +149,16 @@ class ReportModel(object):
             @classmethod
             def fits(cls, wp_plugin_list_entry):
                 return wp_plugin_list_entry["status"] == "must-use"
+
+    class PluginColumn(object):
+        """Model for a column in the wp_plugin_versions_csv_report
+
+        Note that this is not the same as a Host.Plugin; this class
+        represents the set of all plugins sharing the same name,
+        across all hosts.
+        """
+        def __init__(self, name):
+            self.name = name
 
 
 # TEST SUITE #########################################################
