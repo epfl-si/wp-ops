@@ -6,10 +6,9 @@
     that:
       - inventory_hostname in wp_destructive
       - wp_can.write_data
-      - wp_restore_from is search("^backup")
+      - wp_restore_from is defined
 
-- include: restore-over-ssh.yml
-  when: wp_restore_from == "backup-prod"
+- import_tasks: restore-over-ssh.yml
 
 # TODO: There should be a choice to restore from other sources, such as
 # local tarball, possibly in sti-test.epfl.ch format

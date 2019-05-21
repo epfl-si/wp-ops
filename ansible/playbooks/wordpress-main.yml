@@ -18,16 +18,7 @@
 # them on standard output)
 - name: WordPress instances
   hosts: all-wordpresses
-  gather_facts: no   # Delayed again until "setup:" below
-  pre_tasks:
-    - name: Ansible pre-configuration
-      set_fact:
-        ansible_user: www-data
-        ansible_python_interpreter: "/srv/{{wp_env}}/venv/bin/python"
-    - name: Create and use remote temporary directory (if required)
-      include_tasks: '{{ "../tasks/remote-tempdir.yml" if play_dump is match("yes") else "../tasks/noop.yml" }}'
-    - name: Gathering facts (delayed after Ansible pre-configuration)
-      setup:
+  gather_facts: no   # Delayed, see ../roles/wordpress-instance/tasks/setup.yml
   roles:
     - role: ../roles/wordpress-instance
 

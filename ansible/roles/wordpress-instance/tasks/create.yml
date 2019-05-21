@@ -1,4 +1,6 @@
 # Create a WordPress site out of thin air
+#
+# TODO: This uses jahia2wp and we don't want to do things this way anymore.
 
 - include_vars: jahia2wp-vars.yml
 - include_vars: wp-destructive.yml
@@ -22,5 +24,5 @@
   shell: "{{ jahia2wp_shell }} generate {{ wp_env }} {{ jahia2wp_url }} --extra-config={{ jahia2wp_generate_yaml_tmp.dest }}"
   environment: "{{ jahia2wp_env }}"
 
-- include: generate-quick.yml
+- include_tasks: generate-quick.yml
   when: wp_restore_from != 'generate'

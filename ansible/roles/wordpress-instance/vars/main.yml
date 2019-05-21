@@ -22,6 +22,10 @@ wp_htaccess_path: "{{ wp_dir }}/.htaccess"
 # The path to the wp-config.php file
 wp_path_config_php: "{{ wp_dir }}/wp-config.php"
 
+# The path to the wp-admin directory - we stat(2) this to determine
+# whether a given site is "symlinked"
+wp_path_wpadmin: "{{ wp_dir }}/wp-admin"
+
 # The prefix to invoke the WP-CLI for this WordPress instance
 wp_cli_command: "wp --path={{ wp_dir }}"
 
