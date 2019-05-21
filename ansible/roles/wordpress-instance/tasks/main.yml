@@ -10,7 +10,7 @@
 
 - name: WordPress facts
   import_tasks: facts.yml
-  tags: always
+  tags: facts
 
 - name: Backup
   import_tasks: "backup.yml"

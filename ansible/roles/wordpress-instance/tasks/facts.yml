@@ -6,7 +6,6 @@
 # hostvars[some_hostname]["ansible_facts"]["ansible_local"]). See
 # https://medium.com/@jezhalford/ansible-custom-facts-1e1d1bf65db8
 - name: Fact directory
-  tags: always
   # Speed matters here, when running short tasks (with -t) - We don't
   # want (mandatory) facts collection time to dominate the execution
   # time in that case, so we want to populate the whole facts.d
@@ -69,27 +68,28 @@
       - "!min"
       - local
     fact_path: "{{ _facts_dir.stdout }}"
-  tags: always
 
 ############# Debugging support #############################
-# Pass `-t _debug_facts` or `-t _debug2_facts` on the command line to
-# enable this section
+# Pass `-t facts,_debug_facts` or `-t facts,_debug2_facts` on the
+# command line to enable this section
 
-- tags: ["never", "_debug2_facts"]
-  name: Run fact scripts directly for debug
+- name: Run fact scripts directly for debug
+  when: '"_debug2_facts" in ansible_run_tags'
   shell: |
     set -e -x
     for script in {{ _facts_dir.stdout }}/*.fact; do sh -x $script; done
   register: _run_fact_scripts_directly
   changed_when: false
 
-- tags: ["never", "_debug2_facts"]
-  name: Result of above (_run_fact_scripts_directly)
+- name: Result of above (_run_fact_scripts_directly)
+  when: '"_debug2_facts" in ansible_run_tags'
   debug:
     msg: "{{ _run_fact_scripts_directly }}"
 
-- tags: ["never", "_debug_facts", "_debug2_facts"]
-  name: Debug ansible_facts
+- name: Debug ansible_facts
+  when: >
+    "_debug_facts" in ansible_run_tags or
+    "_debug2_facts" in ansible_run_tags
   debug:
     msg:
       - '{{ ansible_facts }}'
