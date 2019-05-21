@@ -49,7 +49,7 @@
       WP_SYMLINKED_SCRIPT
 
       make_fact_script wp_plugin_list <<WP_PLUGINS_SCRIPT
-      wp --path="{{ wp_dir }}" plugin list --format=json
+      wp --path="{{ wp_dir }}" plugin list --format=json | jq .
       WP_PLUGINS_SCRIPT
 
       echo "$factsdir" >&3
