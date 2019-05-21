@@ -81,7 +81,7 @@
     - never
     - undump
 
-- name: CSV inventory report
+- name: CSV plug-in versions report
   tags:
     - never
     - reportcsv
@@ -89,4 +89,4 @@
   local_action:
     module: copy
     dest: "{{ report_csv_out }}"
-    content: '{{ hostvars | wp_inventory_csv_report }}'
+    content: '{{ hostvars | wp_plugin_versions_csv_report }}'

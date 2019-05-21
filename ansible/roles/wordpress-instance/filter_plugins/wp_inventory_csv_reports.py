@@ -28,22 +28,18 @@ WELL_KNOWN_GROUPS = [
 class FilterModule(object):
     def filters(self):
         return {
-            'wp_inventory_csv_report': self.make_report
+            'wp_plugin_versions_csv_report': self.plugin_versions_report
         }
 
-    def make_report(self, hostvars, with_header_line=True):
-        if (sys.version_info > (3, 0)):
-            output = io.StringIO()
-        else:
-            # https://stackoverflow.com/a/13120279/435004
-            output = io.BytesIO()
-
+    def plugin_versions_report(self, hostvars, with_header_line=True):
         m = ReportModel(hostvars)
         fields = ['name', 'group'] + ['plugin_version_%s' % n
                                       for n in m.all_plugin_names]
 
+        output = _StringIO()
         csv = CSV.DictWriter(output, fieldnames=fields)
-        csv.writeheader()
+        if with_header_line:
+            csv.writeheader()
 
         for name, host in m.iterhosts():
             csvrow = {'name': name, 'group': host.group}
@@ -52,6 +48,16 @@ class FilterModule(object):
             csv.writerow(csvrow)
 
         return output.getvalue()
+
+#############################################################################
+
+
+def _StringIO():
+    if (sys.version_info > (3, 0)):
+        return io.StringIO()
+    else:
+        # https://stackoverflow.com/a/13120279/435004
+        return io.BytesIO()
 
 
 class memoize:
