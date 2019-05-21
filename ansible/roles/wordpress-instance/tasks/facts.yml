@@ -49,7 +49,26 @@
       WP_SYMLINKED_SCRIPT
 
       make_fact_script wp_plugin_list <<'WP_PLUGINS_SCRIPT'
-      wp --path="{{ wp_dir }}" plugin list --format=json | jq .
+      maybe_json="$(wp --path="{{ wp_dir }}" plugin list --format=json)"
+      if echo "$maybe_json" | jq -e . ; then
+        exit 0
+      else
+        case "$?" in
+          4) : ;;  # Malformed JSON - Continues below
+          *) exit 0 ;;
+        esac
+      fi
+
+      python3 - <<PYTHON_MALFORMED_JSON
+
+      import json,sys
+      bad_json = """$maybe_json"""
+      print(json.dumps({
+        "_error": "\`wp --path={{ wp_dir }} plugin list --format=json\` produced unparseable JSON",
+        "_output_excerpt": bad_json[:160]
+      }))
+      PYTHON_MALFORMED_JSON
+
       WP_PLUGINS_SCRIPT
 
       echo "$factsdir" >&3

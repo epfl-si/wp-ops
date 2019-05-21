@@ -68,7 +68,8 @@ class ReportModel(object):
 
     def iterhosts(self):
         for host, vars in self.hostvars.items():
-            yield host, self.Host(host, vars["ansible_facts"]["ansible_local"])
+            if "ansible_local" in vars["ansible_facts"]:
+                yield host, self.Host(host, vars["ansible_facts"]["ansible_local"])
 
     class Host(object):
         def __init__(self, name, vars):
@@ -77,13 +78,15 @@ class ReportModel(object):
             self.plugins = []
             self.mu_plugins = []
 
-            for wp_plugin_list_entry in self.vars["wp_plugin_list"]:
-                for subclass, bucket in (
-                        (self.Plugin, self.plugins),
-                        (self.MustUsePlugin, self.mu_plugins)):
-                    if subclass.fits(wp_plugin_list_entry):
-                        bucket.append(
-                            subclass(wp_plugin_list_entry))
+            wp_plugin_list = self.vars.get("wp_plugin_list", None)
+            if wp_plugin_list and isinstance(wp_plugin_list, type([])):
+                for wp_plugin_list_entry in wp_plugin_list:
+                    for subclass, bucket in (
+                            (self.Plugin, self.plugins),
+                            (self.MustUsePlugin, self.mu_plugins)):
+                        if subclass.fits(wp_plugin_list_entry):
+                            bucket.append(
+                                subclass(wp_plugin_list_entry))
 
         class PluginBase(object):
             def __init__(self, wp_plugin_list_entry):
