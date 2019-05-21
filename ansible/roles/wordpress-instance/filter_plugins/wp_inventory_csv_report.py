@@ -12,6 +12,18 @@ EXAMPLES = """
     content: '{{ hostvars | wp_inventory_csv_report }}'
 """
 
+WELL_KNOWN_GROUPS = [
+    "prod-formation",
+    "prod-manager",
+    "prod-inside",
+    "prod-www",
+    "prod-subdomains",
+    "prod-sandbox",
+    "prod-labs",
+    "prod-unmanaged",
+    "test-int"
+]
+
 
 class FilterModule(object):
     def filters(self):
@@ -27,16 +39,16 @@ class FilterModule(object):
             output = io.BytesIO()
 
         m = ReportModel(hostvars)
-        fields = ['name'] + ['plugin_version_%s' % n
-                             for n in m.all_plugin_names]
+        fields = ['name', 'group'] + ['plugin_version_%s' % n
+                                      for n in m.all_plugin_names]
 
         csv = CSV.DictWriter(output, fieldnames=fields)
         csv.writeheader()
 
         for name, host in m.iterhosts():
-            csvrow = {'name': name}
+            csvrow = {'name': name, 'group': host.group}
             for p in host.plugins:
-                csvrow['plugin_version_%s' % p.name] = p.version
+                csvrow['plugin_version_%s' % p.name] = 'v%s' % p.version
             csv.writerow(csvrow)
 
         return output.getvalue()
@@ -68,17 +80,32 @@ class ReportModel(object):
 
     def iterhosts(self):
         for host, vars in self.hostvars.items():
-            if "ansible_local" in vars["ansible_facts"]:
-                yield host, self.Host(host, vars["ansible_facts"]["ansible_local"])
+            obj = self.Host.construct(host, vars)
+            if obj:
+                yield host, obj
 
     class Host(object):
-        def __init__(self, name, vars):
+        @classmethod
+        def construct(cls, name, vars):
+            if "ansible_facts" not in vars:
+                return
+            if "ansible_local" not in vars["ansible_facts"]:
+                return
+            obj = cls(name, vars["ansible_facts"]["ansible_local"])
+            for group in WELL_KNOWN_GROUPS:
+                if group in vars["group_names"]:
+                    obj.group = group
+                    break
+            return obj
+
+        def __init__(self, name, local_facts):
             self.name = name
-            self.vars = vars
+            self.local_facts = local_facts
+            self.group = "(Unknown)"  # But see "construct" above
             self.plugins = []
             self.mu_plugins = []
 
-            wp_plugin_list = self.vars.get("wp_plugin_list", None)
+            wp_plugin_list = self.local_facts.get("wp_plugin_list", None)
             if wp_plugin_list and isinstance(wp_plugin_list, type([])):
                 for wp_plugin_list_entry in wp_plugin_list:
                     for subclass, bucket in (
@@ -109,6 +136,7 @@ class ReportModel(object):
 if __name__ == '__main__':
     hostvars = {
         "www-ventil2": {
+            "group_names": ["prod-www"],
             "ansible_facts": {
                 "ansible_local": {
                     "wp_is_installed": "true",
