@@ -39,7 +39,7 @@ sub categorize {
     $wp_env eq "form"       ? "formation" :
     $wp_env =~ m/^unm-/     ? "unmanaged" :
                               $wp_env;
-  return "prod-$cat_nickname";
+  return "test-$cat_nickname";
 }
 
 =for Perl wizards only beyond this point =====================================
@@ -103,8 +103,8 @@ sub as_ansible_struct {
 
   # https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
   return {
-    "all-wordpresses" => { "children" => [ "prod-wordpresses" ] },
-    "prod-wordpresses" => {
+    "all-wordpresses" => { "children" => [ "test-wordpresses" ] },
+    "test-wordpresses" => {
       "children" => [ keys %$wordpresses ]
     },
 
