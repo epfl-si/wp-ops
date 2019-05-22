@@ -17,6 +17,19 @@
 - include_vars: symlink-vars.yml
   tags: always
 
+- name: "Enter maintenance mode"
+  tags:
+    - symlink
+    - unsymlink
+  when: not ansible_check_mode
+  shell:
+    cmd: |
+      {{ lookup("template", "maintenance-lib.sh") }}
+
+      set -e -x
+
+      enter_maintenance_mode
+
 - name: "Make symlinks"
   tags: symlink
   check_mode: no   # Does The Right Thing under ansible-playbook --check
@@ -49,6 +62,19 @@
     file: configure.yml
     apply:
       tags: ["symlink"]
+
+- name: "Leave maintenance mode"
+  tags:
+    - symlink
+    - unsymlink
+  when: not ansible_check_mode
+  shell:
+    cmd: |
+      {{ lookup("template", "maintenance-lib.sh") }}
+
+      set -e -x
+
+      leave_maintenance_mode
 
 - name: "Clean up top-level files on symlinked site"
   tags: symlink
