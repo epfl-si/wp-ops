@@ -134,8 +134,7 @@ sub flatten_wordpresses {
 
 sub as_ansible_hostvars {
   my $wp = {@_};
-  $wp->{ansible_python_interpreter} = "/srv/" . $wp->{wp_env} .
-    "/venv/bin/python";
+  $wp->{ansible_python_interpreter} = "/usr/bin/python3";
   my $retval = {};
   while(my ($k, $v) = each %$wp) {
     next unless $k =~ m/^(ssh|wp|ansible)_/;

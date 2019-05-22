@@ -5,14 +5,17 @@
 # Variables:: (in addition to those defined or documented in
 #              ../vars/*.yml)
 
-- include_vars: wp-destructive.yml
-  tags: always
+- include_vars: wp-destructive.yml   # For wp_can
+  tags:
+    - symlink
+    - unsymlink
+    - config
 
 - name: WordPress facts
-  import_tasks: setup.yml
-  tags: always
+  import_tasks: facts.yml
+  tags: facts
 
-- name: "Backup"
+- name: Backup
   import_tasks: "backup.yml"
   tags:
     - never  # That is, skip unless "-t backup" or "-t wipe" is
@@ -20,7 +23,7 @@
     - wipe
     - backup
 
-- name: "Wipe"
+- name: Wipe
   import_tasks: "wipe.yml"
   tags:
     - never
@@ -63,8 +66,10 @@
       tags: ["config"]
 
 ################################
-# "Ventilation"-related tasks
+# Special-purpose tasks
 ################################
+
+# "Ventilation"-related
 - name: "Dump to WXR for ventilation"
   import_tasks: "dump.yml"
   tags:
@@ -75,3 +80,13 @@
   tags:
     - never
     - undump
+
+- name: CSV plug-in versions report
+  tags:
+    - never
+    - reportcsv
+  run_once: true
+  local_action:
+    module: copy
+    dest: "{{ report_csv_out }}"
+    content: '{{ hostvars | wp_plugin_versions_csv_report }}'
