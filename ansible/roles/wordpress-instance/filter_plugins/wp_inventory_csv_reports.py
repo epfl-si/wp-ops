@@ -28,17 +28,31 @@ WELL_KNOWN_GROUPS = [
 class FilterModule(object):
     def filters(self):
         return {
-            'wp_plugin_versions_csv_report': self.plugin_versions_report
+            'wp_plugin_versions_csv_report': self.plugin_versions_report,
+            'wp_muplugin_versions_csv_report': self.muplugin_versions_report
         }
 
     def plugin_versions_report(self, hostvars, with_header_line=True):
+        return self._generic_versions_report(hostvars, 'plugin',
+                                             with_header_line=with_header_line)
+
+    def muplugin_versions_report(self, hostvars, with_header_line=True):
+        return self._generic_versions_report(hostvars, 'mu_plugin',
+                                             with_header_line=with_header_line)
+
+    def _generic_versions_report(self, hostvars,
+                                 plugin_or_muplugin='plugin',
+                                 with_header_line=True):
+        plugins_or_muplugins = plugin_or_muplugin + 's'
+
         m = ReportModel(hostvars)
 
         def get_column_name(plugin_name):
-            return 'plugin_version_%s' % plugin_name
+            return '%s_version_%s' % (plugin_or_muplugin, plugin_name)
 
-        fields = ['name', 'group'] + [get_column_name(p.name)
-                                      for p in m.plugins]
+        fields = ['name', 'group'] + [
+            get_column_name(p.name)
+            for p in getattr(m, plugins_or_muplugins)]
 
         output = _StringIO()
         csv = CSV.DictWriter(output, fieldnames=fields)
@@ -47,7 +61,7 @@ class FilterModule(object):
 
         for name, host in m.iterhosts():
             csvrow = {'name': name, 'group': host.group}
-            for p in host.plugins:
+            for p in getattr(host, plugins_or_muplugins):
                 csvrow[get_column_name(p.name)] = 'v%s' % p.version
             csv.writerow(csvrow)
 
@@ -85,9 +99,16 @@ class ReportModel(object):
 
     @memoize_property
     def plugins(self):
+        return self._summarize_plugins_or_muplugins('plugins')
+
+    @memoize_property
+    def mu_plugins(self):
+        return self._summarize_plugins_or_muplugins('mu_plugins')
+
+    def _summarize_plugins_or_muplugins(self, plugins_or_muplugins='plugins'):
         plugins = {}
         for _unused, h in self.iterhosts():
-            for p in h.plugins:
+            for p in getattr(h, plugins_or_muplugins):
                 if p.name not in plugins:
                     plugins[p.name] = self.PluginColumn(p.name)
                     plugins[p.name].use_count = 0
