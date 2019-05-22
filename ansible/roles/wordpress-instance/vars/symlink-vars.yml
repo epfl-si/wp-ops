@@ -38,6 +38,25 @@ symlinks_plugins:
   - varnish-http-purge
   - very-simple-meta-description
   - wp-media-folder
+  # "2010" plugins:
+  - EPFL-Share
+  - epfl-scheduler
+  - epfl-news
+  - epfl-memento
+  - epfl-faq
+  - epfl-map
+  - epfl-buttons
+  - epfl-snippet
+  - epfl-toggle
+  - epfl-grid
+  - epfl-infoscience
+  - epfl-infoscience-search
+  - epfl-xml
+  - epfl-people
+  - epfl-twitter
+  - epfl-video
+  - epfl-tableau
+  - epfl-google-forms
 
 symlinks_themes:
   - epfl-blank
