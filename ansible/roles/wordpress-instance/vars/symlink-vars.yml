@@ -68,7 +68,9 @@ _symlinks_muplugins_yaml: |
 
 symlinks_muplugins: "{{ _symlinks_muplugins_yaml | from_yaml }}"
 
-symlinks_all_paths: "{{ symlinks_paths_wp                               \
-    + ('wp-content/plugins/%s'    | map_format(symlinks_plugins))       \
-    + ('wp-content/mu-plugins/%s' | map_format(symlinks_muplugins))     \
-    + ('wp-content/themes/%s'     | map_format(symlinks_themes))        }}"
+symlinks_all_paths: >
+  {{ symlinks_paths_wp
+    + ('wp-content/plugins/%s'    | map_format(symlinks_plugins))
+    + ('wp-content/mu-plugins/%s' | map_format(symlinks_muplugins))
+    + ('wp-content/themes/%s'     | map_format(symlinks_themes))
+  }}
