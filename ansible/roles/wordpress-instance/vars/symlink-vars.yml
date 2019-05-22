@@ -91,10 +91,10 @@ _symlinks_muplugins_yaml: |
   {% if wp_is_managed %}{#    From category-vars.yml  #}
   {{ _symlinks_muplugins_managed | to_nice_yaml }}
   {% endif %}
-  {% for group, moar_muplugins in _symlinks_muplugins_by_group %}
-  {% if group_names | intersect(["prod-inside"]) %}
-  {{ moar_muplugins | to_nice_yaml }}
-  {% endif %}
+  {% for group, moar_muplugins in _symlinks_muplugins_by_group.items() %}
+  {%   if group_names | intersect(["prod-inside"]) %}
+  {{     moar_muplugins | to_nice_yaml }}
+  {%   endif %}
   {% endfor %}
 
 symlinks_muplugins: "{{ _symlinks_muplugins_yaml | from_yaml }}"

@@ -18,12 +18,12 @@ RUN a2dismod mpm_event mpm_worker
 RUN a2enmod mpm_prefork php${PHP_VERSION} cgi
 
 # directory for custom error pages
-RUN mkdir /var/www/error
+RUN mkdir /var/www/global-error
 
 COPY apache2.conf /etc/apache2/
 COPY ports.conf /etc/apache2/
 COPY error-pages.conf /etc/apache2/conf-enabled/
-COPY 403 /var/www/error/
+COPY global-error /var/www/global-error
 COPY docker-entrypoint.sh /
 COPY health.cgi /usr/lib/cgi-bin
 RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
