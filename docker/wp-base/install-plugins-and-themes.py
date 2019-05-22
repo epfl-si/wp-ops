@@ -395,8 +395,7 @@ class Jahia2wp2010(Jahia2wp2018):
         name = p.name
         if name in self.__PLUGINS_FAVORED_IN_RELEASE2018:
             return True
-        if not (name.startswith("EPFL") or
-                name.startswith("epfl")):
+        if not name.lower().startswith("epfl"):
             return True
         return False
 
