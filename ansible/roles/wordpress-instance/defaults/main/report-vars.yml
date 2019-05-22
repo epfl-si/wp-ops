@@ -1,3 +1,4 @@
 # Where to output the report made by `wpsible -t reportcsv`
 wpsible_cwd: "."
-report_csv_out: "{{ wpsible_cwd }}/report.csv"
+plugin_report_csv_out: "{{ wpsible_cwd }}/plugin-report.csv"
+muplugin_report_csv_out: "{{ wpsible_cwd }}/muplugin-report.csv"

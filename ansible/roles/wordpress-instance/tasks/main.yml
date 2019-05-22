@@ -88,5 +88,17 @@
   run_once: true
   local_action:
     module: copy
-    dest: "{{ report_csv_out }}"
+    dest: '{{ plugin_report_csv_out }}'
     content: '{{ hostvars | wp_plugin_versions_csv_report }}'
+
+# We could do a with_items but then we would get the entire content
+# dumped into the terminal as part of the "items" structure. Oh well
+- name: CSV must-use plug-in versions report
+  tags:
+    - never
+    - reportcsv
+  run_once: true
+  local_action:
+    module: copy
+    dest: '{{ muplugin_report_csv_out }}'
+    content: '{{ hostvars | wp_muplugin_versions_csv_report }}'
