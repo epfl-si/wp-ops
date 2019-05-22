@@ -103,6 +103,9 @@ RUN set -e -x;                                                           \
     rm -rf polylang;                                                     \
     /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
 
+# Prevent directory listings in the mu-plugins/ subdirectories of sites:
+RUN cp /wp/wp-content/plugins/index.php /wp/wp-content/mu-plugins/index.php
+
 # For importing sites from the WXR XML format (e.g. "ventilation" operations)
 RUN cd /wp/wp-content/plugins;                                           \
     /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
