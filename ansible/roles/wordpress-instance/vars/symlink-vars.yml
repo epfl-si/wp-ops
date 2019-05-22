@@ -48,6 +48,7 @@ symlinks_themes:
 _symlinks_muplugins_always:
   - EPFL_custom_editor_menu.php
   - EPFL_disable_comments.php
+  - EPFL_disable_updates_automatic.php
   - EPFL_google_analytics_hook.php
   - EPFL_jahia_redirect.php
   - EPFL_quota_loader.php
@@ -57,8 +58,7 @@ _symlinks_muplugins_always:
   - epfl-stats
 
 _symlinks_muplugins_managed:
-     - EPFL_enable_updates_automatic.php
-     - EPFL_installs_locked.php
+  - EPFL_installs_locked.php
 
 _symlinks_muplugins_yaml: |
   {{ _symlinks_muplugins_always | to_nice_yaml }}
