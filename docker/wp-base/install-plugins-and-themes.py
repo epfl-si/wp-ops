@@ -358,8 +358,17 @@ class Jahia2wp2018(_Singleton):
             except KeyError:
                 progress("Skipping {}".format(name))
                 continue
-            progress("{} -> {}".format(name, url))
-            yield Plugin(name, url, jahia2wp=self)
+
+            plugin = Plugin(name, url, jahia2wp=self)
+            if self._skip_this_plugin(plugin):
+                continue
+
+            progress("{}: {} -> {}".format(
+                self.__class__.__name__, plugin.name, plugin.url))
+            yield plugin
+
+    def _skip_this_plugin(self, plugin):
+        return False   # Overridden in subclass
 
 
 class Jahia2wp2010(Jahia2wp2018):
@@ -373,26 +382,23 @@ class Jahia2wp2010(Jahia2wp2018):
 
     _GIT_URL = 'https://github.com/epfl-idevelop/jahia2wp/tree/release'
 
-    # These plug-ins clash in name with Jahia2wp2018;
-    # however, they are (or should be) identical between
-    # both branches
+    # These plug-ins clash in name with Jahia2wp2018; however, they
+    # are (or should be) identical between both branches. We yield to
+    # the Jahia2wp2018 copy for these (in __is_useful_2010_plugin).
     __PLUGINS_FAVORED_IN_RELEASE2018 = (
         'EPFL-settings',
         'EPFL-Content-Filter',
         'epfl-404'
     )
 
-    def plugins(self):
-        """Only keep EPFL-specific plugins that don't clash with Jahia2wp."""
-        return (p for p in super(Jahia2wp2010, self).plugins()
-                if self.__is_useful_2010_plugin(p))
-
-    def __is_useful_2010_plugin(self, p):
+    def _skip_this_plugin(self, p):
         name = p.name
         if name in self.__PLUGINS_FAVORED_IN_RELEASE2018:
-            return False
-        return (name.startswith("EPFL") or
-                name.startswith("epfl"))
+            return True
+        if not (name.startswith("EPFL") or
+                name.startswith("epfl")):
+            return True
+        return False
 
 
 class Jahia2wpLegacyYAMLLoader(yaml.Loader):
