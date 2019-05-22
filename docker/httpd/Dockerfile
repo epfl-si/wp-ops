@@ -23,7 +23,7 @@ RUN mkdir /var/www/error
 COPY apache2.conf /etc/apache2/
 COPY ports.conf /etc/apache2/
 COPY error-pages.conf /etc/apache2/conf-enabled/
-COPY 403 /var/www/error/
+COPY global-error /var/www/
 COPY docker-entrypoint.sh /
 COPY health.cgi /usr/lib/cgi-bin
 RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
