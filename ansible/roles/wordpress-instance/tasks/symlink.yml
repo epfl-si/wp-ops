@@ -32,6 +32,8 @@
               *) exit $?                 ;;
           esac
       fi
+
+      rm -f "{{ wp_dir }}"/wp-content/mu-plugins/EPFL_enable_updates_automatic.php
   register: _symlink_script
   changed_when: '"SYMLINKS_CHANGED" in _symlink_script.stdout'
 
