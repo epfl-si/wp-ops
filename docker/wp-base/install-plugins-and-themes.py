@@ -3,10 +3,9 @@
 """Install WordPress plugins and themes from various locations."""
 
 import atexit
-from collections import namedtuple
 import getopt
-import inspect
 from io import BytesIO
+import itertools
 import json
 import os
 import re
@@ -62,23 +61,6 @@ def run_cmd(cmd, *args, **kwargs):
         cmd_text = 'cd "{}"; {}'.format(kwargs['cwd'], cmd_text)
     progress(cmd_text)
     return subprocess.call(cmd, *args, **kwargs)
-
-
-class class_or_instance_method(object):
-    """From https://stackoverflow.com/a/55732871/435004"""
-
-    def __init__(self, f):
-        self.f = f
-
-    def __get__(self, instance, owner):
-        if instance is not None:
-            wrt = instance
-        else:
-            wrt = owner
-
-        def newfunc(*args, **kwargs):
-            return self.f(wrt, *args, **kwargs)
-        return newfunc
 
 
 class Tempdir:
@@ -167,14 +149,19 @@ class GitHubCheckout:
             return self._git_topdir
 
 
-class Plugin(namedtuple('Plugin', ['name', 'url'])):
+class Plugin(object):
     """A WordPress plug-in or theme."""
-    def __new__(cls, name, url):
+
+    def __init__(self, name, url, **unused_kwargs):
+        self.name = name
+        self.url = url
+
+    def __new__(cls, name, url, **kwargs):
         if cls is Plugin:
             cls = cls._find_handler(url)
 
-        that = tuple.__new__(cls, (name, url))
-        that.__init__(name, url)
+        that = object.__new__(cls)
+        that.__init__(name, url, **kwargs)
         return that
 
     @staticmethod
@@ -207,12 +194,17 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
+    def __init__(self, name, url, jahia2wp=None):
+        super(ZipPlugin, self).__init__(name, url)
+        self.jahia2wp = jahia2wp
+
     def install(self, target_dir):
         """Unzip into a subdirectory `target_dir` named `self.name`."""
         if self.url.startswith("http"):
             zip = ZipFile(BytesIO(requests.get(self.url).content))
         else:
-            zip = ZipFile(Jahia2wp.data_plugins_path_relative(self.url))
+            assert self.jahia2wp is not None
+            zip = ZipFile(self.jahia2wp.data_plugins_path_relative(self.url))
         progress("Unzipping {}".format(self.url))
         for member in zip.namelist():
             zipinfo = zip.getinfo(member)
@@ -238,7 +230,8 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, url):
+    def __init__(self, name, url, **kwargs):
+        super(GitHubPlugin, self).__init__(name, url, **kwargs)
         self._git = GitHubCheckout(url)
 
     def install(self, target_dir):
@@ -293,21 +286,35 @@ class Jahia2wpSubdirectoryPlugin(Plugin):
     def handles(cls, url):
         return bool(cls._parse(url))
 
+    def __init__(self, name, url, jahia2wp):
+        super(Jahia2wpSubdirectoryPlugin, self).__init__(name, url)
+        self.jahia2wp = jahia2wp
+
     @classmethod
     def _parse(cls, url):
         return re.match("[.][.]/wp/wp-content/plugins/([^/]*)", url)
 
     @property
     def plugin_dir(self):
-        return Jahia2wp.wp_content_plugins_path_relative(
+        return self.jahia2wp.wp_content_plugins_path_relative(
             self._parse(self.url).group(1))
 
     def install(self, target_dir):
         self._copytree_install(self.plugin_dir, target_dir)
 
 
-class Jahia2wp:
-    """Models the jahia2wp source tree.
+class _Singleton(object):
+    __singletons = {}
+
+    @classmethod
+    def singleton(cls):
+        if cls not in cls.__singletons:
+            cls.__singletons[cls] = cls()
+        return cls.__singletons[cls]
+
+
+class Jahia2wp2018(_Singleton):
+    """Models the jahia2wp source tree in its most recent `release2018` branch.
 
     For historical reasons, this Git repository contains code that
     deals with some "ops" aspects such as creating sites, mixed with
@@ -319,12 +326,6 @@ class Jahia2wp:
     _CONFIG_LOT1_YML_PATH = 'generic/config-lot1.yml'
     _WP_PLUGINS_DIR = 'data/wp/wp-content/plugins'
 
-    @classmethod
-    def singleton(cls):
-        if not hasattr(cls, "_singleton"):
-            cls._singleton = cls()
-        return cls._singleton
-
     def __init__(self):
         self._git = GitHubCheckout(self._GIT_URL)
         self._git.clone()
@@ -333,17 +334,12 @@ class Jahia2wp:
     def path(self):
         return self._git.source_dir
 
-    @class_or_instance_method
     def path_relative(self, *path_fragments):
-        if inspect.isclass(self):
-            self = Jahia2wp.singleton()
         return os.path.join(self.path, *path_fragments)
 
-    @class_or_instance_method
     def data_plugins_path_relative(self, *path_fragments):
         return self.path_relative(self._DATA_PLUGINS_DIR, *path_fragments)
 
-    @class_or_instance_method
     def wp_content_plugins_path_relative(self, *path_fragments):
         return self.path_relative(self._WP_PLUGINS_DIR, *path_fragments)
 
@@ -363,7 +359,40 @@ class Jahia2wp:
                 progress("Skipping {}".format(name))
                 continue
             progress("{} -> {}".format(name, url))
-            yield Plugin(name, url)
+            yield Plugin(name, url, jahia2wp=self)
+
+
+class Jahia2wp2010(Jahia2wp2018):
+    """Models the jahia2wp source tree in its older `release` branch.
+
+    As the "2010" theme is being phased out, we only keep
+    EPFL-specific plug-ins that do not name-clash with the 2018 ones.
+    (Fortunately, those that do name-clash are not supposed to differ
+    between both branches.)
+    """
+
+    _GIT_URL = 'https://github.com/epfl-idevelop/jahia2wp/tree/release'
+
+    # These plug-ins clash in name with Jahia2wp2018;
+    # however, they are (or should be) identical between
+    # both branches
+    __PLUGINS_FAVORED_IN_RELEASE2018 = (
+        'EPFL-settings',
+        'EPFL-Content-Filter',
+        'epfl-404'
+    )
+
+    def plugins(self):
+        """Only keep EPFL-specific plugins that don't clash with Jahia2wp."""
+        return (p for p in super(Jahia2wp2010, self).plugins()
+                if self.__is_useful_2010_plugin(p))
+
+    def __is_useful_2010_plugin(self, p):
+        name = p.name
+        if name in self.__PLUGINS_FAVORED_IN_RELEASE2018:
+            return False
+        return (name.startswith("EPFL") or
+                name.startswith("epfl"))
 
 
 class Jahia2wpLegacyYAMLLoader(yaml.Loader):
@@ -442,7 +471,9 @@ if __name__ == '__main__':
 
     if flags.auto:
         MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in Jahia2wp.singleton().plugins():
+        for plugin in itertools.chain(
+                Jahia2wp2018.singleton().plugins(),
+                Jahia2wp2010.singleton().plugins()):
             if plugin.name not in flags.exclude:
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
