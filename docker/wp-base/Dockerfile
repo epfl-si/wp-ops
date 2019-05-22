@@ -110,9 +110,4 @@ RUN cp /wp/wp-content/plugins/index.php /wp/wp-content/mu-plugins/index.php
 RUN cd /wp/wp-content/plugins;                                           \
     /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
 
-# epfl-infoscience is pretty popular these days:
-RUN set -e -x;                                                           \
-    /tmp/install-plugins-and-themes.py epfl-infoscience                  \
-      https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-infoscience
-
 RUN rm -rf /tmp/install-plugins*
