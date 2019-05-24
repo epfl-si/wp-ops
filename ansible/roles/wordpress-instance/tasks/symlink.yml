@@ -17,27 +17,35 @@
 - include_vars: symlink-vars.yml
   tags: always
 
-- name: "Enter maintenance mode"
-  tags:
-    - symlink
-    - unsymlink
-  when: not ansible_check_mode
-  shell:
-    cmd: |
-      {{ lookup("template", "maintenance-lib.sh") }}
+- name: "Set wp_is_symlinked"
+  tags: always
+  set_fact:
+    wp_is_symlinked: '{{ "symlink" in ansible_run_tags }}'
 
-      set -e -x
+# WP_CONTENT_DIR can be set in wp-config.php prior to symlinking
+# without ill effects:
+- name: "Reconfigure wp-config.php before symlinking"
+  tags: symlink
+  include_tasks:
+    file: configure.yml
+    apply:
+      tags: ["symlink"]
 
-      enter_maintenance_mode
-
-- name: "Make symlinks"
+- name: "Symlink"
   tags: symlink
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   shell:
     cmd: |
       {{ lookup("template", "symlinks-lib.sh") }}
+      {{ lookup("template", "maintenance-lib.sh") }}
 
       set -e -x
+      cd {{ wp_dir }}
+
+      {% if not ansible_check_mode %}
+      enter_maintenance_mode
+      trap leave_maintenance_mode EXIT HUP INT QUIT
+      {% endif %}
 
       if make_symlinks_to_wp {{ symlinks_all_paths | join(" ") }}; then :; else
           case "$?" in
@@ -46,65 +54,21 @@
           esac
       fi
 
-      rm -f "{{ wp_dir }}"/wp-content/mu-plugins/EPFL_enable_updates_automatic.php
-  register: _symlink_script
-  changed_when: '"SYMLINKS_CHANGED" in _symlink_script.stdout'
-
-- name: "Set wp_is_symlinked"
-  tags: symlink
-  set_fact:
-    wp_is_symlinked: true
-
-# Minimize downtime:
-- name: "Reconfigure"
-  tags: symlink
-  include_tasks:
-    file: configure.yml
-    apply:
-      tags: ["symlink"]
-
-- name: "Leave maintenance mode"
-  tags:
-    - symlink
-    - unsymlink
-  when: not ansible_check_mode
-  shell:
-    cmd: |
-      {{ lookup("template", "maintenance-lib.sh") }}
-
-      set -e -x
-
-      leave_maintenance_mode
-
-- name: "Clean up top-level files on symlinked site"
-  tags: symlink
-  check_mode: no
-  shell:
-    cmd: |
-      # Trim all files at top level, except for a whitelist
-      cd "{{ wp_dir }}"
-      files_trimmed=
-      for top_level_file in *; do
-          case "$top_level_file" in
-              .ht*) continue ;;
-              wp-config.php|index.php) continue ;;
-              {{ symlinks_all_paths | join('|') }}) continue ;;
+      if ensure_file_contains index.php <<INDEX_PHP
+      {{ lookup('template', 'wordpress-index.php') }}
+      INDEX_PHP
+      then
+          :
+      else
+          case "$?" in
+              1) echo INDEX_PHP_CHANGED ;;
+              *) exit $?                ;;
           esac
-          if [ -d "$top_level_file" ]; then continue; fi
-
-          if [ -z "$files_trimmed" ]; then
-              echo FILES_TRIMMED
-              files_trimmed=1
-          fi
-      {% if ansible_check_mode %}
-          echo >&2 "$top_level_file needs trimming"
-      {% else %}
-          rm -f "$top_level_file"
-      {% endif %}
-      done
-      
-  register: _symlink_cleanup_script
-  changed_when: '"FILES_TRIMMED" in _symlink_cleanup_script.stdout'
+      fi
+  register: _symlink_script
+  changed_when: >
+    "SYMLINKS_CHANGED" in _symlink_script.stdout or
+    "INDEX_PHP_CHANGED" in _symlink_script.stdout
 
 - name: "Unsymlink (copy from /wp)"
   tags: unsymlink
@@ -112,14 +76,37 @@
   check_mode: no
   shell:
     cmd: |
+      {{ lookup("template", "symlinks-lib.sh") }}
+      {{ lookup("template", "maintenance-lib.sh") }}
+
       set -e -x
       cd {{ wp_dir }}
+
+      if ensure_file_contains index.php <<INDEX_PHP
+      {{ lookup('template', 'wordpress-index.php') }}
+      INDEX_PHP
+      then
+          :
+      else
+          case "$?" in
+              1) echo INDEX_PHP_CHANGED ;;
+              *) exit $?                ;;
+          esac
+      fi
+
+      {% if not ansible_check_mode %}
+      enter_maintenance_mode
+      trap leave_maintenance_mode EXIT HUP INT QUIT
+      {% endif %}
+
       if [ "" = "$(find . -name uploads -prune -false -o -type l)" ]; then
         echo NO_SYMLINKS
         exit 0
       fi
 
-      [ "$ansible_check_mode" = "True" ] && exit 0
+      {% if ansible_check_mode %}
+      exit 0
+      {% endif %}
 
       for subdir in wp-content/themes wp-content/plugins \
                     wp-content/mu-plugins; do
@@ -131,15 +118,43 @@
 
       (cd /wp; tar clf - .) | tar xpvf -
   register: _unsymlink_script
-  changed_when: '"NO_SYMLINKS" not in _unsymlink_script.stdout'
+  changed_when: >
+    "INDEX_PHP_CHANGED" in _unsymlink_script.stdout or
+    "NO_SYMLINKS" not in _unsymlink_script.stdout
 
-- name: "Reset wp_is_symlinked"
-  tags: unsymlink
-  set_fact:
-    wp_is_symlinked: false
+- name: "Clean up stale files on symlinked site"
+  tags: symlink
+  check_mode: no
+  shell:
+    cmd: |
+      # Trim all files at top level (except for a whitelist), and
+      # the auto-update muplugin
+      cd "{{ wp_dir }}"
+      files_trimmed=
+      for path in * \
+          wp-content/mu-plugins/EPFL_enable_updates_automatic.php
+      do
+          case "$path" in
+              .ht*) continue ;;
+              wp-config.php|index.php) continue ;;
+              {{ symlinks_all_paths | join('|') }}) continue ;;
+          esac
+          if [ -d "$path" ]; then continue; fi
 
-# Minimize downtime:
-- name: "Reconfigure"
+          if [ -z "$files_trimmed" ]; then
+              echo FILES_TRIMMED
+              files_trimmed=1
+          fi
+      {% if ansible_check_mode %}
+          echo >&2 "$path needs trimming"
+      {% else %}
+          rm -f "$path"
+      {% endif %}
+      done
+  register: _symlink_cleanup_script
+  changed_when: '"FILES_TRIMMED" in _symlink_cleanup_script.stdout'
+
+- name: "Reconfigure wp-config.php after unsymlinking"
   tags: unsymlink
   include_tasks:
     file: configure.yml

@@ -7,11 +7,6 @@
     that:
       - wp_can.configure
 
-- name: Set up index.php
-  copy:
-    content: "{{ lookup('template', 'wordpress-index.php') }}"
-    dest: "{{ wp_dir }}/index.php"
-
 - name: WP_CONTENT_DIR line in wp-config.php
   lineinfile:
     state: "{{ 'present' if wp_is_symlinked else 'absent' }}"
