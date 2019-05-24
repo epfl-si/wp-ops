@@ -39,3 +39,7 @@ wp_plugins_dir: "{{ wp_dir }}/wp-content/plugins"
 wp_is_installed: "{{ ansible_facts.ansible_local.wp_is_installed }}"
 wp_is_symlinked: "{{ ansible_facts.ansible_local.wp_is_symlinked }}"
 wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
+
+# Range of IPv4 addresses that we could be making RPCs from (in
+# particular, to Tequila)
+wp_ops_rpcclient_ipv4_range: 10.180.21.0/24

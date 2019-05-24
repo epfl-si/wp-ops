@@ -1,0 +1,4 @@
+# Variables related to EPFL accred system and access control
+wp_administrator_group: WP_SuperAdmin
+wp_unit_name: "TODO obtain from wp-veritas"
+wp_unit_id: 1234   # also TODO

@@ -1,0 +1,327 @@
+- include_vars: "{{ item }}"
+  with_items:
+    - plugin-vars.yml
+    - accred-vars.yml
+
+- name: Delete plugins bundled with WordPress
+  wordpress_plugin:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - akismet
+    - hello
+
+- name: simple-sitemap plugin
+  wordpress_plugin:
+    name: simple-sitemap
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: tinymce-advanced plugin
+  wordpress_plugin:
+    name: tinymce-advanced
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: polylang plugin
+  wordpress_plugin:
+    name: polylang
+    state: symlinked
+    from: wordpress.org/plugins
+
+# TODO: recapture intent of jahia2wp's
+# src/wordpress/plugins/custom/polylang.py
+# (perhaps not in this file)
+
+- name: mainwp-child plugin
+  wordpress_plugin:
+    name: mainwp-child
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: mainwp_child_uniqueId option
+  wordpress_option:
+    name: mainwp_child_uniqueId
+    value: "{{ plugin_mainwp_child_uniqueid }}"
+    # TODO: this value has "autoload: no" in
+    # jahia2wp/data/plugins/generic/mainwp-child/config-plugin.yml ;
+    # not sure what it means (if anything)
+
+- name: tequila plugin
+  wordpress_plugin:
+    name: tequila
+    state: symlinked
+    from: https://github.com/epfl-sti/wordpress.plugin.tequila/archive/vpsi.zip
+
+- name: Replace WP login screen with redirect-to-Tequila flow
+  wordpress_option:
+    name: plugin:epfl_tequila:has_dual_auth
+    value: 0
+
+- name: Whitelist of IPs for Tequila fetchAttributes request
+  wordpress_option:
+    name: plugin:epfl:tequila_allowed_request_hosts
+    value: "{{ wp_ops_rpcclient_ipv4_range }}"
+
+- name: accred plugin
+  wordpress_plugin:
+    name: accred
+    state: symlinked
+    from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
+
+- name: accred administrator group
+  wordpress_option:
+    name: plugin:epfl_accred:administrator_group
+    value: "{{ wp_administrator_group }}"
+
+- name: accred unit name
+  wordpress_option:
+    name: plugin:epfl_accred:unit
+    value: "{{ wp_unit_name }}"
+
+- name: accred unit ID
+  wordpress_option:
+    name: plugin:epfl_accred:unit_id
+    value: "{{ wp_unit_id }}"
+
+- name: cache-control plugin
+  wordpress_plugin:
+    name: cache-control
+    state: symlinked
+    from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
+
+- name: cache-control options
+  wordpress_option:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  with_items:
+    - name: cache_control_front_page_max_age
+      value: "{{ plugin_cache_control_front_page_max_age }}"
+    - name: cache_control_pages_max_age
+      value: "{{ plugin_cache_control_pages_max_age }}"
+
+- name: varnish-http-purge plugin
+  wordpress_plugin:
+    name: varnish-http-purge
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: EPFL-settings plugin
+  wordpress_plugin:
+    name: EPFL-settings
+    state: symlinked
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-settings
+
+- name: custom_breadcrumb option for EPFL-settings plugin
+  wordpress_option:
+    name: epfl:custom_breadcrumb
+    value: ""
+
+- name: EPFL-Content-Filter plugin
+  wordpress_plugin:
+    name: EPFL-Content-Filter
+    state: '{{ "symlinked" if plugins_locked else "absent" }}'
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Content-Filter
+
+- name: svg-support plugin
+  wordpress_plugin:
+    name: svg-support
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: Dismiss svg-support popup
+  wordpress_option:
+    name: bodhi_svgs_admin_notice_dismissed
+    value: 1
+
+- name: feedzy-rss-feeds plugin
+  wordpress_plugin:
+    name: feedzy-rss-feeds
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: remote-content-shortcode plugin
+  wordpress_plugin:
+    name: remote-content-shortcode
+    state: symlinked
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/remote-content-shortcode
+
+- name: shortcode-ui plugin
+  wordpress_plugin:
+    name: shortcode-ui
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: shortcode-ui-richtext plugin
+  wordpress_plugin:
+    name: shortcode-ui-richtext
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: epfl plugin
+  wordpress_plugin:
+    name: epfl
+    state: >
+      {{ "absent" if plugins_use_wp2010_plugins else "symlinked" }}
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
+
+- name: wp-media-folder plugin
+  wordpress_plugin:
+    name: wp-media-folder
+    state: symlinked
+    from: https://wp-manager.epfl.ch/resources/plugin-zip/wp-media-folder.zip
+
+- name: wp-media-folder options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_wpmf_options }}"
+
+- name: pdfjs-viewer-shortcode plugin
+  wordpress_plugin:
+    name: pdfjs-viewer-shortcode
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: very-simple-meta-description plugin
+  wordpress_plugin:
+    name: very-simple-meta-description
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: epfl-404 plugin
+  wordpress_plugin:
+    name: epfl-404
+    state: symlinked
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-404
+
+- name: ewww-image-optimizer plugin
+  wordpress_plugin:
+    name: ewww-image-optimizer
+    state: symlinked
+    from: wordpress.org/plugins
+
+- name: ewww-image-optimizer configuration
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_ewww_image_optimizer_options }}"
+
+
+##################### 2010-only plugins ###########################
+
+- name: EPFL-Share plugin
+  wordpress_plugin:
+    name: EPFL-Share
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/EPFL-Share
+
+- name: shortcodes-ultimate plugin
+  wordpress_plugin:
+    name: shortcodes-ultimate
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: wordpress.org/plugins
+
+- name: enlighter plugin
+  wordpress_plugin:
+    name: enlighter
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: wordpress.org/plugins
+
+- name: epfl-scheduler plugin
+  wordpress_plugin:
+    name: epfl-scheduler
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-scheduler
+
+- name: epfl-news plugin
+  wordpress_plugin:
+    name: epfl-news
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-news
+
+- name: epfl-memento plugin
+  wordpress_plugin:
+    name: epfl-memento
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-memento
+
+- name: epfl-faq plugin
+  wordpress_plugin:
+    name: epfl-faq
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-faq
+
+- name: epfl-map plugin
+  wordpress_plugin:
+    name: epfl-map
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-map
+
+- name: epfl-buttons plugin
+  wordpress_plugin:
+    name: epfl-buttons
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-buttons
+
+- name: epfl-snippet plugin
+  wordpress_plugin:
+    name: epfl-snippet
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-snippet
+
+- name: epfl-toggle plugin
+  wordpress_plugin:
+    name: epfl-toggle
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-toggle
+
+- name: epfl-grid plugin
+  wordpress_plugin:
+    name: epfl-grid
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-grid
+
+- name: epfl-infoscience plugin
+  wordpress_plugin:
+    name: epfl-infoscience
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience
+
+- name: epfl-infoscience-search plugin
+  wordpress_plugin:
+    name: epfl-infoscience-search
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience-search
+
+- name: epfl-xml plugin
+  wordpress_plugin:
+    name: epfl-xml
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-xml
+
+- name: epfl-people plugin
+  wordpress_plugin:
+    name: epfl-people
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-people
+
+- name: epfl-twitter plugin
+  wordpress_plugin:
+    name: epfl-twitter
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-twitter
+
+- name: epfl-video plugin
+  wordpress_plugin:
+    name: epfl-video
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-video
+
+- name: epfl-tableau plugin
+  wordpress_plugin:
+    name: epfl-tableau
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-tableau
+
+- name: epfl-google-forms plugin
+  wordpress_plugin:
+    name: epfl-google-forms
+    state: "{{ plugins_symlinked_in_2010_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-google-forms

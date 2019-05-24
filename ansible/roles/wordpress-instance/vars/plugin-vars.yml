@@ -1,0 +1,145 @@
+# Plugin variables go here
+
+# TODO: These two should be computed from wp-veritas state
+plugins_locked: true
+plugins_use_wp2010_plugins: false
+plugins_symlinked_in_2010_only: '{{ "symlinked" if plugins_use_wp2010_plugins else "absent" }}'
+
+plugin_mainwp_child_uniqueid: "WinterIsComing"
+
+plugin_cache_control_front_page_max_age: 300
+plugin_cache_control_pages_max_age: 300
+
+plugin_wpmf_options:
+  - name: wpmf_use_taxonomy
+    value: '1'
+  - name: wpmf_version
+    value: 4.7.0
+  - name: wpmf_gallery_image_size_value
+    value: '["thumbnail","medium","large","full"]'
+  - name: wpmf_padding_masonry
+    value: '5'
+  - name: wpmf_padding_portfolio
+    value: '10'
+  - name: wpmf_usegellery
+    value: '0'
+  - name: wpmf_useorder
+    value: '1'
+  - name: wpmf_create_folder
+    value: role
+  - name: wpmf_option_override
+    value: '1'
+  - name: wpmf_option_duplicate
+    value: '0'
+  - name: wpmf_active_media
+    value: '0'
+  - name: wpmf_folder_option2
+    value: '1'
+  - name: wpmf_option_searchall
+    value: '1'
+  - name: wpmf_usegellery_lightbox
+    value: '0'
+  - name: wpmf_media_rename
+    value: '0'
+  - name: wpmf_patern_rename
+    value: '{sitename} - {foldername} - #'
+  - name: wpmf_rename_number
+    value: '0'
+  - name: wpmf_option_media_remove
+    value: '0'
+  - name: wpmf_default_dimension
+    value: '["400x300","640x480","800x600","1024x768","1600x1200"]'
+  - name: wpmf_selected_dimension
+    value: '["400x300","640x480","800x600","1024x768","1600x1200"]'
+  - name: wpmf_weight_default
+    value: '[["0-61440","kB"],["61440-122880","kB"],["122880-184320","kB"],["184320-245760","kB"],["245760-307200","kB"]]'
+  - name: wpmf_weight_selected
+    value: '[["0-61440","kB"],["61440-122880","kB"],["122880-184320","kB"],["184320-245760","kB"],["245760-307200","kB"]]'
+  - name: wpmf_color_singlefile
+    value: '{"bgdownloadlink":"#444444","hvdownloadlink":"#888888","fontdownloadlink":"#ffffff","hoverfontcolor":"#ffffff"}'
+  - name: wpmf_option_singlefile
+    value: '0'
+  - name: wpmf_option_sync_media
+    value: '0'
+  - name: wpmf_option_sync_media_external
+    value: '0'
+  - name: wpmf_list_sync_media
+    value: a:0:{}
+  - name: wpmf_time_sync
+    value: '60'
+  - name: wpmf_lastRun_sync
+    value: '1540467937'
+  - name: wpmf_slider_animation
+    value: slide
+  - name: wpmf_option_mediafolder
+    value: '0'
+  - name: wpmf_option_countfiles
+    value: '1'
+  - name: wpmf_option_lightboximage
+    value: '0'
+  - name: wpmf_option_hoverimg
+    value: '1'
+  - name: wpmf_options_format_title
+    value: a:15:{s:6:"hyphen";s:1:"1";s:6:"period";s:1:"0";s:4:"plus";s:1:"0";s:9:"ampersand";s:1:"0";s:15:"square_brackets";s:1:"0";s:14:"curly_brackets";s:1:"0";s:10:"underscore";s:1:"1";s:5:"tilde";s:1:"0";s:4:"hash";s:1:"0";s:6:"number";s:1:"0";s:14:"round_brackets";s:1:"0";s:3:"alt";s:1:"0";s:11:"description";s:1:"0";s:7:"caption";s:1:"0";s:6:"capita";s:7:"cap_all";}
+  - name: wpmf_image_watermark_apply
+    value: a:5:{s:8:"all_size";s:1:"1";s:9:"thumbnail";s:1:"0";s:6:"medium";s:1:"0";s:5:"large";s:1:"0";s:4:"full";s:1:"0";}
+  - name: wpmf_option_image_watermark
+    value: '0'
+  - name: wpmf_watermark_position
+    value: top_left
+  - name: wpmf_watermark_image
+    value: ''
+  - name: wpmf_watermark_image_id
+    value: '0'
+  - name: wpmf_gallery_settings
+    value: >
+      a:1:{s:5:"theme";a:7:{s:13:"default_theme";a:6:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:15:"portfolio_theme";a:6:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:13:"masonry_theme";a:6:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:12:"slider_theme";a:9:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";s:9:"animation";s:5:"slide";s:8:"duration";i:4000;s:14:"auto_animation";i:1;}s:15:"flowslide_theme";a:7:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";s:12:"show_buttons";i:1;}s:17:"square_grid_theme";a:6:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:14:"material_theme";a:6:{s:7:"columns";i:3;s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}}}
+  - name: external_updates-wp-media-folder
+    value: |
+      O:8:"stdClass":3:{s:9:"lastCheck";i:1540467937;s:14:"checkedVersion";s:5:"4.7.0";s:6:"update";O:8:"stdClass":7:{s:2:"id";i:0;s:4:"slug";s:15:"wp-media-folder";s:7:"version";s:5:"4.7.2";s:8:"homepage";s:61:"https://www.joomunited.com/wordpress-products/wp-media-folder";s:12:"download_url";s:120:"https://www.joomunited.com/index.php?option=com_juupdater&task=download.download&extension=wp-media-folder&version=4.7.2";s:14:"upgrade_notice";s:29:"Upgrade
+      to the latest version";s:8:"filename";s:35:"wp-media-folder/wp-media-folder.php";}}
+  - name: wpmf_settings
+    value: >
+      a:9:{s:17:"hide_remote_video";s:1:"0";s:16:"gallery_settings";a:1:{s:5:"theme";a:4:{s:13:"default_theme";a:6:{s:7:"columns";s:1:"3";s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:15:"portfolio_theme";a:6:{s:7:"columns";s:1:"3";s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:13:"masonry_theme";a:6:{s:7:"columns";s:1:"3";s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:5:"order";s:3:"ASC";}s:12:"slider_theme";a:9:{s:7:"columns";s:1:"3";s:4:"size";s:6:"medium";s:10:"targetsize";s:5:"large";s:4:"link";s:4:"file";s:7:"orderby";s:8:"post__in";s:9:"animation";s:5:"slide";s:8:"duration";s:4:"4000";s:5:"order";s:3:"ASC";s:14:"auto_animation";s:1:"1";}}}s:25:"watermark_exclude_folders";a:1:{i:0;s:1:"0";}s:13:"folder_design";s:15:"material_design";s:8:"load_gif";s:1:"1";s:9:"hide_tree";s:1:"1";s:16:"watermark_margin";a:4:{s:3:"top";s:1:"0";s:5:"right";s:1:"0";s:6:"bottom";s:1:"0";s:4:"left";s:1:"0";}s:23:"watermark_image_scaling";s:3:"100";s:17:"format_mediatitle";s:1:"1";}
+  - name: _wpmf_import_order_notice_flag
+    value: 'yes'
+  - name: can_compress_scripts
+    value: '0'
+
+plugin_ewww_image_optimizer_options:
+  - option_name: exactdn_all_the_things
+    option_value: ''
+  - option_name: exactdn_lossy
+    option_value: ''
+  - option_name: ewww_image_optimizer_tracking_notice
+    option_value: '1'
+  - option_name: ewww_image_optimizer_enable_help_notice
+    option_value: '1'
+  - option_name: ewww_image_optimizer_cloud_key
+    option_value: ''
+  - option_name: ewww_image_optimizer_jpg_quality
+    option_value: ''
+  - option_name: ewww_image_optimizer_include_media_paths
+    option_value: '1'
+  - option_name: ewww_image_optimizer_aux_paths
+    option_value: ''
+  - option_name: ewww_image_optimizer_exclude_paths
+    option_value: ''
+  - option_name: ewww_image_optimizer_allow_tracking
+    option_value: ''
+  - option_name: ewww_image_optimizer_maxmediawidth
+    option_value: '2048'
+  - option_name: ewww_image_optimizer_maxmediaheight
+    option_value: '2048'
+  - option_name: ewww_image_optimizer_resize_existing
+    option_value: '1'
+  - option_name: ewww_image_optimizer_disable_resizes
+    option_value: ''
+  - option_name: ewww_image_optimizer_disable_resizes_opt
+    option_value: ''
+  - option_name: ewww_image_optimizer_jpg_background
+    option_value: ''
+  - option_name: ewww_image_optimizer_webp_paths
+    option_value: ''
+  - option_name: ewww_image_optimizer_dismiss_media_notice
+    option_value: '1'

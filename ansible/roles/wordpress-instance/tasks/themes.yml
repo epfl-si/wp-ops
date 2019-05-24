@@ -1,0 +1,8 @@
+- name: Delete themes bundled with WordPress
+  wordpress_theme:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - twentyfifteen
+    - twentysixteen
+    - twentyseventeen

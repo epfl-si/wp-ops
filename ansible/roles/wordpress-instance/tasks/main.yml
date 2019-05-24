@@ -65,6 +65,24 @@
     apply:
       tags: ["config"]
 
+- name: Set up plugins
+  when: wp_can.configure
+  tags:
+    - plugins
+  include_tasks:
+    file: "plugins.yml"
+    apply:
+      tags: ["plugins"]
+
+- name: Set up themes
+  when: wp_can.configure
+  tags:
+    - themes
+  include_tasks:
+    file: "themes.yml"
+    apply:
+      tags: ["themes"]
+
 ################################
 # Special-purpose tasks
 ################################
