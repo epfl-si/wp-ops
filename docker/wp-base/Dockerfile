@@ -71,6 +71,7 @@ RUN su -s /bin/sh www-data -c " \
     fi;                                                                   \
     wp package install https://github.com/diggy/polylang-cli.git ;        \
     wp package install https://github.com/cortneyray/wp-cli-polylang.git; \
+    wp package install https://github.com/epfl-idevelop/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
 
 # Install a copy of WordPress into /wp, populate it with our plugins,
