@@ -143,3 +143,5 @@ plugin_ewww_image_optimizer_options:
     option_value: ''
   - option_name: ewww_image_optimizer_dismiss_media_notice
     option_value: '1'
+  - option_name: ewww_image_optimizer_debug
+    option_value: false
