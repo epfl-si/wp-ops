@@ -129,7 +129,10 @@
     cmd: |
       # Trim all files at top level (except for a whitelist), and
       # the auto-update muplugin
+
+      set -e -x
       cd "{{ wp_dir }}"
+
       files_trimmed=
       for path in * \
           wp-content/mu-plugins/EPFL_enable_updates_automatic.php
@@ -139,6 +142,7 @@
               wp-config.php|index.php) continue ;;
               {{ symlinks_all_paths | join('|') }}) continue ;;
           esac
+          if [ ! -e "$path" ]; then continue; fi
           if [ -d "$path" ]; then continue; fi
 
           if [ -z "$files_trimmed" ]; then
