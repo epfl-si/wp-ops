@@ -4,7 +4,7 @@
 
 import atexit
 import getopt
-from io import BytesIO
+import io
 import json
 import os
 import re
@@ -194,7 +194,7 @@ class ZipPlugin(Plugin):
     def install(self, target_dir):
         """Unzip into a subdirectory `target_dir` named `self.name`."""
         assert self.url.startswith("http")
-        zip = ZipFile(BytesIO(requests.get(self.url).content))
+        zip = ZipFile(io.BytesIO(requests.get(self.url).content))
 
         progress("Unzipping {}".format(self.url))
         for member in zip.namelist():
@@ -281,6 +281,35 @@ class _Singleton(object):
         return cls.__singletons[cls]
 
 
+class WpOpsPlugins(_Singleton):
+    """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
+
+    # TODO: unfork to master
+    _GIT_URL = 'https://github.com/epfl-idevelop/wp-ops/tree/feature/plugin-and-theme-state-in-ansible'
+    PLUGINS_YML_PATH = 'ansible/roles/wordpress-instance/tasks/plugins.yml'
+
+    def __init__(self):
+        self._git = GitHubCheckout(self._GIT_URL)
+        self._git.clone()
+
+    @property
+    def plugins_yml_path(self):
+        return os.path.join(self._git.source_dir, self.PLUGINS_YML_PATH)
+
+    def plugins(self):
+        """Yield all the plug-ins to be installed according to the "ops" metadata."""
+        for thing in yaml.load(io.open(self.plugins_yml_path, encoding='utf8')):
+            if 'wordpress_plugin' not in thing:
+                continue
+            action = thing['wordpress_plugin']
+            if 'state' not in action or symlinked not in action['state']:
+                continue
+            name = action['name']
+            url = action['from']
+
+            yield Plugin(name, url)
+
+
 class Flags:
     """Command-line parser"""
     def __init__(self, argv=sys.argv[:]):
@@ -310,7 +339,7 @@ if __name__ == '__main__':
 
     if flags.auto:
         MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in WpOpsPlugins.all():
+        for plugin in WpOpsPlugins.singleton().plugins():
             if plugin.name not in flags.exclude:
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
