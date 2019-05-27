@@ -1,3 +1,11 @@
+## Plugin lineup and configuration
+##
+## ⚠ Until such time that we don't use the jahia2wp repository, the
+## configuration herein duplicates the one at
+## https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/plugins/generic/config-lot1.yml
+## (and ditto in the "release" branch as well).
+## Please be sure to propagate your changes there as well.
+
 - include_vars: wp-destructive.yml   # For wp_can
 - assert:
     that: wp_can.configure
