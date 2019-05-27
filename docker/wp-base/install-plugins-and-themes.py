@@ -97,7 +97,7 @@ class GitHubCheckout:
     @classmethod
     def _parse(cls, url):
         matched_with_tree = re.match(
-            'https://github.com/([^/]*)/([^/]*)/tree/([^/]*)(?:$|/(.*))', url)
+            'https://github.com/([^/]*)/([^/]*)/tree/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))', url)
         if matched_with_tree:
             return matched_with_tree
         else:
