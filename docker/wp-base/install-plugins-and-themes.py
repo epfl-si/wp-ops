@@ -131,13 +131,20 @@ class GitHubCheckout:
         return 'https://github.com/{}/{}'.format(
             self.github_namespace, self.github_project)
 
+    _clone_cache = {}
+
     def clone(self):
         if not hasattr(self, '_git_topdir'):
-            tmp = Tempdir()
-            run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
-            self._git_topdir = os.path.join(str(tmp), self.github_project)
-            if self.branch is not None:
-                run_cmd(["git", "checkout", self.branch], cwd=self._git_topdir)
+            if (self.clone_url, self.branch) in self._clone_cache:
+                self._git_topdir = self._clone_cache[(self.clone_url, self.branch)]
+            else:
+                tmp = Tempdir()
+                run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
+                self._git_topdir = os.path.join(str(tmp), self.github_project)
+                if self.branch is not None:
+                    run_cmd(["git", "checkout", self.branch], cwd=self._git_topdir)
+                self._clone_cache[(self.clone_url, self.branch)] = self._git_topdir
+
         return self  # For chaining
 
     @property
@@ -302,7 +309,7 @@ class WpOpsPlugins(_Singleton):
             if 'wordpress_plugin' not in thing:
                 continue
             action = thing['wordpress_plugin']
-            if 'state' not in action or symlinked not in action['state']:
+            if 'state' not in action or 'symlinked' not in action['state']:
                 continue
             name = action['name']
             url = action['from']
