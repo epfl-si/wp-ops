@@ -14,7 +14,7 @@ HTACCESS_MAINTENANCE
 }
 
 leave_maintenance_mode() {
-    local htaccess htaccesstmp
+    local htaccess
 
     htaccess="{{ wp_dir }}"/.htaccess
     mv "$htaccess.bak" "$htaccess"
