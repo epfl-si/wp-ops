@@ -3,6 +3,7 @@
 # All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, VPSI, 2019
 #
 # Wp-vertias API fetcher, to build a JSON ansible inventory
+# this file is currently saved into https://gist.github.com/jdelasoie/1ea9a69d7f5b5fbb9fb24422fe862dee as a remote source inventory
 #
 # Example invocation:
 #    wp-veritas-inventory.py --list
@@ -10,21 +11,27 @@
 import argparse
 import os.path
 import sys
+import logging
+
 
 import json
 import yaml
 
 import requests
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, quote
 
 from StringIO import StringIO
 
 
-WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites'
+WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
 
+OC_API_URL = 'https://pub-os-exopge.epfl.ch/api/v1/'
+OC_PROJECT_NAME = 'wwp'
+OC_KEY_FILE = '/run/secrets/kubernetes.io/serviceaccount/token'
 
 
 def _fetch_wp_veritas():
+    logging.debug('Fetching sites from  ' + WP_VERITAS_SITES_API_URL)
     r = requests.get(WP_VERITAS_SITES_API_URL)
 
     if not r.ok:
@@ -56,17 +63,64 @@ def _build_name(site):
     return site_name
 
 
+def _fetch_oc_for_info(pod_name):
+    token = ""
+
+    with open(OC_KEY_FILE) as token_file:
+        token = token_file.read()
+
+    if token == "":
+        raise Exception("Can't read the OC token on %s" % OC_KEY_FILE)
+    else:
+        token = 'Bearer ' + token
+
+    url = OC_API_URL + 'namespaces/' + OC_PROJECT_NAME + '/pods'
+
+    # add selector
+    url += '?labelSelector=' + quote("app in (httpd-%s)" % pod_name)
+    #url += '?labelSelector=' + quote("app in (httpd-gcharmier)") + '&fieldSelector=' + quote("status.phase=Running")
+
+    logging.debug('Fetching OC pods list from ' + url)
+    headers = {'Authorization': token}
+
+    r = requests.get(url, headers=headers, verify=True)
+
+    if not r.ok:
+        r.raise_for_status()
+
+    return r.json()
+
+
 # Add static data about group vars, if we any instance in it
 def fullfil_pod_structure(inventory_dict):
-    if 'www' in inventory_dict.keys():
-        inventory_dict['www']['vars'] = {
-            "wp_env": "www",
-            "wp_hostname": "www.epfl.ch",
-            "ansible_connection": "oc",
-            "ansible_oc_pod": "httpd-www-32-6n7f6",
-            "ansible_oc_namespace": "wwp",
-            "ansible_oc_container": "httpd-www",
-        }
+    for key in inventory_dict.keys():
+        if key == '_meta':
+            # ignore _meta, this is not a pod, only an ansible key
+            continue
+
+        oc_data = _fetch_oc_for_info(key)  # request data from OC
+        if oc_data['items']:
+            ansible_oc_pod = ""
+            for item in oc_data['items']:
+                if 'name' in item['metadata'] and item['metadata']['name']:
+                    ansible_oc_pod = item['metadata']['name']
+                    # retrieve only a pod name, not all
+                    continue
+
+            logging.debug("ansible pod found %s for %s" % (ansible_oc_pod, key))
+
+            inventory_dict[key]['vars'] = {
+                "wp_hostname": "www.epfl.ch",
+                "ansible_connection": "oc",
+                "ansible_oc_pod": ansible_oc_pod,
+                "ansible_oc_namespace": key,
+                "ansible_oc_container": "httpd-" + key,
+
+                # TODO:? may need oc_token (should be added in Vault) or oc_key_file
+                # 'oc_host'
+                }
+        else:
+            logging.warning('Pods httpd-%s does not exist into the OC project %s' % (key, OC_PROJECT_NAME))
 
     return inventory_dict
 
@@ -102,7 +156,7 @@ def print_list():
             "url": site['url'],
             "tagline": site['tagline'],
             "title": site['title'],
-            "opneshift_env": site['openshiftEnv'],
+            "openshift_env": site['openshiftEnv'],
             "category": site['category'],
             "theme": site['theme'],
             "faculty": site['faculty'],
