@@ -1,3 +1,7 @@
+- include_vars: wp-destructive.yml   # For wp_can
+- assert:
+    that: wp_can.configure
+
 - name: Delete themes bundled with WordPress
   wordpress_theme:
     name: "{{ item }}"
