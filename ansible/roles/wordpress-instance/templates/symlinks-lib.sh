@@ -30,3 +30,22 @@ make_symlinks_to_wp() {
     done
     return $retval
 }
+
+ensure_file_contains () {
+    local oldfilename newfilename
+    oldfilename="$1"
+    newfilename="$1.NEW.$$"
+    cat > "$newfilename"
+    if diff "$oldfilename" "$newfilename" >&2; then
+        rm "$newfilename"
+        return 0
+    else
+{% if ansible_check_mode %}
+      # We have enough chatter from "diff", above
+      rm "$newfilename"
+{% else %}
+      mv "$newfilename" "$oldfilename"
+{% endif %}
+      return 1
+    fi
+}

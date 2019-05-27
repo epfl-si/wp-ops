@@ -19,14 +19,6 @@
 - name: WordPress instances
   hosts: all-wordpresses
   gather_facts: no   # But see ../roles/wordpress-instance/tasks/facts.yml
-
-  # Set execution strategy to "free" (full parallelism) under -t
-  # symlink / -t unsymlink to minimize downtime; and to "linear" (the
-  # default value, slower but easier to reason about) otherwise
-  # https://docs.ansible.com/ansible/latest/user_guide/playbooks_strategies.html
-  strategy: >-
-    {{ "free" if ["symlink", "unsymlink"] | intersect(ansible_run_tags)
-       else "linear" }}
   roles:
     - role: ../roles/wordpress-instance
 

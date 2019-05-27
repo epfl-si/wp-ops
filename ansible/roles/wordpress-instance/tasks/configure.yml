@@ -5,12 +5,7 @@
 
 - assert:
     that:
-      - wp_can.configure
-
-- name: Set up index.php
-  copy:
-    content: "{{ lookup('template', 'wordpress-index.php') }}"
-    dest: "{{ wp_dir }}/index.php"
+      - wp_can.configure or ansible_check_mode
 
 - name: WP_CONTENT_DIR line in wp-config.php
   lineinfile:
@@ -28,4 +23,6 @@
 
 - name: Unset ping_sites
   command: "{{ wp_cli_command }} option set ping_sites ''"
-  when: "_wp_config_ping_sites.stdout != ''"
+  when: >
+    _wp_config_ping_sites is not skipped
+    and (_wp_config_ping_sites.stdout != '')
