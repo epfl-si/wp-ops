@@ -2,11 +2,9 @@
 - assert:
     that: wp_can.configure
 
-- name: Delete themes bundled with WordPress
+- include_vars: theme-vars.yml
+
+- name: WordPress theme
   wordpress_theme:
-    name: "{{ item }}"
-    state: absent
-  with_items:
-    - twentyfifteen
-    - twentysixteen
-    - twentyseventeen
+    name: '{{ theme_name }}'
+    state: symlinked
