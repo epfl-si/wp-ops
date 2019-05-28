@@ -99,12 +99,19 @@ spec:
             openshift.withProject() {
               def latestDeploymentVersion = openshift.selector('dc', 'httpd-int').object().status.latestVersion
               def rc = openshift.selector('rc', "httpd-int-${latestDeploymentVersion}")
-              rc.untilEach(1) {  // Wait until there is one result in the
-                                 // selector, *and then* each shall return
-                                 // true below:
+              Set mentioned = []
+              rc.untilEach(1) {  // Wait until there is (at least) one
+                                 // result in the selector, *and then*
+                                 // each shall return true below:
                 def rcMap = it.object()
-                return (rcMap.status.replicas.equals(
-                  rcMap.status.readyReplicas))
+                def name = rcMap.metadata.name
+                def expectedReplicas = rcMap.status.replicas
+                def actualReplicas = rcMap.status.readyReplicas
+                if (! mentioned.contains(name)) {
+                  echo "Waiting for rc/${name} to reach ${expectedReplicas} replicas (currently ${actualReplicas})"
+                  mentioned.add(name)
+                }
+                return (expectedReplicas.equals(actualReplicas))
               }  // rc.untilEach
             }  // openshift.withProject
           }  // openshift.withCluster
