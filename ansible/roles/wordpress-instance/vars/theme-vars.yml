@@ -1,0 +1,4 @@
+# Theme variables go here
+
+# TODO: This should be computed from wp-veritas state
+theme_name: "wp-theme-2018"

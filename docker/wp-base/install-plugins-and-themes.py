@@ -4,8 +4,7 @@
 
 import atexit
 import getopt
-from io import BytesIO
-import itertools
+import io
 import json
 import os
 import re
@@ -36,9 +35,9 @@ Usage:
     Install one plugin or theme into the current directory. <name> is
     the name of the subdirectory to create. <URL> can point to a ZIP
     file, a GitHub URL (possibly pointing to a particular branch and
-    subdirectory), or it can be the string "web" or the string
-    "wordpress.org/plugins", both meaning that the plug-in named
-    <name> shall be downloaded from the WordPress plugin repository.
+    subdirectory), or it can be the string "wordpress.org/plugins",
+    meaning that the plug-in named <name> shall be downloaded
+    from the WordPress plugin repository.
 
 Options:
 
@@ -98,7 +97,7 @@ class GitHubCheckout:
     @classmethod
     def _parse(cls, url):
         matched_with_tree = re.match(
-            'https://github.com/([^/]*)/([^/]*)/tree/([^/]*)(?:$|/(.*))', url)
+            'https://github.com/([^/]*)/([^/]*)/tree/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))', url)
         if matched_with_tree:
             return matched_with_tree
         else:
@@ -132,13 +131,20 @@ class GitHubCheckout:
         return 'https://github.com/{}/{}'.format(
             self.github_namespace, self.github_project)
 
+    _clone_cache = {}
+
     def clone(self):
         if not hasattr(self, '_git_topdir'):
-            tmp = Tempdir()
-            run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
-            self._git_topdir = os.path.join(str(tmp), self.github_project)
-            if self.branch is not None:
-                run_cmd(["git", "checkout", self.branch], cwd=self._git_topdir)
+            if (self.clone_url, self.branch) in self._clone_cache:
+                self._git_topdir = self._clone_cache[(self.clone_url, self.branch)]
+            else:
+                tmp = Tempdir()
+                run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
+                self._git_topdir = os.path.join(str(tmp), self.github_project)
+                if self.branch is not None:
+                    run_cmd(["git", "checkout", self.branch], cwd=self._git_topdir)
+                self._clone_cache[(self.clone_url, self.branch)] = self._git_topdir
+
         return self  # For chaining
 
     @property
@@ -156,18 +162,17 @@ class Plugin(object):
         self.name = name
         self.url = url
 
-    def __new__(cls, name, url, **kwargs):
+    def __new__(cls, name, url):
         if cls is Plugin:
             cls = cls._find_handler(url)
 
         that = object.__new__(cls)
-        that.__init__(name, url, **kwargs)
+        that.__init__(name, url)
         return that
 
     @staticmethod
     def subclasses():
-        return (ZipPlugin, GitHubPlugin, Jahia2wpSubdirectoryPlugin,
-                WordpressOfficialPlugin)
+        return (ZipPlugin, GitHubPlugin, WordpressOfficialPlugin)
 
     @classmethod
     def _find_handler(cls, url):
@@ -184,12 +189,7 @@ class Plugin(object):
 
 
 class ZipPlugin(Plugin):
-    """A WordPress plug-in in Zip form.
-
-    Also handled here: the case where `url` is a relative path, in
-    which case it is interpreted as the path of a .zip file in the
-    jahia2wp source tree (using @link Jahia2p.data_plugins_path_relative)
-    """
+    """A WordPress plug-in in Zip form."""
     @classmethod
     def handles(cls, url):
         return url.endswith(".zip")
@@ -200,11 +200,9 @@ class ZipPlugin(Plugin):
 
     def install(self, target_dir):
         """Unzip into a subdirectory `target_dir` named `self.name`."""
-        if self.url.startswith("http"):
-            zip = ZipFile(BytesIO(requests.get(self.url).content))
-        else:
-            assert self.jahia2wp is not None
-            zip = ZipFile(self.jahia2wp.data_plugins_path_relative(self.url))
+        assert self.url.startswith("http")
+        zip = ZipFile(io.BytesIO(requests.get(self.url).content))
+
         progress("Unzipping {}".format(self.url))
         for member in zip.namelist():
             zipinfo = zip.getinfo(member)
@@ -230,8 +228,8 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, url, **kwargs):
-        super(GitHubPlugin, self).__init__(name, url, **kwargs)
+    def __init__(self, name, url):
+        super(GitHubPlugin, self).__init__(name, url)
         self._git = GitHubCheckout(url)
 
     def install(self, target_dir):
@@ -242,7 +240,7 @@ class WordpressOfficialPlugin(Plugin):
     """A plug-in to download from the official plug-in repository."""
     @classmethod
     def handles(cls, url):
-        return url == 'web' or url == 'wordpress.org/plugins'
+        return url == 'wordpress.org/plugins'
 
     @property
     def api_struct(self):
@@ -280,29 +278,6 @@ def MuPlugins():
         'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
 
 
-class Jahia2wpSubdirectoryPlugin(Plugin):
-    """A plug-in whose source code lives in the jahia2wp source tree."""
-    @classmethod
-    def handles(cls, url):
-        return bool(cls._parse(url))
-
-    def __init__(self, name, url, jahia2wp):
-        super(Jahia2wpSubdirectoryPlugin, self).__init__(name, url)
-        self.jahia2wp = jahia2wp
-
-    @classmethod
-    def _parse(cls, url):
-        return re.match("[.][.]/wp/wp-content/plugins/([^/]*)", url)
-
-    @property
-    def plugin_dir(self):
-        return self.jahia2wp.wp_content_plugins_path_relative(
-            self._parse(self.url).group(1))
-
-    def install(self, target_dir):
-        self._copytree_install(self.plugin_dir, target_dir)
-
-
 class _Singleton(object):
     __singletons = {}
 
@@ -313,138 +288,33 @@ class _Singleton(object):
         return cls.__singletons[cls]
 
 
-class Jahia2wp2018(_Singleton):
-    """Models the jahia2wp source tree in its most recent `release2018` branch.
+class WpOpsPlugins(_Singleton):
+    """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
 
-    For historical reasons, this Git repository contains code that
-    deals with some "ops" aspects such as creating sites, mixed with
-    WordPress plug-ins, mu-plugins and more.
-    """
-
-    _GIT_URL = 'https://github.com/epfl-idevelop/jahia2wp/tree/release2018'
-    _DATA_PLUGINS_DIR = 'data/plugins'
-    _CONFIG_LOT1_YML_PATH = 'generic/config-lot1.yml'
-    _WP_PLUGINS_DIR = 'data/wp/wp-content/plugins'
+    # TODO: unfork to master
+    _GIT_URL = 'https://github.com/epfl-idevelop/wp-ops'
+    PLUGINS_YML_PATH = 'ansible/roles/wordpress-instance/tasks/plugins.yml'
 
     def __init__(self):
         self._git = GitHubCheckout(self._GIT_URL)
         self._git.clone()
 
     @property
-    def path(self):
-        return self._git.source_dir
-
-    def path_relative(self, *path_fragments):
-        return os.path.join(self.path, *path_fragments)
-
-    def data_plugins_path_relative(self, *path_fragments):
-        return self.path_relative(self._DATA_PLUGINS_DIR, *path_fragments)
-
-    def wp_content_plugins_path_relative(self, *path_fragments):
-        return self.path_relative(self._WP_PLUGINS_DIR, *path_fragments)
-
-    @property
-    def config_lot1_path(self):
-        return self.data_plugins_path_relative(self._CONFIG_LOT1_YML_PATH)
+    def plugins_yml_path(self):
+        return os.path.join(self._git.source_dir, self.PLUGINS_YML_PATH)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
-
-        lot1_struct = Jahia2wpLegacyYAMLLoader.load(self.config_lot1_path)
-        for plugin_struct in lot1_struct['plugins']:
-            name = plugin_struct['name']
-            try:
-                url = plugin_struct['config']['src']
-            except KeyError:
-                progress("Skipping {}".format(name))
+        for thing in yaml.load(io.open(self.plugins_yml_path, encoding='utf8')):
+            if 'wordpress_plugin' not in thing:
                 continue
-
-            plugin = Plugin(name, url, jahia2wp=self)
-            if self._skip_this_plugin(plugin):
+            action = thing['wordpress_plugin']
+            if 'state' not in action or 'symlinked' not in action['state']:
                 continue
+            name = action['name']
+            url = action['from']
 
-            progress("{}: {} -> {}".format(
-                self.__class__.__name__, plugin.name, plugin.url))
-            yield plugin
-
-    def _skip_this_plugin(self, plugin):
-        return False   # Overridden in subclass
-
-
-class Jahia2wp2010(Jahia2wp2018):
-    """Models the jahia2wp source tree in its older `release` branch.
-
-    As the "2010" theme is being phased out, we only keep
-    EPFL-specific plug-ins that do not name-clash with the 2018 ones.
-    (Fortunately, those that do name-clash are not supposed to differ
-    between both branches.)
-    """
-
-    _GIT_URL = 'https://github.com/epfl-idevelop/jahia2wp/tree/release'
-
-    # These plug-ins clash in name with Jahia2wp2018; however, they
-    # are (or should be) identical between both branches. We yield to
-    # the Jahia2wp2018 copy for these (in __is_useful_2010_plugin).
-    __PLUGINS_FAVORED_IN_RELEASE2018 = (
-        'EPFL-settings',
-        'EPFL-Content-Filter',
-        'epfl-404'
-    )
-
-    def _skip_this_plugin(self, p):
-        name = p.name
-        if name in self.__PLUGINS_FAVORED_IN_RELEASE2018:
-            return True
-        if not name.lower().startswith("epfl"):
-            return True
-        return False
-
-
-class Jahia2wpLegacyYAMLLoader(yaml.Loader):
-    """Like yaml.Loader, but with !include and !from_csv.
-
-    The latter is mocked out since we only care about the plugin list.
-    """
-    def __init__(self, *args, **kwargs):
-        super(Jahia2wpLegacyYAMLLoader, self).__init__(*args, **kwargs)
-        self.add_constructor("!include", self.__yaml_include)
-        self.add_constructor("!from_csv", self.__yaml_from_csv)
-
-    def __yaml_include(self, loader, node):
-        """Make "!include" work in YAML files."""
-        local_file = os.path.join(os.path.dirname(loader.stream.name),
-                                  node.value)
-
-        # if file to include exists with given value
-        if os.path.exists(node.value):
-            include_file = node.value
-        # if file exists with relative path to current YAML file
-        elif os.path.exists(local_file):
-            include_file = local_file
-        else:
-            error_message = "YAML include in '{}' - file to include doesn't exist: {}".format(
-                loader.stream.name, node.value)
-            raise Exception(error_message)
-
-        with open(include_file) as inputfile:
-            # Yow, recursive !include's
-            return Jahia2wpLegacyYAMLLoader.load(inputfile)
-
-    def __yaml_from_csv(self, *unused_args, **unused_kwargs):
-        # TODO: Right now we only care about plugin metadata insofar
-        # as it helps us make a decision related to installing it into
-        # the image or not. The bits formerly included from CSV
-        # currently have no bearing on that; furthermore we will
-        # probably want to refactor these parts of the YAML setup to
-        # be more Ansible-like.
-        return "UNUSED"
-
-    @classmethod
-    def load(cls, filename_or_stream):
-        """Convenience shortcut, for when you don't want to learn the PyYAML API."""
-        if not hasattr(filename_or_stream, "read"):
-            filename_or_stream = open(filename_or_stream)
-        return cls(filename_or_stream).get_single_data()
+            yield Plugin(name, url)
 
 
 class Flags:
@@ -476,9 +346,7 @@ if __name__ == '__main__':
 
     if flags.auto:
         MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in itertools.chain(
-                Jahia2wp2018.singleton().plugins(),
-                Jahia2wp2010.singleton().plugins()):
+        for plugin in WpOpsPlugins.singleton().plugins():
             if plugin.name not in flags.exclude:
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():

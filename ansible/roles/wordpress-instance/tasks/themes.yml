@@ -1,0 +1,10 @@
+- include_vars: wp-destructive.yml   # For wp_can
+- assert:
+    that: wp_can.configure
+
+- include_vars: theme-vars.yml
+
+- name: WordPress theme
+  wordpress_theme:
+    name: '{{ theme_name }}'
+    state: symlinked

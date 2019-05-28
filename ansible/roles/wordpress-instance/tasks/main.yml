@@ -6,10 +6,7 @@
 #              ../vars/*.yml)
 
 - include_vars: wp-destructive.yml   # For wp_can
-  tags:
-    - symlink
-    - unsymlink
-    - config
+  tags: always
 
 - name: WordPress facts
   import_tasks: facts.yml
@@ -64,6 +61,24 @@
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
       tags: ["config"]
+
+- name: Set up plugins
+  when: wp_can.configure
+  tags:
+    - plugins
+  include_tasks:
+    file: "plugins.yml"
+    apply:
+      tags: ["plugins"]
+
+- name: Set up themes
+  when: wp_can.configure
+  tags:
+    - themes
+  include_tasks:
+    file: "themes.yml"
+    apply:
+      tags: ["themes"]
 
 ################################
 # Special-purpose tasks

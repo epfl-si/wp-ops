@@ -83,7 +83,8 @@ RUN wp --allow-root --path=/wp core download \
                       | select(match("'${WORDPRESS_VERSION_LINEAGE}'"))' \
             |sort -n -r |head -1)
 
-RUN rm -rf /wp/wp-content/plugins/akismet /wp/wp-content/plugins/hello.php
+RUN rm -rf /wp/wp-content/plugins/akismet /wp/wp-content/plugins/hello.php \
+    /wp/wp-content/themes/twenty*
 
 ADD wordpress-anywhere.patch /tmp/
 RUN set -e -x; cd /; git apply < /tmp/wordpress-anywhere.patch;          \
