@@ -97,9 +97,15 @@ spec:
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              def rollout = openshift.selector('dc', 'httpd-int').rollout()
-              rollout.latest()
-              rollout.status()
+              def latestDeploymentVersion = openshift.selector('dc', 'httpd-int').object().status.latestVersion
+              def rc = openshift.selector('rc', "httpd-int-${latestDeploymentVersion}")
+              rc.untilEach(1) {  // Wait until there is one result in the
+                                 // selector, *and then* each shall return
+                                 // true below:
+                def rcMap = it.object()
+                return (rcMap.status.replicas.equals(
+                  rcMap.status.readyReplicas))
+              }  // rc.untilEach
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
