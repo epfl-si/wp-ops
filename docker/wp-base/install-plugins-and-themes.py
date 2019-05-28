@@ -292,7 +292,7 @@ class WpOpsPlugins(_Singleton):
     """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
 
     # TODO: unfork to master
-    _GIT_URL = 'https://github.com/epfl-idevelop/wp-ops/tree/feature/plugin-and-theme-state-in-ansible'
+    _GIT_URL = 'https://github.com/epfl-idevelop/wp-ops'
     PLUGINS_YML_PATH = 'ansible/roles/wordpress-instance/tasks/plugins.yml'
 
     def __init__(self):
