@@ -26,7 +26,7 @@ our @targets = (
       ssh_port => 32222,
       ssh_user => 'www-data',
       ssh_host => 'test-ssh-wwp.epfl.ch',
-      remote_paths  => qw(/srv/int/migration-wp.epfl.ch/htdocs/labs)
+      remote_paths  => qw(/srv)
   },
   # Feel free to add more (in case we spin up more production OpenShifts)
 );
@@ -78,7 +78,7 @@ sub collect_wordpress_installs_over_ssh {
             # local bash that will parse this open('-|'), and a second
             # time for the remote shell.
             qw<'\(' -type d
-               '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages '\)'
+               '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages -o -name 'jahia-data' '\)'
                '\)' -prune -false -o -name wp-config.php>))
     or die "Cannot ssh $ssh_mantra: $!";
 
