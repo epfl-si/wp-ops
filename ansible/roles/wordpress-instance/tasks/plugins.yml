@@ -100,7 +100,7 @@
   wordpress_plugin:
     name: cache-control
     state: symlinked
-    from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
+    from: wordpress.org/plugins
 
 - name: cache-control options
   wordpress_option:
