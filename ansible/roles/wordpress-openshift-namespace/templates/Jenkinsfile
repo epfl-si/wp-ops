@@ -97,9 +97,22 @@ spec:
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              def rollout = openshift.selector('dc', 'httpd-int').rollout()
-              rollout.latest()
-              rollout.status()
+              def latestDeploymentVersion = openshift.selector('dc', 'httpd-int').object().status.latestVersion
+              def rc = openshift.selector('rc', "httpd-int-${latestDeploymentVersion}")
+              Set mentioned = []
+              rc.untilEach(1) {  // Wait until there is (at least) one
+                                 // result in the selector, *and then*
+                                 // each shall return true below:
+                def rcMap = it.object()
+                def name = rcMap.metadata.name
+                def expectedReplicas = rcMap.status.replicas
+                def actualReplicas = rcMap.status.readyReplicas
+                if (! mentioned.contains(name)) {
+                  echo "Waiting for rc/${name} to reach ${expectedReplicas} replicas (currently ${actualReplicas})"
+                  mentioned.add(name)
+                }
+                return (expectedReplicas.equals(actualReplicas))
+              }  // rc.untilEach
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
@@ -153,7 +166,7 @@ void watchBuild(buildSelector) {
 
   buildSelector.logs('-f')  // Waits for the build(s) to terminate
                             // (or mostly terminate - See below)
-  timeout(1) {
+  timeout(time: 1, units: 'MINUTES') {
     // Despite logs having run their course, experience shows that
     // some builds can still be in "Running" state Kubernetes-wise:
     buildSelector.withEach {
@@ -202,7 +215,7 @@ void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
 
   def triggeredBuilds = []
 
-  timeout(2) {
+  timeout(time: 2, units: 'MINUTES') {
     for (build in openshift.selector("build").objects()) {
       if (build.spec && build.spec.triggeredBy) {
         for (triggered in build.spec.triggeredBy) {
