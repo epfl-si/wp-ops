@@ -166,7 +166,7 @@ void watchBuild(buildSelector) {
 
   buildSelector.logs('-f')  // Waits for the build(s) to terminate
                             // (or mostly terminate - See below)
-  timeout(1) {
+  timeout(time: 1, units: 'MINUTES') {
     // Despite logs having run their course, experience shows that
     // some builds can still be in "Running" state Kubernetes-wise:
     buildSelector.withEach {
@@ -215,7 +215,7 @@ void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
 
   def triggeredBuilds = []
 
-  timeout(2) {
+  timeout(time: 2, units: 'MINUTES') {
     for (build in openshift.selector("build").objects()) {
       if (build.spec && build.spec.triggeredBy) {
         for (triggered in build.spec.triggeredBy) {
