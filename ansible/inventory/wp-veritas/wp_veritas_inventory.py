@@ -150,42 +150,20 @@ class OpenShiftDeploymentConfig:
 class Inventory:
     """Model the entire wp-veritas inventory."""
 
-    def __init__(self):
+    def __init__(self, sites):
         self.inventory = {
             '_meta': {'hostvars': {}}
         }
+        self.groups = set()
+        for site in sites:
+            self._add(site)
 
-    def _fulfill_pod_structure(self):
-        """Add static data about group vars, if we any instance in it"""
-        for key in self.inventory.keys():
-            if key == '_meta':
-                # ignore _meta, this is not a pod, only an ansible key
-                continue
-
-            ansible_oc_pod = OpenShiftDeploymentConfig.by_name(key).pod_name
-            if ansible_oc_pod is not None:
-                logging.debug("ansible pod found %s for %s" % (ansible_oc_pod, key))
-
-                self.inventory[key]['vars'] = {
-                    "wp_hostname": "www.epfl.ch",
-                    "ansible_connection": "oc",
-                    "ansible_oc_pod": ansible_oc_pod,
-                    "ansible_oc_namespace": key,
-                    "ansible_oc_container": "httpd-" + key,
-                }
-
-    @classmethod
-    def build_as_string(cls):
-        self = cls()
-        for site in WpVeritasSite.all():
-            self.add(site)
-        self._fulfill_pod_structure()
-
+    def to_json(self):
         io = StringIO()
         json.dump(self.inventory, io, indent=2)
         return io.getvalue()
 
-    def add(self, site):
+    def _add(self, site):
         # fulfill vars for the site
         meta_site = {
             "wp_veritas_url": site.wp_veritas_url,
@@ -200,14 +178,38 @@ class Inventory:
             "unit_id": site.unit_id,
             "wp_path": site.path
         }
-        instance_name = site.instance_name
-        self.inventory.setdefault(site.openshift_env, {}).setdefault('hosts', []).append(instance_name)
-        self.inventory['_meta']['hostvars'][instance_name] = meta_site
+        self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
+        self._add_site_to_group(site, site.openshift_env)
 
+    def _add_site_to_group(self, site, group):
+        self._add_group(group)
+        self.inventory[group]['hosts'].append(site.instance_name)
 
-def main():
-    return sys.stdout.write(Inventory.build_as_string())
+    def _add_group(self, group):
+        if group in self.groups:
+            return
+        self.groups.add(group)
+
+        self.inventory.setdefault(group, {}).setdefault('hosts', [])
+        self._fill_dc_group_info(group)
+
+    def _fill_dc_group_info(self, group):
+        """Add static data about group vars, if we any instance in it"""
+        ansible_oc_pod = OpenShiftDeploymentConfig.by_name(group).pod_name
+        if ansible_oc_pod is None:
+            # This group is unknown to wp-veritas
+            return
+
+        logging.debug("ansible pod found %s for %s" % (ansible_oc_pod, group))
+
+        self.inventory[group]['vars'] = {
+            "wp_hostname": "www.epfl.ch",
+            "ansible_connection": "oc",
+            "ansible_oc_pod": ansible_oc_pod,
+            "ansible_oc_namespace": group,
+            "ansible_oc_container": "httpd-" + group,
+        }
 
 
 if __name__ == '__main__':
-    main()
+    sys.stdout.write(Inventory(WpVeritasSite.all()).to_json())
