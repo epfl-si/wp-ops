@@ -10,6 +10,7 @@
 #    wp-veritas-inventory.py
 
 import os.path
+import subprocess
 import sys
 import logging
 
@@ -106,8 +107,11 @@ class OpenShiftDeploymentConfig:
     def _fetch_oc_for_info(self, dc_name):
         token = ""
 
-        with open(self.OC_KEY_FILE) as token_file:
-            token = token_file.read()
+        if os.path.exists(self.OC_KEY_FILE):
+            with open(self.OC_KEY_FILE) as token_file:
+                token = token_file.read()
+        else:
+            token = subprocess.check_output(["oc", "whoami", "-t"]).rstrip()
 
         if token == "":
             raise Exception("Can't read the OC token on %s" % self.OC_KEY_FILE)
