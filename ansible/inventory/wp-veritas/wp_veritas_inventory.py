@@ -190,6 +190,7 @@ class Inventory:
             return
         self.groups.add(group)
 
+        self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
         self._fill_dc_group_info(group)
 
