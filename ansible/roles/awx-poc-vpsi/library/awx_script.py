@@ -22,8 +22,10 @@ class AwxScriptTask(object):
     module_spec = dict(
         argument_spec=dict(
             script=dict(type='str'),
-            vars=dict(type='dict')
-        )
+            vars=dict(type='dict'),
+            supports_check_mode=dict(default=False, type='bool')
+        ),
+        supports_check_mode=True  # We make do, even if the script doesn't
     )
 
     def __init__(self):
@@ -31,9 +33,14 @@ class AwxScriptTask(object):
         self.exit_json_called = False
 
     def run(self):
+        check_mode = self.module.check_mode
+        if check_mode and not self.module.params.get('supports_check_mode'):
+            return self.exit_json(skipped=True)
+
         vars = deepcopy(self.module.params.get('vars'))
         vars['exit_json'] = self.exit_json
         vars['AnsibleError'] = AnsibleError
+        vars['check_mode'] = check_mode
 
         self.load_django()
         try:
