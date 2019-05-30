@@ -2,8 +2,9 @@
 
 # All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, VPSI, 2019
 #
-# Wp-vertias API fetcher, to build a JSON ansible inventory
-# this file is currently saved into https://gist.github.com/jdelasoie/1ea9a69d7f5b5fbb9fb24422fe862dee as a remote source inventory
+# Build an Ansible inventory from wp-veritas
+# this file is found in https://github.com/epfl-idevelop/wp-ops under
+# subdirectory ansible/tower/inventory_scripts
 #
 # Example invocation:
 #    wp-veritas-inventory.py --list
