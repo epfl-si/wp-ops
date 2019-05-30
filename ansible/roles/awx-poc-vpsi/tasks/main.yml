@@ -1,0 +1,6 @@
+- shell: df
+  changed_when: false
+  register: _awx_df
+
+- debug:
+    msg: "{{ _awx_df }}"
