@@ -1,4 +1,3 @@
-import six
 import sys
 from django.db import transaction
 
@@ -16,9 +15,12 @@ class AnsibleDjangoObserver:
     def __setattr__(self, name, value):
         if name.endswith("__obj"):
             return object.__setattr__(self, name, value)
-            
+
+        if isinstance(value, self.__class__):
+            value = value.__obj
+
         oldvalue = getattr(self.__obj, name, None)
-        if oldvalue != value:
+        if not (oldvalue == value or oldvalue is value):
             setattr(self.__obj, name, value)
             update_json_status(changed=True)
 
