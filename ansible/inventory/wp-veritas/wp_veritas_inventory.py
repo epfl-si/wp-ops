@@ -95,10 +95,13 @@ class OpenShiftDeploymentConfig:
     OC_PROJECT_NAME = 'wwp'
     OC_KEY_FILE = '/run/secrets/kubernetes.io/serviceaccount/token'
 
+    _cache = {}
+
     @classmethod
     def by_name(cls, dc_name):
-        # TODO: cache by dc_name
-        return cls(dc_name)
+        if dc_name not in cls._cache:
+            cls._cache[dc_name] = cls(dc_name)
+        return cls._cache[dc_name]
 
     def __init__(self, dc_name):
         self.dc_name = dc_name
