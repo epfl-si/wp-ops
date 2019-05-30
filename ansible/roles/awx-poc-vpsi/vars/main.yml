@@ -1,0 +1,2 @@
+awx_wpveritas_inventory_script_name: Fetch wp-veritas sites
+awx_wpveritas_inventory_script_path: "../../../tower/inventory-scripts/wp_veritas_inventory.py"
