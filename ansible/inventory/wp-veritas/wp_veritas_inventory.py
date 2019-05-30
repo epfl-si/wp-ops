@@ -22,159 +22,184 @@ from six.moves.urllib.parse import urlparse, quote
 from StringIO import StringIO
 
 
-WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
+class WpVeritasSite:
+    WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
 
-OC_API_URL = 'https://pub-os-exopge.epfl.ch/api/v1/'
-OC_PROJECT_NAME = 'wwp'
-OC_KEY_FILE = '/run/secrets/kubernetes.io/serviceaccount/token'
+    @classmethod
+    def all(cls):
+        logging.debug('Fetching sites from  ' + cls.WP_VERITAS_SITES_API_URL)
+        r = requests.get(cls.WP_VERITAS_SITES_API_URL)
+
+        if not r.ok:
+            r.raise_for_status()
+        for site in r.json():
+            if cls._keep(site):
+                yield cls(site)
+
+    @classmethod
+    def _keep(cls, site_data):
+        if site_data['status'] != 'created' or \
+           site_data['type'] == 'unmanaged' or \
+           site_data['url'] == '' or \
+           site_data['openshiftEnv'] == '' or \
+           site_data['openshiftEnv'] == 'manager' or \
+           site_data['openshiftEnv'] == 'subdomains':
+            return False
+        else:
+            return True
+
+    def __init__(self, site_data):
+        self.id = site_data['_id']
+        self.url = site_data['url']
+        self.parsed_url = urlparse(site_data['url'])
+        self.tagline = site_data['tagline']
+        self.title = site_data['title']
+        self.openshift_env = site_data['openshiftEnv']
+        self.category = site_data['category']
+        self.theme = site_data['theme']
+        self.faculty = site_data['faculty']
+        self.languages = site_data['languages']
+        self.unit_id = site_data['unitId']
+
+    @property
+    def instance_name(self):
+        path = self.parsed_url.path
+        # dont override groups name with hosts name
+        # labs are in www, it's a special case
+        if self.openshift_env == 'labs':
+            instance_name = path
+        else:
+            instance_name = self.openshift_env + path
+
+        # always clear instance_name last separator
+        instance_name = (instance_name[:1] if instance_name.endswith('/') else instance_name)
+        if not instance_name.startswith('/'):
+            instance_name = '/' + instance_name
+
+        return instance_name
+
+    @property
+    def wp_veritas_url(self):
+        return 'https://wp-veritas.epfl.ch/edit/' + self.id
+
+    # path on disk is not a provided data, so we have to build it
+    @property
+    def path(self):
+        return os.path.join('/srv', self.openshift_env, self.parsed_url.netloc,
+                            'htdocs', self.parsed_url.path)
 
 
-def _fetch_wp_veritas():
-    logging.debug('Fetching sites from  ' + WP_VERITAS_SITES_API_URL)
-    r = requests.get(WP_VERITAS_SITES_API_URL)
+class OpenShiftDeploymentConfig:
+    OC_API_URL = 'https://pub-os-exopge.epfl.ch/api/v1/'
+    OC_PROJECT_NAME = 'wwp'
+    OC_KEY_FILE = '/run/secrets/kubernetes.io/serviceaccount/token'
 
-    if not r.ok:
-        r.raise_for_status()
+    @classmethod
+    def by_name(cls, dc_name):
+        # TODO: cache by dc_name
+        return cls(dc_name)
 
-    return r.json()
+    def __init__(self, dc_name):
+        self.dc_name = dc_name
+        self._oc_data = self._fetch_oc_for_info(dc_name)
 
+    def _fetch_oc_for_info(self, dc_name):
+        token = ""
 
-# path on disk is not a provided data, so we have to build it
-def _build_path(site):
-    return os.path.join('/srv', site['openshiftEnv'], site['parsed_url'].netloc,
-                        'htdocs', site['parsed_url'].path)
+        with open(self.OC_KEY_FILE) as token_file:
+            token = token_file.read()
 
+        if token == "":
+            raise Exception("Can't read the OC token on %s" % self.OC_KEY_FILE)
+        else:
+            token = 'Bearer ' + token
 
-def _build_name(site):
-    path = site['parsed_url'].path
-    # dont override groups name with hosts name
-    # labs are in www, it's a special case
-    if site['openshiftEnv'] == 'labs':
-        site_name = path
-    else:
-        site_name = site['openshiftEnv'] + path
+        url = self.OC_API_URL + 'namespaces/' + self.OC_PROJECT_NAME + '/pods'
 
-    # always clear site_name last separator
-    site_name = (site_name[:1] if site_name.endswith('/') else site_name)
-    if not site_name.startswith('/'):
-        site_name = '/' + site_name
+        # add selector
+        url += '?labelSelector=' + quote("app in (httpd-%s)" % dc_name)
 
-    return site_name
+        logging.debug('Fetching OC pods list from ' + url)
+        headers = {'Authorization': token}
 
+        r = requests.get(url, headers=headers, verify=True)
 
-def _fetch_oc_for_info(pod_name):
-    token = ""
+        if not r.ok:
+            r.raise_for_status()
 
-    with open(OC_KEY_FILE) as token_file:
-        token = token_file.read()
+        return r.json()
 
-    if token == "":
-        raise Exception("Can't read the OC token on %s" % OC_KEY_FILE)
-    else:
-        token = 'Bearer ' + token
-
-    url = OC_API_URL + 'namespaces/' + OC_PROJECT_NAME + '/pods'
-
-    # add selector
-    url += '?labelSelector=' + quote("app in (httpd-%s)" % pod_name)
-
-    logging.debug('Fetching OC pods list from ' + url)
-    headers = {'Authorization': token}
-
-    r = requests.get(url, headers=headers, verify=True)
-
-    if not r.ok:
-        r.raise_for_status()
-
-    return r.json()
-
-
-# Add static data about group vars, if we any instance in it
-def fullfil_pod_structure(inventory_dict):
-    for key in inventory_dict.keys():
-        if key == '_meta':
-            # ignore _meta, this is not a pod, only an ansible key
-            continue
-
-        oc_data = _fetch_oc_for_info(key)  # request data from OC
+    @property
+    def pod_name(self):
+        oc_data = self._oc_data
         if oc_data['items']:
-            ansible_oc_pod = ""
             for item in oc_data['items']:
                 if 'name' in item['metadata'] and item['metadata']['name']:
-                    ansible_oc_pod = item['metadata']['name']
-                    # retrieve only a pod name, not all
-                    continue
-
-            logging.debug("ansible pod found %s for %s" % (ansible_oc_pod, key))
-
-            inventory_dict[key]['vars'] = {
-                "wp_hostname": "www.epfl.ch",
-                "ansible_connection": "oc",
-                "ansible_oc_pod": ansible_oc_pod,
-                "ansible_oc_namespace": key,
-                "ansible_oc_container": "httpd-" + key,
-
-                # TODO:? may need oc_token (should be added in Vault) or oc_key_file
-                # 'oc_host'
-                }
-        else:
-            logging.warning('Pods httpd-%s does not exist into the OC project %s' % (key, OC_PROJECT_NAME))
-
-    return inventory_dict
+                    return item['metadata']['name']
+        logging.error('Pods httpd-%s does not exist into the OC project %s' % (self.dc_name, self.OC_PROJECT_NAME))
+        return None
 
 
-def print_list():
-    inventory = {
-        '_meta': {'hostvars': {}}
-    }
+class Inventory:
+    """Model the entire wp-veritas inventory."""
 
-    for site in _fetch_wp_veritas():
-        # filter entries :
-        # we only work with created sites that have the data we need
-        # unmanaged are not in our scope
-        # no url = not for AWX
-        # no env = not for AWX
-        # and explicitly ignored env
-        if site['status'] != 'created' or \
-           site['type'] == 'unmanaged' or \
-           site['url'] == '' or \
-           site['openshiftEnv'] == '' or \
-           site['openshiftEnv'] == 'manager' or \
-           site['openshiftEnv'] == 'subdomains':
-            continue
-
-        # add parsed_url, we will need it
-        site['parsed_url'] = urlparse(site['url'])
-
-        host_name = _build_name(site)
-
-        # fullfil vars for the site
-        meta_site = {
-            "wp_veritas_url": 'https://wp-veritas.epfl.ch/edit/' + site['_id'],
-            "url": site['url'],
-            "tagline": site['tagline'],
-            "title": site['title'],
-            "openshift_env": site['openshiftEnv'],
-            "category": site['category'],
-            "theme": site['theme'],
-            "faculty": site['faculty'],
-            "languages": site['languages'],
-            "unit_id": site['unitId'],
-            "wp_path": _build_path(site),
+    def __init__(self):
+        self.inventory = {
+            '_meta': {'hostvars': {}}
         }
 
-        inventory.setdefault(site['openshiftEnv'], {}).setdefault('hosts', []).append(host_name)
-        inventory['_meta']['hostvars'][host_name] = meta_site
+    def _fulfill_pod_structure(self):
+        """Add static data about group vars, if we any instance in it"""
+        for key in self.inventory.keys():
+            if key == '_meta':
+                # ignore _meta, this is not a pod, only an ansible key
+                continue
 
-    inventory = fullfil_pod_structure(inventory)
+            ansible_oc_pod = OpenShiftDeploymentConfig.by_name(key).pod_name
+            if ansible_oc_pod is not None:
+                logging.debug("ansible pod found %s for %s" % (ansible_oc_pod, key))
 
-    io = StringIO()
-    json.dump(inventory, io, indent=2)
-    return io.getvalue()
+                self.inventory[key]['vars'] = {
+                    "wp_hostname": "www.epfl.ch",
+                    "ansible_connection": "oc",
+                    "ansible_oc_pod": ansible_oc_pod,
+                    "ansible_oc_namespace": key,
+                    "ansible_oc_container": "httpd-" + key,
+                }
+
+    @classmethod
+    def build_as_string(cls):
+        self = cls()
+        for site in WpVeritasSite.all():
+            self.add(site)
+        self._fulfill_pod_structure()
+
+        io = StringIO()
+        json.dump(self.inventory, io, indent=2)
+        return io.getvalue()
+
+    def add(self, site):
+        # fulfill vars for the site
+        meta_site = {
+            "wp_veritas_url": site.wp_veritas_url,
+            "url": site.url,
+            "tagline": site.tagline,
+            "title": site.title,
+            "openshift_env": site.openshift_env,
+            "category": site.category,
+            "theme": site.theme,
+            "faculty": site.faculty,
+            "languages": site.languages,
+            "unit_id": site.unit_id,
+            "wp_path": site.path
+        }
+        instance_name = site.instance_name
+        self.inventory.setdefault(site.openshift_env, {}).setdefault('hosts', []).append(instance_name)
+        self.inventory['_meta']['hostvars'][instance_name] = meta_site
 
 
 def main():
-    return sys.stdout.write(print_list())
+    return sys.stdout.write(Inventory.build_as_string())
 
 
 if __name__ == '__main__':
