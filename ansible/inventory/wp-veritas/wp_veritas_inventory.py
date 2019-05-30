@@ -7,7 +7,7 @@
 # subdirectory ansible/tower/inventory_scripts
 #
 # Example invocation:
-#    wp-veritas-inventory.py --list
+#    wp-veritas-inventory.py
 
 import os.path
 import sys
