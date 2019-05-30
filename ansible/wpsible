@@ -35,17 +35,19 @@ fatal () {
     exit 1
 }
 
-which keybase >/dev/null || warn <<NO_KEYBASE
+platform_check () {
+    which keybase >/dev/null || warn <<NO_KEYBASE
 
 WARNING: keybase is not installed, cannot decipher and push secrets.
 
 NO_KEYBASE
 
-which eyaml >/dev/null || warn <<NO_EYAML
+    which eyaml >/dev/null || warn <<NO_EYAML
 
 WARNING: eyaml is not installed, cannot decipher and push secrets.
 
 NO_EYAML
+}
 
 ###########################################################################
 
@@ -66,6 +68,7 @@ set -e
 
 case "$mode" in
     ansible-playbook)
+        platform_check
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
         ansible-playbook $playbook_flags $inventories "$@" \
                          -e "wpsible_cwd=$OLDPWD" \
