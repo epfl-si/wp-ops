@@ -78,7 +78,9 @@ sub collect_wordpress_installs_over_ssh {
             # local bash that will parse this open('-|'), and a second
             # time for the remote shell.
             qw<'\(' -type d
-               '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages -o -name 'jahia-data' '\)'
+               '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages
+                    -o -name 'jahia-data'
+                    -o -path /srv/lvenries -o -path /srv/jenkins '\)'
                '\)' -prune -false -o -name wp-config.php>))
     or die "Cannot ssh $ssh_mantra: $!";
 
