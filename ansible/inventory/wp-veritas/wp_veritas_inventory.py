@@ -206,8 +206,10 @@ class Inventory:
         self.inventory[group]['vars'] = {
             "wp_hostname": "www.epfl.ch",
             "ansible_connection": "oc",
+            "ansible_python_interpreter": "/usr/bin/python3",
             "ansible_oc_pod": ansible_oc_pod,
-            "ansible_oc_namespace": group,
+            "wp_env": group,
+            "ansible_oc_namespace": "wwp",
             "ansible_oc_container": "httpd-" + group,
         }
 
