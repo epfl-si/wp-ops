@@ -1,3 +1,17 @@
+- name: "Set up `{{ awx_project_name }}` project"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.projects import Project
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+          with AnsibleGetOrCreate(Project, name="{{ awx_project_name }}") as prj:
+            prj.organization = org
+            prj.scm_type = "git"
+            prj.scm_url = "{{ awx_project_github_url }}"
+
 - name: "Set up `{{ awx_wpveritas_inventory_script_name }}` custom inventory script"
   awx_script:
     script: |
