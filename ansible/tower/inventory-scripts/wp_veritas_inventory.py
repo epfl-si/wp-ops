@@ -9,7 +9,6 @@
 # Example invocation:
 #    wp-veritas-inventory.py --list
 
-import argparse
 import os.path
 import sys
 import logging
@@ -175,28 +174,9 @@ def print_list():
     json.dump(inventory, io, indent=2)
     return io.getvalue()
 
-# don't use host, but the fulllist, for optimal process
-def print_host(host):
-    return {}    
 
-
-def get_args(args_list):
-    parser = argparse.ArgumentParser(
-        description='ansible inventory script parsing')
-    mutex_group = parser.add_mutually_exclusive_group(required=True)
-    help_list = 'list all hosts from .ssh/config inventory'
-    mutex_group.add_argument('--list', action='store_true', help=help_list)
-    help_host = 'display variables for a host'
-    mutex_group.add_argument('--host', help=help_host)
-    return parser.parse_args(args_list)
-
-
-def main(args_list):
-    args = get_args(args_list)
-    if args.list:
-        return sys.stdout.write(print_list())
-    if args.host:
-        return print_host(args.host)
+def main():
+    return sys.stdout.write(print_list())
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
