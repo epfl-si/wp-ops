@@ -1,8 +1,14 @@
 - name: "Create or update `{{ awx_wpveritas_inventory_script_name }}` custom inventory script"
   awx_script:
     script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
       from awx.main.models.inventory import CustomInventoryScript
 
-      exit_json(changed=False)
+      with AnsibleGetOrCreate(CustomInventoryScript,
+                              name="{{ awx_wpveritas_inventory_script_name }}"
+                              ) as i:
+          i.script = script_text
+    supports_check_mode: yes
     vars:
-      wpveritas_inventory_script: '{{ lookup("file", awx_wpveritas_inventory_script_path) }}'
+      script_text: '{{ lookup("file", awx_wpveritas_inventory_script_path) }}'

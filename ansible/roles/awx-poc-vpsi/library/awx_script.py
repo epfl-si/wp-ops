@@ -3,9 +3,9 @@
 
 """Run a script through Ansible Tower's awx-python, with Django loaded.
 
-The script may call exit_json() or throw an AnsibleError, much like an
-Ansible task would. Additionally, Django will be loaded before the
-script runs.
+Django will be loaded before the script runs. The script may call
+exit_json() or throw an AnsibleError, much like an Ansible task would.
+Additionally, it may call the update_json_status() global function.
 
 See AwxScriptTask.module_spec for supported task parameters.
 """
@@ -32,6 +32,8 @@ class AwxScriptTask(object):
 
     def __init__(self):
         self.module = AnsibleModule(**self.module_spec)
+        self.json_status = {'changed': False}
+        self.update_json_status_called = False
         self.exit_json_called = False
 
     def run(self):
@@ -40,15 +42,21 @@ class AwxScriptTask(object):
             return self.exit_json(skipped=True)
 
         vars = deepcopy(self.module.params.get('vars'))
-        vars['exit_json'] = self.exit_json
-        vars['AnsibleError'] = AnsibleError
         vars['check_mode'] = check_mode
+        vars['AnsibleError'] = AnsibleError
+        vars['exit_json'] = self.exit_json
+        vars['update_json_status'] = self.update_json_status
 
         self.load_django()
         try:
             exec(self.module.params.get('script'), vars)
             if not self.exit_json_called:
-                self.exit_json(changed=True)
+                if self.update_json_status_called:
+                    self.exit_json(**self.json_status)
+                else:
+                    # Conservative behavior for scripts that don't manage
+                    # the status at all
+                    self.exit_json(changed=True)
         except Exception as exn:
             self.exit_json(
                 failed=True,
@@ -66,6 +74,12 @@ class AwxScriptTask(object):
     def exit_json(self, *args, **kwargs):
         self.exit_json_called = True
         return self.module.exit_json(*args, **kwargs)
+
+    def update_json_status(self, **kwargs):
+        self.update_json_status_called = True
+        # TODO: This is too crude; we don't want to e.g. override
+        # {'changed': True} with {'changed': False}
+        self.json_status.update(**kwargs)
 
 
 if __name__ == '__main__':
