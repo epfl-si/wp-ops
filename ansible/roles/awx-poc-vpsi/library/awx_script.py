@@ -6,6 +6,8 @@
 The script may call exit_json() or throw an AnsibleError, much like an
 Ansible task would. Additionally, Django will be loaded before the
 script runs.
+
+See AwxScriptTask.module_spec for supported task parameters.
 """
 
 from ansible.module_utils.basic import AnsibleModule
