@@ -42,6 +42,8 @@ class AwxScriptTask(object):
             return self.exit_json(skipped=True)
 
         vars = deepcopy(self.module.params.get('vars'))
+        if vars is None:
+            vars = {}
         vars['check_mode'] = check_mode
         vars['AnsibleError'] = AnsibleError
         vars['exit_json'] = self.exit_json
