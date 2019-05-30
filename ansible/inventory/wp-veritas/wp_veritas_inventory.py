@@ -15,7 +15,6 @@ import logging
 
 
 import json
-import yaml
 
 import requests
 from six.moves.urllib.parse import urlparse, quote
@@ -42,14 +41,14 @@ def _fetch_wp_veritas():
 
 # path on disk is not a provided data, so we have to build it
 def _build_path(site):
-    site_path = '/srv/' + site['openshiftEnv'] + '/' + site['parsed_url'].netloc + '/htdocs' + site['parsed_url'].path
-    return site_path
+    return os.path.join('/srv', site['openshiftEnv'], site['parsed_url'].netloc,
+                        'htdocs', site['parsed_url'].path)
 
 
 def _build_name(site):
     path = site['parsed_url'].path
     # dont override groups name with hosts name
-    #labs are in www, it's a special case
+    # labs are in www, it's a special case
     if site['openshiftEnv'] == 'labs':
         site_name = path
     else:
@@ -78,7 +77,6 @@ def _fetch_oc_for_info(pod_name):
 
     # add selector
     url += '?labelSelector=' + quote("app in (httpd-%s)" % pod_name)
-    #url += '?labelSelector=' + quote("app in (httpd-gcharmier)") + '&fieldSelector=' + quote("status.phase=Running")
 
     logging.debug('Fetching OC pods list from ' + url)
     headers = {'Authorization': token}
@@ -177,6 +175,7 @@ def print_list():
 
 def main():
     return sys.stdout.write(print_list())
+
 
 if __name__ == '__main__':
     main()
