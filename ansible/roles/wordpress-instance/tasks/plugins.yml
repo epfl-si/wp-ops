@@ -41,6 +41,12 @@
     state: symlinked
     from: wordpress.org/plugins
 
+- name: Coming Soon plugin
+  wordpress_plugin:
+    name: coming-soon
+    state: symlinked
+    from: wordpress.org/plugins
+
 # TODO: recapture intent of jahia2wp's
 # src/wordpress/plugins/custom/polylang.py
 # (perhaps not in this file)
