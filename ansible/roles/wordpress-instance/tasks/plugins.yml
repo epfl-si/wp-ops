@@ -29,13 +29,13 @@
     state: symlinked
     from: wordpress.org/plugins
 
-- name: tinymce-advanced plugin
+- name: '"TinyMCE Advanced" plugin'
   wordpress_plugin:
     name: tinymce-advanced
     state: symlinked
     from: wordpress.org/plugins
 
-- name: polylang plugin
+- name: Polylang plugin
   wordpress_plugin:
     name: polylang
     state: symlinked
@@ -59,7 +59,7 @@
     # jahia2wp/data/plugins/generic/mainwp-child/config-plugin.yml ;
     # not sure what it means (if anything)
 
-- name: tequila plugin
+- name: Tequila plugin
   wordpress_plugin:
     name: tequila
     state: symlinked
@@ -75,7 +75,7 @@
     name: plugin:epfl:tequila_allowed_request_hosts
     value: "{{ wp_ops_rpcclient_ipv4_range }}"
 
-- name: accred plugin
+- name: Accred plugin
   wordpress_plugin:
     name: accred
     state: symlinked
@@ -96,13 +96,13 @@
     name: plugin:epfl_accred:unit_id
     value: "{{ wp_unit_id }}"
 
-- name: cache-control plugin
+- name: Cache-Control plugin
   wordpress_plugin:
     name: cache-control
     state: symlinked
     from: wordpress.org/plugins
 
-- name: cache-control options
+- name: Cache-Control options
   wordpress_option:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
@@ -170,7 +170,7 @@
     state: symlinked
     from: wordpress.org/plugins
 
-- name: epfl plugin
+- name: EPFL plugin
   wordpress_plugin:
     name: epfl
     state: >
@@ -224,13 +224,13 @@
     state: "{{ plugins_symlinked_in_2010_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/EPFL-Share
 
-- name: shortcodes-ultimate plugin
+- name: Shortcodes Ultimate plugin
   wordpress_plugin:
     name: shortcodes-ultimate
     state: "{{ plugins_symlinked_in_2010_only }}"
     from: wordpress.org/plugins
 
-- name: enlighter plugin
+- name: Enlighter plugin
   wordpress_plugin:
     name: enlighter
     state: "{{ plugins_symlinked_in_2010_only }}"
