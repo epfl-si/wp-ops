@@ -17,18 +17,25 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
 Usage:
 
-  install-plugins-and-themes.py auto [--exclude <plugin-name> ...]
+  install-plugins-and-themes.py auto [options ...]
 
     Install all plugins (and in the future, also mu-plugins and themes)
     into /wp. The list and addresses of plugins to install is determined
-    from the current state of the source code (currently, by
-    interpreting data/plugins/generic/config-lot1.yml out of branch
-    `release2018` in https://github.com/epfl-idevelop/jahia2wp)
+    from the current state of the source code.
+
+    Options:
+
+      --exclude <plugin-name>    Self-explanatory. Used to exclude proprietary
+                                 plugins from Travis builds
+
+      --manifest-url             The URL to obtain the plugin manifest from;
+                                 default is %s
 
   install-plugins-and-themes.py <name> <URL>
 
@@ -44,7 +51,7 @@ Options:
   --exclude <plugin-name>
 
     Exclude that plugin when in "auto" mode
-""")
+""" % AUTO_MANIFEST_URL)
 
 
 def progress(string):
@@ -278,34 +285,19 @@ def MuPlugins():
         'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
 
 
-class _Singleton(object):
-    __singletons = {}
-
-    @classmethod
-    def singleton(cls):
-        if cls not in cls.__singletons:
-            cls.__singletons[cls] = cls()
-        return cls.__singletons[cls]
-
-
-class WpOpsPlugins(_Singleton):
+class WpOpsPlugins:
     """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
 
-    # TODO: unfork to master
-    _GIT_URL = 'https://github.com/epfl-idevelop/wp-ops'
-    PLUGINS_YML_PATH = 'ansible/roles/wordpress-instance/tasks/plugins.yml'
+    def __init__(self, manifest_url=None):
+        if manifest_url is None:
+            manifest_url = AUTO_MANIFEST_URL
 
-    def __init__(self):
-        self._git = GitHubCheckout(self._GIT_URL)
-        self._git.clone()
-
-    @property
-    def plugins_yml_path(self):
-        return os.path.join(self._git.source_dir, self.PLUGINS_YML_PATH)
+        progress("Obtaining plug-in manifest from {}".format(manifest_url))
+        self.plugins_yaml = requests.get(manifest_url).content
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
-        for thing in yaml.load(io.open(self.plugins_yml_path, encoding='utf8')):
+        for thing in yaml.load(self.plugins_yaml):
             if 'wordpress_plugin' not in thing:
                 continue
             action = thing['wordpress_plugin']
@@ -326,11 +318,15 @@ class Flags:
         self.auto = argv[0] == 'auto'
         if self.auto:
             try:
-                opts, args = getopt.getopt(argv[1:], "e:v", ["exclude="])
+                opts, args = getopt.getopt(argv[1:], "e:v", ["exclude=", "manifest-url="])
             except getopt.GetoptError:
                 usage()
                 sys.exit(1)
             self.exclude = set(a for o, a in opts if o in ("-e", "--exclude"))
+            self.manifest_url = None
+            for o, a in opts:
+                if o == "--manifest-url":
+                    self.manifest_url = a
         else:
             self.name = argv[0]
             self.path = argv[1]
@@ -346,7 +342,7 @@ if __name__ == '__main__':
 
     if flags.auto:
         MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in WpOpsPlugins.singleton().plugins():
+        for plugin in WpOpsPlugins(flags.manifest_url).plugins():
             if plugin.name not in flags.exclude:
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
