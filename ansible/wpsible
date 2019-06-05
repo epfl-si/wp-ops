@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This is a wrapper around ansible / ansible-playbook.
 #
@@ -51,14 +51,18 @@ NO_EYAML
 
 mode=ansible-playbook
 
-while [ -n "$1" ]; do
-    case "$1" in
+declare -a ansible_args
+while [ "$#" -gt 0 ]; do
+  case "$1" in
         --prod)
             inventories="$inventories -i inventory/prod"
             shift ;;
-        -m) mode=ansible; break ;;
+        -m) mode=ansible
+            ansible_args+=("-m")
+            shift ;;
         *)
-            break ;;
+            ansible_args+=("$1")
+            shift ;;
     esac
 done
 
@@ -67,11 +71,11 @@ set -e
 case "$mode" in
     ansible-playbook)
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
-        ansible-playbook $playbook_flags $inventories "$@" \
+        ansible-playbook $playbook_flags $inventories "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
                          playbooks/wordpress-main.yml
         ;;
     ansible)
-        ansible $inventories $ansible_flags $common_flags "$@"
+        ansible $inventories $ansible_flags $common_flags "${ansible_args[@]}"
         ;;
 esac
