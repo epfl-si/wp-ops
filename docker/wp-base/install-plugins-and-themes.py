@@ -292,6 +292,7 @@ class WpOpsPlugins:
         if manifest_url is None:
             manifest_url = AUTO_MANIFEST_URL
 
+        progress("Obtaining plug-in manifest from {}".format(manifest_url))
         self.plugins_yaml = requests.get(manifest_url).content
 
     def plugins(self):
