@@ -75,7 +75,7 @@ spec:
   // Here we describe what the pipeline consists of.
   stages {
 
-    stage('Fabrication de l\'image') {
+    stage('Assemblage de l\'image') {
       steps {
         // Imperative things (including any and all calls to
         // openshift.withCluster and friends) can only happen in a
