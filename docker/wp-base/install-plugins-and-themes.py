@@ -105,13 +105,12 @@ class GitHubCheckout:
 
     @classmethod
     def _parse(cls, url):
-        matched_with_tree = re.match(
-            'https://github.com/([^/]*)/([^/]*)/tree/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))', url)
-        if matched_with_tree:
-            return matched_with_tree
-        else:
-            return re.match(
-                'https://github.com/([^/]*)/([^/]*)$', url)
+        for parse_re in (
+                'https://github.com/([^/]*)/([^/]*)/(?:tree|blob)/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))',
+                'https://github.com/([^/]*)/([^/]*)$'):
+            matched = re.match(parse_re, url)
+            if matched:
+                return matched
 
     @property
     def github_namespace(self):
@@ -158,7 +157,7 @@ class GitHubCheckout:
         return self  # For chaining
 
     @property
-    def source_dir(self):
+    def source_path(self):
         if self.path_under_git_root is not None:
             return os.path.join(self._git_topdir, self.path_under_git_root)
         else:
@@ -195,9 +194,13 @@ class Plugin(object):
             "Don't know how to handle plug-in URL: {}".format(url))
 
     def _copytree_install(self, from_path, to_path):
-        to_path = os.path.join(to_path, self.name)
-        progress('Copying {} to {}'.format(from_path, to_path))
-        shutil.copytree(from_path, to_path)
+        if os.path.isdir(from_path):
+            to_path = os.path.join(to_path, self.name)
+            progress('Copying {} directory to {}'.format(from_path, to_path))
+            shutil.copytree(from_path, to_path)
+        else:
+            progress('Copying {} file to {}'.format(from_path, to_path))
+            shutil.copy(from_path, to_path)
 
 
 class ZipPlugin(Plugin):
@@ -246,7 +249,7 @@ class GitHubPlugin(Plugin):
 
     def install(self, target_dir):
         for git in self._gits:
-            self._copytree_install(git.clone().source_dir, target_dir)
+            self._copytree_install(git.clone().source_path, target_dir)
 
 
 class WordpressOfficialPlugin(Plugin):
