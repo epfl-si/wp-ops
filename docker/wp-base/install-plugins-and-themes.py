@@ -166,16 +166,18 @@ class GitHubCheckout:
 class Plugin(object):
     """A WordPress plug-in or theme."""
 
-    def __init__(self, name, url, **unused_kwargs):
+    def __init__(self, name, urls, **unused_kwargs):
         self.name = name
-        self.url = url
+        self.urls = urls
+        if len(self.urls) == 1:
+            self.url = self.urls[0]
 
-    def __new__(cls, name, url):
+    def __new__(cls, name, urls):
         if cls is Plugin:
-            cls = cls._find_handler(url)
+            cls = cls._find_handler(urls[0])
 
         that = object.__new__(cls)
-        that.__init__(name, url)
+        that.__init__(name, urls)
         return that
 
     @staticmethod
@@ -202,8 +204,8 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def __init__(self, name, url, jahia2wp=None):
-        super(ZipPlugin, self).__init__(name, url)
+    def __init__(self, name, urls, jahia2wp=None):
+        super(ZipPlugin, self).__init__(name, urls)
         self.jahia2wp = jahia2wp
 
     def install(self, target_dir):
@@ -236,12 +238,13 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, url):
-        super(GitHubPlugin, self).__init__(name, url)
-        self._git = GitHubCheckout(url)
+    def __init__(self, name, urls):
+        super(GitHubPlugin, self).__init__(name, urls)
+        self._gits = [GitHubCheckout(url) for url in self.urls]
 
     def install(self, target_dir):
-        self._copytree_install(self._git.clone().source_dir, target_dir)
+        for git in self._gits:
+            self._copytree_install(git.clone().source_dir, target_dir)
 
 
 class WordpressOfficialPlugin(Plugin):
@@ -261,7 +264,7 @@ class WordpressOfficialPlugin(Plugin):
         return json.loads(api_json)
 
     def install(self, target_dir):
-        ZipPlugin(self.name, self.api_struct['download_link']).install(target_dir)
+        ZipPlugin(self.name, [self.api_struct['download_link']]).install(target_dir)
 
 
 class Themes:
@@ -270,13 +273,13 @@ class Themes:
     def all(cls):
         return (
             Plugin('wp-theme-2018',
-                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018'),
+                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
-                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light'),
+                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light']),
             Plugin('epfl-blank',
-                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank'),
+                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank']),
             Plugin('epfl-master',
-                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
+                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master'])
         )
 
 
@@ -353,4 +356,4 @@ if __name__ == '__main__':
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
     else:
-        Plugin(flags.name, flags.path).install('.')
+        Plugin(flags.name, [flags.path]).install('.')
