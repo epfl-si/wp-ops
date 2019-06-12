@@ -55,7 +55,8 @@ Options:
 
 
 def progress(string):
-    print("# {}".format(string))
+    print("# {}".format(string), file=sys.stderr)
+    sys.stderr.flush()
 
 
 def run_cmd(cmd, *args, **kwargs):
