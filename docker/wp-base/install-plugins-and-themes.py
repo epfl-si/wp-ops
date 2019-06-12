@@ -283,12 +283,6 @@ class Themes:
         )
 
 
-def MuPlugins():
-    return Plugin(
-        'mu-plugins',
-        'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
-
-
 class WpOpsPlugins:
     """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
 
@@ -303,18 +297,38 @@ class WpOpsPlugins:
                 manifest_url, req.status_code))
         self.plugins_yaml = req.content
 
-    def plugins(self):
-        """Yield all the plug-ins to be installed according to the "ops" metadata."""
+    def _plugins_muplugins_and_their_state(self):
         for thing in yaml.load(self.plugins_yaml):
-            if 'wordpress_plugin' not in thing:
-                continue
+            try:
+                if 'wordpress_plugin' not in thing:
+                    continue
+            except Exception as e:
+                import pprint
+                raise Exception(pprint.pformat(thing))
             action = thing['wordpress_plugin']
+
             if 'state' not in action or 'symlinked' not in action['state']:
                 continue
-            name = action['name']
-            url = action['from']
 
-            yield Plugin(name, url)
+            name = action['name']
+            urls = action['from']
+            if isinstance(urls, string_types):
+                urls = [urls]
+            state = action['state']
+
+            yield (Plugin(name, urls), state)
+
+    def plugins(self):
+        """Yield all the plug-ins to be installed according to the "ops" metadata."""
+        for p, state in self._plugins_muplugins_and_their_state():
+            if 'must-use' not in state:
+                yield p
+
+    def must_use_plugins(self):
+        """Yield all the must-use plug-ins to be installed according to the "ops" metadata."""
+        for p, state in self._plugins_muplugins_and_their_state():
+            if 'must-use' in state:
+                yield p
 
 
 class Flags:
@@ -342,6 +356,7 @@ class Flags:
 
 WP_INSTALL_DIR = '/wp/wp-content'
 WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
+WP_MU_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'mu-plugins')
 WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')
 
 
@@ -349,9 +364,14 @@ if __name__ == '__main__':
     flags = Flags()
 
     if flags.auto:
-        MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in WpOpsPlugins(flags.manifest_url).plugins():
+        manifest = WpOpsPlugins(flags.manifest_url)
+        for plugin in manifest.must_use_plugins():
             if plugin.name not in flags.exclude:
+                progress("Installing mu-plugin {}".format(plugin.name))
+                plugin.install(WP_MU_PLUGINS_INSTALL_DIR)
+        for plugin in manifest.plugins():
+            if plugin.name not in flags.exclude:
+                progress("Installing plugin {}".format(plugin.name))
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
