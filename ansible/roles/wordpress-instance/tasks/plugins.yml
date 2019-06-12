@@ -1,4 +1,4 @@
-## Plugin lineup and configuration
+## Plugin and mu-plugin lineup and configuration
 ##
 ## ⚠ Until such time that we don't use the jahia2wp repository, the
 ## configuration herein duplicates the one at
@@ -23,11 +23,75 @@
     - akismet
     - hello
 
-- name: simple-sitemap plugin
+##################### Must-use plugins ###########################
+
+- name: Custom editor menu (must-use plugin)
   wordpress_plugin:
-    name: simple-sitemap
-    state: symlinked
-    from: wordpress.org/plugins
+    name: EPFL_custom_editor_menu
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu.php
+
+- name: Disable comments (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_disable_comments
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_comments.php
+
+- name: Disable automatic updates (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_disable_updates_automatic
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_updates_automatic.php
+
+- name: Google Analytics hook (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_google_analytics_hook
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_google_analytics_hook.php
+
+- name: Locked installs (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_installs_locked
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_installs_locked.php
+
+- name: Jahia redirect tracker (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_jahia_redirect
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_jahia_redirect.php
+
+- name: EPFL functions (must-use plugin)
+  wordpress_plugin:
+    name: epfl-functions
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-functions.php
+
+- name: Stats (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_stats_loader
+    state:
+      - symlinked
+      - must-use
+    from:
+      - https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-stats
+      - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_stats_loader.php
+
+##################### "2018" plugins ###########################
 
 - name: '"TinyMCE Advanced" plugin'
   wordpress_plugin:
