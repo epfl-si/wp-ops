@@ -25,9 +25,9 @@ Usage:
 
   install-plugins-and-themes.py auto [options ...]
 
-    Install all plugins (and in the future, also mu-plugins and themes)
-    into /wp. The list and addresses of plugins to install is determined
-    from the current state of the source code.
+    Install all plugins, mu-plugins and themes into /wp. The list and
+    addresses of plugins to install is determined from the Ansible
+    configuration.
 
     Options:
 
