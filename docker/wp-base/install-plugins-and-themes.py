@@ -293,7 +293,11 @@ class WpOpsPlugins:
             manifest_url = AUTO_MANIFEST_URL
 
         progress("Obtaining plug-in manifest from {}".format(manifest_url))
-        self.plugins_yaml = requests.get(manifest_url).content
+        req = requests.get(manifest_url)
+        if req.status_code != 200:
+            raise Exception('requests.get("{}") yielded status {}'.format(
+                manifest_url, req.status_code))
+        self.plugins_yaml = req.content
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
