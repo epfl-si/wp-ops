@@ -370,6 +370,9 @@ if __name__ == '__main__':
 
     if flags.auto:
         manifest = WpOpsPlugins(flags.manifest_url)
+        for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
+            if not os.path.isdir(d):
+                os.makedirs(d)
         for plugin in manifest.must_use_plugins():
             if plugin.name not in flags.exclude:
                 progress("Installing mu-plugin {}".format(plugin.name))
