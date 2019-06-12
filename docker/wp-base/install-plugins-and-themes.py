@@ -97,6 +97,7 @@ class GitHubCheckout:
         """
         self.url = url
         self._parsed = self._parse(url)
+        assert self._parsed
 
     @classmethod
     def is_valid(cls, url):
@@ -147,6 +148,7 @@ class GitHubCheckout:
                 self._git_topdir = self._clone_cache[(self.clone_url, self.branch)]
             else:
                 tmp = Tempdir()
+                progress("Cloning {}".format(self.clone_url))
                 run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
                 self._git_topdir = os.path.join(str(tmp), self.github_project)
                 if self.branch is not None:
