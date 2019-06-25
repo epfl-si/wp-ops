@@ -36,7 +36,7 @@ fatal () {
 }
 
 platform_check () {
-    which keybase >/dev/null || warn <<NO_KEYBASE
+    test -d /keybase/team || warn <<NO_KEYBASE
 
 WARNING: keybase is not installed, cannot decipher and push secrets.
 
