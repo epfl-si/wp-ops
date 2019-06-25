@@ -18,6 +18,8 @@ mgmt_access_list:
     - laurent.durrer@epfl.ch
     - julien.delasoie@epfl.ch
     - hugo.valente@epfl.ch
+    - christian.zufferey@epfl.ch
+    - s.dubuis@epfl.ch
   wwp: *common_access_list
 
 mgmt_secret_name: mgmt-ssh
