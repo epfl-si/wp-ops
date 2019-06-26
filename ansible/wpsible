@@ -17,7 +17,6 @@
 
 cd "$(dirname "$(realpath "$0")")"
 
-inventories="-i inventory/test"
 # One can override these on the command line
 playbook_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
 ansible_flags="-e @roles/wordpress-instance/vars/main.yml"
@@ -49,6 +48,15 @@ WARNING: eyaml is not installed, cannot decipher and push secrets.
 NO_EYAML
 }
 
+inventory_mode="test"
+inventories () {
+    case "$inventory_mode" in
+        test) echo "-i inventory/test" ;;
+        test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
+        wp_veritas) echo "-i inventory/wp-veritas" ;;
+    esac
+}
+
 ###########################################################################
 
 mode=ansible-playbook
@@ -57,7 +65,10 @@ declare -a ansible_args
 while [ "$#" -gt 0 ]; do
   case "$1" in
         --prod)
-            inventories="$inventories -i inventory/prod"
+            inventory_mode="test_and_prod"
+            shift ;;
+        --wp-veritas)
+            inventory_mode="wp_veritas"
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
@@ -74,11 +85,11 @@ case "$mode" in
     ansible-playbook)
         platform_check
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
-        ansible-playbook $playbook_flags $inventories "${ansible_args[@]}" \
+        ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
                          playbooks/wordpress-main.yml
         ;;
     ansible)
-        ansible $inventories $ansible_flags $common_flags "${ansible_args[@]}"
+        ansible $(inventories) $ansible_flags "${ansible_args[@]}"
         ;;
 esac

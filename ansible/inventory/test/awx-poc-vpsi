@@ -1,0 +1,5 @@
+[all:children]
+awx-dev
+
+[awx-dev]
+awx-poc-vpsi   ansible_connection=oc ansible_oc_namespace=wwp-test ansible_oc_pod=awx-0 ansible_oc_container=awx-web ansible_python_interpreter=/usr/bin/awx-python
