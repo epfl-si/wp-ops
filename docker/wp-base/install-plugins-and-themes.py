@@ -25,9 +25,9 @@ Usage:
 
   install-plugins-and-themes.py auto [options ...]
 
-    Install all plugins (and in the future, also mu-plugins and themes)
-    into /wp. The list and addresses of plugins to install is determined
-    from the current state of the source code.
+    Install all plugins, mu-plugins and themes into /wp. The list and
+    addresses of plugins to install is determined from the Ansible
+    configuration.
 
     Options:
 
@@ -55,7 +55,8 @@ Options:
 
 
 def progress(string):
-    print("# {}".format(string))
+    print("# {}".format(string), file=sys.stderr)
+    sys.stderr.flush()
 
 
 def run_cmd(cmd, *args, **kwargs):
@@ -96,6 +97,7 @@ class GitHubCheckout:
         """
         self.url = url
         self._parsed = self._parse(url)
+        assert self._parsed
 
     @classmethod
     def is_valid(cls, url):
@@ -103,13 +105,12 @@ class GitHubCheckout:
 
     @classmethod
     def _parse(cls, url):
-        matched_with_tree = re.match(
-            'https://github.com/([^/]*)/([^/]*)/tree/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))', url)
-        if matched_with_tree:
-            return matched_with_tree
-        else:
-            return re.match(
-                'https://github.com/([^/]*)/([^/]*)$', url)
+        for parse_re in (
+                'https://github.com/([^/]*)/([^/]*)/(?:tree|blob)/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))',
+                'https://github.com/([^/]*)/([^/]*)$'):
+            matched = re.match(parse_re, url)
+            if matched:
+                return matched
 
     @property
     def github_namespace(self):
@@ -146,6 +147,7 @@ class GitHubCheckout:
                 self._git_topdir = self._clone_cache[(self.clone_url, self.branch)]
             else:
                 tmp = Tempdir()
+                progress("Cloning {}".format(self.clone_url))
                 run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
                 self._git_topdir = os.path.join(str(tmp), self.github_project)
                 if self.branch is not None:
@@ -155,7 +157,7 @@ class GitHubCheckout:
         return self  # For chaining
 
     @property
-    def source_dir(self):
+    def source_path(self):
         if self.path_under_git_root is not None:
             return os.path.join(self._git_topdir, self.path_under_git_root)
         else:
@@ -165,16 +167,16 @@ class GitHubCheckout:
 class Plugin(object):
     """A WordPress plug-in or theme."""
 
-    def __init__(self, name, url, **unused_kwargs):
+    def __init__(self, name, urls, **unused_kwargs):
         self.name = name
-        self.url = url
+        self.urls = urls
 
-    def __new__(cls, name, url):
+    def __new__(cls, name, urls):
         if cls is Plugin:
-            cls = cls._find_handler(url)
+            cls = cls._find_handler(urls[0])
 
         that = object.__new__(cls)
-        that.__init__(name, url)
+        that.__init__(name, urls)
         return that
 
     @staticmethod
@@ -190,9 +192,13 @@ class Plugin(object):
             "Don't know how to handle plug-in URL: {}".format(url))
 
     def _copytree_install(self, from_path, to_path):
-        to_path = os.path.join(to_path, self.name)
-        progress('Copying {} to {}'.format(from_path, to_path))
-        shutil.copytree(from_path, to_path)
+        if os.path.isdir(from_path):
+            to_path = os.path.join(to_path, self.name)
+            progress('Copying {} directory to {}'.format(from_path, to_path))
+            shutil.copytree(from_path, to_path)
+        else:
+            progress('Copying {} file to {}'.format(from_path, to_path))
+            shutil.copy(from_path, to_path)
 
 
 class ZipPlugin(Plugin):
@@ -201,13 +207,15 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def __init__(self, name, url, jahia2wp=None):
-        super(ZipPlugin, self).__init__(name, url)
+    def __init__(self, name, urls, jahia2wp=None):
+        super(ZipPlugin, self).__init__(name, urls)
+        assert len(self.urls) == 1
+        self.url = self.urls[0]
+        assert self.url.startswith("http")
         self.jahia2wp = jahia2wp
 
     def install(self, target_dir):
         """Unzip into a subdirectory `target_dir` named `self.name`."""
-        assert self.url.startswith("http")
         zip = ZipFile(io.BytesIO(requests.get(self.url).content))
 
         progress("Unzipping {}".format(self.url))
@@ -235,12 +243,13 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, url):
-        super(GitHubPlugin, self).__init__(name, url)
-        self._git = GitHubCheckout(url)
+    def __init__(self, name, urls):
+        super(GitHubPlugin, self).__init__(name, urls)
+        self._gits = [GitHubCheckout(url) for url in self.urls]
 
     def install(self, target_dir):
-        self._copytree_install(self._git.clone().source_dir, target_dir)
+        for git in self._gits:
+            self._copytree_install(git.clone().source_path, target_dir)
 
 
 class WordpressOfficialPlugin(Plugin):
@@ -260,7 +269,7 @@ class WordpressOfficialPlugin(Plugin):
         return json.loads(api_json)
 
     def install(self, target_dir):
-        ZipPlugin(self.name, self.api_struct['download_link']).install(target_dir)
+        ZipPlugin(self.name, [self.api_struct['download_link']]).install(target_dir)
 
 
 class Themes:
@@ -269,20 +278,14 @@ class Themes:
     def all(cls):
         return (
             Plugin('wp-theme-2018',
-                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018'),
+                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
-                   'https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light'),
+                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light']),
             Plugin('epfl-blank',
-                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank'),
+                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank']),
             Plugin('epfl-master',
-                   'https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master')
+                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master'])
         )
-
-
-def MuPlugins():
-    return Plugin(
-        'mu-plugins',
-        'https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins')
 
 
 class WpOpsPlugins:
@@ -293,20 +296,44 @@ class WpOpsPlugins:
             manifest_url = AUTO_MANIFEST_URL
 
         progress("Obtaining plug-in manifest from {}".format(manifest_url))
-        self.plugins_yaml = requests.get(manifest_url).content
+        req = requests.get(manifest_url)
+        if req.status_code != 200:
+            raise Exception('requests.get("{}") yielded status {}'.format(
+                manifest_url, req.status_code))
+        self.plugins_yaml = req.content
+
+    def _plugins_muplugins_and_their_state(self):
+        for thing in yaml.load(self.plugins_yaml):
+            try:
+                if 'wordpress_plugin' not in thing:
+                    continue
+            except Exception as e:
+                import pprint
+                raise Exception(pprint.pformat(thing))
+            action = thing['wordpress_plugin']
+
+            if 'state' not in action or 'symlinked' not in action['state']:
+                continue
+
+            name = action['name']
+            urls = action['from']
+            if isinstance(urls, string_types):
+                urls = [urls]
+            state = action['state']
+
+            yield (Plugin(name, urls), state)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
-        for thing in yaml.load(self.plugins_yaml):
-            if 'wordpress_plugin' not in thing:
-                continue
-            action = thing['wordpress_plugin']
-            if 'state' not in action or 'symlinked' not in action['state']:
-                continue
-            name = action['name']
-            url = action['from']
+        for p, state in self._plugins_muplugins_and_their_state():
+            if 'must-use' not in state:
+                yield p
 
-            yield Plugin(name, url)
+    def must_use_plugins(self):
+        """Yield all the must-use plug-ins to be installed according to the "ops" metadata."""
+        for p, state in self._plugins_muplugins_and_their_state():
+            if 'must-use' in state:
+                yield p
 
 
 class Flags:
@@ -334,6 +361,7 @@ class Flags:
 
 WP_INSTALL_DIR = '/wp/wp-content'
 WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
+WP_MU_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'mu-plugins')
 WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')
 
 
@@ -341,11 +369,19 @@ if __name__ == '__main__':
     flags = Flags()
 
     if flags.auto:
-        MuPlugins().install(WP_INSTALL_DIR)
-        for plugin in WpOpsPlugins(flags.manifest_url).plugins():
+        manifest = WpOpsPlugins(flags.manifest_url)
+        for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
+            if not os.path.isdir(d):
+                os.makedirs(d)
+        for plugin in manifest.must_use_plugins():
             if plugin.name not in flags.exclude:
+                progress("Installing mu-plugin {}".format(plugin.name))
+                plugin.install(WP_MU_PLUGINS_INSTALL_DIR)
+        for plugin in manifest.plugins():
+            if plugin.name not in flags.exclude:
+                progress("Installing plugin {}".format(plugin.name))
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
             theme.install(WP_THEMES_INSTALL_DIR)
     else:
-        Plugin(flags.name, flags.path).install('.')
+        Plugin(flags.name, [flags.path]).install('.')

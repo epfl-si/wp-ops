@@ -4,11 +4,6 @@ FROM ubuntu:bionic
 ENV PHP_VERSION=7.3
 ARG WORDPRESS_VERSION_LINEAGE=4.9
 
-# Travis-specific arguments — See ../../.travis.yml
-ARG GITHUB_API_USER
-ARG GITHUB_API_TOKEN
-ARG INSTALL_AUTO_FLAGS
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
@@ -48,6 +43,9 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
 
 # Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
 # won't install):
+# Travis-specific arguments — See ../../.travis.yml
+ARG GITHUB_API_USER
+ARG GITHUB_API_TOKEN
 RUN set -x;                                                              \
    curl -o /usr/local/bin/wp -L                                          \
         $(curl $(if [ -n "${GITHUB_API_TOKEN}" ]; then                   \
@@ -92,6 +90,7 @@ RUN set -e -x; cd /; git apply < /tmp/wordpress-anywhere.patch;          \
 
 ADD install-plugins-and-themes.py /tmp/
 # Get all plugins and themes ("auto" mode) from the jahia2wp manifest:
+ARG INSTALL_AUTO_FLAGS
 RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 
 ######################################################################
