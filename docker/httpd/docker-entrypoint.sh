@@ -28,11 +28,12 @@ VirtualDocumentRoot "/srv/${WP_ENV}/%0/htdocs"
 </VirtualHost>
 EOF
 
-# Directory to log web services calls. It may already exists if we're on Openshift
-if [ ! -d "/webservices/logs" ]
+# Directory to log web services calls and generic logs. It may already exists if we're on Openshift
+LOG_FOLDER="/call_logs"
+if [ ! -d $LOG_FOLDER ]
 then
-    /bin/mkdir -p /webservices/logs
-    /bin/chown www-data: /webservices/logs
+    /bin/mkdir -p $LOG_FOLDER
+    /bin/chown www-data: $LOG_FOLDER
 fi
 
 /bin/mkdir -p /srv/${WP_ENV}/logs
