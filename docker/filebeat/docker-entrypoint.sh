@@ -8,6 +8,7 @@ filebeat.inputs:
   enabled: true
   paths:
   - "/webservices/logs/*"
+  - "/call_logs/*.log"
   fields_under_root: true
 
 output.kafka:
