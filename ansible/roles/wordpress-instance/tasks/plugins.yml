@@ -81,6 +81,16 @@
       - must-use
     from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-functions.php
 
+- name: Quota (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_quota_loader
+    state:
+      - symlinked
+      - must-use
+    from:
+      - https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-quota
+      - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_quota_loader.php
+
 - name: Stats (must-use plugin)
   wordpress_plugin:
     name: EPFL_stats_loader
