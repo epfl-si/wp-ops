@@ -25,7 +25,6 @@ RUN mkdir /var/run/sshd && \
     sed -ri 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && \
     sed -ri 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* WP_ENV/g' /etc/ssh/sshd_config && \
     sed -ri 's/#UsePrivilegeSeparation sandbox/UsePrivilegeSeparation no/g'  /etc/ssh/sshd_config && \
-    sed -ri 's/#?PermitRootLogin\s+.*/PermitRootLogin yes/g' /etc/ssh/sshd_config && \
     mkdir /tmp/openshift && \
     cd /tmp/openshift && \
     curl -L -O https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz && \
