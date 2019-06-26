@@ -81,6 +81,16 @@
       - must-use
     from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-functions.php
 
+- name: Quota (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_quota_loader
+    state:
+      - symlinked
+      - must-use
+    from:
+      - https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-quota
+      - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_quota_loader.php
+
 - name: Stats (must-use plugin)
   wordpress_plugin:
     name: EPFL_stats_loader
@@ -407,3 +417,30 @@
     name: epfl-google-forms
     state: "{{ plugins_symlinked_in_2010_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-google-forms
+
+##################### Class-specific plugins ###########################
+
+- name: epfl-emploi plugin
+  wordpress_plugin:
+    name: epfl-emploi
+    state: "{{ plugins_symlinked_in_emploi_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-emploi
+
+- name: epfl-intranet plugin
+  wordpress_plugin:
+    name: epfl-intranet
+    state: "{{ plugins_symlinked_in_inside_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-intranet
+
+- name: epfl-restauration plugin
+  wordpress_plugin:
+    name: epfl-restauration
+    state: "{{ plugins_symlinked_in_restauration_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
+
+- name: epfl-scienceqa plugin
+  wordpress_plugin:
+    name: epfl-scienceqa
+    state: "{{ plugins_symlinked_in_scienceqa_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
+
