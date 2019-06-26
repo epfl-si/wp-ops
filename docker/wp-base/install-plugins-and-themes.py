@@ -170,8 +170,6 @@ class Plugin(object):
     def __init__(self, name, urls, **unused_kwargs):
         self.name = name
         self.urls = urls
-        if len(self.urls) == 1:
-            self.url = self.urls[0]
 
     def __new__(cls, name, urls):
         if cls is Plugin:
@@ -211,11 +209,13 @@ class ZipPlugin(Plugin):
 
     def __init__(self, name, urls, jahia2wp=None):
         super(ZipPlugin, self).__init__(name, urls)
+        assert len(self.urls) == 1
+        self.url = self.urls[0]
+        assert self.url.startswith("http")
         self.jahia2wp = jahia2wp
 
     def install(self, target_dir):
         """Unzip into a subdirectory `target_dir` named `self.name`."""
-        assert self.url.startswith("http")
         zip = ZipFile(io.BytesIO(requests.get(self.url).content))
 
         progress("Unzipping {}".format(self.url))
