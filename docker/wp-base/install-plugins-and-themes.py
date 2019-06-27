@@ -263,7 +263,7 @@ class GitHubPlugin(Plugin):
         """
         for git in self._gits:
             self._copytree_install(git.clone().source_path, target_dir,
-                                   rename_dir=self.name)
+                                   rename_dir=self.name if rename_like_self else None)
 
 
 class WordpressOfficialPlugin(Plugin):
