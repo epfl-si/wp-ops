@@ -250,6 +250,12 @@
     state: symlinked
     from: wordpress.org/plugins
 
+- name: simple-sitemap plugin
+  wordpress_plugin:
+    name: simple-sitemap
+    state: symlinked
+    from: wordpress.org/plugins
+
 - name: EPFL plugin
   wordpress_plugin:
     name: epfl
