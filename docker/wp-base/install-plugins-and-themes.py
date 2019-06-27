@@ -194,7 +194,7 @@ class Plugin(object):
     def _copytree_install(self, from_path, to_path, rename_dir=None):
         if os.path.isdir(from_path):
             if not rename_dir:
-                rename_dir = basename(from_path)
+                rename_dir = os.path.basename(from_path)
             to_path = os.path.join(to_path, rename_dir)
             progress('Copying {} directory to {}'.format(from_path, to_path))
             shutil.copytree(from_path, to_path)
