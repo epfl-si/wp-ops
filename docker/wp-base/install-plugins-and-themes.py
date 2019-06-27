@@ -191,9 +191,11 @@ class Plugin(object):
         raise Exception(
             "Don't know how to handle plug-in URL: {}".format(url))
 
-    def _copytree_install(self, from_path, to_path):
+    def _copytree_install(self, from_path, to_path, rename_dir=None):
         if os.path.isdir(from_path):
-            to_path = os.path.join(to_path, self.name)
+            if not rename_dir:
+                rename_dir = os.path.basename(from_path)
+            to_path = os.path.join(to_path, rename_dir)
             progress('Copying {} directory to {}'.format(from_path, to_path))
             shutil.copytree(from_path, to_path)
         else:
@@ -214,8 +216,13 @@ class ZipPlugin(Plugin):
         assert self.url.startswith("http")
         self.jahia2wp = jahia2wp
 
-    def install(self, target_dir):
-        """Unzip into a subdirectory `target_dir` named `self.name`."""
+    def install(self, target_dir, rename_like_self=True):
+        """Unzip into `target_dir`.
+
+        Keyword arguments:
+        rename_like_self -- Ignored - We always unzip to a subdirectory named
+                            `self.name`
+        """
         zip = ZipFile(io.BytesIO(requests.get(self.url).content))
 
         progress("Unzipping {}".format(self.url))
@@ -247,9 +254,16 @@ class GitHubPlugin(Plugin):
         super(GitHubPlugin, self).__init__(name, urls)
         self._gits = [GitHubCheckout(url) for url in self.urls]
 
-    def install(self, target_dir):
+    def install(self, target_dir, rename_like_self=True):
+        """Install by copying into `target_dir`.
+
+        Keyword arguments:
+        rename_like_self -- if set, rename the top-level directory to `self.name`.
+                            (Ignored if the plug-in consists of a single file)
+        """
         for git in self._gits:
-            self._copytree_install(git.clone().source_path, target_dir)
+            self._copytree_install(git.clone().source_path, target_dir,
+                                   rename_dir=self.name if rename_like_self else None)
 
 
 class WordpressOfficialPlugin(Plugin):
@@ -376,7 +390,7 @@ if __name__ == '__main__':
         for plugin in manifest.must_use_plugins():
             if plugin.name not in flags.exclude:
                 progress("Installing mu-plugin {}".format(plugin.name))
-                plugin.install(WP_MU_PLUGINS_INSTALL_DIR)
+                plugin.install(WP_MU_PLUGINS_INSTALL_DIR, rename_like_self=False)
         for plugin in manifest.plugins():
             if plugin.name not in flags.exclude:
                 progress("Installing plugin {}".format(plugin.name))
