@@ -191,9 +191,11 @@ class Plugin(object):
         raise Exception(
             "Don't know how to handle plug-in URL: {}".format(url))
 
-    def _copytree_install(self, from_path, to_path):
+    def _copytree_install(self, from_path, to_path, rename_dir=None):
         if os.path.isdir(from_path):
-            to_path = os.path.join(to_path, self.name)
+            if not rename_dir:
+                rename_dir = basename(from_path)
+            to_path = os.path.join(to_path, rename_dir)
             progress('Copying {} directory to {}'.format(from_path, to_path))
             shutil.copytree(from_path, to_path)
         else:
@@ -249,7 +251,8 @@ class GitHubPlugin(Plugin):
 
     def install(self, target_dir):
         for git in self._gits:
-            self._copytree_install(git.clone().source_path, target_dir)
+            self._copytree_install(git.clone().source_path, target_dir,
+                                   rename_dir=self.name)
 
 
 class WordpressOfficialPlugin(Plugin):
