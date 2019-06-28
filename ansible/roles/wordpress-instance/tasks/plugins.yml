@@ -113,7 +113,7 @@
   wordpress_plugin:
     name: polylang
     state: symlinked
-    from: wordpress.org/plugins
+    from: https://downloads.wordpress.org/plugin/polylang.2.5.2.zip
 
 - name: Coming Soon plugin
   wordpress_plugin:
