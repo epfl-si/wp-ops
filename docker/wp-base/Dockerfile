@@ -97,13 +97,6 @@ RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 # Manually override themes and plugins
 ######################################################################
 
-# jahia2wp uses an ancient version of Polylang (for reasons that have
-# no bearing on the task at hand). Upgrade it:
-RUN set -e -x;                                                           \
-    cd /wp/wp-content/plugins;                                           \
-    rm -rf polylang;                                                     \
-    /tmp/install-plugins-and-themes.py polylang wordpress.org/plugins
-
 # Prevent directory listings in the mu-plugins/ subdirectories of sites:
 RUN cp /wp/wp-content/plugins/index.php /wp/wp-content/mu-plugins/index.php
 
