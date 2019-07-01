@@ -17,9 +17,6 @@ DeploymentConfigs:
     - name: httpd-lchaboudez
     - name: httpd-lvenries
 
-# TODO: unfork to master
-wp_ops_git_branch: wwp-mgmt-in-openshift
-
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
   pub: "{{ playbook_dir }}/../eyaml/epfl_wp_test.pem"
