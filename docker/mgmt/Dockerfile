@@ -21,6 +21,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apt-get -qy autoremove && \
     apt-get clean
 
+RUN pip3 install ansible
 
 RUN mkdir /var/run/sshd && \
     sed -ri 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && \
