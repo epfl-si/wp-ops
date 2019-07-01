@@ -93,6 +93,10 @@ ADD install-plugins-and-themes.py /tmp/
 ARG INSTALL_AUTO_FLAGS
 RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 
+# In the future, we will have support for multiple WordPress versions
+# in the image:
+RUN cd /wp; ln -s . 4
+
 ######################################################################
 # Manually override themes and plugins
 ######################################################################
