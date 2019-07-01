@@ -15,7 +15,7 @@ ci_jenkins_master_git_build:
 ci_jenkins_test_sidekick_image_name: cucumberjs
 ci_jenkins_test_sidekick_git_build:
   repository: 'https://github.com/epfl-idevelop/wp-dev'
-  path: docker/acceptance
+  path: acceptance
 
 ci_jenkins_slave_image_name: "jenkins-agent"
 ci_jenkins_slave_docker_image: quay.io/openshift/origin-jenkins-agent-base
