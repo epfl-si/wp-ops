@@ -424,7 +424,7 @@
     state: "{{ plugins_symlinked_in_2010_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-google-forms
 
-##################### Class-specific plugins ###########################
+##################### Category-specific plugins ###########################
 
 - name: epfl-emploi plugin
   wordpress_plugin:
