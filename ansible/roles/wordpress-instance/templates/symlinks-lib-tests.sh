@@ -10,8 +10,6 @@ main() {
     assert_equal "$(to_dotdots "wp-content/plugins/epfl")" "../../"       "wp-c/p/epfl/"
 }
 
-
-
 assert_equal() {
     if [ "$1" = "$2" ]; then
         return
