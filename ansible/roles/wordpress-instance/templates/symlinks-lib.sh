@@ -13,22 +13,32 @@ make_symlinks_to_wp() {
 
     cd "{{ wp_dir }}"
 
-    retval=0
+    ensure_symlink_makes_changes=0
     for path in "$@"; do
-        target="/wp/$path"
-        [ "$(readlink $path 2>/dev/null || true)" = $target ] && continue
-
-        retval=1
-{% if ansible_check_mode %}
-        echo >&2 "$path needs symlinking"
-{% else %}
-        rm -rf "$path"
-        dir="$(dirname "$path")"
-        test -d "$dir" || mkdir -p "$dir"
-        ln -s "$target" "$path"
-{% endif %}
+        target="$(to_dotdots "$path")wp/$path"
+        ensure_symlink "$path" "$target"
     done
-    return $retval
+
+    ensure_symlink "wp" "/wp/4"
+
+    return $ensure_symlink_makes_changes
+}
+
+ensure_symlink () {
+  [ "$(readlink "$1" 2>/dev/null || true)" = "$2" ] && return 0
+  ensure_symlink_makes_changes=1
+
+{% if ansible_check_mode %}
+          echo >&2 "$1 needs symlinking"
+{% else %}
+          rm -rf "$1"
+
+          local dir
+          dir="$(dirname "$1")"
+          test -d "$dir" || mkdir -p "$dir"
+
+          ln -s "$2" "$1"
+{% endif %}
 }
 
 ensure_file_contains () {
@@ -48,4 +58,17 @@ ensure_file_contains () {
 {% endif %}
       return 1
     fi
+}
+
+# Converts a relative path to as many dotdots ("..") as it takes to
+# make a symlink that brings back to the top-level directory (that is,
+# one less than the number of path elements in $1)
+to_dotdots() {
+    local dotdots
+    dotdots=$(echo "$1" | sed -e 's,/$,,g' -e 's,[^/][^/]*,..,g' |xargs dirname)
+
+    case "$dotdots" in
+        ".")     echo "";;
+        *)       echo "$dotdots"/;;
+    esac
 }
