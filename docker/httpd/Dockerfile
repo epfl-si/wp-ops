@@ -21,6 +21,7 @@ RUN a2enmod mpm_prefork php${PHP_VERSION} cgi
 RUN mkdir /var/www/global-error
 
 COPY apache2.conf /etc/apache2/
+COPY dyn-vhost.conf /etc/apache2/conf-available/
 COPY ports.conf /etc/apache2/
 COPY error-pages.conf /etc/apache2/conf-enabled/
 COPY global-error /var/www/global-error
