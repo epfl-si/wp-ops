@@ -5,19 +5,17 @@
   * If neither set of conditions is true, initiate loading the setup process.
   */
 +
-+$wp_config_loaded = FALSE;
++$wp_config_loaded = TRUE;
 +
  if ( file_exists( ABSPATH . 'wp-config.php') ) {
  
  	/** The config file resides in ABSPATH */
-@@ -41,6 +44,31 @@
- 	/** The config file resides one level above ABSPATH but is not part of another installation */
- 	require_once( dirname( ABSPATH ) . '/wp-config.php' );
+@@ -43,4 +46,29 @@
  
-+    $wp_config_loaded = TRUE;
-+
  } else {
  
++    $wp_config_loaded = FALSE;
++
 +    // Look for wp-config.php up the directory tree, up to a depth of
 +    // 5 e.g. for wp-content/plugins/myplugin/inc/foo.php
 +    for ( $depth = 1; $depth <= 5 ; $depth++ ) {
