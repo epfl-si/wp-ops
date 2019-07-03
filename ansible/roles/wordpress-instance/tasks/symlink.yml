@@ -139,6 +139,7 @@
       do
           case "$path" in
               .ht*) continue ;;
+              *.ini) continue ;;
               wp-config.php|index.php) continue ;;
               {{ symlinks_all_paths | join('|') }}) continue ;;
           esac
