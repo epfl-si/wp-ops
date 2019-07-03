@@ -1,13 +1,42 @@
 --- volumes/wp/wp-load.php.ORIG	2019-03-14 08:30:45.000000000 +0100
 +++ volumes/wp/wp-load.php	2019-03-14 08:52:13.000000000 +0100
-@@ -41,6 +41,10 @@
- 	/** The config file resides one level above ABSPATH but is not part of another installation */
- 	require_once( dirname( ABSPATH ) . '/wp-config.php' );
+@@ -31,6 +31,9 @@
+  *
+  * If neither set of conditions is true, initiate loading the setup process.
+  */
++
++$wp_config_loaded = TRUE;
++
+ if ( file_exists( ABSPATH . 'wp-config.php') ) {
  
-+} elseif ( @file_exists($wp_config = dirname($_SERVER["SCRIPT_FILENAME"]) . "/wp-config.php")) {
-+    require_once($wp_config);
-+} elseif ( @file_exists($wp_config = dirname(dirname($_SERVER["SCRIPT_FILENAME"])) . "/wp-config.php")) {
-+    require_once($wp_config);
+ 	/** The config file resides in ABSPATH */
+@@ -43,4 +46,29 @@
+ 
  } else {
  
++    $wp_config_loaded = FALSE;
++
++    // Look for wp-config.php up the directory tree, up to a depth of
++    // 5 e.g. for wp-content/plugins/myplugin/inc/foo.php
++    for ( $depth = 1; $depth <= 5 ; $depth++ ) {
++
++        $parentdir = dirname( $_SERVER["SCRIPT_FILENAME"], $depth );
++        if ( @file_exists($wp_config = "$parentdir/wp-config.php" ) ) {
++
++            require_once( $wp_config );
++            $wp_config_loaded = TRUE;
++            break;
++
++        } else if ( FALSE !== @lstat( "$parentdir/wp-content" ) ) {
++
++            // We appear to have reached a WordPress top-level
++            // directory; stop here
++            break;
++
++        }
++    }
++}
++
++if ( ! $wp_config_loaded ) {
++
  	// A config file doesn't exist
