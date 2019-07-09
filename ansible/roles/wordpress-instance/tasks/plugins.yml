@@ -180,7 +180,7 @@
   wordpress_plugin:
     name: cache-control
     state: symlinked
-    from: wordpress.org/plugins
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/cache-control
 
 - name: Cache-Control options
   wordpress_option:
