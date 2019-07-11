@@ -450,3 +450,8 @@
     state: "{{ plugins_symlinked_in_scienceqa_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
 
+- name: EPFL-Library-Plugins plugin
+  wordpress_plugin:
+    name: EPFL-Library-Plugins
+    state: symlinked
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
