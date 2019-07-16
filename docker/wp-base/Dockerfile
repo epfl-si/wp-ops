@@ -93,6 +93,8 @@ ADD install-plugins-and-themes.py /tmp/
 ARG INSTALL_AUTO_FLAGS
 RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
 
+
+
 # In the future, we will have support for multiple WordPress versions
 # in the image:
 RUN cd /wp; ln -s . 4
@@ -107,5 +109,10 @@ RUN cp /wp/wp-content/plugins/index.php /wp/wp-content/mu-plugins/index.php
 # For importing sites from the WXR XML format (e.g. "ventilation" operations)
 RUN cd /wp/wp-content/plugins;                                           \
     /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
+# Aaaaand nuke the stat() cache inbetween downloading things
+ADD clearstatcache-wp-import.patch /tmp/
+RUN set -e -x; cd /wp/wp-content/plugins/wordpress-importer;             \
+    git apply < /tmp/clearstatcache-wp-import.patch;                     \
+    rm /tmp/clearstatcache-wp-import.patch
 
 RUN rm -rf /tmp/install-plugins*
