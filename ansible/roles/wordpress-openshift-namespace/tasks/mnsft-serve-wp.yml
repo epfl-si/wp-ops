@@ -1,0 +1,25 @@
+---
+
+
+- include_vars: ../defaults/blue_vars.yml
+
+- name: "Service"
+  openshift:
+    state: "{{state}}"
+    kind: Service
+    name: "{{app_name}}"
+    namespace: "myproject"
+    apiVersion: v1
+    metadata:
+        name: "{{app_name}}"
+        labels:
+          run: "{{app_name}}"
+        namespace: myproject
+    spec:
+        selector:
+            run: "{{app_name}}"
+        ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 80
+  tags: svc

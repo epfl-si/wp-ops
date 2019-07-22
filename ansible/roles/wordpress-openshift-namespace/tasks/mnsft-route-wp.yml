@@ -1,0 +1,22 @@
+---
+
+
+- include_vars: ../defaults/blue_vars.yml
+
+- name: "Route"
+  openshift:
+    state: "{{state}}"
+    kind: Route
+    name: "{{app_name}}"
+    namespace: "myproject"
+    apiVersion: v1
+    metadata:
+        name: "{{app_name}}"
+    spec:
+        host: "{{app_name}}-myproject.192.168.99.100.nip.io"
+        port:
+            targetPort: 80
+        to:
+            kind: Service
+            name: "{{app_name}}"
+  tags: rt

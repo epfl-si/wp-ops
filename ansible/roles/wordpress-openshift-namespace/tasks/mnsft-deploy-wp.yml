@@ -1,0 +1,51 @@
+---
+
+
+- include_vars: ../defaults/blue_vars.yml
+
+
+- name: "deployment config"
+  openshift:
+    state: "{{state}}"
+    kind: DeploymentConfig
+    name: "{{app_name}}"
+    namespace: "myproject"
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      labels:
+        run: "{{app_name}}"
+      name: "{{app_name}}"
+      namespace: myproject
+    spec:
+      replicas: "{{replicas}}"
+      revisionHistoryLimit: 10
+      selector:
+        run: "{{app_name}}"
+      template:
+        metadata:
+          labels:
+            run: "{{app_name}}"
+        spec:
+          containers:
+            - env:
+                - name: WORDPRESS_DB_NAME
+                  value: "{{db_name}}"
+                - name: WORDPRESS_DB_USER
+                  value: root
+                - name: WORDPRESS_DB_PASSWORD
+                  value: "root!"
+                - name: WORDPRESS_DB_HOST
+                  value: "{{db_ip}}"
+              image: 'wordpress:latest'
+              name: "{{app_name}}"
+              volumeMounts:
+                - mountPath: /var/www/html
+                  name: "nfsvol-{{app_name}}"
+          volumes:
+            - name: "nfsvol-{{app_name}}"
+              persistentVolumeClaim:
+                claimName: 'nfs-pvc-{{app_name}}'
+      triggers:
+        - type: ConfigChange
+             
+  tags: dc

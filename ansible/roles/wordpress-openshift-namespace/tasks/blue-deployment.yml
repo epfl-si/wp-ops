@@ -1,0 +1,40 @@
+---
+# Infrastructure deployment tasks
+#
+- name: pv
+  import_tasks: "mnsft-persistent-volume.yml"
+  when: state == 'latest' or state == 'present'
+  tags:
+    - blue
+
+- name: pvc
+  import_tasks: "mnsft-persistent-claim.yml"
+  when: state == 'latest' or state == 'present'
+  tags:
+    - blue
+
+- name: OpenProject deployment
+  import_tasks: "mnsft-deploy-wp.yml"
+  tags:
+    - blue
+
+- name: OpenProject service
+  import_tasks: "mnsft-serve-wp.yml"
+  tags:
+    - blue
+- name: OpenProject route
+  import_tasks: "mnsft-route-wp.yml"
+  tags:
+    - blue
+
+- name: pvc
+  import_tasks: "mnsft-persistent-claim.yml"
+  when: state == 'absent'
+  tags:
+    - blue
+
+- name: pv
+  import_tasks: "mnsft-persistent-volume.yml"
+  when: state == 'absent'
+  tags:
+    - blue

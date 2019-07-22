@@ -1,0 +1,14 @@
+# file: roles/wordpress-instance/defaults/main/blue_vars.yml
+#
+# The variables to pass to minishift instance for site deployment
+
+#The name of the deployment
+app_name: wp1
+#The number of pods to deploy
+replicas: 1
+#The database's server ip
+db_ip: 128.179.146.8
+#The database's name
+db_name: db_wp1
+#The nfs server ip
+nfs_ip: 128.179.146.8
