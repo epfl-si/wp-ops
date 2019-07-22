@@ -48,13 +48,21 @@ WARNING: eyaml is not installed, cannot decipher and push secrets.
 NO_EYAML
 }
 
+
 inventory_mode="test"
 inventories () {
-    case "$inventory_mode" in
-        test) echo "-i inventory/test" ;;
-        test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
-        wp_veritas) echo "-i inventory/wp-veritas" ;;
-    esac
+    CONFIG=$(oc config current-context)
+    if [[ $CONFIG == "myproject/192-168-99-"*"developer" ]]
+    then
+      echo "-i inventory/minishift -t blue -e "state=latest" --connection=local "
+
+    else
+	case "$inventory_mode" in
+       	    test) echo "-i inventory/test" ;;
+	    test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
+	    wp_veritas) echo "-i inventory/wp-veritas" ;;
+	esac
+    fi
 }
 
 ###########################################################################

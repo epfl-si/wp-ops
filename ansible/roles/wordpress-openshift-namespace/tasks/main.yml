@@ -37,3 +37,18 @@
 - name: "Management container (ssh server, PHP CLI)"
   import_tasks: mgmt.yml
   tags: mgmt
+
+- name: blue-deployment
+  include_tasks:
+    file: blue-deployment.yml
+  vars:
+    app_name: "{{item.name}}"
+    db_name: "{{item.db_name}}"
+    db_ip: "{{item.db_ip}}"
+    db_root_password: "{{item.db_root_password}}"
+    nfs_ip: "{{item.nfs_ip}}"
+  loop: "{{my_list}}"
+  tags:
+    - blue
+
+
