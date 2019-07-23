@@ -453,5 +453,11 @@
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
-    state: symlinked
+    state: "{{ plugins_symlinked_in_library_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
+
+- name: epfl-courses-se plugin
+  wordpress_plugin:
+    name: epfl-courses-se
+    state: "{{ plugins_symlinked_in_cdhshs_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
