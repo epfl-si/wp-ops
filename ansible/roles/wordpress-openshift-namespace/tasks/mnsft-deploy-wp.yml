@@ -22,17 +22,10 @@
             run: "{{dc.name}}"
         spec:
           containers:
-            - env:
-                - name: WORDPRESS_DB_NAME
-                  value: "{{dc.db_name}}"
-                - name: WORDPRESS_DB_USER
-                  value: root
-                - name: WORDPRESS_DB_PASSWORD
-                  value: "{{dc.db_root_password | eyaml(eyaml_keys) }}"
-                - name: WORDPRESS_DB_HOST
-                  value: "{{dc.db_ip}}"
-              image: 'wordpress:latest'
+            - image: 'wordpress:latest'
               name: "{{dc.name}}"
+              command:
+                - /usr/local/bin/apache2-foreground
               volumeMounts:
                 - mountPath: /var/www/html
                   name: "nfsvol-{{dc.name}}"

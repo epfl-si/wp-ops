@@ -73,5 +73,4 @@
     loop_var: dc
   tags:
     - blue
-
-
+    - dc
