@@ -4,23 +4,29 @@
 mgmt_service_account: "{{ openshift_namespace }}"
 
 mgmt_access_list:
-  wwp-test: &common_access_list
-    - christophe.burki@camptocamp.com
-    - christian.kaenzig@camptocamp.com
-    - mathieu.bornoz@camptocamp.com
-    - diego.abelenda@camptocamp.com
-    - luc.venries@epfl.ch
-    - gregory.charmier@epfl.ch
-    - lucien.chaboudez@epfl.ch
-    - william.belle@epfl.ch
-    - olivier.bieler@epfl.ch
-    - dominique.quatravaux@epfl.ch
-    - laurent.durrer@epfl.ch
-    - julien.delasoie@epfl.ch
-    - hugo.valente@epfl.ch
-    - christian.zufferey@epfl.ch
-    - s.dubuis@epfl.ch
-  wwp: *common_access_list
+  wwp: '{{ _mgmt_access_list_wwp_test_and_wwp }}'
+  wwp-test: '{{ _mgmt_access_list_wwp_test_and_wwp + _mgmt_access_list_wwp_test_only }}'
+
+_mgmt_access_list_wwp_test_and_wwp:
+  - christophe.burki@camptocamp.com
+  - christian.kaenzig@camptocamp.com
+  - mathieu.bornoz@camptocamp.com
+  - diego.abelenda@camptocamp.com
+  - luc.venries@epfl.ch
+  - gregory.charmier@epfl.ch
+  - lucien.chaboudez@epfl.ch
+  - william.belle@epfl.ch
+  - olivier.bieler@epfl.ch
+  - dominique.quatravaux@epfl.ch
+  - laurent.durrer@epfl.ch
+  - julien.delasoie@epfl.ch
+  - hugo.valente@epfl.ch
+  - christian.zufferey@epfl.ch
+  - s.dubuis@epfl.ch
+
+_mgmt_access_list_wwp_test_only:
+  - cyrille.pittet@epfl.ch
+  - mohamed.khadri@epfl.ch
 
 mgmt_secret_name: mgmt-ssh
 
