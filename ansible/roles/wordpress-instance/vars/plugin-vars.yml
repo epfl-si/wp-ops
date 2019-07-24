@@ -7,12 +7,16 @@ plugins_use_Emploi: false
 plugins_use_Inside: false
 plugins_use_Restauration: false
 plugins_use_ScienceQA: false
+plugins_use_CDHSHS: false
+plugins_use_Library: false
 
 plugins_symlinked_in_2010_only: '{{ "symlinked" if plugins_use_wp2010_plugins else "absent" }}'
 plugins_symlinked_in_emploi_only: '{{ "symlinked" if plugins_use_Emploi else "absent" }}'
 plugins_symlinked_in_inside_only: '{{ "symlinked" if plugins_use_Inside else "absent" }}'
 plugins_symlinked_in_restauration_only: '{{ "symlinked" if plugins_use_Restauration else "absent" }}'
 plugins_symlinked_in_scienceqa_only: '{{ "symlinked" if plugins_use_ScienceQA else "absent" }}'
+plugins_symlinked_in_cdhshs_only: '{{ "symlinked" if plugins_use_CDHSHS else "absent" }}'
+plugins_symlinked_in_library_only: '{{ "symlinked" if plugins_use_Library else "absent" }}'
 
 
 plugin_mainwp_child_uniqueid: "WinterIsComing"

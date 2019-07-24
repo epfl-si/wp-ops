@@ -180,7 +180,7 @@
   wordpress_plugin:
     name: cache-control
     state: symlinked
-    from: wordpress.org/plugins
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/cache-control
 
 - name: Cache-Control options
   wordpress_option:
@@ -450,3 +450,14 @@
     state: "{{ plugins_symlinked_in_scienceqa_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
 
+- name: EPFL-Library-Plugins plugin
+  wordpress_plugin:
+    name: EPFL-Library-Plugins
+    state: "{{ plugins_symlinked_in_library_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
+
+- name: epfl-courses-se plugin
+  wordpress_plugin:
+    name: epfl-courses-se
+    state: "{{ plugins_symlinked_in_cdhshs_only }}"
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
