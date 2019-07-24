@@ -54,7 +54,7 @@ inventories () {
     CONFIG=$(oc config current-context)
     if [[ $CONFIG == "myproject/192-168-99-"*"developer" ]]
     then
-      echo "-i inventory/minishift -t blue -e "state=latest" --connection=local "
+      echo "-i inventory/minishift -e "state=latest" --connection=local "
 
     else
 	case "$inventory_mode" in

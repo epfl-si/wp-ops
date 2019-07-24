@@ -1,20 +1,19 @@
 ---
 
 
-- include_vars: ../defaults/blue_vars.yml
 
 - name: "PersistentVolume"
   openshift:
     as_user: "system:admin"
-    state: "{{state}}"
+    state: latest
     kind: PersistentVolume
-    name: "nfs-pv-{{app_name}}"
+    name: "nfs-pv-{{dc.name}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-      name: 'nfs-pv-{{app_name}}'
+      name: 'nfs-pv-{{dc.name}}'
       labels:
-          id: "{{app_name}}"
+          id: "{{dc.name}}"
     spec:
       capacity:
         storage: 1Gi
@@ -22,7 +21,7 @@
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
       nfs:
-        path: '/wp/{{app_name}}'
-        server: "{{nfs_ip}}"
+        path: '/wp/{{dc.name}}'
+        server: "{{dc.nfs_ip}}"
         readOnly: false
   tags: pv
