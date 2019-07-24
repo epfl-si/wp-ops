@@ -1,18 +1,17 @@
 ---
 
 
-- include_vars: ../defaults/blue_vars.yml
 
 - name: "PersistentVolumeClaim"
   openshift:
     as_admin: true
-    state: "{{state}}"
+    state: latest
     kind: PersistentVolumeClaim
-    name: "nfs-pvc-{{app_name}}"
+    name: "nfs-pvc-{{dc.name}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-      name: 'nfs-pvc-{{app_name}}'
+      name: 'nfs-pvc-{{dc.name}}'
     spec:
       accessModes:
       - ReadWriteMany
@@ -21,5 +20,5 @@
            storage: 1Gi
       selector:
           matchLabels:
-              id: "{{app_name}}"
+              id: "{{dc.name}}"
   tags: pvc

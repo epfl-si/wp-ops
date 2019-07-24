@@ -2,14 +2,17 @@
 # tasks for WordPress OpenShift namespaces
 
 - name: "Disk usage report microservice"
+  when: "'openshift-namespaces-blue' not in group_names"
   import_tasks: disk-usage-report.yml
   tags: diskusage
 
 - name: "Images and builds"
+  when: "'openshift-namespaces-blue' not in group_names"
   import_tasks: images.yml
   tags: images
 
 - name: "DeploymentConfigs (previously known as pods)"
+  when: "'openshift-namespaces-blue' not in group_names"
   include_tasks:
     file: deploymentconfig-httpd.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
@@ -35,19 +38,19 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
+  when: "'openshift-namespaces-blue' not in group_names"
   import_tasks: mgmt.yml
   tags: mgmt
 
+
+
 - name: blue-deployment
+  when: "'openshift-namespaces-blue' in group_names"
   include_tasks:
     file: blue-deployment.yml
-  vars:
-    app_name: "{{item.name}}"
-    db_name: "{{item.db_name}}"
-    db_ip: "{{item.db_ip}}"
-    db_root_password: "{{item.db_root_password}}"
-    nfs_ip: "{{item.nfs_ip}}"
-  loop: "{{my_list}}"
+  loop: "{{MyList}}"
+  loop_control:
+    loop_var: dc
   tags:
     - blue
 
