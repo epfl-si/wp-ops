@@ -1,38 +1,38 @@
 ---
 
 
-- name: "dc/{{ dc.name }}"
+- name: "dc/{{ name }}"
   openshift:
     state: latest
     kind: DeploymentConfig
     apiVersion: apps.openshift.io/v1
     metadata:
       labels:
-        run: "{{dc.name}}"
-      name: "{{dc.name}}"
+        run: "{{name}}"
+      name: "{{name}}"
       namespace: "{{ openshift_namespace }}"
     spec:
       replicas: 1
 #      selector:
 #        run: "{{dc.name}}"
       template:
-        when: dc.db_ip is undefined
+        when: db_ip is undefined
         metadata:
           labels:
-            run: "{{dc.name}}"
+            run: "{{name}}"
         spec:
           containers:
             - image: 'wordpress:latest'
-              name: "{{dc.name}}"
+              name: "{{name}}"
               command:
                 - /usr/local/bin/apache2-foreground
               volumeMounts:
                 - mountPath: /var/www/html
-                  name: "nfsvol-{{dc.name}}"
+                  name: "nfsvol-{{name}}"
           volumes:
-            - name: "nfsvol-{{dc.name}}"
+            - name: "nfsvol-{{name}}"
               persistentVolumeClaim:
-                claimName: 'nfs-pvc-{{dc.name}}'
+                claimName: 'nfs-pvc-{{name}}'
       triggers:
         - type: ConfigChange
              

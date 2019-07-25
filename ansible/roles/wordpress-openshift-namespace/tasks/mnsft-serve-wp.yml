@@ -6,17 +6,17 @@
   openshift:
     state: latest
     kind: Service
-    name: "{{dc.name}}"
+    name: "{{name}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-        name: "{{dc.name}}"
+        name: "{{name}}"
         labels:
-          run: "{{dc.name}}"
+          run: "{{name}}"
         namespace: myproject
     spec:
         selector:
-            run: "{{dc.name}}"
+            run: "{{name}}"
         ports:
         - port: 80
           protocol: TCP

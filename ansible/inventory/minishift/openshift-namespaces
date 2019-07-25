@@ -1,5 +1,5 @@
-[all-openshift-namespaces:children]
-openshift-namespaces-blue
+#[all-openshift-namespaces:children]
+#openshift-namespaces-blue
 
-[openshift-namespaces-blue]
-wp-blue nfs_path=128.179.146.8:/wp
+#[openshift-namespaces-blue]
+#wp-blue nfs_path=128.179.146.8:/wp

@@ -6,16 +6,16 @@
   openshift:
     state: latest
     kind: Route
-    name: "{{dc.name}}"
+    name: "{{name}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-        name: "{{dc.name}}"
+        name: "{{name}}"
     spec:
-        host: "{{dc.name}}-myproject.192.168.99.100.nip.io"
+        host: "{{name}}-myproject.192.168.99.100.nip.io"
         port:
             targetPort: 80
         to:
             kind: Service
-            name: "{{dc.name}}"
+            name: "{{name}}"
   tags: rt
