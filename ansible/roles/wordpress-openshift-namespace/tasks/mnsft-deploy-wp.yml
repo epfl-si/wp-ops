@@ -16,7 +16,7 @@
 #      selector:
 #        run: "{{dc.name}}"
       template:
-        when: db_ip is undefined
+#        when: db_ip is undefined
         metadata:
           labels:
             run: "{{name}}"

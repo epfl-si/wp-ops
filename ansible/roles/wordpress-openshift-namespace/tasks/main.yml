@@ -62,8 +62,6 @@
   import_tasks: mgmt.yml
   tags: mgmt
 
-
-
 - name: blue-deployment
   when: is_minishift
   include_tasks:

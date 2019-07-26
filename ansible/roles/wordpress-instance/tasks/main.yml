@@ -8,6 +8,12 @@
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
+- name: Create directories for wordpress instances (end_play in create.yml)
+  import_tasks: "create.yml"
+  tags: blue
+#Stop the execution here
+- meta: end_play
+
 - name: WordPress facts
   import_tasks: facts.yml
   tags:
@@ -40,7 +46,7 @@
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"
-  when: "'wipe' in ansible_run_tags or not wp_is_installed"
+  when: "('wipe' in ansible_run_tags or not wp_is_installed)"
 
 - name: Restore
   import_tasks: "restore.yml"
@@ -58,7 +64,7 @@
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
 
-- name: "Set up “symlink” serving discipline"
+- name: "Set up / revert “symlink” serving discipline"
   when:
     - wp_ensure_symlink_version is defined
     - (wp_can.configure and wp_can.write_code) or ansible_check_mode

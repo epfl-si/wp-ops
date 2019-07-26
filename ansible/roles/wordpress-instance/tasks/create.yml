@@ -5,6 +5,19 @@
 - include_vars: jahia2wp-vars.yml
 - include_vars: wp-destructive.yml
 
+- name: Create directories for wordpress instances
+#  become: yes
+#  become_method: sudo
+  shell: |
+    docker-compose exec -T nas /bin/bash -c 'mkdir -p /nfsshare/wp/"{{name}}" && chown -R "{{web_uid}}"."{{web_gid}}" /nfsshare/wp'
+    pwd
+    exit 0
+  args:
+    chdir: "{{nfs_path}}"
+# Stop the execution here
+- meta: end_play
+
+
 - assert:
     that:
       - (wp_can.wipe) or (not _wp_config_php_stat.stat.exists)
