@@ -1,0 +1,15 @@
+apiVersion: v1
+imagePullSecrets:
+- name: default-dockercfg-vl8n9
+- name: creds
+kind: ServiceAccount
+metadata:
+  creationTimestamp: 2019-07-05T21:03:34Z
+  name: default
+  namespace: myproject
+  resourceVersion: "1500974"
+  selfLink: /api/v1/namespaces/myproject/serviceaccounts/default
+  uid: 59dc7a90-9f68-11e9-b956-08002794c448
+secrets:
+- name: default-token-t42nm
+- name: default-dockercfg-vl8n9

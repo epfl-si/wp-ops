@@ -6,9 +6,11 @@
 # See also continuous-integration.yml (which has its own set of images)
 
 - include_vars: image-vars.yml
+  tags:
+    - always
 
 - name: "Testing ImageStreams and their build information"
-  when: not openshift_is_production
+  when: not openshift_is_production and not is_minishift
   openshift_imagestream:
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
@@ -36,3 +38,34 @@
   with_items:
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
+
+#TODO change namespace name
+- name: "Minishift mirror ImageStreams"
+  when: is_minishift
+  openshift:
+    state: latest
+    content: |
+      apiVersion: v1
+      kind: ImageStream
+      namespace: {{ minishift_namespace }}
+      metadata:
+        name: {{item.name}}
+        namespace: myproject
+      spec:
+        dockerImageRepository: {{epfl_openshift_registry_repo}}/{{item.name}}
+  with_items:
+    - name: "{{ httpd_image_name }}"
+    - name: "{{ mgmt_image_name }}"
+
+
+- name: "Resync images"
+  shell:
+    cmd: |
+      set -e -x
+      oc import-image {{item.name}}:prod
+  with_items:
+    - name: "{{ httpd_image_name }}"
+    - name: "{{ mgmt_image_name }}"
+  tags:
+    - never
+    - resync

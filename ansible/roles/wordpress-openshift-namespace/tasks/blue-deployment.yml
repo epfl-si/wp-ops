@@ -3,13 +3,13 @@
 #
 - name: pv
   import_tasks: "mnsft-persistent-volume.yml"
-  when: state == 'latest' or state == 'present'
+#  when: state == 'latest' or state == 'present'
   tags:
     - blue
 
 - name: pvc
   import_tasks: "mnsft-persistent-claim.yml"
-  when: state == 'latest' or state == 'present'
+#  when: state == 'latest' or state == 'present'
   tags:
     - blue
 
@@ -27,14 +27,4 @@
   tags:
     - blue
 
-- name: pvc
-  import_tasks: "mnsft-persistent-claim.yml"
-  when: state == 'absent'
-  tags:
-    - blue
-
-- name: pv
-  import_tasks: "mnsft-persistent-volume.yml"
-  when: state == 'absent'
-  tags:
-    - blue
+#
