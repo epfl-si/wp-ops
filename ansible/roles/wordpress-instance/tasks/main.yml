@@ -46,7 +46,7 @@
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"
-  when: "('wipe' in ansible_run_tags or not wp_is_installed)"
+  when: "'wipe' in ansible_run_tags or not wp_is_installed"
 
 - name: Restore
   import_tasks: "restore.yml"
