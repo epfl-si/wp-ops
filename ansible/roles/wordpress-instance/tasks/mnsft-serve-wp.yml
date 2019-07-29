@@ -3,20 +3,21 @@
 
 
 - name: "Service"
+  connection: local
   openshift:
     state: latest
     kind: Service
-    name: mysvc
+    name: "{{name}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-        name: mysvc
+        name: "{{name}}"
         labels:
-          run: mysvc
+          run: "{{name}}"
         namespace: myproject
     spec:
         selector:
-            run: mysvc
+            run: "{{name}}"
         ports:
         - port: 80
           protocol: TCP

@@ -29,7 +29,9 @@
 - name: "Images and builds"
   import_tasks: images.yml
   tags: images
-- meta: end_play
+
+
+
 
 - name: "DeploymentConfigs (previously known as pods)"
   when: not is_minishift

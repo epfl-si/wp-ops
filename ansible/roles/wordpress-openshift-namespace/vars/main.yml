@@ -4,6 +4,7 @@
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
 openshift_registry_tag: "{{ 'prod' if openshift_is_production else 'latest' }}"
 is_minishift: "{{'openshift-namespaces-blue' in group_names}}"
+is_minishift_instance: "{{'wordpress_instances_test_blue' in group_names}}"
 minishift_namespace: myproject
 
 epfl_openshift_registry_address: os-docker-registry.epfl.ch

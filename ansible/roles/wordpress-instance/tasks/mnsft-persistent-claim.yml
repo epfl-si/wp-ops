@@ -3,6 +3,7 @@
 
 
 - name: "PersistentVolumeClaim"
+  connection: local
   openshift:
     as_user: "system:admin"
     state: latest
