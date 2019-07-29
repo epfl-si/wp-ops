@@ -1,7 +1,4 @@
 ---
-
-
-
 - name: "PersistentVolume"
   connection: local
   openshift:

@@ -1,5 +1,9 @@
 ---
-
+- name: "Giving root bootup rights to developer account"
+  shell:
+      cmd: |
+          set -e -x
+          oc adm policy add-scc-to-user anyuid -z default --as system:admin
 # Checking weither the prod secure registry is pingable form inside minishift
 - name: "Checking minishift internal dns resolver"
   shell:

@@ -10,19 +10,12 @@
 
 - name: module test
   include_tasks: "blue-deployment.yml"
+  when: is_minishift_instance
 
-
-- meta: end_play
-
-
-
-- name: Create directories for wordpress instances (end_play in create.yml)
+- name: Create directories for wordpress instances
   import_tasks: "create.yml"
+  when: is_minishift_instance
   tags: blue
-
-
-
-
 
 - name: WordPress facts
   import_tasks: facts.yml
@@ -31,6 +24,7 @@
     # TODO: configure.yml uses wp_is_symlinked, which requires facts.yml to have run.
     # Can we use a handler instead?
     - config
+  when: not is_minishift_instance
 
 - name: Backup
   # We include_tasks (not import_tasks) here, because we do *not* want
@@ -47,19 +41,22 @@
     - backup.code
     - backup.data
     - backup.uploads
+  when: not is_minishift_instance  
 
 - name: Wipe
   import_tasks: "wipe.yml"
+  when: not is_minishift_instance
   tags:
     - never
     - wipe
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"
-  when: "'wipe' in ansible_run_tags or not wp_is_installed"
+  when: "('wipe' in ansible_run_tags or not wp_is_installed) and not is_minishift_instance"
 
 - name: Restore
   import_tasks: "restore.yml"
+  when: not is_minishift_instance
   tags:
     - never
     - restore
@@ -73,11 +70,13 @@
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
+  when: not is_minishift_instance  
 
 - name: "Set up / revert “symlink” serving discipline"
   when:
     - wp_ensure_symlink_version is defined
     - (wp_can.configure and wp_can.write_code) or ansible_check_mode
+    - not is_minishift_instance
   tags:
     - never
     - symlink
@@ -89,7 +88,7 @@
   include_tasks: "symlink.yml"
 
 - name: Configure
-  when: wp_can.configure
+  when: wp_can.configure and not is_minishift_instance
   tags:
     - config
   include_tasks:    # Required because of the "when" clause
@@ -99,7 +98,7 @@
       tags: ["config"]
 
 - name: Set up plugins
-  when: wp_can.configure
+  when: wp_can.configure and not is_minishift_instance
   tags:
     - plugins
   include_tasks:
@@ -108,7 +107,7 @@
       tags: ["plugins"]
 
 - name: Set up themes
-  when: wp_can.configure
+  when: wp_can.configure and not is_minishift_instance
   tags:
     - themes
   include_tasks:
@@ -132,16 +131,19 @@
 # "Ventilation"-related
 - name: "Dump to WXR for ventilation"
   import_tasks: "dump.yml"
+  when: not is_minishift_instance
   tags:
     - never
     - dump
 - name: "Undump from WXR for ventilation"
   import_tasks: "undump.yml"
+  when: not is_minishift_instance
   tags:
     - never
     - undump
 
 - name: CSV plug-in versions report
+  when: not is_minishift_instance
   tags:
     - never
     - reportcsv
@@ -154,6 +156,7 @@
 # We could do a with_items but then we would get the entire content
 # dumped into the terminal as part of the "items" structure. Oh well
 - name: CSV must-use plug-in versions report
+  when: not is_minishift_instance
   tags:
     - never
     - reportcsv
