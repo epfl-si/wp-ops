@@ -40,7 +40,7 @@
             - "{{ name }}"
             from:
               kind: ImageStreamTag
-              name: "httpd:prod"
+              name: "httpd:latest"
               namespace: "myproject"
              
   tags: dc
