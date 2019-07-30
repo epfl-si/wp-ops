@@ -1,0 +1,43 @@
+---
+
+
+- name: DeploymentConfigs
+  connection: local
+  openshift:
+    state: latest
+    kind: DeploymentConfig
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      labels:
+        run: "mgmt"
+      name: "mgmt"
+      namespace: "myproject"
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            run: "mgmt"
+        spec:
+          containers:
+            - name: "mgmt"
+              volumeMounts:
+                - mountPath: /var/www/html
+                  name: "nfsvol-mgmt"
+          volumes:
+            - name: "nfsvol-mgmt"
+              persistentVolumeClaim:
+                claimName: 'nfs-pvc-mgmt'
+      triggers:
+        - type: ConfigChange
+
+        - type: ImageChange
+          imageChangeParams:
+            containerNames:
+            - "mgmt"
+            from:
+              kind: ImageStreamTag
+              name: "mgmt:prod"
+              namespace: "myproject"
+             
+  tags: dc

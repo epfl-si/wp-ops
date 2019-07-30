@@ -12,6 +12,14 @@
     docker exec "{{nas_name}}" /bin/bash -c 'mkdir -p /"{{nfs_path}}"/wp/"{{name}}" ; chown -R "{{web_uid}}"."{{web_gid}}" /"{{nfs_path}}"/wp'
   when: is_minishift_instance
 
+- name: Create databases for wordpress instances
+  connection: local
+  shell: |
+    set -e -x
+    docker exec "{{ msql_name }}" /bin/bash -c 'mysql -u root --password=root! -h {{ db_ip }} -e "CREATE DATABASE {{ name }}"' 
+   
+  when: is_minishift_instance
+
 - meta: end_play
 
 - assert:

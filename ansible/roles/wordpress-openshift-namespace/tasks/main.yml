@@ -61,10 +61,10 @@
   import_tasks: mgmt.yml
   tags: mgmt
 
-#- name: blue-deployment
-#  when: is_minishift
-#  include_tasks:
-#    file: blue-deployment.yml
+- name: blue-deployment
+  when: is_minishift
+  include_tasks:
+    file: blue-mgmt-deployment.yml
 #  loop: "{{MyList}}"
 #  loop_control:
 #    loop_var: dc
