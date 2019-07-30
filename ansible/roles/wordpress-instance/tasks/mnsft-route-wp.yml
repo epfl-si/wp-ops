@@ -15,7 +15,7 @@
     spec:
         host: "{{name}}-myproject.192.168.99.100.nip.io"
         port:
-            targetPort: 80
+            targetPort: 8080
         to:
             kind: Service
             name: "{{name}}"
