@@ -14,9 +14,9 @@ all-wordpresses:
       vars:
         db_root_password: ENC[PKCS7,MIIBeQYJKoZIhvcNAQcDoIIBajCCAWYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAksw5Hr8L9P5ybvD85NEl9DU3Ow9HtKgY8llaFwygoS+uvs1+4ZDKTJSQ+stDMn0HsVEqgEC7S2TQL9aS/FbeViSp1ixV0pekRhWj7sQ7T/Al9TaPBPm6EfI6vTwF8yTO68arEylIwLCsz+2CFCGmrmzDJNd9TrSpx2YHUaFaMEuFvaix1XjDW9+/5LtUY0BKAvHsz38j6j3oUHhX8an/cJRVTMavfpB6Xkd0eM365wa5ztwFEv8dO+pHs6L1Sxie8H4ClqsDUrY71sWLpar3+AuBgUUhsg87xW94OjSmeVfFT3U6o1DTBZihMronIdlHqIyE5k/3RMrwF2UqVgZeNjA8BgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBA7EFlCuAxRnJ/w0XyducVhgBB61WxAO+a7GWBvwK+/UczL]
         ansible_host: localhost
-        db_ip: 128.179.178.87
+        db_ip: 128.179.146.8
         type: wordpress       
-        nfs_ip: 128.179.178.87
+        nfs_ip: 128.179.146.8
         web_uid: 33
         web_gid: 33
         nfs_path: "nfsshare"

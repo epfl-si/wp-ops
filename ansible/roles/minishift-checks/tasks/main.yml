@@ -4,4 +4,5 @@
 - name: "Minishift Precondition Checks"
   import_tasks: checks.yml
   tags:
+    - never
     - check

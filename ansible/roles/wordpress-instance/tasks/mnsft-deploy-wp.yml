@@ -20,7 +20,10 @@
             run: "{{name}}"
         spec:
           containers:
-            - name: "{{name}}"
+            - env:
+              - name: WP_ENV
+                value: env
+              name: "{{name}}"
               volumeMounts:
                 - mountPath: /var/www/html
                   name: "nfsvol-{{name}}"

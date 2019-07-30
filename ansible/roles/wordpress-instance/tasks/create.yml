@@ -16,7 +16,7 @@
   connection: local
   shell: |
     set -e -x
-    docker exec "{{ msql_name }}" /bin/bash -c 'mysql -u root --password=root! -h {{ db_ip }} -e "CREATE DATABASE {{ name }}"' 
+    docker exec "{{ msql_name }}" /bin/bash -c 'mysql -u root --password=root! -h {{ db_ip }} -e "CREATE DATABASE IF NOT EXISTS {{ name }}"' 
    
   when: is_minishift_instance
 
