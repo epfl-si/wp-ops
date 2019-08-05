@@ -22,3 +22,7 @@ all-wordpresses:
         nfs_path: "nfsshare"
         nas_name: "nas"
         msql_name: "mysql"
+        eyaml_keys:
+          priv: "/keybase/team/epfl_wwp_blue/private_key.pkcs7.pem"
+          pub: "/keybase/team/epfl_wwp_blue/public_key.pkcs7.pem"
+       

@@ -20,10 +20,20 @@
             run: "{{name}}"
         spec:
           containers:
-            - env:
-              - name: WP_ENV
-                value: env
-              name: "{{name}}"
+#            - env:
+#              - name: WP_ENV
+#                value: env
+            - name: "{{name}}"
+              env:
+                - name: WORDPRESS_DB_NAME
+                  value: "{{name}}"
+                - name: WORDPRESS_DB_USER
+                  value: root
+                - name: WORDPRESS_DB_PASSWORD
+                  value: "{{db_root_password | eyaml(eyaml_keys) }}"
+                - name: WORDPRESS_DB_HOST
+                  value: "{{db_ip}}"
+              image: "wordpress:latest"
               ports:
                 - containerPort: 80
                   protocol: TCP
@@ -37,13 +47,13 @@
       triggers:
         - type: ConfigChange
 
-        - type: ImageChange
-          imageChangeParams:
-            containerNames:
-            - "{{ name }}"
-            from:
-              kind: ImageStreamTag
-              name: "httpd:prod"
-              namespace: "myproject"
+#        - type: ImageChange
+#          imageChangeParams:
+#            containerNames:
+#            - "{{ name }}"
+#            from:
+#              kind: ImageStreamTag
+#              name: "httpd:prod"
+#              namespace: "myproject"
              
   tags: dc

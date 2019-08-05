@@ -54,6 +54,7 @@ inventories () {
     CONFIG=$(oc config current-context)
     if [[ $CONFIG == "myproject/192-168-99-"*"developer" ]]
     then
+      IPADRS="`curl https://api.ipify.org`"
       echo "-i inventory/minishift "
 
     else
