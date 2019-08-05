@@ -24,6 +24,9 @@
               - name: WP_ENV
                 value: env
               name: "{{name}}"
+              ports:
+                - containerPort: 80
+                  protocol: TCP
               volumeMounts:
                 - mountPath: /var/www/html
                   name: "nfsvol-{{name}}"
