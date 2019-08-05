@@ -13,6 +13,8 @@
     apiVersion: v1
     metadata:
       name: 'nfs-pvc-mgmt'
+#      annotations:
+#        volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites
     spec:
       accessModes:
       - ReadWriteMany
@@ -21,5 +23,5 @@
            storage: 1Gi
       selector:
           matchLabels:
-              id: "mgmt"
+              id: mgmt
   tags: pvc
