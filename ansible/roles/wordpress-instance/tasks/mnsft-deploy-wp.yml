@@ -11,7 +11,7 @@
       labels:
         run: "{{name}}"
       name: "{{name}}"
-      namespace: "myproject"
+      namespace: "{{ minishift_namespace }}"
     spec:
       replicas: 1
       template:
@@ -19,20 +19,32 @@
           labels:
             run: "{{name}}"
         spec:
+          serviceAccount: wwp-int
+          serviceAccountName: wwp-int
           containers:
 #            - env:
 #              - name: WP_ENV
 #                value: env
             - name: "{{name}}"
               env:
-                - name: WORDPRESS_DB_NAME
+                - name: DB_NAME
                   value: "{{name}}"
-                - name: WORDPRESS_DB_USER
-                  value: root
-                - name: WORDPRESS_DB_PASSWORD
-                  value: "{{db_root_password | eyaml(eyaml_keys) }}"
-                - name: WORDPRESS_DB_HOST
-                  value: "{{db_ip}}"
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: database-access
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: database-access
+                - name: DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      key: host
+                      name: database-access
+
               image: "wordpress:latest"
               ports:
                 - containerPort: 80
@@ -40,10 +52,11 @@
               volumeMounts:
                 - mountPath: /var/www/html
                   name: "nfsvol-{{name}}"
+                  subPath: "wp/{{name}}"
           volumes:
             - name: "nfsvol-{{name}}"
               persistentVolumeClaim:
-                claimName: 'nfs-pvc-{{name}}'
+                claimName: 'nfs-pvc-mgmt'
       triggers:
         - type: ConfigChange
 

@@ -2,4 +2,4 @@
 openshift-namespaces-blue
 
 [openshift-namespaces-blue]
-wp-blue nfs_path=128.179.146.8:/wp
+wp-blue nfs_path=nfsshare

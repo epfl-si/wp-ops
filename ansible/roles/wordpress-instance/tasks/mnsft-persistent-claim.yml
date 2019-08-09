@@ -5,7 +5,6 @@
 - name: "PersistentVolumeClaim"
   connection: local
   openshift:
-    as_user: "system:admin"
     state: latest
     kind: PersistentVolumeClaim
     name: "nfs-pvc-{{name}}"

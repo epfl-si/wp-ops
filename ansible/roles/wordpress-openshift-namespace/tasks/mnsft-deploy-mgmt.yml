@@ -11,7 +11,7 @@
       labels:
         run: "mgmt"
       name: "mgmt"
-      namespace: "myproject"
+      namespace: "{{ minishift_namespace }}"
     spec:
       replicas: 1
       template:
@@ -19,10 +19,28 @@
           labels:
             run: "mgmt"
         spec:
+          serviceAccount: wwp-int
+          serviceAccountName: wwp-int
           containers:
             - name: "mgmt"
+              env:
+                - name: DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      key: host
+                      name: database-access
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: database-access
+                - name: DB_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: database-access
               volumeMounts:
-                - mountPath: /var/www/html
+                - mountPath: "/{{nfs_path}}"
                   name: "nfsvol-mgmt"
           volumes:
             - name: "nfsvol-mgmt"
@@ -38,6 +56,6 @@
             from:
               kind: ImageStreamTag
               name: "mgmt:prod"
-              namespace: "myproject"
+              namespace: "{{ minishift_namespace }}"
              
   tags: dc

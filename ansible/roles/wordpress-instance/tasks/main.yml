@@ -5,19 +5,27 @@
 # Variables:: (in addition to those defined or documented in
 #              ../vars/*.yml)
 
+
+
+
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
-- meta: end_play
+
+
 
 - name: module test
   include_tasks: "blue-deployment.yml"
   when: is_minishift_instance
 
+- meta: end_play
+
 - name: Create directories for wordpress instances
   import_tasks: "create.yml"
   when: is_minishift_instance
-  tags: blue
+  tags: 
+    - never
+    - arch
 
 - name: WordPress facts
   import_tasks: facts.yml

@@ -23,6 +23,8 @@
 - name: "Image secret setup"
   when: is_minishift
   import_tasks: image-secret.yml
+  tags:
+    - imagesecret
   
 
 

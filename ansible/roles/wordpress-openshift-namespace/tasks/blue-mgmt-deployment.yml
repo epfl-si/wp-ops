@@ -1,10 +1,6 @@
 ---
 # Infrastructure deployment tasks
 #
-- name: pv
-  import_tasks: "mnsft-mgmt-persistent-volume.yml"
-  tags:
-    - blue
 
 - name: pvc
   import_tasks: "mnsft-mgmt-persistent-claim.yml"
@@ -16,13 +12,13 @@
   tags:
     - blue
 
-- name: OpenProject service
-  import_tasks: "mnsft-serve-mgmt.yml"
-  tags:
+#- name: OpenProject service
+#  import_tasks: "mnsft-serve-mgmt.yml"
+#  tags:
     - blue
-- name: OpenProject route
-  import_tasks: "mnsft-route-mgmt.yml"
-  tags:
-    - blue
+#- name: OpenProject route
+#  import_tasks: "mnsft-route-mgmt.yml"
+#  tags:
+#    - blue
 
 #

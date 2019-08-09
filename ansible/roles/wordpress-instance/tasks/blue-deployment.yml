@@ -1,15 +1,15 @@
 ---
 # Infrastructure deployment tasks
 #
-- name: pv
-  import_tasks: "mnsft-persistent-volume.yml"
-  tags:
-    - blue
+#- name: pv
+#  import_tasks: "mnsft-persistent-volume.yml"
+#  tags:
+#    - blue
 
-- name: pvc
-  import_tasks: "mnsft-persistent-claim.yml"
-  tags:
-    - blue
+#- name: pvc
+#  import_tasks: "mnsft-persistent-claim.yml"
+#  tags:
+#    - blue
 
 - name: OpenProject deployment
   import_tasks: "mnsft-deploy-wp.yml"

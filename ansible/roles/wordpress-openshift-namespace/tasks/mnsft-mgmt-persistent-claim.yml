@@ -5,23 +5,20 @@
 - name: "PersistentVolumeClaim"
   connection: local
   openshift:
-    as_user: "system:admin"
     state: latest
     kind: PersistentVolumeClaim
     name: "nfs-pvc-mgmt"
-    namespace: "myproject"
+    namespace: "{{minishift_namespace}}"
     apiVersion: v1
     metadata:
       name: 'nfs-pvc-mgmt'
-#      annotations:
-#        volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites
+      annotations:
+        volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites
     spec:
       accessModes:
       - ReadWriteMany
       resources:
          requests:
            storage: 1Gi
-      selector:
-          matchLabels:
-              id: mgmt
+
   tags: pvc

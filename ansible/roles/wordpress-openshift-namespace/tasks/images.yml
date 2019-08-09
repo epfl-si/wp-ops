@@ -50,7 +50,7 @@
       namespace: {{ minishift_namespace }}
       metadata:
         name: {{item.name}}
-        namespace: myproject
+        namespace: {{ minishift_namespace }}
       spec:
         dockerImageRepository: {{epfl_openshift_registry_repo}}/{{item.name}}
   with_items:

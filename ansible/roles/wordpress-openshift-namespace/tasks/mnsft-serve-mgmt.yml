@@ -8,7 +8,7 @@
     state: latest
     kind: Service
     name: "mgmt"
-    namespace: "myproject"
+    namespace: "{{ minishift_namespace }}"
     apiVersion: v1
     metadata:
         name: "mgmt"

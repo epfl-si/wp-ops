@@ -8,15 +8,17 @@
     state: latest
     kind: Route
     name: "{{name}}"
-    namespace: "myproject"
+    namespace: "{{ minishift_namespace }}"
     apiVersion: v1
     metadata:
         name: "{{name}}"
     spec:
-        host: "{{name}}-myproject.192.168.99.100.nip.io"
+        host: "{{name}}-{{minishift_namespace}}.128.178.222.83.nip.io"
         port:
             targetPort: 80
         to:
             kind: Service
             name: "{{name}}"
+        tls:
+            termination: edge
   tags: rt
