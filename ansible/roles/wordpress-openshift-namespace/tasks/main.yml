@@ -26,7 +26,7 @@
   tags:
     - imagesecret
   
-
+- meta: end_play
 
 - name: "Images and builds"
   import_tasks: images.yml

@@ -1,8 +1,0 @@
----
-# tasks file for minishift-dns-check
-
-- name: "Minishift Precondition Checks"
-  import_tasks: checks.yml
-  tags:
-    - never
-    - check
