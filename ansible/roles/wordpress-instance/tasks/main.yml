@@ -13,7 +13,7 @@
 - meta: end_play
 
 
-
+# TODO: À garder en premier
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
@@ -30,6 +30,7 @@
     - never
     - arch
 
+# TODO: À garder en deuxième
 - name: WordPress facts
   import_tasks: facts.yml
   tags:
@@ -38,6 +39,11 @@
     # Can we use a handler instead?
     - config
   when: not is_minishift_instance
+
+# TODO: Tu peux shooter les tâches (et leurs dépendances) "Backup",
+# "Wipe" "Recreate", "Create" et "Restore" qui suivent (cependant, tu
+# voudras peut-être utiliser un create.yml que tu réécris de zéro,
+# afin que ce fichier-ci ne devienne pas trop long)
 
 - name: Backup
   # We include_tasks (not import_tasks) here, because we do *not* want
@@ -79,6 +85,18 @@
   tags:
     - config
   import_tasks: "serving-infrastructure.yml"
+
+# TODO: À partir d'ici, à garder; avant de livrer, ces tâches doivent
+# redevenir fonctionnelles et ne pas contenir de "if" qui ferait de
+# wp-int et/ou MiniShift des cas spéciaux.
+#
+# C'est-à-dire : étant donné un SITE qui fonctionne, après
+#
+#    wpsible -t symlink -l SITE
+#
+# il doit être symlinké (c'est-à-dire que son code réside dans le /wp
+# de l'image), et continuer à fonctionner. Si ce n'est pas le cas
+# c'est un bug (du code préexistant).
 
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
