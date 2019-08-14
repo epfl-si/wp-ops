@@ -10,6 +10,6 @@ minishift_namespace: wwp-int
 secret_name: camptocamp-docker-pull-token
 
 epfl_openshift_registry_address: os-docker-registry.epfl.ch
-epfl_openshift_registry_repo: "{{ epfl_openshift_registry_address }}/epfl-gitlab-prod"
+epfl_openshift_registry_repo: "{{ epfl_openshift_registry_address }}/wwp-int"
 epfl_openshift_portal_address: pub-os-exopge.epfl.ch
 epfl_openshift_credentials: "{{ epfl_openshift_portal_address | kube_credentials }}"

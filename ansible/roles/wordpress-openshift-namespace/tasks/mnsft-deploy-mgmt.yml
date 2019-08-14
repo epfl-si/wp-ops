@@ -40,7 +40,7 @@
                       key: password
                       name: database-access
               volumeMounts:
-                - mountPath: "/{{nfs_path}}"
+                - mountPath: /srv
                   name: "nfsvol-mgmt"
                 - mountPath: /backups
                   name: "backups"

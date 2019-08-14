@@ -1,0 +1,3 @@
+dependencies:
+  - name: epfl_idevelop.ansible_module_openshift
+  - name: epfl_idevelop.ansible_module_eyaml

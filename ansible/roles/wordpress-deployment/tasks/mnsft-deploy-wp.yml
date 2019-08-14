@@ -1,0 +1,51 @@
+---
+
+
+- name: DeploymentConfigs
+  connection: local
+  openshift:
+    state: latest
+    kind: DeploymentConfig
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      labels:
+        run: "{{name}}"
+      name: "{{name}}"
+      namespace: "{{ minishift_namespace }}"
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            run: "{{name}}"
+        spec:
+          serviceAccount: wwp-int
+          serviceAccountName: wwp-int
+          containers:
+            - env:
+              - name: WP_ENV
+                value: env
+
+              name: "{{name}}"
+              ports:
+                - containerPort: 80
+                  protocol: TCP
+              volumeMounts:
+                - mountPath: /srv
+                  name: "nfsvol-{{name}}"
+                  subPath: "wp/{{name}}"
+          volumes:
+            - name: "nfsvol-{{name}}"
+              persistentVolumeClaim:
+                claimName: 'nfs-pvc-mgmt'
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            containerNames:
+            - "{{ name }}"
+            from:
+              kind: ImageStreamTag
+              name: "httpd:prod"
+              namespace: "{{minishift_namespace}}"
+             
+  tags: dc

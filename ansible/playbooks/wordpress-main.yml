@@ -12,24 +12,33 @@
           You must update Ansible to at least 2.6 to use this playbook.
 
 
+
+
 # In this play, "hosts" are not really hosts; rather, they are
-# WordPress instances. See the list in
-# ../inventory/test/wordpress-instances and
-# ../inventory/prod/wordpress-instances (executable scripts, that lists
+# OpenShift namespaces. See the list in ../inventory/*/openshift-namespaces
+- name: OpenShift namespaces
+  hosts: all-openshift-namespaces
+  gather_facts: no    # Ansible facts are useless for this play
+  roles:
+    - role: ../roles/wordpress-openshift-namespace
+
+
+- name: Wordpress deployments
+  hosts: all-wordpress-deployments
+  gather_facts: no
+  roles:
+    - role : ../roles/wordpress-deployment
+
+
+# Likewise, members of all-wordpress-instances are WordPress instances, not hosts. See the list in
+# ../inventory/test/wordpress-instances (a plain file) and
+# ../inventory/prod/wordpress-instances (an executable script, that lists
 # them on standard output)
 - name: WordPress instances
   hosts: all-wordpresses
   gather_facts: no   # But see ../roles/wordpress-instance/tasks/facts.yml
   roles:
     - role: ../roles/wordpress-instance
-
-# Likewise, members of all-openshift-namespaces are OpenShift
-# namespaces, not hosts
-- name: OpenShift namespaces
-  hosts: all-openshift-namespaces
-  gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/wordpress-openshift-namespace
 
 - name: Ansible Tower (AWX) configuration
   hosts: awx-poc-vpsi

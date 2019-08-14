@@ -39,23 +39,35 @@
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
 
-#TODO change namespace name
-- name: "Minishift mirror ImageStreams"
+
+#TODO figure out an automated way to pull prod images
+- name: "wwp-int ImageStreams"
   when: is_minishift
-  openshift:
-    state: latest
-    content: |
-      apiVersion: v1
-      kind: ImageStream
-      namespace: {{ minishift_namespace }}
-      metadata:
-        name: {{item.name}}
-        namespace: {{ minishift_namespace }}
-      spec:
-        dockerImageRepository: {{epfl_openshift_registry_repo}}/{{item.name}}
+  openshift_imagestream:
+    name: "{{ item.name }}"
+    namespace: "{{ minishift_namespace }}"
+    metadata: "{{ item.metadata | default({}) }}"
   with_items:
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
+
+
+#- name: "Minishift mirror ImageStreams"
+#  when: is_minishift
+#  openshift:
+#    state: latest
+#    content: |
+#      apiVersion: v1
+#      kind: ImageStream
+#      namespace: {{ minishift_namespace }}
+#      metadata:
+#        name: {{item.name}}
+#        namespace: {{ minishift_namespace }}
+#      spec:
+#        dockerImageRepository: {{epfl_openshift_registry_repo}}/{{item.name}}
+#  with_items:
+#    - name: "{{ httpd_image_name }}"
+#    - name: "{{ mgmt_image_name }}"
 
 
 - name: "Resync images"
