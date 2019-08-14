@@ -13,7 +13,6 @@
     cmd: |
        set -e -x
 
-
 - name: "Disk usage report microservice"
   when: not is_minishift
   import_tasks: disk-usage-report.yml
@@ -25,8 +24,6 @@
   import_tasks: image-secret.yml
   tags:
     - imagesecret
-  
-- meta: end_play
 
 - name: "Images and builds"
   import_tasks: images.yml
@@ -67,9 +64,3 @@
   when: is_minishift
   include_tasks:
     file: blue-mgmt-deployment.yml
-#  loop: "{{MyList}}"
-#  loop_control:
-#    loop_var: dc
-#  tags:
-#    - blue
-#    - dc
