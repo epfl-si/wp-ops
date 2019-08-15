@@ -2,7 +2,6 @@ FROM ubuntu:bionic
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.3
-ARG WORDPRESS_VERSION_LINEAGE=4.9
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -41,11 +40,17 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     apt-get -qy autoremove && \
     apt-get clean
 
-# Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
-# won't install):
+
+######################################################################
+# Install wp-cli
+######################################################################
+
 # Travis-specific arguments — See ../../.travis.yml
 ARG GITHUB_API_USER
 ARG GITHUB_API_TOKEN
+
+# Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
+# won't install):
 RUN set -x;                                                              \
    curl -o /usr/local/bin/wp -L                                          \
         $(curl $(if [ -n "${GITHUB_API_TOKEN}" ]; then                   \
@@ -72,47 +77,79 @@ RUN su -s /bin/sh www-data -c " \
     wp package install https://github.com/epfl-idevelop/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
 
-# Install a copy of WordPress into /wp, populate it with our plugins,
-# and patch it to support our symlink-based serving layout
-RUN mkdir /wp
-RUN wp --allow-root --path=/wp core download \
-  --version=$(curl https://api.wordpress.org/core/version-check/1.7/     \
+######################################################################
+# Install and patch WordPresses
+######################################################################
+# Install multiple versions of WordPress into /wp/, and patch them to
+# support our symlink-based serving layout
+ARG WORDPRESS_VERSION_LINEAGES="4.9 5.2"
+RUN set -x;                                                              \
+    for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
+        version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
             | jq -r '.offers[].current                                   \
-                      | select(match("'${WORDPRESS_VERSION_LINEAGE}'"))' \
-            |sort -n -r |head -1)
+                      | select(match("'${lineage}'"))'                   \
+            |sort -n -r |head -1) ;                                      \
+        mkdir -p /wp/$version ;                                          \
+        wp --allow-root --path=/wp/$version                              \
+           core download --version=$version ;                            \
+    done
 
-RUN rm -rf /wp/wp-content/plugins/akismet /wp/wp-content/plugins/hello.php \
-    /wp/wp-content/themes/twenty*
+RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
+          /wp/*/wp-content/plugins/hello.php                             \
+    /wp/*/wp-content/themes/twenty*
 
 ADD wordpress-anywhere.patch /tmp/
-RUN set -e -x; cd /; git apply < /tmp/wordpress-anywhere.patch;          \
+RUN set -e -x;                                                           \
+    apt -qy install patch;                                               \
+    for wp in /wp/*; do                                                  \
+        cd $wp ;                                                         \
+        patch -p0 -F3 < /tmp/wordpress-anywhere.patch;                   \
+    done;                                                                \
+    apt -qy remove --purge patch;                                        \
     rm /tmp/wordpress-anywhere.patch
 
-ADD install-plugins-and-themes.py /tmp/
-# Get all plugins and themes ("auto" mode) from the jahia2wp manifest:
+######################################################################
+# Install and patch plugins and themes
+######################################################################
+
+ADD install-plugins-and-themes.py clearstatcache-wp-import.patch /tmp/
+# Get all plugins and themes ("auto" mode) from the jahia2wp manifest;
 ARG INSTALL_AUTO_FLAGS
-RUN set -x; /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}
+RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
+        /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS};   \
+    done
 
-
-
-# In the future, we will have support for multiple WordPress versions
-# in the image:
-RUN cd /wp; ln -s . 4
-
-######################################################################
-# Manually override themes and plugins
-######################################################################
-
-# Prevent directory listings in the mu-plugins/ subdirectories of sites:
-RUN cp /wp/wp-content/plugins/index.php /wp/wp-content/mu-plugins/index.php
-
-# For importing sites from the WXR XML format (e.g. "ventilation" operations)
-RUN cd /wp/wp-content/plugins;                                           \
-    /tmp/install-plugins-and-themes.py wordpress-importer wordpress.org/plugins
-# Aaaaand nuke the stat() cache inbetween downloading things
-ADD clearstatcache-wp-import.patch /tmp/
-RUN set -e -x; cd /wp/wp-content/plugins/wordpress-importer;             \
-    git apply < /tmp/clearstatcache-wp-import.patch;                     \
+# Manually add the wordpress-importer plugin, used in "ventilation"
+# operations. Patch it to nuke the stat() cache inbetween downloading
+# things
+RUN set -e -x; for wp in /wp/*; do                                       \
+        cd $wp/wp-content/plugins ;                                      \
+        /tmp/install-plugins-and-themes.py                               \
+            wordpress-importer wordpress.org/plugins ;                   \
+        cd wordpress-importer ;                                          \
+        git apply < /tmp/clearstatcache-wp-import.patch ;                \
+    done;                                                                \
     rm /tmp/clearstatcache-wp-import.patch
 
-RUN rm -rf /tmp/install-plugins*
+RUN rm /tmp/install-plugins-and-themes.py
+
+# Prevent directory listings in the mu-plugins/ subdirectories of sites:
+RUN set -e -x; for wp in /wp/*; do                                       \
+        cd $wp/wp-content ;                                              \
+        cp plugins/index.php mu-plugins/index.php ;                      \
+    done
+
+######################################################################
+# Symlinks
+######################################################################
+# Major version symlinks
+# We do that last for simplicity, at a small cost in build time
+RUN set -e -x; cd /wp; for version in *; do                              \
+        major="$(echo "$version" |cut -d. -f1)";                         \
+        rm -f "$major"; ln -s "$version" "$major";                       \
+    done
+
+# As a backward compatibility measure / temporary hack, we support
+# sites that symlink to /wp instead of /wp/4 or /wp/5:
+RUN set -e -x; cd /wp;                                                   \
+    for file_or_dir in 4/*; do ln -s $file_or_dir .; done
