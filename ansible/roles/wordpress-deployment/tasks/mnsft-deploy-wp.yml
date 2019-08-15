@@ -24,7 +24,7 @@
           containers:
             - env:
               - name: WP_ENV
-                value: env
+                value: /
 
               name: "{{name}}"
               ports:
@@ -33,7 +33,7 @@
               volumeMounts:
                 - mountPath: /srv
                   name: "nfsvol-{{name}}"
-                  subPath: "wp/{{name}}"
+                  subPath: "{{name}}"
           volumes:
             - name: "nfsvol-{{name}}"
               persistentVolumeClaim:

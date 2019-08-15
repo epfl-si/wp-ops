@@ -3,36 +3,31 @@
 - name: id
   shell:
     cmd: id
-
-- meta: end_play
-
-- name: get routes
-  connection: local
-  shell:
-    cmd: |
-      set -e -x
-      podname=$(oc get pods -o name |grep mgmt | cut -d "/" -f2)
-      oc get route  {{domain}} -o yaml
-  register: route
-
-- set_fact:
-    route_name: "{{route.stdout | from_yaml | uri_filter}}"
-
+  register: id
 - debug:
-    var: route_name
+    var: id.stdout
 
-- name: run mgmt
-  connection: local
+- name: directories
+  file:  
+    path: "{{wp_dir}}"
+    owner: www-data
+    state: directory
+
+- name: wp evaluation
   shell:
     cmd: |
-      set -e -x
-      podname=$(oc get pods -o name |grep mgmt | cut -d "/" -f2)
-      oc exec -it $podname -- "/bin/bash" -c 'ls /backups'
-#      oc exec -it $podname -- "/bin/bash" -c 'mkdir -p /srv/wp/{{domain}}/{{route_name}}'
+      echo $({{wp_cli_command }} eval '1;')
   register: out
 
-- set_fact:
-   bkp_name: "{{out.stdout | latest_bkp }}"
 
 - debug:
-    var: bkp_name
+    var: out.stderr
+
+#- name: unzip backup archive
+#  shell:
+#    cmd: |
+#      cd {{wp_dir}}
+#      tar xf /backups/{{wp_backup_folder}}/{{wp_archive_name}}
+#  when: "'This does not seem to be a WordPress install.' in out.stderr"
+
+- meta: end_play

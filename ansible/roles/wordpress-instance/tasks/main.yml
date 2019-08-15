@@ -7,11 +7,11 @@
 
 
 
-
 - name: restore from /backups
   import_tasks: "restore-wp-int.yml"
-- meta: end_play
 
+
+- meta: end_play
 
 # TODO: À garder en premier
 - include_vars: wp-destructive.yml   # For wp_can
