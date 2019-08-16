@@ -19,6 +19,6 @@
       - ReadWriteMany
       resources:
          requests:
-           storage: 1Gi
+           storage: 250Gi
 
   tags: pvc

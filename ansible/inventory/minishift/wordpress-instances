@@ -2,12 +2,20 @@
 
 import subprocess
 import yaml
+from sys import stdout
+from collections import OrderedDict
+import random
+import string
 
 pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True).replace('\n','')
 
 def parse_backup_directory(nb_sites):
+    if pod_name == "":
+        return ""
     command = "oc exec %(pod_name)s -- ls /backups " %{"pod_name":pod_name}
     ls = subprocess.check_output(command, shell=True)
+    if "Error" in ls:
+        return ""
     return list(filter(lambda x: len(x) > 0, ls.split('\n')[0:nb_sites] ))
 
 inventory = {
@@ -16,7 +24,6 @@ inventory = {
                    ["wordpress_instances_test_blue"]
               },
               "wordpress_instances_test_blue":{
-                 "hosts":[],
                  "vars":{
                    "ansible_python_interpreter": "python3",
                    "ansible_connection": "oc",
@@ -32,8 +39,23 @@ inventory = {
               }
              }
 
+def group_by_env(hostvars):
+    groups={}
+    group_hosts={}
+    for k in hostvars:
+        env = hostvars[k]["wp_env"]
+        if not env in groups:
+            groups[env]= {}
+        if not env in group_hosts:
+            group_hosts[env]={}
+            group_hosts[env]["hosts"]= []
+        groups[env][k]=hostvars[k]
+        group_hosts[env]["hosts"].append(k)
+    return {"group_hosts":group_hosts, "groups":hostvars}
+        
+
 def populate_vars():
-    ls = parse_backup_directory(4)
+    ls = parse_backup_directory(3)
     ls_hosts= []
     vs = {}
     for name in ls:
@@ -41,9 +63,10 @@ def populate_vars():
         name = vars["wp_hostname"].split('.')[0]+"-"+vars["wp_path"]
         ls_hosts.append(name)
         vs[name] = vars
-    return { "hosts":ls_hosts , "hostvars": vs}
+    return vs
 
 def get_latest_full_backup(bkp_string):
+    #TODO performance bottleneck in the repeated oc command
     command = "oc exec %(pod_name)s -- ls /backups/%(bkp)s " %{"pod_name":pod_name, "bkp": bkp_string}
     ls = subprocess.check_output(command, shell=True)
     bkp_list = list(filter(lambda x: len(x) and "full" in x > 0, ls.split('\n') ))
@@ -51,26 +74,44 @@ def get_latest_full_backup(bkp_string):
     reversed_bkp_list = bkp_list[::-1]
     #TODO check edge cases: we suppose that each archive has a same-named sql backup 
     #and that there exist backups in the first place
-    return {"wp_archive_name": reversed_bkp_list[0], "wp_sql_name": reversed_bkp_list[1]}
+    if len(reversed_bkp_list) > 1:
+        return {"wp_archive_name": reversed_bkp_list[0], "wp_sql_name": reversed_bkp_list[1]}
+    else:
+        return {"wp_archive_name": "none", "wp_sql_name": "none"}
 
 
 def parse_vars(bkp_string):
     path = bkp_string.split('_')[2:]
-    wp_env = "foot"  #TODO make wordpress environnements dynamic as well > use path[0]
+    wp_env = path[0]  #TODO make wordpress environnements dynamic as well > use path[0]
     wp_hostname= path[1]
     wp_path = bkp_string.split("htdocs")[1].replace('_','')
     wp_archives= get_latest_full_backup(bkp_string)
+    random_db_name = "wp_"+''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
     return {
             "wp_env":wp_env,
             "wp_hostname":wp_hostname,
             "wp_path":wp_path,
             "wp_archive_name":wp_archives["wp_archive_name"],
             "wp_sql_name": wp_archives["wp_sql_name"],
-            "wp_backup_folder": bkp_string
+            "wp_backup_folder": bkp_string,
+            "db_name":random_db_name
     }
 
 gen = populate_vars()
-inventory["wordpress_instances_test_blue"]["hosts"] = gen["hosts"]
-inventory["_meta"]["hostvars"] = gen["hostvars"]  
+inventory["_meta"]["hostvars"] = gen
+output = group_by_env(gen)
+inventory["wordpress_instances_test_blue"]["children"] = []
+for k in output["group_hosts"]:
+    inventory[k] = output["group_hosts"][k]
+    inventory["wordpress_instances_test_blue"]["children"].append(k)
+    
+    
+
+#inventory["wordpress_instances_test_blue"]["hosts"] = gen["hosts"]
+#inventory["_meta"]["hostvars"] = gen["hostvars"]  
 #print( get_latest_full_backup("_srv_www_www.epfl.ch_htdocs_schools_cdh")  )
 print ( yaml.dump(inventory) )
+#print ( inventory)
+#print(yaml.dump(group_by_env(gen)))
+
+

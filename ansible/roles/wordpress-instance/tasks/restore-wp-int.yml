@@ -1,12 +1,5 @@
 ---
 
-- name: id
-  shell:
-    cmd: id
-  register: id
-- debug:
-    var: id.stdout
-
 - name: directories
   file:  
     path: "{{wp_dir}}"
@@ -18,16 +11,45 @@
     cmd: |
       echo $({{wp_cli_command }} eval '1;')
   register: out
-
-
 - debug:
     var: out.stderr
 
-#- name: unzip backup archive
-#  shell:
-#    cmd: |
-#      cd {{wp_dir}}
-#      tar xf /backups/{{wp_backup_folder}}/{{wp_archive_name}}
-#  when: "'This does not seem to be a WordPress install.' in out.stderr"
+- name: unzip backup archive
+  shell:
+    cmd: |
+      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} {{wp_dir_tar}}
+      {{wp_cli_command}} core download
+  when: "'This does not seem to be a WordPress install.' in out.stderr"
+
+- name: wp evaluation
+  shell:
+    cmd: |
+      echo $({{wp_cli_command }} eval '1;')
+  register: out
+- debug:
+    var: out.stderr
+
+- name: delete stale wp-config file
+  shell:
+    cmd: |
+      rm {{wp_dir}}/wp-config.php
+  when: "'Error establishing a database connection' in out.stderr"
+
+- name: Create databases & wp-config files for wordpress instances [IF NEEDED]
+  shell:
+    cmd: |
+       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -e "CREATE DATABASE IF NOT EXISTS {{ db_name }}"
+       {{wp_cli_command }} config create --dbname={{db_name}} --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST
+       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{wp_backup_folder}}/{{wp_sql_name}}
+  when: "('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr"
+
+- name: wp evaluation
+  shell:
+    cmd: |
+      echo $({{wp_cli_command }} eval '1;')
+  register: out
+- debug:
+    var: out.stderr
+
 
 - meta: end_play

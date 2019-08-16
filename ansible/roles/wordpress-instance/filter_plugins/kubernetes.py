@@ -15,12 +15,15 @@ def latest_bkp(raw_bash):
     bkp_archive_name= max(dates)+"_full.tar.gz"
     bkp_sql_name= max(dates)+"_full.sql"
     return bkp_archive_name
-    
+
+def sanitize_tar_path(path):
+    return path.replace("//","/")    
     
 
 class FilterModule(object):
     def filters(self):
         return {
             'uri_filter':  uri_filter,
-            'latest_bkp': latest_bkp
+            'latest_bkp': latest_bkp,
+            'sanitize_tar_path':sanitize_tar_path
         }

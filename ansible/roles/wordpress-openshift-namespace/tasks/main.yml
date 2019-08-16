@@ -1,8 +1,7 @@
 ---
 # tasks for WordPress OpenShift namespaces
 
-#empty safety test before launching ...
-- meta: end_play
+
 - name: "Disk usage report microservice"
   when: not is_minishift
   import_tasks: disk-usage-report.yml

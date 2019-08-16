@@ -1,6 +1,5 @@
 ---
 # tasks file for wordpress-deployment
 
-- meta: end_play
 - name: "module test"
   import_tasks: blue-deployment.yml
