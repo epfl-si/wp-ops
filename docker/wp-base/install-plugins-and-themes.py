@@ -25,8 +25,9 @@ Usage:
 
   install-plugins-and-themes.py auto [options ...]
 
-    Install all plugins, mu-plugins and themes into /wp. The list and
-    addresses of plugins to install is determined from the Ansible
+    Install all plugins, mu-plugins and themes into the WordPress
+    instance rooted at the current directory. The list and addresses
+    of plugins to install is determined from the Ansible
     configuration.
 
     Options:
@@ -373,7 +374,7 @@ class Flags:
             self.path = argv[1]
 
 
-WP_INSTALL_DIR = '/wp/wp-content'
+WP_INSTALL_DIR = './wp-content'
 WP_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'plugins')
 WP_MU_PLUGINS_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'mu-plugins')
 WP_THEMES_INSTALL_DIR = os.path.join(WP_INSTALL_DIR, 'themes')

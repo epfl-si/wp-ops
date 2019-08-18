@@ -1,5 +1,5 @@
---- volumes/wp/wp-load.php.ORIG	2019-03-14 08:30:45.000000000 +0100
-+++ volumes/wp/wp-load.php	2019-03-14 08:52:13.000000000 +0100
+--- wp-load.php.ORIG	2019-08-15 12:55:06.030129000 +0000
++++ wp-load.php	2019-08-15 12:55:41.083793000 +0000
 @@ -31,6 +31,9 @@
   *
   * If neither set of conditions is true, initiate loading the setup process.
@@ -10,7 +10,7 @@
  if ( file_exists( ABSPATH . 'wp-config.php') ) {
  
  	/** The config file resides in ABSPATH */
-@@ -43,4 +46,29 @@
+@@ -43,6 +46,31 @@
  
  } else {
  
@@ -40,3 +40,5 @@
 +if ( ! $wp_config_loaded ) {
 +
  	// A config file doesn't exist
+ 
+ 	define( 'WPINC', 'wp-includes' );
