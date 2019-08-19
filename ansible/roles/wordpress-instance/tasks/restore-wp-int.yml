@@ -14,11 +14,12 @@
 - debug:
     var: out.stderr
 
+#TODO: seulement extraire /uploads plus tard
 - name: unzip backup archive
   shell:
     cmd: |
       cd "{{wp_dir}}"
-      tar --transform 's,^.*/wp-content,wp-content,' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content/uploads'
+      tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content'
       {{wp_cli_command}} core download
   when: "'This does not seem to be a WordPress install.' in out.stderr"
 
@@ -64,6 +65,12 @@
       wp core symlink
   register: wp_core_symlink
   changed_when: '"ALREADYSYMLINKED" not in wp_core_symlink.stderr'
+
+- name: wp symlink
+  file:
+    state: link
+    src: /wp/4
+    dest: "{{wp_dir}}/wp"
 
 - name: extract .htaccess
   shell:
