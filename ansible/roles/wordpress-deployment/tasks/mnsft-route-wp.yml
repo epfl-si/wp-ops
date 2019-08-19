@@ -20,5 +20,6 @@
             kind: Service
             name: "{{name}}"
         tls:
+            insecureEdgeTerminationPolicy: Redirect
             termination: edge
   tags: rt

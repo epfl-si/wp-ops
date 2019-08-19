@@ -24,8 +24,7 @@
           containers:
             - env:
               - name: WP_ENV
-                value: /
-
+                value: "{{name}}"
               name: "{{name}}"
               ports:
                 - containerPort: 80

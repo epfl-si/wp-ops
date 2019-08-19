@@ -17,7 +17,8 @@
 - name: unzip backup archive
   shell:
     cmd: |
-      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} {{wp_dir_tar}}
+      cd "{{wp_dir}}"
+      tar --transform 's,^.*/wp-content,wp-content,' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content/uploads'
       {{wp_cli_command}} core download
   when: "'This does not seem to be a WordPress install.' in out.stderr"
 
@@ -39,17 +40,44 @@
   shell:
     cmd: |
        mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -e "CREATE DATABASE IF NOT EXISTS {{ db_name }}"
-       {{wp_cli_command }} config create --dbname={{db_name}} --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST
+       {{wp_cli_command }} config create --dbname={{db_name}} --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --extra-php << "PHP"
+       define('WP_CONTENT_DIR', '{{wp_dir}}/wp-content');
+       if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+         $_SERVER['HTTPS']='on';
+       }
+       define('ALLOW_UNFILTERED_UPLOADS', true);
+       PHP
        mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{wp_backup_folder}}/{{wp_sql_name}}
+       for opt in home siteurl; do {{wp_cli_command}} --allow-root option set $opt https://{{wp_hostname}}; done;
+       {{wp_cli_command}} --allow-root transient delete --all
+       
   when: "('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr"
+
+- name: wp core symlink
+  shell:
+    chdir: "{{wp_dir}}"
+    cmd: |
+      if test -L wp-load.php; then
+        echo >&2 "ALREADYSYMLINKED"
+        exit 0
+      fi
+      wp core symlink
+  register: wp_core_symlink
+  changed_when: '"ALREADYSYMLINKED" not in wp_core_symlink.stderr'
+
+- name: extract .htaccess
+  shell:
+    creates: "{{wp_htaccess_path}}"
+    chdir: "{{wp_dir}}"
+    cmd: |
+      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards --to-stdout '*/.htaccess' > .htaccess
+
 
 - name: wp evaluation
   shell:
     cmd: |
-      echo $({{wp_cli_command }} eval '1;')
+      {{wp_cli_command }} eval '1;'
   register: out
 - debug:
     var: out.stderr
 
-
-- meta: end_play

@@ -8,6 +8,7 @@ import random
 import string
 
 pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True).replace('\n','')
+cluster_ip = "128.178.222.83"
 
 def parse_backup_directory(nb_sites):
     if pod_name == "":
@@ -89,7 +90,9 @@ def parse_vars(bkp_string):
     random_db_name = "wp_"+''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
     return {
             "wp_env":wp_env,
-            "wp_hostname":wp_hostname,
+#            "wp_hostname":wp_hostname,
+## For demo purposes, restore from backup under a different hostname
+            "wp_hostname": wp_env+"-wwp-int."+cluster_ip+".nip.io",
             "wp_path":wp_path,
             "wp_archive_name":wp_archives["wp_archive_name"],
             "wp_sql_name": wp_archives["wp_sql_name"],
