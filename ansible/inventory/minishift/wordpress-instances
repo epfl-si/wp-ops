@@ -10,6 +10,120 @@ import string
 pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True).replace('\n','')
 cluster_ip = "128.178.222.83"
 
+def limit_hosts(inv,nb):
+    limited_inv = inv
+    for group in limited_inv:
+        if "hosts" in limited_inv[group]:
+            if len(limited_inv[group]["hosts"])>nb:
+                limited_inv[group]["hosts"]=limited_inv[group]["hosts"][0:nb]
+    return limited_inv
+
+def bkp_to_dict():
+    command = "oc exec %(pod_name)s -- find /backups -maxdepth 2 -mindepth 2 -type f" %{"pod_name":pod_name}
+    ls_output = subprocess.check_output(command, shell=True)
+    ls_list_raw = list(filter(lambda x: len(x) > 0, ls_output.split('\n')))
+    inv= {}
+    backups= {}
+    last_site=""
+    last_namespace=""
+    inv["all-wordpresses"]={"children":["wordpress_instances_test_blue"]}
+    inv["wordpress_instances_test_blue"]={"vars":{
+                   "ansible_python_interpreter": "python3",
+                   "ansible_connection": "oc",
+                   "ansible_oc_namespace": "wwp-int",
+                   "ansible_oc_pod": "%(pod_name)s" % {"pod_name": pod_name},
+                   "ansible_become": "true",
+                   "ansible_become_user": "www-data",
+                   "ansible_become_method": "su"
+    }, "children":[]}
+    inv["_meta"]={}
+
+    for path in ls_list_raw:
+       path_list =path.split('/')
+       
+#       env_path = parse_env_path(path_list[2])
+#       if "wp_env" in env_path and "wp_path" in env_path:
+#           site_name= env_path["wp_env"]+"/"+env_path["wp_path"]
+#       else: site_name="bla"
+       site_name=path_list[2]
+
+       if not site_name in backups:
+           
+           if len(last_site)>0:
+               backups[last_site] = list(filter(lambda x: "full" in x,backups[last_site]))
+               backups[last_site].sort()
+               
+               backups[last_site] = backups[last_site][::-1][0:2]
+                
+               hostvars= parse_bkp_name1(last_site)
+
+               if len(backups[last_site]) > 1:
+                   hostvars["wp_archive_name"]= backups[last_site][0]
+                   hostvars["wp_sql_name"]= backups[last_site][1]
+               else:
+                   hostvars["wp_archive_name"]= ""
+                   hostvars["wp_sql_name"]= ""           
+
+               backups[last_site]= hostvars
+               if "wp_env" in hostvars:
+                   wp_env = hostvars["wp_env"]
+                   if not wp_env in inv:
+                       inv[wp_env] = {"hosts":[]}
+                   if "wp_backup_folder" in hostvars:
+                       inv[wp_env]["hosts"].append(hostvars["wp_backup_folder"])
+                   if not wp_env in inv["wordpress_instances_test_blue"]["children"]:
+                       inv["wordpress_instances_test_blue"]["children"].append(wp_env)
+
+           backups[site_name]= []
+           last_site=site_name
+       backups[site_name].append(path_list[3])
+    inv["_meta"]["hostvars"] = backups;
+    return inv
+
+def parse_env_path(bkp_name):
+    bkp_list = bkp_name.split('_')
+    bkp_path = bkp_name.split("htdocs_")
+    if len(bkp_list) > 1:
+        if len(bkp_path)> 1:
+            wp_path = bkp_name.split("htdocs_")[1].replace('_','/')
+        else: wp_path=""
+        return{
+            "wp_env": bkp_list[2],
+            "wp_path":wp_path,
+        }  
+    else: return {}  
+
+def parse_bkp_name1(bkp_name):
+    env_path = parse_env_path(bkp_name)
+    if "wp_env" in env_path and "wp_path" in env_path:
+        random_db_name = "wp_"+''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
+        return{
+                "wp_env": env_path["wp_env"],
+                "wp_path":env_path["wp_path"],
+                "wp_hostname": env_path["wp_env"]+"-wwp-int."+cluster_ip+".nip.io",
+                "wp_backup_folder": bkp_name,
+                "db_name":random_db_name
+         } 
+    else: return {} 
+       
+def parse_bkp_name(bkp_name):
+    bkp_list = bkp_name.split('_')
+    bkp_path = bkp_name.split("htdocs_")
+    random_db_name = "wp_"+''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
+    if len(bkp_list) > 1:
+        if len(bkp_path)> 1:
+            wp_path = bkp_name.split("htdocs_")[1].replace('_','/')
+        else: wp_path=""
+        return{
+            "wp_env": bkp_list[2],
+            "wp_path":wp_path,
+            "wp_hostname": bkp_list[2]+"-wwp-int."+cluster_ip+".nip.io",
+            "wp_backup_folder": bkp_name,
+            "db_name":random_db_name
+        }  
+    else: return {}  
+
+
 def parse_backup_directory(nb_sites):
     if pod_name == "":
         return ""
@@ -113,8 +227,9 @@ for k in output["group_hosts"]:
 #inventory["wordpress_instances_test_blue"]["hosts"] = gen["hosts"]
 #inventory["_meta"]["hostvars"] = gen["hostvars"]  
 #print( get_latest_full_backup("_srv_www_www.epfl.ch_htdocs_schools_cdh")  )
-print ( yaml.dump(inventory) )
+
 #print ( inventory)
 #print(yaml.dump(group_by_env(gen)))
-
-
+##print ( yaml.dump(inventory) )
+print(yaml.dump(bkp_to_dict() ))
+####print(yaml.dump(limit_hosts(bkp_to_dict(),2) ))

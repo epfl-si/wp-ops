@@ -14,7 +14,7 @@ def parse_backup_directory(nb_sites):
     ls = subprocess.check_output(command, shell=True)
     if "Error" in ls:
         return ""
-    return list(filter(lambda x: len(x) > 0, ls.split('\n')[0:nb_sites] ))
+    return list(filter(lambda x: len(x) > 0, ls.split('\n') ))
 
 inventory = {
              "all-wordpress-deployments":{
@@ -47,7 +47,7 @@ def group_by_env(hostvars):
         
 
 def populate_vars():
-    ls = parse_backup_directory(3)
+    ls = parse_backup_directory(20)
     ls_hosts= []
     vs = {}
     for name in ls:
@@ -73,29 +73,35 @@ def get_latest_full_backup(bkp_string):
 
 
 def parse_vars(bkp_string):
-    path = bkp_string.split('_')[2:]
-    wp_env = path[0]  #TODO make wordpress environnements dynamic as well > use path[0]
-    wp_hostname= path[1]
-    wp_path = bkp_string.split("htdocs")[1].replace('_','')
-    # wp_archives= get_latest_full_backup(bkp_string)
-    return {
-            "name":wp_env,
-            "wp_env":wp_env,
-            "wp_hostname":wp_hostname,
-            "wp_path":wp_path,
-#            "wp_archive_name":wp_archives["wp_archive_name"],
-#            "wp_sql_name": wp_archives["wp_sql_name"],
-#            "wp_backup_folder": bkp_string
-    }
+    if '_' in bkp_string:
+       path = bkp_string.split('_')[2:]
+       wp_env = path[0]  #TODO make wordpress environnements dynamic as well > use path[0]
+       wp_hostname= path[1]
+       wp_path = bkp_string.split("htdocs")[1].replace('_','')
+       # wp_archives= get_latest_full_backup(bkp_string)
+       return {
+               "name":wp_env,
+               "wp_env":wp_env,
+               "wp_hostname":wp_hostname,
+               "wp_path":wp_path,
+#               "wp_archive_name":wp_archives["wp_archive_name"],
+#               "wp_sql_name": wp_archives["wp_sql_name"],
+#               "wp_backup_folder": bkp_string
+       }
+    else: return {"name":"",
+               "wp_env":"",
+               "wp_hostname":"",
+               "wp_path":"",}
 
 gen = populate_vars()
 #inventory["_meta"]["hostvars"] = gen
 output = group_by_env(gen)
 inventory["wordpress_deployments_test_blue"]["children"] = []
 for k in output["group_hosts"]:
-    inventory["d-"+k] = [k]
-    inventory["wordpress_deployments_test_blue"]["children"].append("d-"+k)
-    inventory["_meta"]["hostvars"][k]= {"name":k}
+    if len(k)>0:
+        inventory["g-httpd-"+k] = ["httpd-"+k]
+        inventory["wordpress_deployments_test_blue"]["children"].append("g-httpd-"+k)
+        inventory["_meta"]["hostvars"]["httpd-"+k]= {"name":k}
     
     
 

@@ -11,6 +11,7 @@
     cmd: |
       echo $({{wp_cli_command }} eval '1;')
   register: out
+  changed_when: false
 - debug:
     var: out.stderr
 
@@ -28,6 +29,7 @@
     cmd: |
       echo $({{wp_cli_command }} eval '1;')
   register: out
+  changed_when: false
 - debug:
     var: out.stderr
 
@@ -85,6 +87,7 @@
     cmd: |
       {{wp_cli_command }} eval '1;'
   register: out
+  changed_when: false
 - debug:
     var: out.stderr
 
