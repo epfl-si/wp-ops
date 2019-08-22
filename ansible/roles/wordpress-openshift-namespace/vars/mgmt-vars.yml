@@ -26,7 +26,6 @@ _mgmt_access_list_wwp_test_and_wwp:
   - giovanni.cangiani@epfl.ch
 
 _mgmt_access_list_wwp_test_only:
-  - cyrille.pittet@epfl.ch
   - mohamed.khadri@epfl.ch
 
 mgmt_secret_name: mgmt-ssh
