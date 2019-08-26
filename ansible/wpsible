@@ -57,7 +57,7 @@ inventories () {
       echo "-i inventory/minishift -e " IPADRS="`curl https://api.ipify.org`" " "
     elif [[ $CONFIG == "wwp-int/pub-os-exopge-epfl-ch:443/"* ]]
     then
-      echo "-i inventory/minishift "    
+      echo "-i inventory/wp-int "    
     else
 	case "$inventory_mode" in
        	    test) echo "-i inventory/test" ;;

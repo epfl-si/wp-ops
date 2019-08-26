@@ -5,6 +5,7 @@
     path: "{{wp_dir}}"
     owner: www-data
     state: directory
+  when: wp_backup_folder is defined
 
 - name: wp evaluation
   shell:
@@ -14,6 +15,27 @@
   changed_when: false
 - debug:
     var: out.stderr
+
+- name: wp symlink
+  file:
+    state: link
+    src: /wp/4
+    dest: "{{wp_dir}}/wp"
+
+
+- name: symlink
+  shell:
+    chdir: "{{wp_dir}}"
+    cmd: |
+      ln -sf wp/wp-admin wp-admin
+      ln -sf wp/index.php index.php
+      ln -sf wp/wp-cron.php wp-cron.php
+      ln -sf wp/wp-load.php wp-load.php
+      ln -sf wp/wp-settings.php wp-settings.php
+      ln -sf wp/wp-includes wp-includes 
+      ln -sf wp/wp-login.php wp-login.php
+  when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
+
 
 #TODO: seulement extraire /uploads plus tard
 - name: unzip backup archive
@@ -21,8 +43,9 @@
     cmd: |
       cd "{{wp_dir}}"
       tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content'
-      {{wp_cli_command}} core download
-  when: "'This does not seem to be a WordPress install.' in out.stderr"
+#      {{wp_cli_command}} core download
+  when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
+
 
 - name: wp evaluation
   shell:
@@ -33,11 +56,14 @@
 - debug:
     var: out.stderr
 
+
+
+
 - name: delete stale wp-config file
   shell:
     cmd: |
       rm {{wp_dir}}/wp-config.php
-  when: "'Error establishing a database connection' in out.stderr"
+  when: "'Error establishing a database connection' in out.stderr and wp_backup_folder is defined"
 
 - name: Create databases & wp-config files for wordpress instances [IF NEEDED]
   shell:
@@ -51,28 +77,12 @@
        define('ALLOW_UNFILTERED_UPLOADS', true);
        PHP
        mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{wp_backup_folder}}/{{wp_sql_name}}
-       for opt in home siteurl; do {{wp_cli_command}} --allow-root option set $opt https://{{wp_hostname}}; done;
-       {{wp_cli_command}} --allow-root transient delete --all
        
-  when: "('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr"
+  when: "(('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr) and wp_backup_folder is defined "
 
-- name: wp core symlink
-  shell:
-    chdir: "{{wp_dir}}"
-    cmd: |
-      if test -L wp-load.php; then
-        echo >&2 "ALREADYSYMLINKED"
-        exit 0
-      fi
-      wp core symlink
-  register: wp_core_symlink
-  changed_when: '"ALREADYSYMLINKED" not in wp_core_symlink.stderr'
 
-- name: wp symlink
-  file:
-    state: link
-    src: /wp/4
-    dest: "{{wp_dir}}/wp"
+
+
 
 - name: extract .htaccess
   shell:
@@ -80,14 +90,24 @@
     chdir: "{{wp_dir}}"
     cmd: |
       tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards --to-stdout '*/.htaccess' > .htaccess
+  when: wp_backup_folder is defined
 
 
-- name: wp evaluation
+
+- name: rename wordpress site
   shell:
     cmd: |
-      {{wp_cli_command }} eval '1;'
-  register: out
-  changed_when: false
-- debug:
-    var: out.stderr
+      for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}; done;
+      {{wp_cli_command}} search-replace {{url_from}} {{wp_hostname}}
+      {{wp_cli_command}} transient delete --all
+  when: wp_backup_folder is defined
+
+- name: reactivate plugins
+  shell:
+    cmd: |
+      {{wp_cli_command}} plugin deactivate epfl
+      {{wp_cli_command}} plugin deactivate polylang
+      {{wp_cli_command}} plugin activate polylang
+      {{wp_cli_command}} plugin activate epfl
+  when: wp_backup_folder is defined
 

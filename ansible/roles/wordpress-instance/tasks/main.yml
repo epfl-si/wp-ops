@@ -50,7 +50,7 @@
     - wipe
 
 - name: restore from /backups
-  import_tasks: "restore-wp-int.yml"
+  import_tasks: "restore-from-prod.yml"
 
 
 - name: Serving infrastructure

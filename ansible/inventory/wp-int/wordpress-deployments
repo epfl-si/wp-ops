@@ -105,9 +105,7 @@ for k in output["group_hosts"]:
     
     
 
-#inventory["wordpress_instances_test_blue"]["hosts"] = gen["hosts"]
-#inventory["_meta"]["hostvars"] = gen["hostvars"]  
-#print( get_latest_full_backup("_srv_www_www.epfl.ch_htdocs_schools_cdh")  )
+
 print ( yaml.dump(inventory) )
 #print ( inventory)
 #print(yaml.dump(group_by_env(gen)))
