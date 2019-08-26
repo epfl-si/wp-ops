@@ -1,17 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import subprocess
 import yaml
 from sys import stdout
 from collections import OrderedDict
 
-pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True).replace('\n','')
+pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True).decode('utf-8').replace('\n','')
 
 def parse_backup_directory(nb_sites):
     if pod_name == "":
         return ""
     command = "oc exec %(pod_name)s -- ls /backups " %{"pod_name":pod_name}
-    ls = subprocess.check_output(command, shell=True)
+    ls = subprocess.check_output(command, shell=True).decode('utf-8')
     if "Error" in ls:
         return ""
     return list(filter(lambda x: len(x) > 0, ls.split('\n') ))
@@ -60,7 +60,7 @@ def populate_vars():
 def get_latest_full_backup(bkp_string):
     #TODO performance bottleneck in the repeated oc command
     command = "oc exec %(pod_name)s -- ls /backups/%(bkp)s " %{"pod_name":pod_name, "bkp": bkp_string}
-    ls = subprocess.check_output(command, shell=True)
+    ls = subprocess.check_output(command, shell=True).decode('utf-8')
     bkp_list = list(filter(lambda x: len(x) and "full" in x > 0, ls.split('\n') ))
     bkp_list.sort()
     reversed_bkp_list = bkp_list[::-1]
