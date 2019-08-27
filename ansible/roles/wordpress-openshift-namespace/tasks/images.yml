@@ -10,7 +10,7 @@
     - always
 
 - name: "Testing ImageStreams and their build information"
-  when: not openshift_is_production and not is_minishift
+  when: not openshift_is_production and not openshift_namespace == "wwp-int"
   openshift_imagestream:
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
@@ -42,7 +42,7 @@
 
 #TODO figure out an automated way to pull prod images
 - name: "wwp-int ImageStreams"
-  when: is_minishift
+  when: openshift_namespace == "wwp-int"
   openshift_imagestream:
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
@@ -52,24 +52,7 @@
     - name: "{{ mgmt_image_name }}"
 
 
-#- name: "Minishift mirror ImageStreams"
-#  when: is_minishift
-#  openshift:
-#    state: latest
-#    content: |
-#      apiVersion: v1
-#      kind: ImageStream
-#      namespace: {{ minishift_namespace }}
-#      metadata:
-#        name: {{item.name}}
-#        namespace: {{ minishift_namespace }}
-#      spec:
-#        dockerImageRepository: {{epfl_openshift_registry_repo}}/{{item.name}}
-#  with_items:
-#    - name: "{{ httpd_image_name }}"
-#    - name: "{{ mgmt_image_name }}"
-
-
+# re-imports images on the image stream if it is linked to a docker registry
 - name: "Resync images"
   shell:
     cmd: |

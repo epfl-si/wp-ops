@@ -3,23 +3,16 @@
 
 
 - name: "Disk usage report microservice"
-  when: not is_minishift
   import_tasks: disk-usage-report.yml
   tags: diskusage
 
-
-#- name: "Image secret setup"
-#  when: is_minishift
-#  import_tasks: image-secret.yml
-#  tags:
-#    - imagesecret
 
 - name: "Images and builds"
   import_tasks: images.yml
   tags: images
 
 - name: "DeploymentConfigs (previously known as pods)"
-  when: not is_minishift
+  when: not openshift_namespace == "wwp-int"
   include_tasks:
     file: deploymentconfig-httpd.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
@@ -45,11 +38,11 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
-  when: not is_minishift
+  when: not openshift_namespace == "wwp-int"
   import_tasks: mgmt.yml
   tags: mgmt
 
 - name: wwp-int-mgmt-deployment
-  when: is_minishift
+  when: openshift_namespace == "wwp-int"
   include_tasks:
     file: wwp-int-mgmt.yml

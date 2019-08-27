@@ -6,11 +6,9 @@
 #              ../vars/*.yml)
 
 
-# TODO: À garder en premier
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
-# TODO: À garder en deuxième
 - name: WordPress facts
   import_tasks: facts.yml
   tags:

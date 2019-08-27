@@ -3,3 +3,9 @@
 
 - name: "httpd Deployment"
   import_tasks: wwp-int-httpd-deployment.yml
+
+- name: "Deployment rollout"
+  connection: local
+  shell:
+    cmd: oc rollout latest dc/{{name}}
+  tags: rollout

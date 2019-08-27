@@ -71,10 +71,8 @@
             - name: backups
               persistentVolumeClaim:
                 claimName: backups-readonly
-       
       triggers:
         - type: ConfigChange
-
         - type: ImageChange
           imageChangeParams:
             containerNames:
@@ -126,3 +124,9 @@
             kind: Service
             name: "mgmt"
   tags: rt
+
+- name: "Deployment rollout"
+  connection: local
+  shell:
+    cmd: oc rollout latest dc/mgmt
+  tags: rollout
