@@ -23,7 +23,7 @@ inventory = {
               },
               "wordpress_deployments_test_blue":{
                  "vars":{
-                   "minishift_namespace":"wwp-int"
+                   "openshift_namespace":"wwp-int"
                  }
               },
               "_meta":{
