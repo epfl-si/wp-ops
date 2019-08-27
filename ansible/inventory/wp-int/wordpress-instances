@@ -114,5 +114,39 @@ def parse_bkp_name1(bkp_name):
          } 
     else: return {} 
 
-print(yaml.dump(bkp_to_dict() ))
+def sort_inv_by_deph(inv_dict):
+    """ sorts instances lists on each group by depth to process from root site and downwards instead of random ordering """
+    for group in inv_dict:
+        if "hosts" in inv_dict[group]:
+            inv_dict[group]["hosts"].sort( key= lambda h: len(h.split('_')) )
+    return inv_dict
+
+def limit_depth(inv_dict, max_depth):
+    """ limits instances lists on each group by depth to process from root site and downwards instead of random ordering
+           a depth of 0 limits only for root worpress sites
+    """
+    root_depth =5
+    for group in inv_dict:
+        if "hosts" in inv_dict[group]:
+            inv_dict[group]["hosts"] = list(filter( lambda x : len(x.split('_')) - root_depth <= max_depth, inv_dict[group]["hosts"] ))
+    return inv_dict
+
+def generate_inventory(sorted= True, limit=0, max_depth=-1):
+    """ Helper function for clearer execution flow """
+    inventory = {}
+    if sorted:
+        inventory= sort_inv_by_deph(bkp_to_dict())
+    else:
+        inventory= bkp_to_dict()
+    if limit > 0:
+        inventory = limit_hosts(inventory, limit)
+    if max_depth >= 0:
+        inventory = limit_depth(inventory, max_depth)
+    return inventory
+    
+
+###print(yaml.dump(bkp_to_dict() ))
+###print(yaml.dump(  sort_inv_by_deph(bkp_to_dict()) ))
 ####print(yaml.dump(limit_hosts(bkp_to_dict(),2) ))
+
+print(yaml.dump( generate_inventory(max_depth=1)))

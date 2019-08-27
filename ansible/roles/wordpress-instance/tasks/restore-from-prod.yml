@@ -97,7 +97,7 @@
 - name: rename wordpress site
   shell:
     cmd: |
-      for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}; done;
+      for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}/{{wp_path}}; done;
       {{wp_cli_command}} search-replace {{url_from}} {{wp_hostname}}
       {{wp_cli_command}} transient delete --all
   when: wp_backup_folder is defined
