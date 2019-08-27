@@ -6,30 +6,6 @@
 - include_vars: wp-destructive.yml
 
 
-- name: Create directories for wordpress instances
-  connection: local
-  shell: |
-    set -e -x
-    MGMTNAME=$(oc get pods -o name | grep mgmt | cut -d '/' -f2)
-    oc exec $MGMTNAME -- /bin/bash -c 'mkdir -p /{{nfs_path}}/wp/{{name}} ; chown -R {{web_uid}}.{{web_gid}} /{{nfs_path}}/wp'
-  when: is_minishift_instance
-
-
-
-
-
-
-- name: Create databases for wordpress instances
-  connection: local
-  shell: |
-    set -e -x 
-    MGMTNAME=$(oc get pods -o name | grep mgmt | cut -d '/' -f2)
-    oc exec $MGMTNAME -- "bin/bash" -c 'mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASS -e "CREATE DATABASE IF NOT EXISTS {{ name }}" '
-   
-  when: is_minishift_instance
-
-- meta: end_play
-
 - assert:
     that:
       - (wp_can.wipe) or (not _wp_config_php_stat.stat.exists)

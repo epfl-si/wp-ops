@@ -1,5 +1,6 @@
 ---
 
+# Create folder structure if needed, and only during a restore procedure from backup folders
 - name: directories
   file:  
     path: "{{wp_dir}}"
@@ -15,6 +16,8 @@
   changed_when: false
 - debug:
     var: out.stderr
+
+# wp installation process using symlinks
 
 - name: wp symlink
   file:
@@ -37,7 +40,9 @@
   when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
 
 
+# Unziping data from wp-content folder after a fresh symlink "installation"
 #TODO: seulement extraire /uploads plus tard
+
 - name: unzip backup archive
   shell:
     cmd: |
@@ -58,13 +63,14 @@
 
 
 
-
+# cleaning potential unfinished setup from previously failed backups
 - name: delete stale wp-config file
   shell:
     cmd: |
       rm {{wp_dir}}/wp-config.php
   when: "'Error establishing a database connection' in out.stderr and wp_backup_folder is defined"
 
+# restoring database and data pointing information in a NEWLY GENERATED wp-config.php file
 - name: Create databases & wp-config files for wordpress instances [IF NEEDED]
   shell:
     cmd: |
@@ -80,10 +86,7 @@
        
   when: "(('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr) and wp_backup_folder is defined "
 
-
-
-
-
+# Always extract .htaccess file when we are restoring from backups
 - name: extract .htaccess
   shell:
     creates: "{{wp_htaccess_path}}"
@@ -93,7 +96,7 @@
   when: wp_backup_folder is defined
 
 
-
+# Always rename wordpress site when we are restoring from backups
 - name: rename wordpress site
   shell:
     cmd: |
@@ -102,6 +105,7 @@
       {{wp_cli_command}} transient delete --all
   when: wp_backup_folder is defined
 
+# Always empty polylang plugin config by reactivating it when we are restoring from backups
 - name: reactivate plugins
   shell:
     cmd: |

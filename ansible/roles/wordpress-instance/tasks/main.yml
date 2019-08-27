@@ -91,7 +91,6 @@
   include_tasks: "symlink.yml"
 
 
-- meta: end_play
 
 - name: Configure
   when: wp_can.configure
@@ -102,6 +101,8 @@
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
       tags: ["config"]
+
+
 
 - name: Set up plugins
   when: wp_can.configure
@@ -178,46 +179,3 @@
 ##########################################################################
 
 
-- name: module test
-  include_tasks: "blue-deployment.yml"
-  when: is_minishift_instance
-
-- name: Create directories for wordpress instances
-  import_tasks: "create.yml"
-  when: is_minishift_instance
-  tags: 
-    - never
-    - arch
-
-
-# TODO: Tu peux shooter les tâches (et leurs dépendances) "Backup",
-# "Wipe" "Recreate", "Create" et "Restore" qui suivent (cependant, tu
-# voudras peut-être utiliser un create.yml que tu réécris de zéro,
-# afin que ce fichier-ci ne devienne pas trop long)
-  
-- name: Backup
-  import_tasks: "backup.yml"
-  when: not is_minishift_instance  
-  tags:
-    - never  # That is, skip unless "-t backup" or "-t wipe" is
-             # passed on the command line
-    - wipe
-    - backup
-
-- name: Wipe
-  import_tasks: "wipe.yml"
-  when: not is_minishift_instance
-  tags:
-    - never
-    - wipe
-
-- name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
-  include_tasks: "create.yml"
-  when: "('wipe' in ansible_run_tags or not wp_is_installed) and not is_minishift_instance"
-
-- name: Restore
-  import_tasks: "restore.yml"
-  when: not is_minishift_instance
-  tags:
-    - never
-    - restore

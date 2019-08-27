@@ -11,7 +11,7 @@
       labels:
         run: "{{name}}"
       name: "{{name}}"
-      namespace: "{{ minishift_namespace }}"
+      namespace: "{{ openshift_namespace }}"
     spec:
       replicas: 1
       template:
@@ -45,6 +45,6 @@
             from:
               kind: ImageStreamTag
               name: "httpd:prod"
-              namespace: "{{minishift_namespace}}"
+              namespace: "{{openshift_namespace}}"
              
   tags: dc

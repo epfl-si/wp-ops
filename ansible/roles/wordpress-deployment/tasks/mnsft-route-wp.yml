@@ -8,12 +8,12 @@
     state: latest
     kind: Route
     name: "{{name}}"
-    namespace: "{{ minishift_namespace }}"
+    namespace: "{{ openshift_namespace }}"
     apiVersion: v1
     metadata:
         name: "{{name}}"
     spec:
-        host: "{{name}}-{{minishift_namespace}}.128.178.222.83.nip.io"
+        host: "{{name}}-{{openshift_namespace}}.128.178.222.83.nip.io"
         port:
             targetPort: 8080
         to:

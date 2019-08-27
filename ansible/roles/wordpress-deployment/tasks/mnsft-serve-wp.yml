@@ -8,13 +8,13 @@
     state: latest
     kind: Service
     name: "{{name}}"
-    namespace: "{{ minishift_namespace }}"
+    namespace: "{{ openshift_namespace }}"
     apiVersion: v1
     metadata:
         name: "{{name}}"
         labels:
           run: "{{name}}"
-        namespace: "{{ minishift_namespace }}"
+        namespace: "{{ openshift_namespace }}"
     spec:
         selector:
             run: "{{name}}"
