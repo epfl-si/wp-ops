@@ -1,0 +1,94 @@
+---
+
+- name: DeploymentConfigs
+  connection: local
+  openshift:
+    state: latest
+    kind: DeploymentConfig
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      labels:
+        run: "{{name}}"
+      name: "{{name}}"
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            run: "{{name}}"
+        spec:
+          serviceAccount: wwp-int
+          serviceAccountName: wwp-int
+          containers:
+            - env:
+              - name: WP_ENV
+                value: "{{env}}"
+              name: "{{name}}"
+              ports:
+                - containerPort: 80
+                  protocol: TCP
+              volumeMounts:
+                - mountPath: /srv/{{env}}
+                  name: "nfsvol-{{env}}"
+                  subPath: "{{env}}"
+          volumes:
+            - name: "nfsvol-{{env}}"
+              persistentVolumeClaim:
+                claimName: 'nfs-pvc-mgmt'
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            containerNames:
+            - "{{ name }}"
+            from:
+              kind: ImageStreamTag
+              name: "httpd:prod"
+              namespace: "{{openshift_namespace}}"
+             
+  tags: dc
+
+
+- name: "Service"
+  connection: local
+  openshift:
+    state: latest
+    kind: Service
+    name: "{{name}}"
+    namespace: "{{ openshift_namespace }}"
+    apiVersion: v1
+    metadata:
+        name: "{{name}}"
+        labels:
+          run: "{{name}}"
+        namespace: "{{ openshift_namespace }}"
+    spec:
+        selector:
+            run: "{{name}}"
+        ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 8080
+  tags: svc
+
+- name: "Route"
+  connection: local
+  openshift:
+    state: latest
+    kind: Route
+    name: "{{name}}"
+    namespace: "{{ openshift_namespace }}"
+    apiVersion: v1
+    metadata:
+        name: "{{name}}"
+    spec:
+        host: "{{env}}-{{openshift_namespace}}.128.178.222.83.nip.io"
+        port:
+            targetPort: 8080
+        to:
+            kind: Service
+            name: "{{name}}"
+        tls:
+            insecureEdgeTerminationPolicy: Redirect
+            termination: edge
+  tags: rt

@@ -101,7 +101,7 @@ for k in output["group_hosts"]:
     if len(k)>0:
         inventory["g-httpd-"+k] = ["httpd-"+k]
         inventory["wordpress_deployments_test_blue"]["children"].append("g-httpd-"+k)
-        inventory["_meta"]["hostvars"]["httpd-"+k]= {"name":k}
+        inventory["_meta"]["hostvars"]["httpd-"+k]= {"name":"httpd-"+k, "env":k}
     
     
 

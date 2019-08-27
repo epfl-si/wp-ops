@@ -1,4 +1,24 @@
 ---
+- name: "PersistentVolumeClaim"
+  connection: local
+  openshift:
+    state: latest
+    kind: PersistentVolumeClaim
+    name: "nfs-pvc-mgmt"
+    namespace: "{{openshift_namespace}}"
+    apiVersion: v1
+    metadata:
+      name: 'nfs-pvc-mgmt'
+      annotations:
+        volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+         requests:
+           storage: 250Gi
+
+  tags: pvc
 
 
 - name: DeploymentConfigs
@@ -11,7 +31,7 @@
       labels:
         run: "mgmt"
       name: "mgmt"
-      namespace: "{{ minishift_namespace }}"
+      namespace: "{{ openshift_namespace }}"
     spec:
       replicas: 1
       template:
@@ -62,6 +82,47 @@
             from:
               kind: ImageStreamTag
               name: "mgmt:prod"
-              namespace: "{{ minishift_namespace }}"
+              namespace: "{{ openshift_namespace }}"
              
   tags: dc
+
+- name: "Service"
+  connection: local
+  openshift:
+    state: latest
+    kind: Service
+    name: "mgmt"
+    namespace: "{{ openshift_namespace }}"
+    apiVersion: v1
+    metadata:
+        name: "mgmt"
+        labels:
+          run: "mgmt"
+        namespace: "{{openshift_namespace}}"
+    spec:
+        selector:
+            run: "mgmt"
+        ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 80
+  tags: svc
+
+- name: "Route"
+  connection: local
+  openshift:
+    state: latest
+    kind: Route
+    name: "mgmt"
+    namespace: "{{ openshift_namespace }}"
+    apiVersion: v1
+    metadata:
+        name: "mgmt"
+    spec:
+        host: "mgmt-{{openshift_namespace}}.128.178.222.83.nip.io"
+        port:
+            targetPort: 80
+        to:
+            kind: Service
+            name: "mgmt"
+  tags: rt

@@ -142,11 +142,9 @@ def generate_inventory(sorted= True, limit=0, max_depth=-1):
         inventory = limit_hosts(inventory, limit)
     if max_depth >= 0:
         inventory = limit_depth(inventory, max_depth)
+
+    print( yaml.dump(inventory))
     return inventory
     
 
-###print(yaml.dump(bkp_to_dict() ))
-###print(yaml.dump(  sort_inv_by_deph(bkp_to_dict()) ))
-####print(yaml.dump(limit_hosts(bkp_to_dict(),2) ))
-
-print(yaml.dump( generate_inventory(max_depth=1)))
+generate_inventory(max_depth=1)

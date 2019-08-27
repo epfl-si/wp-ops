@@ -45,7 +45,7 @@
   when: is_minishift
   openshift_imagestream:
     name: "{{ item.name }}"
-    namespace: "{{ minishift_namespace }}"
+    namespace: "{{ openshift_namespace }}"
     metadata: "{{ item.metadata | default({}) }}"
   with_items:
     - name: "{{ httpd_image_name }}"

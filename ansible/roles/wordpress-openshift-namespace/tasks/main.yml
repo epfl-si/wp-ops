@@ -49,7 +49,7 @@
   import_tasks: mgmt.yml
   tags: mgmt
 
-- name: blue-deployment
+- name: wwp-int-mgmt-deployment
   when: is_minishift
   include_tasks:
-    file: blue-mgmt-deployment.yml
+    file: wwp-int-mgmt.yml

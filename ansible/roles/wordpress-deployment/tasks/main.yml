@@ -1,5 +1,5 @@
 ---
 # tasks file for wordpress-deployment
 
-- name: "module test"
-  import_tasks: blue-deployment.yml
+- name: "httpd Deployment"
+  import_tasks: wwp-int-httpd-deployment.yml
