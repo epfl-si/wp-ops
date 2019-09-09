@@ -24,7 +24,7 @@
 
 # It never hurts to have a working "wp" symlink at the top level of
 # the WordPress site, so do this first:
-- name: "Version-specific symlink to /wp"
+- name: "“Main” symlink to /wp"
   tags: symlink
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   when: wp_ensure_symlink_version is defined
