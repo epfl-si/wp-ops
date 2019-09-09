@@ -33,8 +33,6 @@
   when: wp_ensure_symlink_version is defined
   shell:
     cmd: |
-      {{ lookup("template", "symlinks-lib.sh") }}
-
       cd "{{ wp_dir }}"
       target="/wp/{{ wp_ensure_symlink_version }}"
       [ "$(readlink "wp" 2>/dev/null || true)" = "$target" ] && return 0
