@@ -146,7 +146,10 @@ RUN set -e -x; for wp in /wp/*; do                                       \
 # We do that last for simplicity, at a small cost in build time
 RUN set -e -x; cd /wp; for version in *; do                              \
         major="$(echo "$version" |cut -d. -f1)";                         \
-        rm -f "$major"; ln -s "$version" "$major";                       \
+        majorminor="$(echo "$version" |cut -d. -f1-2)";                  \
+        rm -f "$major" "$minor";                                         \
+        ln -s "$version" "$major";                                       \
+        ln -s "$version" "$majorminor";                                  \
     done
 
 # As a backward compatibility measure / temporary hack, we support
