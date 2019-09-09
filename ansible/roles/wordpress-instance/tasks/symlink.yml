@@ -22,6 +22,8 @@
   set_fact:
     wp_is_symlinked: '{{ "symlink" in ansible_run_tags }}'
 
+# It never hurts to have a working "wp" symlink at the top level of
+# the WordPress site, so do this first:
 - name: "Version-specific symlink to /wp"
   tags: symlink
   check_mode: no   # Does The Right Thing under ansible-playbook --check
@@ -46,6 +48,23 @@
   register: _main_symlink_script
   changed_when: >
     "SYMLINK_CHANGED" in _main_symlink_script.stdout
+
+- name: "Invalidate serving pods' NFS cache entries for the main symlink"
+  tags: symlink
+  when: >
+    _main_symlink_script is changed
+  shell:
+    cmd: |
+      dc=httpd-int
+      for pod in $(oc get pods -n "{{ openshift_namespace }}" -o json \
+                   | jq -r \
+                       '.items
+                        | map("'"{{ openshift_dc }}"'" ==
+                             select(.metadata.annotations["openshift.io/deployment-config.name"]))
+                        | map(.metadata.name) | .[]')
+      do
+        oc exec -n "{{ openshift_namespace }}" -c "{{ openshift_dc }}" -it $pod -- ls -l "{{ wp_dir }}"
+      done
 
 # WP_CONTENT_DIR can be set in wp-config.php prior to symlinking
 # without ill effects:

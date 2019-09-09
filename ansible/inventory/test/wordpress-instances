@@ -143,6 +143,8 @@ sub as_ansible_hostvars {
     $k =~ s/^ssh_/ansible_/;
     $retval->{$k} = $v || '';
   }
+  $retval->{openshift_namespace} = "wwp-test";
+  $retval->{openshift_dc} = "httpd-" . $retval->{wp_env};
   if (($wp->{wp_hostname} eq 'migration-wp.epfl.ch') &&
         $wp->{wp_path} =~ /^labs/)
     {
