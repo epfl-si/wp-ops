@@ -55,7 +55,6 @@
     _main_symlink_script is changed
   shell:
     cmd: |
-      dc=httpd-int
       for pod in $(oc get pods -n "{{ openshift_namespace }}" -o json \
                    | jq -r \
                        '.items
