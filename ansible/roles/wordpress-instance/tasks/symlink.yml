@@ -56,13 +56,18 @@
   tags: symlink
   when: >
     _main_symlink_script is changed
-  shell:
+  local_action:
+    module: shell
     cmd: |
+      set -o pipefail
+      set -e # -x
       for pod in $(oc get pods -n "{{ openshift_namespace }}" -o json \
                    | jq -r \
                        '.items
-                        | map("'"{{ openshift_dc }}"'" ==
-                             select(.metadata.annotations["openshift.io/deployment-config.name"]))
+                        | map(select(
+                            "'"{{ openshift_dc }}"'" ==
+                            .metadata.annotations["openshift.io/deployment-config.name"]
+                             ))
                         | map(.metadata.name) | .[]')
       do
         oc exec -n "{{ openshift_namespace }}" -c "{{ openshift_container_name }}" -it $pod -- ls -l "{{ wp_dir }}"
