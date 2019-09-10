@@ -40,10 +40,9 @@
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
 
-- name: "Set up / revert “symlink” serving discipline"
-  when: wp_can.configure or ansible_check_mode
+- name: "Set up “symlink” serving discipline"
+  when: (wp_can.configure or ansible_check_mode) and wp_ensure_symlink_version is defined
   tags:
-    - never
     - symlink
     - unsymlink
   # We include_tasks (not import_tasks) here, because we do *not* want

@@ -17,10 +17,61 @@
 - include_vars: symlink-vars.yml
   tags: always
 
+- include_vars: openshift-vars.yml
+  tags: always
+
 - name: "Set wp_is_symlinked"
   tags: always
   set_fact:
     wp_is_symlinked: '{{ "symlink" in ansible_run_tags }}'
+
+# It never hurts to have a working "wp" symlink at the top level of
+# the WordPress site, so do this first:
+- name: "“Main” symlink to /wp"
+  tags: symlink
+  check_mode: no   # Does The Right Thing under ansible-playbook --check
+  when: wp_ensure_symlink_version is defined
+  shell:
+    cmd: |
+      {{ lookup("template", "symlinks-lib.sh") }}
+
+      cd "{{ wp_dir }}"
+      target="/wp/{{ wp_ensure_symlink_version }}"
+      [ "$(readlink "wp" 2>/dev/null || true)" = "$target" ] && return 0
+
+      echo SYMLINK_CHANGED
+      {% if ansible_check_mode %}
+      echo >&2 "$PWD/wp points to $(readlink "wp"); $target expected"
+      {% else %}
+      tmpdir="$(mktemp -d ./tmpnewsymlink-XXXXXX)"
+      (cd "$tmpdir"; ln -s "$target" wp)
+      mv "$tmpdir"/wp .
+      rmdir "$tmpdir"
+      {% endif %}
+  register: _main_symlink_script
+  changed_when: >
+    "SYMLINK_CHANGED" in _main_symlink_script.stdout
+
+- name: "Invalidate serving pods' NFS cache entries for the main symlink"
+  tags: symlink
+  when: >
+    _main_symlink_script is changed
+  local_action:
+    module: shell
+    cmd: |
+      set -o pipefail
+      set -e # -x
+      for pod in $(oc get pods -n "{{ openshift_namespace }}" -o json \
+                   | jq -r \
+                       '.items
+                        | map(select(
+                            "'"{{ openshift_dc }}"'" ==
+                            .metadata.annotations["openshift.io/deployment-config.name"]
+                             ))
+                        | map(.metadata.name) | .[]')
+      do
+        oc exec -n "{{ openshift_namespace }}" -c "{{ openshift_container_name }}" -it $pod -- ls -l "{{ wp_dir }}"
+      done
 
 # WP_CONTENT_DIR can be set in wp-config.php prior to symlinking
 # without ill effects:
@@ -31,9 +82,9 @@
     apply:
       tags: ["symlink"]
 
-- name: "Symlink"
+- name: "Symlink pieces of the WordPress core"
   tags: symlink
-  check_mode: no   # Does The Right Thing under ansible-playbook --check
+  check_mode: no
   shell:
     cmd: |
       {{ lookup("template", "symlinks-lib.sh") }}
@@ -42,10 +93,11 @@
       set -e -x
       cd {{ wp_dir }}
 
+      if make_symlinks_to_wp --check {{ symlinks_all_paths | join(" ") }}; then exit; else :; fi
+
       {% if not ansible_check_mode %}
       enter_maintenance_mode
       trap leave_maintenance_mode EXIT HUP INT QUIT
-      {% endif %}
 
       if make_symlinks_to_wp {{ symlinks_all_paths | join(" ") }}; then :; else
           case "$?" in
@@ -65,6 +117,7 @@
               *) exit $?                ;;
           esac
       fi
+      {% endif %}
   register: _symlink_script
   changed_when: >
     "SYMLINKS_CHANGED" in _symlink_script.stdout or

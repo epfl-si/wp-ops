@@ -10,6 +10,11 @@
 # return 0.
 make_symlinks_to_wp() {
     local retval
+    local check
+    if [ "$1" = "--check" ]; then
+      check=--check
+      shift
+    fi
 
     cd "{{ wp_dir }}"
 
@@ -19,18 +24,25 @@ make_symlinks_to_wp() {
         ensure_symlink "$path" "$target"
     done
 
-    ensure_symlink "wp" "/wp/4"
-
-    return $ensure_symlink_makes_changes
+    return "$ensure_symlink_makes_changes"
 }
 
 ensure_symlink () {
+  local check
+{% if ansible_check_mode %}
+  check=1
+{% else %}
+  if [ "$1" = "--check" ]; then
+    check=1
+    shift
+  fi
+{% endif %}
   [ "$(readlink "$1" 2>/dev/null || true)" = "$2" ] && return 0
   ensure_symlink_makes_changes=1
 
-{% if ansible_check_mode %}
+  if [ -n "$check" ]; then
           echo >&2 "$1 needs symlinking"
-{% else %}
+  else
           rm -rf "$1"
 
           local dir
@@ -38,7 +50,7 @@ ensure_symlink () {
           test -d "$dir" || mkdir -p "$dir"
 
           ln -s "$2" "$1"
-{% endif %}
+  fi
 }
 
 ensure_file_contains () {
