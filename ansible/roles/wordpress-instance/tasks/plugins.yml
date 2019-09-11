@@ -263,6 +263,13 @@
       {{ "absent" if plugins_use_wp2010_plugins else "symlinked" }}
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
 
+- name: EPFL Gutenberg plugin
+  wordpress_plugin:
+    name: wp-gutenberg-epfl
+    state: >
+      {{ "symlinked" if plugins_use_gutenberg else "absent" }}
+    from: https://github.com/epfl-idevelop/wp-gutenberg-epfl
+
 - name: wp-media-folder plugin
   wordpress_plugin:
     name: wp-media-folder
