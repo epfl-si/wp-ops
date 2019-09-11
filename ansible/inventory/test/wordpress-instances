@@ -148,8 +148,7 @@ sub as_ansible_hostvars {
   if (($wp->{wp_hostname} eq 'migration-wp.epfl.ch') &&
         $wp->{wp_path} =~ /^labs/)
     {
-      # TODO: should be 5.2 once #108 has been pushed to staging.
-      $retval->{wp_ensure_symlink_version} = "5";
+      $retval->{wp_ensure_symlink_version} = "5.2";
     }
   return $retval;
 }
