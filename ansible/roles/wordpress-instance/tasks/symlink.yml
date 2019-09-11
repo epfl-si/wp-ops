@@ -92,13 +92,13 @@
       set -e -x
       cd {{ wp_dir }}
 
-      if make_symlinks_to_wp --check {{ symlinks_all_paths | join(" ") }}; then exit; else :; fi
+      if make_symlinks_to_wp --check {{ symlinks_managed_in_bulk | join(" ") }}; then exit; else :; fi
 
       {% if not ansible_check_mode %}
       enter_maintenance_mode
       trap leave_maintenance_mode EXIT HUP INT QUIT
 
-      if make_symlinks_to_wp {{ symlinks_all_paths | join(" ") }}; then :; else
+      if make_symlinks_to_wp {{ symlinks_managed_in_bulk | join(" ") }}; then :; else
           case "$?" in
               1) echo "SYMLINKS_CHANGED" ;;
               *) exit $?                 ;;
@@ -193,7 +193,7 @@
               .ht*) continue ;;
               *.ini) continue ;;
               wp-config.php|index.php) continue ;;
-              {{ symlinks_all_paths | join('|') }}) continue ;;
+              {{ symlinks_managed_in_bulk | join('|') }}) continue ;;
           esac
           if [ ! -e "$path" ]; then continue; fi
           if [ -d "$path" ]; then continue; fi
