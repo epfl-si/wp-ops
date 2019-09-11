@@ -10,7 +10,11 @@
 
 - name: WordPress facts
   import_tasks: facts.yml
-  tags: facts
+  tags:
+    - facts
+    # TODO: configure.yml uses wp_is_symlinked, which requires facts.yml to have run.
+    # Can we use a handler instead?
+    - config
 
 - name: Backup
   import_tasks: "backup.yml"
