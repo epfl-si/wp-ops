@@ -93,7 +93,7 @@ class ActionModule(ActionBase):
 
     def _run_action (self, action_name, args):
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins
-        # at § "Action Plugins"
+        # at § “Action Plugins”
         return self._execute_module(module_name=action_name,
                                     module_args=args, tmp=self._tmp, task_vars=self._task_vars)
 
