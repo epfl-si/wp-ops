@@ -40,10 +40,10 @@ _effective_wp_destructive: "{{ _my_wp_destructive if _my_wp_destructive else (
     _group_wp_destructive_3 if _group_wp_destructive_3 else (
     _group_wp_destructive_4))))) }}"
 
-_wp_can_configure: "{{ _effective_wp_destructive and (_effective_wp_destructive != 'none') }}"
-_wp_can_wipe: "{{ _effective_wp_destructive == 'wipe' }}"
-_wp_can_write_data: '{{ _wp_can_wipe or (_effective_wp_destructive is search("data")) }}'
-_wp_can_write_code: '{{ _wp_can_wipe or (_effective_wp_destructive is search("code")) }}'
+_wp_can_wipe: '{{ "wipe" in _effective_wp_destructive }}'
+_wp_can_configure:  '{{ _wp_can_wipe or ("config" in _effective_wp_destructive) }}'
+_wp_can_write_data: '{{ _wp_can_wipe or ("data"   in _effective_wp_destructive) }}'
+_wp_can_write_code: '{{ _wp_can_wipe or ("code"   in _effective_wp_destructive) }}'
 
 wp_can:
   configure: "{{ _wp_can_configure }}"
