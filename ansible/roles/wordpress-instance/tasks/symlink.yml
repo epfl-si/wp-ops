@@ -135,27 +135,25 @@
       set -e -x
       cd "{{ wp_dir }}"
 
-      files_trimmed=
       for path in * \
           wp-content/mu-plugins/EPFL_enable_updates_automatic.php
       do
           case "$path" in
               .ht*) continue ;;
               *.ini) continue ;;
-              wp-config.php|index.php) continue ;;
+              wp|wp-config.php|index.php) continue ;;
+              ansible-backup-*) continue ;;
               {{ symlinks_managed_in_bulk | join('|') }}) continue ;;
           esac
           if [ ! -e "$path" ]; then continue; fi
+          {# We can't remove “flying” directories, as they might contain
+             sub-sites: #}
           if [ -d "$path" ]; then continue; fi
 
-          if [ -z "$files_trimmed" ]; then
-              echo FILES_TRIMMED
-              files_trimmed=1
-          fi
-          echo >&2 "$path needs trimming"
+          echo FILES_TO_TRIM=$path
       done
   register: _symlink_cleanup_script
-  changed_when: '"FILES_TRIMMED" in _symlink_cleanup_script.stdout'
+  changed_when: '"FILES_TO_TRIM" in _symlink_cleanup_script.stdout'
 
 - name: "Reconfigure wp-config.php after unsymlinking"
   tags: unsymlink
