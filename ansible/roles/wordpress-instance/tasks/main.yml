@@ -48,6 +48,12 @@
     - never
     - restore
 
+- name: Serving infrastructure
+  when: wp_can.configure
+  tags:
+    - config
+  import_tasks: "serving-infrastructure.yml"
+
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
@@ -57,6 +63,7 @@
     - wp_ensure_symlink_version is defined
     - (wp_can.configure and wp_can.write_code) or ansible_check_mode
   tags:
+    - never
     - symlink
     - unsymlink
   # Like for backup.yml above, we include_tasks (not import_tasks)

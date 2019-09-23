@@ -8,9 +8,9 @@
 # to run.
 #
 # Also note that some of the symlink-related tasks are performed
-# unconditionnally by configure.yml. This file is for operations that
-# *require* operator awareness, such as symlinking a previously
-# unsymlinked site or vice versa.
+# unconditionnally by configure.yml, which invokes this file. This
+# file is for operations that *require* downtime / operator awareness,
+# such as symlinking a previously unsymlinked site or vice versa.
 #
 # Being (or not being) a symlinked site also has consequences w.r.t.
 # templated configuration files; see configure.yml for details.
@@ -26,14 +26,10 @@
 - include_vars: symlink-vars.yml
   tags: always
 
-- include_vars: openshift-vars.yml
-  tags: always
-
 - name: "Set wp_is_symlinked"
   tags: always
   set_fact:
     wp_is_symlinked: '{{ "symlink" in ansible_run_tags }}'
-
 
 # WP_CONTENT_DIR can be set in wp-config.php prior to symlinking
 # without ill effects:
