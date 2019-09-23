@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
