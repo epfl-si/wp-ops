@@ -41,7 +41,7 @@
       WP_INSTALLED_SCRIPT
 
       make_fact_script wp_is_symlinked <<'WP_SYMLINKED_SCRIPT'
-      if [ -f "{{ wp_path_wpadmin }}" ]; then
+      if [ -L "{{ wp_path_wpadmin }}" ]; then
         echo true
       else
         echo false
