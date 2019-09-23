@@ -143,8 +143,7 @@ sub as_ansible_hostvars {
   }
   $retval->{openshift_namespace} = "wwp-prod";
   $retval->{openshift_dc} = "httpd-" . $retval->{wp_env};
-  # TODO: should be 5.2 once #108 has been pushed to staging.
-  $retval->{wp_ensure_symlink_version} = "5";
+  $retval->{wp_ensure_symlink_version} = "5.2";
   return $retval;
 }
 
