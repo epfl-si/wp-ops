@@ -57,6 +57,7 @@
     _main_symlink_script is changed
   local_action:
     module: shell
+    executable: bash
     cmd: |
       set -o pipefail
       set -e -x
