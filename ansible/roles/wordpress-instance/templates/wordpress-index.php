@@ -18,7 +18,7 @@ define('WP_USE_THEMES', true);
 
 /** Loads the WordPress Environment and Template */
 {% if wp_is_symlinked %}
-require_once('/wp/wp-blog-header.php');
+require_once('wp/wp-blog-header.php');
 {% else %}
 require( dirname( __FILE__ ) . '/wp-blog-header.php' );
 {% endif %}
