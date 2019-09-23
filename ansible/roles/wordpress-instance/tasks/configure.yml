@@ -16,6 +16,11 @@
     line: |
       define('WP_CONTENT_DIR', '{{ wp_dir }}/wp-content');
 
+- name: "Set up index.php"
+  copy:
+    dest: "{{ wp_dir }}/index.php"
+    content: "{{ lookup('template', 'wordpress-index.php') }}"
+
 - name: Detect whether a WordPress database update is needed
   shell: '{{ wp_cli_command }} core update-db --dry-run'
   changed_when: false

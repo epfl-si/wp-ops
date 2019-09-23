@@ -110,22 +110,10 @@
           esac
       fi
 
-      if ensure_file_contains index.php <<INDEX_PHP
-      {{ lookup('template', 'wordpress-index.php') }}
-      INDEX_PHP
-      then
-          :
-      else
-          case "$?" in
-              1) echo INDEX_PHP_CHANGED ;;
-              *) exit $?                ;;
-          esac
-      fi
       {% endif %}
   register: _symlink_script
   changed_when: >
-    "SYMLINKS_CHANGED" in _symlink_script.stdout or
-    "INDEX_PHP_CHANGED" in _symlink_script.stdout
+    "SYMLINKS_CHANGED" in _symlink_script.stdout
 
 - name: "Unsymlink (copy from /wp)"
   tags: unsymlink
