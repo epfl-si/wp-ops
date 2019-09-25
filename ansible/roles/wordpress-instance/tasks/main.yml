@@ -16,7 +16,6 @@
     # TODO: configure.yml uses wp_is_symlinked, which requires facts.yml to have run.
     # Can we use a handler instead?
     - config
-  when: not is_minishift_instance
 
 # TODO: Tu peux shooter les tâches (et leurs dépendances) "Backup",
 # "Wipe" "Recreate", "Create" et "Restore" qui suivent (cependant, tu
