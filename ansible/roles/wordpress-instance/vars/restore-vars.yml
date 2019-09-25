@@ -8,7 +8,8 @@ restore_tar_full_path: '/backups/{{restore_backup_folder}}/{{restore_archive_nam
 # TODO: this is a buggy heuristics, as subdirectory names may
 # contain underscores.
 restore_intar_dir: "{{ restore_backup_folder | replace('_', '/') }}"
+restore_intar_htaccess: "{{ restore_intar_dir }}/.htaccess"
 
 # The .htaccess commanding over this WordPress instance
 restore_htaccess_path: "{{ wp_dir }}/.htaccess"
-restore_htaccess_path_tar: "{{ restore_intar_dir + '/.htaccess' | sanitize_tar_path}}"
+restore_htaccess_path_tar: "{{ restore_intar_htaccess | sanitize_tar_path }}"

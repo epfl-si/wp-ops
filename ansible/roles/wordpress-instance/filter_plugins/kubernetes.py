@@ -21,7 +21,7 @@ def sanitize_tar_path(path):
     path = re.sub(r'/+','/', path)
     path = re.sub(r'^/', '', path)
     return path
-    
+
 
 class FilterModule(object):
     def filters(self):
