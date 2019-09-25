@@ -7,7 +7,7 @@ from collections import OrderedDict
 import random
 import string
 
-pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2', shell=True)
+pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2 |head -1', shell=True)
 pod_name= pod_name.decode('utf-8').replace('\n','')
 cluster_ip = "128.178.222.83"
 
