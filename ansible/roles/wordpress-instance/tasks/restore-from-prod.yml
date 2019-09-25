@@ -92,7 +92,7 @@
     creates: "{{wp_htaccess_path}}"
     chdir: "{{wp_dir}}"
     cmd: |
-      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards --to-stdout '*/.htaccess' > .htaccess
+      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards --to-stdout {{ wp_htaccess_path_tar }} > .htaccess
   when: wp_backup_folder is defined
 
 
