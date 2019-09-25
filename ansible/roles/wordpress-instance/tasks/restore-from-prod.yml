@@ -49,7 +49,7 @@
   shell:
     cmd: |
       cd "{{wp_dir}}"
-      tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{restore_backup_folder}}/{{restore_archive_name}} --wildcards '*/wp-content'
+      tar --transform 's,^.*/wp-content,wp-content,S' -xvf {{ restore_tar_full_path }} --wildcards '*/wp-content'
   when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
 
 
@@ -93,7 +93,7 @@
     creates: "{{restore_htaccess_path}}"
     chdir: "{{wp_dir}}"
     cmd: |
-      tar -xvf /backups/{{restore_backup_folder}}/{{restore_archive_name}} --wildcards --to-stdout {{ restore_htaccess_path_tar }} > .htaccess
+      tar -xvf {{ restore_tar_full_path }} --wildcards --to-stdout {{ restore_htaccess_path_tar }} > .htaccess
   when: restore_backup_folder is defined
 
 

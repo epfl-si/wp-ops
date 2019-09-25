@@ -2,6 +2,8 @@
 # come from the inventory
 # (../../../inventory/wp-int/wordpress-instances)
 
+restore_tar_full_path: '/backups/{{restore_backup_folder}}/{{restore_archive_name}}'
+
 # The path of the original site (as found inside the backup)
 # TODO: this is a buggy heuristics, as subdirectory names may
 # contain underscores.
