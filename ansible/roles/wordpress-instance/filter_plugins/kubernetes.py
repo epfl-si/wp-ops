@@ -1,5 +1,6 @@
 import yaml
 import os
+import re
 
 def uri_filter(raw_yaml):
     
@@ -17,7 +18,9 @@ def latest_bkp(raw_bash):
     return bkp_archive_name
 
 def sanitize_tar_path(path):
-    return path.replace("/+","/").replace('^/', '')
+    path = re.sub(r'/+','/', path)
+    path = re.sub(r'^/', '', path)
+    return path
     
 
 class FilterModule(object):
