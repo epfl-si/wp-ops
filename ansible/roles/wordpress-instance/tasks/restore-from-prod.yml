@@ -48,7 +48,6 @@
     cmd: |
       cd "{{wp_dir}}"
       tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content'
-#      {{wp_cli_command}} core download
   when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
 
 
