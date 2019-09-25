@@ -1,12 +1,14 @@
 ---
 
+- include_vars: restore-vars.yml
+
 # Create folder structure if needed, and only during a restore procedure from backup folders
 - name: directories
   file:  
     path: "{{wp_dir}}"
     owner: www-data
     state: directory
-  when: wp_backup_folder is defined
+  when: restore_backup_folder is defined
 
 - name: wp evaluation
   shell:
@@ -37,7 +39,7 @@
       ln -sf wp/wp-settings.php wp-settings.php
       ln -sf wp/wp-includes wp-includes 
       ln -sf wp/wp-login.php wp-login.php
-  when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
+  when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
 
 
 # Unziping data from wp-content folder after a fresh symlink "installation"
@@ -47,8 +49,8 @@
   shell:
     cmd: |
       cd "{{wp_dir}}"
-      tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards '*/wp-content'
-  when: "'This does not seem to be a WordPress install.' in out.stderr and wp_backup_folder is defined"
+      tar --transform 's,^.*/wp-content,wp-content,S' -xvf /backups/{{restore_backup_folder}}/{{restore_archive_name}} --wildcards '*/wp-content'
+  when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
 
 
 - name: wp evaluation
@@ -67,7 +69,7 @@
   shell:
     cmd: |
       rm {{wp_dir}}/wp-config.php
-  when: "'Error establishing a database connection' in out.stderr and wp_backup_folder is defined"
+  when: "'Error establishing a database connection' in out.stderr and restore_backup_folder is defined"
 
 # restoring database and data pointing information in a NEWLY GENERATED wp-config.php file
 - name: Create databases & wp-config files for wordpress instances [IF NEEDED]
@@ -81,18 +83,18 @@
        }
        define('ALLOW_UNFILTERED_UPLOADS', true);
        PHP
-       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{wp_backup_folder}}/{{wp_sql_name}}
+       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{restore_backup_folder}}/{{restore_sql_name}}
        
-  when: "(('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr) and wp_backup_folder is defined "
+  when: "(('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr) and restore_backup_folder is defined "
 
 # Always extract .htaccess file when we are restoring from backups
 - name: extract .htaccess
   shell:
-    creates: "{{wp_htaccess_path}}"
+    creates: "{{restore_htaccess_path}}"
     chdir: "{{wp_dir}}"
     cmd: |
-      tar -xvf /backups/{{wp_backup_folder}}/{{wp_archive_name}} --wildcards --to-stdout {{ wp_htaccess_path_tar }} > .htaccess
-  when: wp_backup_folder is defined
+      tar -xvf /backups/{{restore_backup_folder}}/{{restore_archive_name}} --wildcards --to-stdout {{ restore_htaccess_path_tar }} > .htaccess
+  when: restore_backup_folder is defined
 
 
 # Always rename wordpress site when we are restoring from backups
@@ -102,7 +104,7 @@
       for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}/{{wp_path}}; done;
       {{wp_cli_command}} search-replace {{url_from}} {{wp_hostname}}
       {{wp_cli_command}} transient delete --all
-  when: wp_backup_folder is defined
+  when: restore_backup_folder is defined
 
 # Always empty polylang plugin config by reactivating it when we are restoring from backups
 - name: reactivate plugins
@@ -112,5 +114,5 @@
       {{wp_cli_command}} plugin deactivate polylang
       {{wp_cli_command}} plugin activate polylang
       {{wp_cli_command}} plugin activate epfl
-  when: wp_backup_folder is defined
+  when: restore_backup_folder is defined
 

@@ -67,9 +67,9 @@ def get_latest_full_backup(bkp_string):
     #TODO check edge cases: we suppose that each archive has a same-named sql backup 
     #and that there exist backups in the first place
     if len(reversed_bkp_list) > 1:
-        return {"wp_archive_name": reversed_bkp_list[0], "wp_sql_name": reversed_bkp_list[1]}
+        return {"restore_archive_name": reversed_bkp_list[0], "restore_sql_name": reversed_bkp_list[1]}
     else:
-        return {"wp_archive_name": "none", "wp_sql_name": "none"}
+        return {"restore_archive_name": "none", "restore_sql_name": "none"}
 
 
 def parse_vars(bkp_string):
@@ -84,9 +84,9 @@ def parse_vars(bkp_string):
                "wp_env":wp_env,
                "wp_hostname":wp_hostname,
                "wp_path":wp_path,
-#               "wp_archive_name":wp_archives["wp_archive_name"],
-#               "wp_sql_name": wp_archives["wp_sql_name"],
-#               "wp_backup_folder": bkp_string
+#               "restore_archive_name":wp_archives["restore_archive_name"],
+#               "restore_sql_name": wp_archives["restore_sql_name"],
+#               "restore_backup_folder": bkp_string
        }
     else: return {"name":"",
                "wp_env":"",

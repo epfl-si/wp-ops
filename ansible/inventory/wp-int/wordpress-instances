@@ -60,19 +60,19 @@ def bkp_to_dict():
                hostvars= parse_bkp_name1(last_site)
 
                if len(backups[last_site]) > 1:
-                   hostvars["wp_archive_name"]= backups[last_site][0]
-                   hostvars["wp_sql_name"]= backups[last_site][1]
+                   hostvars["restore_archive_name"]= backups[last_site][0]
+                   hostvars["restore_sql_name"]= backups[last_site][1]
                else:
-                   hostvars["wp_archive_name"]= ""
-                   hostvars["wp_sql_name"]= ""           
+                   hostvars["restore_archive_name"]= ""
+                   hostvars["restore_sql_name"]= ""
 
                backups[last_site]= hostvars
                if "wp_env" in hostvars:
                    wp_env = hostvars["wp_env"]
                    if not wp_env in inv:
                        inv[wp_env] = {"hosts":[]}
-                   if "wp_backup_folder" in hostvars:
-                       inv[wp_env]["hosts"].append(hostvars["wp_backup_folder"])
+                   if "restore_backup_folder" in hostvars:
+                       inv[wp_env]["hosts"].append(hostvars["restore_backup_folder"])
                    if not wp_env in inv["wordpress_instances_test_blue"]["children"]:
                        inv["wordpress_instances_test_blue"]["children"].append(wp_env)
 
@@ -108,7 +108,7 @@ def parse_bkp_name1(bkp_name):
                 "wp_env": env_path["wp_env"],
                 "wp_path":env_path["wp_path"],
                 "wp_hostname": env_path["wp_env"]+"-wwp-int."+cluster_ip+".nip.io",
-                "wp_backup_folder": bkp_name,
+                "restore_backup_folder": bkp_name,
                 "db_name":random_db_name,
                 "url_from": env_path["url_from"]
          } 
