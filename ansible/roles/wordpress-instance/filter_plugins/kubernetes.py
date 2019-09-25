@@ -17,7 +17,7 @@ def latest_bkp(raw_bash):
     return bkp_archive_name
 
 def sanitize_tar_path(path):
-    return path.replace("//","/")    
+    return path.replace("/+","/").replace('^/', '')
     
 
 class FilterModule(object):
