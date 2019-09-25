@@ -16,11 +16,12 @@
 # The top-level directory of this WordPress instance
 wp_dir: "/srv/{{ wp_env }}/{{ wp_hostname }}/htdocs/{{ wp_path }}"
 
+# The path of the original site (as found inside the backup)
 wp_int_dir: "/srv/{{ wp_env }}/{{ wp_int_hostname }}/htdocs/{{ wp_path }}"
 
 # The .htaccess commanding over this WordPress instance
-wp_htaccess_path: "srv/{{ wp_env }}/{{ wp_hostname }}/htdocs/{{ wp_path }}/.htaccess"
-wp_htaccess_path_tar: "{{wp_htaccess_path | sanitize_tar_path}}"
+wp_htaccess_path: "{{ wp_dir }}/.htaccess"
+wp_htaccess_path_tar: "{{ wp_int_dir + '/.htaccess' | sanitize_tar_path}}"
 
 # The path to the wp-config.php file
 wp_path_config_php: "{{ wp_dir }}/wp-config.php"
