@@ -39,20 +39,20 @@ class ActionModule(ActionBase):
 
 
         if cares_about_activation_state and 'active' in to_undo:
-            self.result.update(self._do_deactivate_plugin(name))
+            self._update_result(self._do_deactivate_plugin(name))
             if 'failed' in self.result: return self.result
 
         if  cares_about_installation_state and (
                 'symlinked' in to_undo or 'installed' in to_undo):
-            self.result.update(self._do_rimraf_plugin(name))
+            self._update_result(self._do_rimraf_plugin(name))
             if 'failed' in self.result: return self.result
 
         if cares_about_installation_state and 'symlinked' in to_do:
-            self.result.update(self._do_symlink_plugin(name, 'must-use' in desired_state))
+            self._update_result(self._do_symlink_plugin(name, 'must-use' in desired_state))
             if 'failed' in self.result: return self.result
 
         if cares_about_activation_state and 'active' in to_do:
-            self.result.update(self._do_activate_plugin(name))
+            self._update_result(self._do_activate_plugin(name))
             if 'failed' in self.result: return self.result
 
         return self.result
@@ -107,6 +107,7 @@ class ActionModule(ActionBase):
             return list(installation_state)[0]
         else:
             raise ValueError('Plug-in %s cannot be simultaneously %s' % list(installation_state))
+
     def _desired_activation_state(self, desired_state):
         activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
         if len(activation_state) == 0:
@@ -152,7 +153,7 @@ class ActionModule(ActionBase):
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
-        self.result.update(result)
+        self._update_result(result)
         return self.result
 
     def _get_wp_dir (self):
@@ -190,4 +191,6 @@ class ActionModule(ActionBase):
         else:
             return self._templar.template(unexpanded)
 
-
+    def _update_result (self, result):
+        self.result.update(result)
+        return self.result
