@@ -192,5 +192,17 @@ class ActionModule(ActionBase):
             return self._templar.template(unexpanded)
 
     def _update_result (self, result):
+        oldresult = copy.copy(self.result)
         self.result.update(result)
+
+        def _keep_flag(flag_name):
+            if (flag_name in oldresult and
+                oldresult[flag_name] and
+                flag_name in self.result and
+                not result[flag_name]
+            ):
+                self.result[flag_name] = oldresult[flag_name]
+
+        _keep_flag('changed')
+                
         return self.result
