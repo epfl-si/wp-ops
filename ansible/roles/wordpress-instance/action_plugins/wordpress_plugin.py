@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import re
 
 from ansible.plugins.action import ActionBase
@@ -148,8 +149,11 @@ class ActionModule(ActionBase):
             name)
 
     def _get_plugin_activation_state (self, name):
+        oldresult = copy.copy(self.result)
         result = self._run_wp_cli_action('plugin list --format=csv')
         for line in result.splitlines()[1:]:
+
+        self.result = oldresult  # We don't want "changed" to pollute the state
             fields = line.split(',')
             if len(line) < 2: continue
             if line[0] == name: return line[1]
