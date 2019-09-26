@@ -79,7 +79,7 @@ sub collect_wordpress_installs_over_ssh {
             # time for the remote shell.
             qw<'\(' -type d
                '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages
-                    -o -name 'jahia-data'
+                    -o -name 'jahia-data' -o -name 'ansible-backup-*'
                     -o -path /srv/lvenries -o -path /srv/jenkins '\)'
                '\)' -prune -false -o -name wp-config.php>))
     or die "Cannot ssh $ssh_mantra: $!";
