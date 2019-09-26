@@ -24,6 +24,12 @@ class ActionModule(ActionBase):
         cares_about_installation_state = bool(self._desired_installation_state(desired_state))
         cares_about_activation_state = bool(self._desired_activation_state(desired_state))
 
+        if 'must-use' in desired_state:
+            # TODO — UNIMPLEMENTED Some must-use plug-ins have two
+            # files to symlink, and the structure of the code doesn't
+            # allow for that yet.
+            return self.result
+
         if not (to_do or to_undo):
             return self.result
 
