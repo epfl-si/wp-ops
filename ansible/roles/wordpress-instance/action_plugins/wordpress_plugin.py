@@ -89,7 +89,8 @@ class ActionModule(ActionBase):
         activation_state = self._desired_activation_state(desired_state)
 
         if 'absent' == installation_state and activation_state:
-            raise ValueError('Plug-in %s cannot be simultaneously absent and %s' % activation_state)
+            raise ValueError('Plug-in %s cannot be simultaneously absent and %s' %
+                             (name, activation_state))
 
         return desired_state
 
@@ -106,7 +107,8 @@ class ActionModule(ActionBase):
         elif len(installation_state) == 1:
             return list(installation_state)[0]
         else:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(installation_state))
+            raise ValueError('Plug-in %s cannot be simultaneously %s' % (
+                name, list(installation_state)))
 
     def _desired_activation_state(self, desired_state):
         activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
@@ -115,7 +117,8 @@ class ActionModule(ActionBase):
         elif len(activation_state) == 1:
             return list(activation_state)[0]
         else:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(activation_state))
+            raise ValueError('Plug-in %s cannot be simultaneously %s' %
+                             (name, list(activation_state)))
 
     def _do_symlink_plugin (self, name, is_mu):
         return self._run_action('file', {
