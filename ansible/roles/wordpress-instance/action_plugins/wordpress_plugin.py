@@ -23,6 +23,10 @@ class ActionModule(ActionBase):
         to_undo = current_state - desired_state
         cares_about_installation_state = bool(self._desired_installation_state(desired_state))
         cares_about_activation_state = bool(self._desired_activation_state(desired_state))
+        must_install_implicitly = ('symlinked' not in current_state and
+                                   'installed' not in current_state and
+                                   not cares_about_installation_state and
+                                   cares_about_activation_state)
 
         if 'must-use' in desired_state:
             # TODO — UNIMPLEMENTED Some must-use plug-ins have two
@@ -47,7 +51,8 @@ class ActionModule(ActionBase):
             self._update_result(self._do_rimraf_plugin(name))
             if 'failed' in self.result: return self.result
 
-        if cares_about_installation_state and 'symlinked' in to_do:
+        if ( (cares_about_installation_state and 'symlinked' in to_do)
+             or must_install_implicitly):
             self._update_result(self._do_symlink_plugin(name, 'must-use' in desired_state))
             if 'failed' in self.result: return self.result
 
@@ -78,9 +83,6 @@ class ActionModule(ActionBase):
             desired_state = set(desired_state)
         else:
             raise TypeError("Unexpected value for `state`: %s" % state)
-
-        if 'active' in desired_state and 'symlinked' not in desired_state:
-            desired_state.add('installed')
 
         if 'symlinked' in desired_state and 'installed' in desired_state:
             raise ValueError('Plug-in %s cannot be both `symlinked` and `installed`' % name)
