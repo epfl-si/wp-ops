@@ -151,12 +151,14 @@ class ActionModule(ActionBase):
     def _get_plugin_activation_state (self, name):
         oldresult = copy.copy(self.result)
         result = self._run_wp_cli_action('plugin list --format=csv')
-        for line in result.splitlines()[1:]:
+        if 'failed' in self.result: return self.result
 
         self.result = oldresult  # We don't want "changed" to pollute the state
+
+        for line in result["stdout"].splitlines()[1:]:
             fields = line.split(',')
-            if len(line) < 2: continue
-            if line[0] == name: return line[1]
+            if len(fields) < 2: continue
+            if fields[0] == name: return fields[1]
         return 'inactive'
 
     def _get_ansible_var (self, name):
