@@ -142,7 +142,6 @@ sub as_ansible_hostvars {
     $retval->{$k} = $v || '';
   }
   $retval->{openshift_namespace} = "wwp-prod";
-  $retval->{openshift_dc} = "httpd-" . $retval->{wp_env};
   $retval->{wp_ensure_symlink_version} = "5.2";
   return $retval;
 }
