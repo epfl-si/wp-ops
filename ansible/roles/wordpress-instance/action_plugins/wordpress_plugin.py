@@ -21,6 +21,8 @@ class ActionModule(ActionBase):
         desired_state = self._get_desired_state(name, args)
         to_do = desired_state - current_state
         to_undo = current_state - desired_state
+        cares_about_installation_state = bool(self._desired_installation_state(desired_state))
+        cares_about_activation_state = bool(self._desired_activation_state(desired_state))
 
         if not (to_do or to_undo):
             return self.result
@@ -29,19 +31,21 @@ class ActionModule(ActionBase):
             raise NotImplementedError('Installing "regular" (non-symlinked) plugin %s '
                                       'not supported (yet)' % name)
 
-        if 'active' in to_undo:
+
+        if cares_about_activation_state and 'active' in to_undo:
             self.result.update(self._do_deactivate_plugin(name))
             if 'failed' in self.result: return self.result
 
-        if 'symlinked' in to_undo or 'installed' in to_undo:
+        if  cares_about_installation_state and (
+                'symlinked' in to_undo or 'installed' in to_undo):
             self.result.update(self._do_rimraf_plugin(name))
             if 'failed' in self.result: return self.result
 
-        if 'symlinked' in to_do:
+        if cares_about_installation_state and 'symlinked' in to_do:
             self.result.update(self._do_symlink_plugin(name, 'must-use' in desired_state))
             if 'failed' in self.result: return self.result
 
-        if 'active' in to_do:
+        if cares_about_activation_state and 'active' in to_do:
             self.result.update(self._do_activate_plugin(name))
             if 'failed' in self.result: return self.result
 
@@ -75,16 +79,11 @@ class ActionModule(ActionBase):
         if 'symlinked' in desired_state and 'installed' in desired_state:
             raise ValueError('Plug-in %s cannot be both `symlinked` and `installed`' % name)
 
-        fs_state = desired_state.intersection(['present', 'absent', 'symlinked'])
-        if len(fs_state) > 1:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(fs_state))
+        installation_state = self._desired_installation_state(desired_state)
+        activation_state = self._desired_activation_state(desired_state)
 
-        running_state = desired_state.intersection(['active', 'inactive', 'must-use'])
-        if len(running_state) > 1:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(running_state))
-
-        if 'absent' in fs_state and running_state:
-            raise ValueError('Plug-in %s cannot be simultaneously absent and %s' % list(running_state)[0])
+        if 'absent' == installation_state and activation_state:
+            raise ValueError('Plug-in %s cannot be simultaneously absent and %s' % activation_state)
 
         return desired_state
 
@@ -93,6 +92,23 @@ class ActionModule(ActionBase):
         if 'failed' not in result:
             result.update(self._do_rimraf_plugin(name))
         return result
+
+    def _desired_installation_state(self, desired_state):
+        installation_state = desired_state.intersection(['present', 'absent', 'symlinked'])
+        if len(installation_state) == 0:
+            return None
+        elif len(installation_state) == 1:
+            return list(installation_state)[0]
+        else:
+            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(installation_state))
+    def _desired_activation_state(self, desired_state):
+        activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
+        if len(activation_state) == 0:
+            return None
+        elif len(activation_state) == 1:
+            return list(activation_state)[0]
+        else:
+            raise ValueError('Plug-in %s cannot be simultaneously %s' % list(activation_state))
 
     def _do_symlink_plugin (self, name, is_mu):
         return self._run_action('file', {
