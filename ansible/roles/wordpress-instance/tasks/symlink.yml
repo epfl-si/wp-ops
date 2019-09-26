@@ -36,7 +36,7 @@
 - name: "Reconfigure wp-config.php, index.php and the “main” symlink first"
   tags: symlink
   include_tasks:
-    file: configure.yml
+    file: serving-infrastructure.yml
     apply:
       tags: ["symlink"]
 
@@ -154,7 +154,9 @@
 - name: "Reconfigure wp-config.php after unsymlinking"
   tags: unsymlink
   include_tasks:
-    file: configure.yml
+    file: serving-infrastructure.yml
     apply:
       tags: ["unsymlink"]
+
+
 
