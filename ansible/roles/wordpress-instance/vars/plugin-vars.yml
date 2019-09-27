@@ -1,24 +1,28 @@
 # Plugin variables go here
 
 # TODO: These should be computed from wp-veritas state
-plugins_locked: true
-plugins_use_wp2010_plugins: false
-plugins_use_Emploi: false
-plugins_use_Inside: false
-plugins_use_Restauration: false
-plugins_use_ScienceQA: false
-plugins_use_CDHSHS: false
-plugins_use_Library: false
+plugins_locked: true                # TODO: should be false for unmanaged sites
+plugins_use_wp2010_plugins: false   # TODO: should be someething like '{{ wp_env == 'subdomains' }}" once camptocamp's INF-4475 (and the follow-up tasks on our side) are done
+plugins_use_Inside: '{{ wp_env == "inside" }}'
+
+plugins_symlinked_and_active_in_2010_only: '{{ ["symlinked", "active"] if plugins_use_wp2010_plugins else "absent" }}'
+plugins_symlinked_and_active_in_inside_only: '{{ ["symlinked", "active"] if plugins_use_Inside else "absent" }}'
 plugins_use_gutenberg: '{{ wp_ensure_symlink_version is defined and (wp_ensure_symlink_version | float) >= 5.0 }}'
 
-plugins_symlinked_in_2010_only: '{{ ["symlinked", "active"] if plugins_use_wp2010_plugins else "absent" }}'
-plugins_symlinked_in_emploi_only: '{{ ["symlinked", "active"] if plugins_use_Emploi else "absent" }}'
-plugins_symlinked_in_inside_only: '{{ ["symlinked", "active"] if plugins_use_Inside else "absent" }}'
-plugins_symlinked_in_restauration_only: '{{ ["symlinked", "active"] if plugins_use_Restauration else "absent" }}'
-plugins_symlinked_in_scienceqa_only: '{{ ["symlinked", "active"] if plugins_use_ScienceQA else "absent" }}'
-plugins_symlinked_in_cdhshs_only: '{{ ["symlinked", "active"] if plugins_use_CDHSHS else "absent" }}'
-plugins_symlinked_in_library_only: '{{ ["symlinked", "active"] if plugins_use_Library else "absent" }}'
+# TODO: Likewise, these should be computed from wp-veritas state. We
+# set them to true out of an abundance of caution, and refrain from
+# managing their active / inactive state.
+plugins_use_Emploi: true
+plugins_use_Restauration: true
+plugins_use_ScienceQA: true
+plugins_use_Library: true
+plugins_use_CDHSHS: true
 
+plugins_symlinked_in_emploi_only: '{{ "symlinked" if plugins_use_Emploi else "absent" }}'
+plugins_symlinked_in_restauration_only: '{{ "symlinked" if plugins_use_Restauration else "absent" }}'
+plugins_symlinked_in_scienceqa_only: '{{ "symlinked" if plugins_use_ScienceQA else "absent" }}'
+plugins_symlinked_in_library_only: '{{ "symlinked" if plugins_use_Library else "absent" }}'
+plugins_symlinked_in_cdhshs_only: '{{ "symlinked" if plugins_use_CDHSHS else "absent" }}'
 
 plugin_mainwp_child_uniqueid: "WinterIsComing"
 
