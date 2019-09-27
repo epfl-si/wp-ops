@@ -2,7 +2,9 @@
 
 # TODO: These should be computed from wp-veritas state
 plugins_locked: true                # TODO: should be false for unmanaged sites
-plugins_use_wp2010_plugins: false   # TODO: should be someething like '{{ wp_env == 'subdomains' }}" once camptocamp's INF-4475 (and the follow-up tasks on our side) are done
+plugins_use_wp2010_plugins: '{{ wp_env == 'subdomains' }}"   # TODO: the accuracy (and innocuity!) of this
+                                                             # is pending camptocamp's INF-4475 (and the follow-up
+                                                             # tasks on our side)
 plugins_use_Inside: '{{ wp_env == "inside" }}'
 
 plugins_symlinked_and_active_in_2010_only: '{{ ["symlinked", "active"] if plugins_use_wp2010_plugins else "absent" }}'
