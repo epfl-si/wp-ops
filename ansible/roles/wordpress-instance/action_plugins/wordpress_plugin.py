@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import copy
+# There is a name clash with a module in Ansible named "copy":
+deepcopy = __import__('copy').deepcopy
 import re
 
 from ansible.plugins.action import ActionBase
@@ -177,7 +178,7 @@ class ActionModule(ActionBase):
             name)
 
     def _get_plugin_activation_state (self, name):
-        oldresult = copy.copy(self.result)
+        oldresult = deepcopy(self.result)
         result = self._run_wp_cli_action('plugin list --format=csv')
         if 'failed' in self.result: return self.result
 
@@ -197,7 +198,7 @@ class ActionModule(ActionBase):
             return self._templar.template(unexpanded)
 
     def _update_result (self, result):
-        oldresult = copy.copy(self.result)
+        oldresult = deepcopy(self.result)
         self.result.update(result)
 
         def _keep_flag(flag_name):
