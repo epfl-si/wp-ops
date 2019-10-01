@@ -14,11 +14,11 @@ plugins_use_gutenberg: '{{ wp_ensure_symlink_version is defined and (wp_ensure_s
 # TODO: Likewise, these should be computed from wp-veritas state. We
 # set them to true out of an abundance of caution, and refrain from
 # managing their active / inactive state.
-plugins_use_Emploi: true
-plugins_use_Restauration: true
-plugins_use_ScienceQA: true
-plugins_use_Library: true
-plugins_use_CDHSHS: true
+plugins_use_Emploi: '{{ inventory_hostname == "www-about-working" }}'
+plugins_use_Restauration: '{{ inventory_hostname == "www-campus-restaurants-shops-hotels" }}'
+plugins_use_ScienceQA: '{{ inventory_hostname == "www" }}'
+plugins_use_Library: '{{ inventory_hostname == "www-campus-library" }}'
+plugins_use_CDHSHS: '{{ inventory_hostname == "www-schools-cdh" }}'
 
 plugins_symlinked_in_emploi_only: '{{ "symlinked" if plugins_use_Emploi else "absent" }}'
 plugins_symlinked_in_restauration_only: '{{ "symlinked" if plugins_use_Restauration else "absent" }}'
