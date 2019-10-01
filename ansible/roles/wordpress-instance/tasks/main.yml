@@ -100,6 +100,15 @@
     apply:
       tags: ["themes"]
 
+- name: Convert shortcodes to Gutenberg blocks
+  when: wp_use_gutenberg
+  include_tasks:
+    file: "shortcode-to-block.yml"
+    apply:
+      tags: ["convert-shortcode-to-block"]
+  tags:
+    - convert-shortcode-to-block
+
 ################################
 # Special-purpose tasks
 ################################
