@@ -282,6 +282,14 @@
         {{ "active" if plugins_use_gutenberg else "inactive" }}
     from: https://github.com/epfl-idevelop/wp-gutenberg-epfl
 
+- name: epfl-infoscience plugin
+  wordpress_plugin:
+    name: epfl-infoscience
+    state:
+      - symlinked
+      - active
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience
+
 - name: wp-media-folder plugin
   wordpress_plugin:
     name: wp-media-folder
@@ -419,12 +427,6 @@
     name: epfl-grid
     state: "{{ plugins_symlinked_and_active_in_2010_only }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-grid
-
-- name: epfl-infoscience plugin
-  wordpress_plugin:
-    name: epfl-infoscience
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience
 
 - name: epfl-infoscience-search plugin
   wordpress_plugin:
