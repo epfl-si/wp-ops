@@ -255,7 +255,8 @@
     name: shortcode-ui
     state:
       - symlinked
-      - active
+      - >-
+        {{ "inactive" if plugins_use_gutenberg else "active" }}
     from: wordpress.org/plugins
 
 - name: shortcode-ui-richtext plugin
@@ -263,7 +264,8 @@
     name: shortcode-ui-richtext
     state:
       - symlinked
-      - active
+      - >-
+        {{ "inactive" if plugins_use_gutenberg else "active" }}
     from: wordpress.org/plugins
 
 - name: EPFL plugin
