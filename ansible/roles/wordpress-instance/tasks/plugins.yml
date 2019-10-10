@@ -108,7 +108,8 @@
     name: tinymce-advanced
     state:
       - symlinked
-      - active
+      - >-
+        {{ "inactive" if plugins_use_gutenberg else "active" }}
     from: wordpress.org/plugins
 
 - name: Polylang plugin
@@ -283,6 +284,15 @@
       - >-
         {{ "active" if plugins_use_gutenberg else "inactive" }}
     from: https://github.com/epfl-idevelop/wp-gutenberg-epfl
+
+- name: EPFL Menus plugin
+  wordpress_plugin:
+    name: epfl-menus
+    state:
+      - symlinked
+      - >-
+        {{ "active" if plugins_use_gutenberg else "inactive" }}
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-menus
 
 - name: wp-media-folder plugin
   wordpress_plugin:
