@@ -24,10 +24,10 @@ main() {
     else
         db_name="wp_$(mkid 29)"
         db_user="$(mkid 16)"
-        db_pass="$(mkpass 20)"
+        db_password="$(mkpass 20)"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
-          wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_pass" \
+          wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
              --dbhost=db --skip-check
         )
     fi
