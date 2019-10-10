@@ -269,13 +269,6 @@
         {{ "inactive" if plugins_use_gutenberg else "active" }}
     from: wordpress.org/plugins
 
-- name: EPFL plugin
-  wordpress_plugin:
-    name: epfl
-    state: >-
-      {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
-
 - name: EPFL Gutenberg plugin
   wordpress_plugin:
     name: wp-gutenberg-epfl
