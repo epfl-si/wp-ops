@@ -24,7 +24,7 @@ main() {
     else
         db_name="wp_$(mkid 29)"
         db_user="$(mkid 16)"
-        db_password="$(mkpass 20)"
+        db_pass="$(mkpass 20)"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
           wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_pass" \
@@ -49,7 +49,7 @@ SQL_CREATE_USER
         ( set -x;
           wp core install --url="http://$wp_hostname/$wp_path" \
              --title="$(basename "$(pwd)")" \
-             --admin_user=admin --admin_email=admin@example.com \
+             --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
              --wpversion="$WORDPRESS_VERSION"
         )
     fi
@@ -102,8 +102,10 @@ MESSAGE
 }
 
 check_env_prereqs() {
-    [ -n "$MYSQL_SUPER_USER" ] || whine_env "MYSQL_SUPER_USER" 
-    [ -n "$MYSQL_SUPER_PASSWORD" ] || whine_env "MYSQL_SUPER_PASSWORD" 
+    [ -n "$MYSQL_SUPER_USER" ] || whine_env "MYSQL_SUPER_USER"
+    [ -n "$MYSQL_SUPER_PASSWORD" ] || whine_env "MYSQL_SUPER_PASSWORD"
+    [ -n "$WP_ADMIN_USER" ] || whine_env "WP_ADMIN_USER"
+    [ -n "$WP_ADMIN_EMAIL" ] || whine_env "WP_ADMIN_EMAIL"
 }
 
 do_mysql() {
