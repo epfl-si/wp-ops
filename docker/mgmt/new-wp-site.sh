@@ -16,7 +16,7 @@ USAGE
 }
 
 main() {
-    (set -x; wp --path=. core symlink --path_to_version="/wp/$WORDPRESS_VERSION")
+    ( set -x; wp --path=. core symlink --path_to_version="/wp/$WORDPRESS_VERSION" )
 
     if [ -f wp-config.php ]; then
         # Retrieve DB credentials from wp-config.php
@@ -26,12 +26,13 @@ main() {
         db_user="$(mkid 16)"
         db_password="$(mkpass 20)"
         # `wp config create` doesn't care whether the credentials work or not
-        (set -x;
-         wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_pass" \
-           --dbhost=db --skip-check)
+        ( set -x;
+          wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_pass" \
+             --dbhost=db --skip-check
+        )
     fi
 
-    (set -x; wp db create --dbuser="$MYSQL_SUPER_USER" --dbpass="$MYSQL_SUPER_PASSWORD") || true
+    ( set -x; wp db create --dbuser="$MYSQL_SUPER_USER" --dbpass="$MYSQL_SUPER_PASSWORD" ) || true
 
     echo "DROP USER '$db_user';" | do_mysql || true
     do_mysql <<SQL_CREATE_USER
@@ -39,6 +40,21 @@ CREATE USER '$db_user'@'%' IDENTIFIED BY '$db_password';
 GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%';
 FLUSH PRIVILEGES;
 SQL_CREATE_USER
+
+    contents_of_symlinked_index_php > index.php
+
+    if wp eval '1;' 2>&1 |grep "wp core install"; then
+        wp_hostname="$(pwd | cut -d/ -f4)"
+        wp_path="$(pwd | cut -d/ -f6-)"
+        ( set -x;
+          wp core install --url="http://$wp_hostname/$wp_path" \
+             --title="$(basename "$(pwd)")" \
+             --admin_user=admin --admin_email=admin@example.com \
+             --wpversion="$WORDPRESS_VERSION"
+        )
+    fi
+
+    ( set -x; wp eval '1;' )
 }
 
 ###############################################################################
@@ -92,6 +108,29 @@ check_env_prereqs() {
 
 do_mysql() {
     tee /dev/stderr | (set -x; mysql -h db -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
+}
+
+contents_of_symlinked_index_php() {
+    cat <<INDEX_PHP
+<?php
+/**
+ * Front to the WordPress application. This file doesn't do anything, but loads
+ * wp-blog-header.php which does and tells WordPress to load the theme.
+ *
+ * @package WordPress
+ */
+
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
+define('WP_USE_THEMES', true);
+
+/** Loads the WordPress Environment and Template */
+require_once('wp/wp-blog-header.php');
+
+INDEX_PHP
 }
 
 main
