@@ -16,6 +16,8 @@ USAGE
 }
 
 main() {
+    check_env_prereqs
+
     ( set -x; wp --path=. core symlink --path_to_version="/wp/$WORDPRESS_VERSION" )
 
     if [ -f wp-config.php ]; then
