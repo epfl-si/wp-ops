@@ -9,6 +9,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     mysql-client \
     openssh-server \
     tree \
+    pwgen \
     python3 \
     python3-pip \
     python3-virtualenv \
@@ -35,6 +36,8 @@ RUN mkdir /var/run/sshd && \
     mkdir /root/.ssh
 
 COPY jahia2wp.sh /etc/profile.d/
+COPY new-wp-site.sh /usr/local/bin/new-wp-site
+RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
 
 # setup access rights
