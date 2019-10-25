@@ -108,8 +108,7 @@
     name: tinymce-advanced
     state:
       - symlinked
-      - >-
-        {{ "inactive" if plugins_use_gutenberg else "active" }}
+      - active
     from: wordpress.org/plugins
 
 - name: Polylang plugin
