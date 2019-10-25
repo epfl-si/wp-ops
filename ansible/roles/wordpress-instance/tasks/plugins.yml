@@ -106,7 +106,9 @@
 - name: '"TinyMCE Advanced" plugin'
   wordpress_plugin:
     name: tinymce-advanced
-    state: symlinked
+    state: 
+      - symlinked
+      - active
     from: wordpress.org/plugins
 
 - name: Polylang plugin
