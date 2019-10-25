@@ -106,7 +106,7 @@
 - name: '"TinyMCE Advanced" plugin'
   wordpress_plugin:
     name: tinymce-advanced
-    state: 
+    state:
       - symlinked
       - active
     from: wordpress.org/plugins
