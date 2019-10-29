@@ -54,9 +54,32 @@ SQL_CREATE_USER
              --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
              --wpversion="$WORDPRESS_VERSION"
         )
+        echo "http://$wp_hostname/$wp_path"
     fi
 
     ( set -x; wp eval '1;' )
+
+    # Plugins jam
+    [ -d 'wp-content/plugins' ] || mkdir 'wp-content/plugins/'
+    for plugin in $(ls /wp/wp-content/plugins); do 
+        echo "Creating symling for plugin $plugin:"
+        ln -s /wp/wp-content/plugins/$plugin wp-content/plugins/$plugin;
+    done
+    # polylang is a dependency for some other plugins, activate it first !
+    wp plugin activate polylang
+    # Try to activate all others newly linked plugins
+    for plugin in $(wp plugin list --status=inactive --field=name | grep -v epfl-menus); do 
+        wp plugin activate $plugin
+        # Yeah, that's not gonna work with symlinks... wp plugin update $plugin
+    done
+
+    # Themes jam
+    [ -d 'wp-content/themes' ] || mkdir 'wp-content/themes/'
+    for theme in $(ls /wp/wp-content/themes); do 
+        echo "Creating symling for theme $theme:"
+        ln -s /wp/wp-content/themes/$theme wp-content/themes/$theme; 
+    done
+
 }
 
 ###############################################################################
