@@ -60,25 +60,32 @@ SQL_CREATE_USER
     ( set -x; wp eval '1;' )
 
     # Plugins jam
-    [ -d 'wp-content/plugins' ] || mkdir 'wp-content/plugins/'
+    [ -d 'wp-content/mu-plugins' ] || mkdir 'wp-content/mu-plugins'
+    for muplugin in $(ls /wp/wp-content/mu-plugins | egrep -v locked); do 
+        echo "Creating symling for must-use plugin $muplugin:"
+        ln -s ../../wp/wp-content/mu-plugins/$muplugin wp-content/mu-plugins/$muplugin;
+    done
+
+    [ -d 'wp-content/plugins' ] || mkdir 'wp-content/plugins'
     for plugin in $(ls /wp/wp-content/plugins); do 
         echo "Creating symling for plugin $plugin:"
-        ln -s /wp/wp-content/plugins/$plugin wp-content/plugins/$plugin;
+        ln -s ../../wp/wp-content/plugins/$plugin wp-content/plugins/$plugin;
     done
     # polylang is a dependency for some other plugins, activate it first !
     wp plugin activate polylang
     # Try to activate all others newly linked plugins
-    for plugin in $(wp plugin list --status=inactive --field=name | grep -v epfl-menus); do 
+    for plugin in $(wp plugin list --status=inactive --field=name | egrep -v "epfl-menus|mainwp-child" ); do 
         wp plugin activate $plugin
-        # Yeah, that's not gonna work with symlinks... wp plugin update $plugin
     done
 
     # Themes jam
-    [ -d 'wp-content/themes' ] || mkdir 'wp-content/themes/'
+    [ -d 'wp-content/themes' ] || mkdir 'wp-content/themes'
     for theme in $(ls /wp/wp-content/themes); do 
         echo "Creating symling for theme $theme:"
-        ln -s /wp/wp-content/themes/$theme wp-content/themes/$theme; 
+        ln -s ../../wp/wp-content/themes/$theme wp-content/themes/$theme; 
     done
+    # As the default theme twentynineteen is removed, we have to activate another theme
+    wp theme activate wp-theme-light
 
 }
 
