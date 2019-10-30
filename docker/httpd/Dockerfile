@@ -7,10 +7,13 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
+    msmtp \
+    msmtp-mta \
   && \
     apt-get -qy autoremove && \
     apt-get clean
 
+COPY msmtprc /etc/msmtprc
 COPY php.ini /etc/php/95-epfl.ini
 RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/apache2/conf.d
 
