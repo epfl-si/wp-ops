@@ -111,6 +111,14 @@
       - active
     from: wordpress.org/plugins
 
+- name: Gutenberg PDF Viewer Block
+  wordpress_plugin:
+    name: pdf-viewer-block
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+
 - name: Polylang plugin
   wordpress_plugin:
     name: polylang
