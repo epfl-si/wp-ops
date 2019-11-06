@@ -281,10 +281,8 @@
 - name: EPFL Menus plugin
   wordpress_plugin:
     name: epfl-menus
-    state:
-      - symlinked
-      - >-
-        {{ "active" if plugins_use_gutenberg else "inactive" }}
+    state: >-
+        {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-menus
 
 - name: wp-media-folder plugin
