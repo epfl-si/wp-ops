@@ -311,14 +311,6 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_wpmf_options }}"
 
-# TODO: We are not sure what is up with WP5 and this one.
-- name: pdfjs-viewer-shortcode plugin
-  wordpress_plugin:
-    name: pdfjs-viewer-shortcode
-    state:
-      - symlinked
-    from: wordpress.org/plugins
-
 - name: very-simple-meta-description plugin
   wordpress_plugin:
     name: very-simple-meta-description
