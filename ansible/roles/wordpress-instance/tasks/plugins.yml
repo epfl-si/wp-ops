@@ -289,8 +289,9 @@
   wordpress_plugin:
     name: epfl
     state: >-
-      {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
+      {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ]  }}
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
+
 
 - name: EPFL Gutenberg plugin
   wordpress_plugin:
@@ -304,9 +305,8 @@
 - name: EPFL Menus plugin
   wordpress_plugin:
     name: epfl-menus
-    state:
-      - symlinked
-      - inactive
+    state: >-
+        {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-menus
 
 - name: wp-media-folder plugin
