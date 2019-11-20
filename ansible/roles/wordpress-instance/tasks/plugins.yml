@@ -33,6 +33,15 @@
       - must-use
     from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu.php
 
+
+- name: Blocks white-list (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_block_white_list
+    state:
+      - symlinked
+      - must-use
+    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_block_white_list.php
+
 - name: Disable comments (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_comments
