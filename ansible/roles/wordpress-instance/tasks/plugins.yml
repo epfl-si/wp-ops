@@ -31,7 +31,9 @@
     state:
       - symlinked
       - must-use
-    from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu.php
+    from: 
+      - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-custom-editor-menu
+      - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu_loader.php
 
 
 - name: Blocks white-list (must-use plugin)
