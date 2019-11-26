@@ -23,7 +23,8 @@ symlinks_themes:
   - wp-theme-light
 
 _symlinks_muplugins_always:
-  - EPFL_custom_editor_menu.php
+  - epfl-custom-editor-menu
+  - EPFL_custom_editor_menu_loader.php
   - EPFL_disable_comments.php
   - EPFL_disable_updates_automatic.php
   - EPFL_jahia_redirect.php
