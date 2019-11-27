@@ -121,7 +121,7 @@
       - symlinked
       - active
     from: wordpress.org/plugins
-    vesion: 5.2.1
+    version: 5.2.1
 
 - name: Gutenberg PDF Viewer Block
   wordpress_plugin:
