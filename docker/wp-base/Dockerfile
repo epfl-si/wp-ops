@@ -125,12 +125,12 @@ RUN set -e -x; for wp in /wp/*; do                                         \
   cd $wp;                                                                  \
   wpmajorminor="$(basename $wp | cut -d. -f1-2)";                          \
   case "$wpmajorminor" in 4.*) wpmajorminor="4.8" ;; esac ;                \
-  rm -rf wp-content/plugins/tinymce-advanced;                              \
   curl -q https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json \
   | jq -r ".versions | to_entries                                          \
          | map(select (.key | startswith(\"$wpmajorminor\")))              \
          | map(.value) | last"                                             \
      | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
+  rm -rf wp-content/plugins/tinymce-advanced;                              \
   (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
   rm tinymce-advanced.zip;                                                 \
   done
