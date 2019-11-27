@@ -17,7 +17,7 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 
-AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/limit-plugin-version/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
@@ -168,16 +168,17 @@ class GitHubCheckout:
 class Plugin(object):
     """A WordPress plug-in or theme."""
 
-    def __init__(self, name, urls, **unused_kwargs):
+    def __init__(self, name, urls, version, **unused_kwargs):
         self.name = name
         self.urls = urls
+        self.version = version
 
-    def __new__(cls, name, urls):
+    def __new__(cls, name, urls, version):
         if cls is Plugin:
             cls = cls._find_handler(urls[0])
 
         that = object.__new__(cls)
-        that.__init__(name, urls)
+        that.__init__(name, urls, version)
         return that
 
     @staticmethod
@@ -284,7 +285,8 @@ class WordpressOfficialPlugin(Plugin):
         return json.loads(api_json)
 
     def install(self, target_dir):
-        ZipPlugin(self.name, [self.api_struct['download_link']]).install(target_dir)
+        download_link = self.api_struct['versions'][self.version] if self.version else self.api_struct['download_link']
+        ZipPlugin(self.name, [download_link]).install(target_dir)
 
 
 class Themes:
@@ -336,7 +338,9 @@ class WpOpsPlugins:
                 urls = [urls]
             state = action['state']
 
-            yield (Plugin(name, urls), state)
+            version = action['version'] if 'version' in action else None
+
+            yield (Plugin(name, urls, version), state)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
