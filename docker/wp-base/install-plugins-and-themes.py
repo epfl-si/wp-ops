@@ -168,17 +168,17 @@ class GitHubCheckout:
 class Plugin(object):
     """A WordPress plug-in or theme."""
 
-    def __init__(self, name, urls, version, **unused_kwargs):
+    def __init__(self, name, urls, version=None, **unused_kwargs):
         self.name = name
         self.urls = urls
         self.version = version
 
-    def __new__(cls, name, urls, version):
+    def __new__(cls, name, urls, version=None):
         if cls is Plugin:
             cls = cls._find_handler(urls[0])
 
         that = object.__new__(cls)
-        that.__init__(name, urls, version)
+        that.__init__(name, urls, version=version)
         return that
 
     @staticmethod
@@ -211,7 +211,7 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def __init__(self, name, urls, jahia2wp=None):
+    def __init__(self, name, urls, jahia2wp=None, version=None):
         super(ZipPlugin, self).__init__(name, urls)
         assert len(self.urls) == 1
         self.url = self.urls[0]
@@ -252,7 +252,7 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, urls):
+    def __init__(self, name, urls, version=None):
         super(GitHubPlugin, self).__init__(name, urls)
         self._gits = [GitHubCheckout(url) for url in self.urls]
 
@@ -285,7 +285,11 @@ class WordpressOfficialPlugin(Plugin):
         return json.loads(api_json)
 
     def install(self, target_dir):
-        download_link = self.api_struct['versions'][self.version] if self.version else self.api_struct['download_link']
+        if self.version:
+            progress("Specific version requested: {}".format(self.version))
+            download_link = self.api_struct['versions'][self.version]
+        else:
+            download_link = self.api_struct['download_link']
         ZipPlugin(self.name, [download_link]).install(target_dir)
 
 
