@@ -140,19 +140,8 @@ RUN set -e -x; for wp in /wp/*; do                                       \
     done
 
 ######################################################################
-# Symlinks
+# Symlinks in /wp
 ######################################################################
-# Major version symlinks
 # We do that last for simplicity, at a small cost in build time
-RUN set -e -x; cd /wp; for version in *; do                              \
-        major="$(echo "$version" |cut -d. -f1)";                         \
-        majorminor="$(echo "$version" |cut -d. -f1-2)";                  \
-        rm -f "$major" "$minor";                                         \
-        ln -s "$version" "$major";                                       \
-        ln -s "$version" "$majorminor";                                  \
-    done
-
-# As a backward compatibility measure / temporary hack, we support
-# sites that symlink to /wp instead of /wp/4 or /wp/5:
-RUN set -e -x; cd /wp;                                                   \
-    for file_or_dir in 4/*; do ln -s $file_or_dir .; done
+COPY symlink-wp-versions.sh /tmp
+RUN sh /tmp/symlink-wp-versions.sh && rm /tmp/symlink-wp-versions.sh
