@@ -119,6 +119,25 @@ RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
         /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS};   \
     done
 
+# Special treatment for tinymce-advanced, whose version scheme follows
+# WordPress' starting at 5.2
+RUN set -e -x; for wp in /wp/*; do                                         \
+  cd $wp;                                                                  \
+  wpmajorminor="$(basename $wp | cut -d. -f1-2)";                          \
+  case "$wpmajorminor" in                                                  \
+      4.*) tinymcemajorminor="4.8" ;;                                      \
+      *)   tinymcemajorminor="$wpmajorminor" ;;                            \
+  esac ;                                                                   \
+  curl -q https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json \
+  | jq -r ".versions | to_entries                                          \
+         | map(select (.key | startswith(\"$tinymcemajorminor\")))         \
+         | map(.value) | last"                                             \
+     | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
+  rm -rf wp-content/plugins/tinymce-advanced;                              \
+  (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
+  rm tinymce-advanced.zip;                                                 \
+  done
+
 # Manually add the wordpress-importer plugin, used in "ventilation"
 # operations. Patch it to nuke the stat() cache inbetween downloading
 # things
