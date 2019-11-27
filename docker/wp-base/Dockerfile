@@ -82,7 +82,7 @@ RUN su -s /bin/sh www-data -c " \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="4.9 5.2"
+ARG WORDPRESS_VERSION_LINEAGES="4.9 5.2 5.3"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
@@ -140,19 +140,8 @@ RUN set -e -x; for wp in /wp/*; do                                       \
     done
 
 ######################################################################
-# Symlinks
+# Symlinks in /wp
 ######################################################################
-# Major version symlinks
 # We do that last for simplicity, at a small cost in build time
-RUN set -e -x; cd /wp; for version in *; do                              \
-        major="$(echo "$version" |cut -d. -f1)";                         \
-        majorminor="$(echo "$version" |cut -d. -f1-2)";                  \
-        rm -f "$major" "$minor";                                         \
-        ln -s "$version" "$major";                                       \
-        ln -s "$version" "$majorminor";                                  \
-    done
-
-# As a backward compatibility measure / temporary hack, we support
-# sites that symlink to /wp instead of /wp/4 or /wp/5:
-RUN set -e -x; cd /wp;                                                   \
-    for file_or_dir in 4/*; do ln -s $file_or_dir .; done
+COPY symlink-wp-versions.sh /tmp
+RUN sh /tmp/symlink-wp-versions.sh && rm /tmp/symlink-wp-versions.sh
