@@ -18,25 +18,11 @@ class ActionModule(ActionBase):
 
         name = args.get('name')
 
-        # desired_state is common to all files
+        current_state = set([self._get_plugin_activation_state(name)])
         desired_state = self._get_desired_state(name, args)
-
-        # TODO: this assumes that there is always only one file, whose name
-        # is the name of the plug-in. This is not the case typically for
-        # mu-plugins.
-        current_state = set([
-            self._get_current_file_state(name),
-            self._get_plugin_activation_state(name)
-        ])
-
         to_do = desired_state - current_state
         to_undo = current_state - desired_state
-        cares_about_installation_state = bool(self._desired_installation_state(desired_state))
         cares_about_activation_state = bool(self._desired_activation_state(desired_state))
-        must_install_implicitly = ('symlinked' not in current_state and
-                                   'installed' not in current_state and
-                                   not cares_about_installation_state and
-                                   cares_about_activation_state)
 
         if 'must-use' in desired_state:
             # TODO — UNIMPLEMENTED Some must-use plug-ins have two
@@ -44,27 +30,13 @@ class ActionModule(ActionBase):
             # allow for that yet.
             return self.result
 
-        if not (to_do or to_undo):
-            return self.result
 
-        if 'installed' in to_do:
-            raise NotImplementedError('Installing "regular" (non-symlinked) plugin %s '
-                                      'not supported (yet)' % name)
-
-
-        if cares_about_activation_state and 'active' in to_undo:
+        if cares_about_activation_state and 'active' in current_state - desired_state:
             self._update_result(self._do_deactivate_plugin(name))
             if 'failed' in self.result: return self.result
 
-        if  cares_about_installation_state and (
-                'symlinked' in to_undo or 'installed' in to_undo):
-            self._update_result(self._do_rimraf_plugin(name))
-            if 'failed' in self.result: return self.result
-
-        if ( (cares_about_installation_state and 'symlinked' in to_do)
-             or must_install_implicitly):
-            self._update_result(self._do_symlink_plugin(name, 'must-use' in desired_state))
-            if 'failed' in self.result: return self.result
+        for basename in (name,):
+            self._ensure_file_state(desired_state, basename)
 
         if cares_about_activation_state and 'active' in to_do:
             self._update_result(self._do_activate_plugin(name))
@@ -72,10 +44,38 @@ class ActionModule(ActionBase):
 
         return self.result
 
-    def _get_current_file_state (self, name):
+    def _ensure_file_state (self, desired_state, basename):
+        current_state = set([self._get_current_file_state(basename)])
+        to_do = desired_state - current_state
+        to_undo = current_state - desired_state
+
+        if not (to_do or to_undo):
+            return
+
+        if 'installed' in to_do:
+            raise NotImplementedError('Installing "regular" (non-symlinked) plugin %s '
+                                      'not supported (yet)' % basename)
+
+        cares_about_activation_state = bool(self._desired_activation_state(desired_state))
+        cares_about_installation_state = bool(self._desired_installation_state(desired_state))
+        must_install_implicitly = ('symlinked' not in current_state and
+                                   'installed' not in current_state and
+                                   not cares_about_installation_state and
+                                   cares_about_activation_state)
+        if  cares_about_installation_state and (
+                'symlinked' in to_undo or 'installed' in to_undo):
+            self._update_result(self._do_rimraf_file(basename))
+            if 'failed' in self.result: return self.result
+
+        if ( (cares_about_installation_state and 'symlinked' in to_do)
+             or must_install_implicitly):
+            self._update_result(self._do_symlink_file(basename, 'must-use' in desired_state))
+            if 'failed' in self.result: return self.result
+
+    def _get_current_file_state (self, basename):
         successful_stats = []
-        paths = (self._get_plugin_path(name),
-                     self._get_muplugin_path(name))
+        paths = (self._get_plugin_path(basename),
+                     self._get_muplugin_path(basename))
         for path in paths:
             plugin_stat = self._run_action('stat', { 'path': path },
                                            record_errors=False)
@@ -100,7 +100,7 @@ class ActionModule(ActionBase):
 
         if plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
-                self._get_plugin_symlink_target(name, is_mu)):
+                self._get_plugin_symlink_target(basename, is_mu)):
                 return 'symlinked'
             else:
                 return 'symlink_damaged'
@@ -148,15 +148,15 @@ class ActionModule(ActionBase):
             raise ValueError('Plug-in %s cannot be simultaneously %s' %
                              (name, list(activation_state)))
 
-    def _do_symlink_plugin (self, name, is_mu):
+    def _do_symlink_file (self, basename, is_mu):
         return self._run_action('file', {
             'state': 'link',
-            'src': self._make_plugin_path('../../wp', name, is_mu),
-            'path': self._get_plugin_symlink_target(name, is_mu),
+            'src': self._make_plugin_path('../../wp', basename, is_mu),
+            'path': self._get_plugin_symlink_target(basename, is_mu),
             })
 
-    def _get_plugin_symlink_target (self, name, is_mu):
-        return self._make_plugin_path(self._get_wp_dir(), name, is_mu)
+    def _get_plugin_symlink_target (self, basename, is_mu):
+        return self._make_plugin_path(self._get_wp_dir(), basename, is_mu)
 
     def _do_activate_plugin (self, name):
         return self._run_wp_cli_action('plugin activate %s' % name)
@@ -164,9 +164,9 @@ class ActionModule(ActionBase):
     def _do_deactivate_plugin (self, name):
         return self._run_wp_cli_action('plugin deactivate %s' % name)
 
-    def _do_rimraf_plugin (self, name):
-        for path in (self._get_plugin_path(name),
-                     self._get_muplugin_path(name)):
+    def _do_rimraf_file (self, basename):
+        for path in (self._get_plugin_path(basename),
+                     self._get_muplugin_path(basename)):
             if 'failed' in self.result: return self.result
             self._run_action(
                 'file',
@@ -196,17 +196,17 @@ class ActionModule(ActionBase):
     def _get_wp_dir (self):
         return self._get_ansible_var('wp_dir')
 
-    def _get_plugin_path (self, name):
-        return self._make_plugin_path(self._get_wp_dir(), name, False)
+    def _get_plugin_path (self, basename):
+        return self._make_plugin_path(self._get_wp_dir(), basename, False)
 
-    def _get_muplugin_path (self, name):
-        return self._make_plugin_path(self._get_wp_dir(), name, True)
+    def _get_muplugin_path (self, basename):
+        return self._make_plugin_path(self._get_wp_dir(), basename, True)
 
-    def _make_plugin_path(self, prefix, name, is_mu):
+    def _make_plugin_path(self, prefix, basename, is_mu):
         return '%s/wp-content/%splugins/%s' % (
             prefix,
             'mu-' if is_mu else '',
-            name)
+            basename)
 
     def _get_plugin_activation_state (self, name):
         oldresult = deepcopy(self.result)
