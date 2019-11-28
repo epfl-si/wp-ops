@@ -3,6 +3,7 @@
 # There is a name clash with a module in Ansible named "copy":
 deepcopy = __import__('copy').deepcopy
 import re
+import os.path
 
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
@@ -22,21 +23,30 @@ class ActionModule(ActionBase):
         desired_state = self._get_desired_state(name, args)
         to_do = desired_state - current_state
         to_undo = current_state - desired_state
-        cares_about_activation_state = bool(self._desired_activation_state(desired_state))
-
-        if 'must-use' in desired_state:
-            # TODO — UNIMPLEMENTED Some must-use plug-ins have two
-            # files to symlink, and the structure of the code doesn't
-            # allow for that yet.
-            return self.result
-
+        desired_activation_state = self._desired_activation_state(desired_state)
+        cares_about_activation_state = bool(desired_activation_state)
 
         if cares_about_activation_state and 'active' in current_state - desired_state:
             self._update_result(self._do_deactivate_plugin(name))
             if 'failed' in self.result: return self.result
 
-        for basename in (name,):
-            self._ensure_file_state(desired_state, basename)
+        desired_installation_state = self._desired_installation_state(desired_state)
+        if (
+                (not desired_installation_state) and
+                cares_about_activation_state and
+                desired_activation_state != 'inactive'
+        ):
+            desired_installation_state = 'symlinked'  # Implicitly
+
+        if desired_installation_state:
+            # We don't second-guess mu-plugins - If the activation
+            # state is left vague, then they will be "demoted" to
+            # ordinary plug-ins.
+            desired_as_muplugin = desired_activation_state == 'must-use'
+            self._ensure_all_files_state(desired_installation_state, desired_as_muplugin)
+            if 'failed' in self.result: return self.result
+            self._ensure_all_files_state('absent', not desired_as_muplugin)
+            if 'failed' in self.result: return self.result
 
         if cares_about_activation_state and 'active' in to_do:
             self._update_result(self._do_activate_plugin(name))
@@ -44,10 +54,22 @@ class ActionModule(ActionBase):
 
         return self.result
 
-    def _ensure_file_state (self, desired_state, basename):
-        current_state = set([self._get_current_file_state(basename)])
-        to_do = desired_state - current_state
-        to_undo = current_state - desired_state
+    def _ensure_all_files_state (self, desired_state, is_mu):
+        froms = self._task.args.get('from')
+        if isinstance(froms, six.string_types):
+            froms = [froms]
+        if froms:
+            basenames = [os.path.basename(f) for f in froms]
+        else:
+            basenames = [self._task.args.get('name')]
+        for basename in basenames:
+            self._ensure_file_state(desired_state, basename, is_mu)
+            if 'failed' in self.result: return self.result
+
+    def _ensure_file_state (self, desired_state, basename, is_mu):
+        current_state = set([self._get_current_file_state(basename, is_mu)])
+        to_do = set(desired_state) - current_state
+        to_undo = current_state - set(desired_state)
 
         if not (to_do or to_undo):
             return
@@ -56,48 +78,23 @@ class ActionModule(ActionBase):
             raise NotImplementedError('Installing "regular" (non-symlinked) plugin %s '
                                       'not supported (yet)' % basename)
 
-        cares_about_activation_state = bool(self._desired_activation_state(desired_state))
-        cares_about_installation_state = bool(self._desired_installation_state(desired_state))
-        must_install_implicitly = ('symlinked' not in current_state and
-                                   'installed' not in current_state and
-                                   not cares_about_installation_state and
-                                   cares_about_activation_state)
-        if  cares_about_installation_state and (
-                'symlinked' in to_undo or 'installed' in to_undo):
-            self._update_result(self._do_rimraf_file(basename))
+        if  'symlinked' in to_undo or 'installed' in to_undo:
+            self._update_result(self._do_rimraf_file(basename, is_mu))
             if 'failed' in self.result: return self.result
 
-        if ( (cares_about_installation_state and 'symlinked' in to_do)
-             or must_install_implicitly):
-            self._update_result(self._do_symlink_file(basename, 'must-use' in desired_state))
+        if 'symlinked' in to_do:
+            self._update_result(self._do_symlink_file(basename, is_mu))
             if 'failed' in self.result: return self.result
 
-    def _get_current_file_state (self, basename):
-        successful_stats = []
-        paths = (self._get_plugin_path(basename),
-                     self._get_muplugin_path(basename))
-        for path in paths:
-            plugin_stat = self._run_action('stat', { 'path': path })
-            if 'failed' in plugin_stat:
-                raise AnsibleActionFail("Cannot stat() %s" % path)
-            file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
-            if not file_exists:
-                continue
-            else:
-                successful_stats.append({
-                    'is_mu': '/mu-plugins/' in path,
-                    'stat': plugin_stat
-                })
-
-        if not successful_stats:
-            return 'absent'
-        elif len(successful_stats) == 2:
-            raise AnsibleActionFail("Error - Both paths exist:" % str(paths))
-        else:
-            is_mu = successful_stats[0]['is_mu']
-            plugin_stat = successful_stats[0]['stat']
-
-        if plugin_stat['stat']['islnk']:
+    def _get_current_file_state (self, basename, is_mu):
+        path = self._get_symlink_path(basename, is_mu)
+        plugin_stat = self._run_action('stat', { 'path': path })
+        if 'failed' in plugin_stat:
+            raise AnsibleActionFail("Cannot stat() %s" % path)
+        file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
+        if not file_exists:
+                return 'absent'
+        elif plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
                 self._get_plugin_symlink_target(basename, is_mu)):
                 return 'symlinked'
@@ -149,10 +146,10 @@ class ActionModule(ActionBase):
         return self._run_action('file', {
             'state': 'link',
             'src': self._make_plugin_path('../../wp', basename, is_mu),
-            'path': self._get_plugin_symlink_target(basename, is_mu),
+            'path': self._get_symlink_target(basename, is_mu),
             })
 
-    def _get_plugin_symlink_target (self, basename, is_mu):
+    def _get_symlink_target (self, basename, is_mu):
         return self._make_plugin_path(self._get_wp_dir(), basename, is_mu)
 
     def _do_activate_plugin (self, name):
@@ -161,14 +158,10 @@ class ActionModule(ActionBase):
     def _do_deactivate_plugin (self, name):
         return self._run_wp_cli_action('plugin deactivate %s' % name)
 
-    def _do_rimraf_file (self, basename):
-        for path in (self._get_plugin_path(basename),
-                     self._get_muplugin_path(basename)):
-            if 'failed' in self.result: return self.result
-            self._run_action(
-                'file',
-                {'state': 'absent',
-                 'path': path}) 
+    def _do_rimraf_file (self, basename, is_mu):
+        self._run_action('file',
+                         {'state': 'absent',
+                          'path': self._get_symlink_path(basename, is_mu)})
         return self.result
 
     def _run_wp_cli_action (self, args):
@@ -190,13 +183,10 @@ class ActionModule(ActionBase):
     def _get_wp_dir (self):
         return self._get_ansible_var('wp_dir')
 
-    def _get_plugin_path (self, basename):
-        return self._make_plugin_path(self._get_wp_dir(), basename, False)
+    def _get_symlink_path (self, basename, is_mu):
+        return self._make_plugin_path('.', basename, is_mu)
 
-    def _get_muplugin_path (self, basename):
-        return self._make_plugin_path(self._get_wp_dir(), basename, True)
-
-    def _make_plugin_path(self, prefix, basename, is_mu):
+    def _make_plugin_path (self, prefix, basename, is_mu):
         return '%s/wp-content/%splugins/%s' % (
             prefix,
             'mu-' if is_mu else '',
