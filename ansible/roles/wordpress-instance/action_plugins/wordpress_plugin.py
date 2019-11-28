@@ -77,8 +77,7 @@ class ActionModule(ActionBase):
         paths = (self._get_plugin_path(basename),
                      self._get_muplugin_path(basename))
         for path in paths:
-            plugin_stat = self._run_action('stat', { 'path': path },
-                                           record_errors=False)
+            plugin_stat = self._run_action('stat', { 'path': path })
             if 'failed' in plugin_stat:
                 raise AnsibleActionFail("Cannot stat() %s" % path)
             file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
@@ -179,17 +178,14 @@ class ActionModule(ActionBase):
     def _run_shell_action (self, cmd):
         return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
 
-    def _run_action (self, action_name, args, record_errors=True):
+    def _run_action (self, action_name, args):
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins
         # at § “Action Plugins”
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
-        if record_errors:
-            self._update_result(result)
-            return self.result
-        else:
-            return result
+        self._update_result(result)
+        return self.result
 
     def _get_wp_dir (self):
         return self._get_ansible_var('wp_dir')
