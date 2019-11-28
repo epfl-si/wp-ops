@@ -135,8 +135,7 @@ class ActionModule(ActionBase):
         elif len(installation_state) == 1:
             return list(installation_state)[0]
         else:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' % (
-                name, list(installation_state)))
+            raise ValueError('Plug-in cannot be simultaneously %s' % str(list(installation_state)))
 
     def _desired_activation_state(self, desired_state):
         activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
@@ -145,8 +144,7 @@ class ActionModule(ActionBase):
         elif len(activation_state) == 1:
             return list(activation_state)[0]
         else:
-            raise ValueError('Plug-in %s cannot be simultaneously %s' %
-                             (name, list(activation_state)))
+            raise ValueError('Plug-in %s cannot be simultaneously %s' % str(list(activation_state)))
 
     def _do_symlink_file (self, basename, is_mu):
         return self._run_action('file', {
