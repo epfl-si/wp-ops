@@ -18,7 +18,14 @@ class ActionModule(ActionBase):
 
         name = args.get('name')
 
-        current_state = self._get_current_state(name)
+        # TODO: this assumes that there is always only one file, whose name
+        # is the name of the plug-in. This is not the case typically for
+        # mu-plugins.
+        current_state = set([
+            self._get_current_file_state(name),
+            self._get_plugin_activation_state(name)
+        ])
+
         desired_state = self._get_desired_state(name, args)
         to_do = desired_state - current_state
         to_undo = current_state - desired_state
@@ -63,7 +70,7 @@ class ActionModule(ActionBase):
 
         return self.result
 
-    def _get_current_state (self, name):
+    def _get_current_file_state (self, name):
         successful_stats = []
         paths = (self._get_plugin_path(name),
                      self._get_muplugin_path(name))
@@ -82,7 +89,7 @@ class ActionModule(ActionBase):
                 })
 
         if not successful_stats:
-            return set(['absent'])
+            return 'absent'
         elif len(successful_stats) == 2:
             raise AnsibleActionFail("Error - Both paths exist:" % str(paths))
         else:
@@ -92,10 +99,11 @@ class ActionModule(ActionBase):
         if plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
                 self._get_plugin_symlink_target(name, is_mu)):
-                symlink_state = 'symlinked'
+                return 'symlinked'
             else:
-                symlink_state = 'symlink_damaged'
-        return set([symlink_state, self._get_plugin_activation_state(name)])
+                return 'symlink_damaged'
+        else:
+            return 'installed'
 
     def _get_desired_state(self, name, args):
         desired_state = args.get('state', 'absent')
