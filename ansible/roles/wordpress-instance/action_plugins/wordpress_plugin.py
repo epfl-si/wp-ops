@@ -18,6 +18,9 @@ class ActionModule(ActionBase):
 
         name = args.get('name')
 
+        # desired_state is common to all files
+        desired_state = self._get_desired_state(name, args)
+
         # TODO: this assumes that there is always only one file, whose name
         # is the name of the plug-in. This is not the case typically for
         # mu-plugins.
@@ -26,7 +29,6 @@ class ActionModule(ActionBase):
             self._get_plugin_activation_state(name)
         ])
 
-        desired_state = self._get_desired_state(name, args)
         to_do = desired_state - current_state
         to_undo = current_state - desired_state
         cares_about_installation_state = bool(self._desired_installation_state(desired_state))
@@ -125,12 +127,6 @@ class ActionModule(ActionBase):
                              (name, activation_state))
 
         return desired_state
-
-    def _do_uninstall_plugin (self, name):
-        result = self._run_wp_cli_action('plugin deactivate %s' % name)
-        if 'failed' not in result:
-            result.update(self._do_rimraf_plugin(name))
-        return result
 
     def _desired_installation_state(self, desired_state):
         installation_state = desired_state.intersection(['present', 'absent', 'symlinked'])
