@@ -18,8 +18,6 @@ class ActionModule(ActionBase):
         args = self._task.args
 
         name = args.get('name')
-        if name == 'EPFL_stats_loader':
-            import sys; sys.path.append("/Users/quatrava/Library/Application Support/IntelliJIdea2019.2/python/pydevd-pycharm.egg"); import pydevd; pydevd.settrace('localhost', port=12477, stdoutToServer=True, stderrToServer=True)
 
         current_state = set([self._get_plugin_activation_state(name)])
         desired_state = self._get_desired_state(name, args)
@@ -80,7 +78,7 @@ class ActionModule(ActionBase):
             raise NotImplementedError('Installing "regular" (non-symlinked) plugin %s '
                                       'not supported (yet)' % basename)
 
-        if  'symlinked' in to_undo or 'installed' in to_undo:
+        if 'symlinked' in to_undo or 'installed' in to_undo:
             self._update_result(self._do_rimraf_file(basename, is_mu))
             if 'failed' in self.result: return self.result
 
@@ -227,5 +225,5 @@ class ActionModule(ActionBase):
                 self.result[flag_name] = oldresult[flag_name]
 
         _keep_flag('changed')
-                
+
         return self.result
