@@ -64,17 +64,38 @@ class ActionModule(ActionBase):
         return self.result
 
     def _get_current_state (self, name):
-        path = self._get_plugin_path(name)
-        plugin_stat = self._run_action('stat', { 'path': path })
-        if 'failed' in plugin_stat:
-            raise AnsibleActionFail("Cannot stat() %s" % path)
+        successful_stats = []
+        paths = (self._get_plugin_path(name),
+                     self._get_muplugin_path(name))
+        for path in paths:
+            plugin_stat = self._run_action('stat', { 'path': path },
+                                           record_errors=False)
+            if 'failed' in plugin_stat:
+                raise AnsibleActionFail("Cannot stat() %s" % path)
+            file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
+            if not file_exists:
+                continue
+            else:
+                successful_stats.append({
+                    'is_mu': '/mu-plugins/' in path,
+                    'stat': plugin_stat
+                })
 
-        if not ('stat' in plugin_stat and plugin_stat['stat']['exists']):
+        if not successful_stats:
             return set(['absent'])
-        elif plugin_stat['stat']['islnk']:
-            return set(['symlinked', self._get_plugin_activation_state(name)])
+        elif len(successful_stats) == 2:
+            raise AnsibleActionFail("Error - Both paths exist:" % str(paths))
         else:
-            return set(['installed', self._get_plugin_activation_state(name)])
+            is_mu = successful_stats[0]['is_mu']
+            plugin_stat = successful_stats[0]['stat']
+
+        if plugin_stat['stat']['islnk']:
+            if (plugin_stat['stat']['lnk_target'] ==
+                self._get_plugin_symlink_target(name, is_mu)):
+                symlink_state = 'symlinked'
+            else:
+                symlink_state = 'symlink_damaged'
+        return set([symlink_state, self._get_plugin_activation_state(name)])
 
     def _get_desired_state(self, name, args):
         desired_state = args.get('state', 'absent')
@@ -127,8 +148,11 @@ class ActionModule(ActionBase):
         return self._run_action('file', {
             'state': 'link',
             'src': self._make_plugin_path('../../wp', name, is_mu),
-            'path': self._make_plugin_path(self._get_wp_dir(), name, is_mu),
+            'path': self._get_plugin_symlink_target(name, is_mu),
             })
+
+    def _get_plugin_symlink_target (self, name, is_mu):
+        return self._make_plugin_path(self._get_wp_dir(), name, is_mu)
 
     def _do_activate_plugin (self, name):
         return self._run_wp_cli_action('plugin activate %s' % name)
@@ -153,14 +177,17 @@ class ActionModule(ActionBase):
     def _run_shell_action (self, cmd):
         return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
 
-    def _run_action (self, action_name, args):
+    def _run_action (self, action_name, args, record_errors=True):
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins
         # at § “Action Plugins”
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
-        self._update_result(result)
-        return self.result
+        if record_errors:
+            self._update_result(result)
+            return self.result
+        else:
+            return result
 
     def _get_wp_dir (self):
         return self._get_ansible_var('wp_dir')
