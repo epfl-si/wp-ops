@@ -30,6 +30,7 @@ _symlinks_muplugins_always:
   - EPFL_jahia_redirect.php
   - EPFL_quota_loader.php
   - EPFL_stats_loader.php
+  - EPFL_google_analytics_hook.php
   - epfl-functions.php
   - epfl-quota
   - epfl-stats
