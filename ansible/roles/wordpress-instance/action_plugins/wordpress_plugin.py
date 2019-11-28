@@ -103,7 +103,7 @@ class ActionModule(ActionBase):
                 return 'absent'
         elif plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
-                self._get_plugin_symlink_target(basename, is_mu)):
+                self._get_symlink_target(basename, is_mu)):
                 return 'symlinked'
             else:
                 return 'symlink_damaged'
@@ -152,12 +152,13 @@ class ActionModule(ActionBase):
     def _do_symlink_file (self, basename, is_mu):
         return self._run_action('file', {
             'state': 'link',
-            'src': self._make_plugin_path('../../wp', basename, is_mu),
-            'path': self._get_symlink_target(basename, is_mu),
+            # Beware src / path inversion, as is customary with everything symlink:
+            'src': self._get_symlink_target(basename, is_mu),
+            'path': self._get_symlink_path(basename, is_mu),
             })
 
     def _get_symlink_target (self, basename, is_mu):
-        return self._make_plugin_path(self._get_wp_dir(), basename, is_mu)
+        return self._make_plugin_path('../../wp', basename, is_mu)
 
     def _do_activate_plugin (self, name):
         return self._run_wp_cli_action('plugin activate %s' % name)
@@ -191,7 +192,7 @@ class ActionModule(ActionBase):
         return self._get_ansible_var('wp_dir')
 
     def _get_symlink_path (self, basename, is_mu):
-        return self._make_plugin_path('.', basename, is_mu)
+        return self._make_plugin_path(self._get_wp_dir(), basename, is_mu)
 
     def _make_plugin_path (self, prefix, basename, is_mu):
         return '%s/wp-content/%splugins/%s' % (
