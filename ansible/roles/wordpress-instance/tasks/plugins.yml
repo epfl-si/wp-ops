@@ -71,7 +71,7 @@
 - name: Locked installs (must-use plugin)
   wordpress_plugin:
     name: EPFL_installs_locked
-    state: '{{ ["symlinked", "must-use" if wp_is_managed else "absent" ] }}'
+    state: '{{ ["symlinked", "must-use"] if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_installs_locked.php
 
 - name: Jahia redirect tracker (must-use plugin)
