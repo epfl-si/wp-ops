@@ -18,6 +18,8 @@ class ActionModule(ActionBase):
         args = self._task.args
 
         name = args.get('name')
+        if name == 'EPFL_stats_loader':
+            import sys; sys.path.append("/Users/quatrava/Library/Application Support/IntelliJIdea2019.2/python/pydevd-pycharm.egg"); import pydevd; pydevd.settrace('localhost', port=12477, stdoutToServer=True, stderrToServer=True)
 
         current_state = set([self._get_plugin_activation_state(name)])
         desired_state = self._get_desired_state(name, args)
@@ -68,8 +70,8 @@ class ActionModule(ActionBase):
 
     def _ensure_file_state (self, desired_state, basename, is_mu):
         current_state = set([self._get_current_file_state(basename, is_mu)])
-        to_do = set(desired_state) - current_state
-        to_undo = current_state - set(desired_state)
+        to_do = set([desired_state]) - current_state
+        to_undo = current_state - set([desired_state])
 
         if not (to_do or to_undo):
             return
