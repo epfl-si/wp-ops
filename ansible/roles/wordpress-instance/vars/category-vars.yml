@@ -8,6 +8,7 @@ _category_managed_groups:
   - prod-inside
   - prod-labs
   - prod-sandbox
+  - prod-www
 
 # TODO: This is about to change (@jdelasoie) when we fetch the
 # inventory from wp-veritas
