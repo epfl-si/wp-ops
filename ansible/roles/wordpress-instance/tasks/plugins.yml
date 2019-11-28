@@ -31,7 +31,7 @@
     state:
       - symlinked
       - must-use
-    from: 
+    from:
       - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-custom-editor-menu
       - https://github.com/epfl-idevelop/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu_loader.php
 
@@ -270,19 +270,15 @@
 - name: shortcode-ui plugin
   wordpress_plugin:
     name: shortcode-ui
-    state:
-      - symlinked
-      - >-
-        {{ "inactive" if plugins_use_gutenberg else "active" }}
+    state: >-
+        {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ] }}
     from: wordpress.org/plugins
 
 - name: shortcode-ui-richtext plugin
   wordpress_plugin:
     name: shortcode-ui-richtext
-    state:
-      - symlinked
-      - >-
-        {{ "inactive" if plugins_use_gutenberg else "active" }}
+    state: >-
+        {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ] }}
     from: wordpress.org/plugins
 
 - name: EPFL plugin

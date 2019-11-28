@@ -58,13 +58,20 @@ class ActionModule(ActionBase):
         froms = self._task.args.get('from')
         if isinstance(froms, six.string_types):
             froms = [froms]
-        if froms:
-            basenames = [os.path.basename(f) for f in froms]
-        else:
+        if not froms:
+            froms = []
+
+        basenames = [os.path.basename(f) for f in froms
+                if self._is_filename(f)]
+        if not basenames:
             basenames = [self._task.args.get('name')]
         for basename in basenames:
             self._ensure_file_state(desired_state, basename, is_mu)
             if 'failed' in self.result: return self.result
+
+    def _is_filename (self, from_piece):
+        return (from_piece != "wordpress.org/plugins"
+                and not from_piece.endswith(".zip"))
 
     def _ensure_file_state (self, desired_state, basename, is_mu):
         current_state = set([self._get_current_file_state(basename, is_mu)])
