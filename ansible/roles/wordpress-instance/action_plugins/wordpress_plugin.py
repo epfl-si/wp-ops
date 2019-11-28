@@ -16,27 +16,18 @@ class ActionModule(ActionBase):
         self._task_vars = task_vars
 
         args = self._task.args
-
         name = args.get('name')
 
-        current_state = set([self._get_plugin_activation_state(name)])
-        desired_state = self._get_desired_state(name, args)
-        to_do = desired_state - current_state
-        to_undo = current_state - desired_state
-        desired_activation_state = self._desired_activation_state(desired_state)
-        cares_about_activation_state = bool(desired_activation_state)
+        current_activation_state = self._get_plugin_activation_state(name)
+        (desired_installation_state,
+         desired_activation_state) = self._get_desired_state(name, args)
 
-        if cares_about_activation_state and 'active' in current_state - desired_state:
+        if (
+                bool(desired_activation_state) and
+                'active' in set([current_activation_state]) - set([desired_activation_state])
+        ):
             self._update_result(self._do_deactivate_plugin(name))
             if 'failed' in self.result: return self.result
-
-        desired_installation_state = self._desired_installation_state(desired_state)
-        if (
-                (not desired_installation_state) and
-                cares_about_activation_state and
-                desired_activation_state != 'inactive'
-        ):
-            desired_installation_state = 'symlinked'  # Implicitly
 
         if desired_installation_state:
             # We don't second-guess mu-plugins - If the activation
@@ -48,7 +39,10 @@ class ActionModule(ActionBase):
             self._ensure_all_files_state('absent', not desired_as_muplugin)
             if 'failed' in self.result: return self.result
 
-        if cares_about_activation_state and 'active' in to_do:
+        if (
+                bool(desired_activation_state) and
+                'active' in set([desired_activation_state]) - set([current_activation_state])
+        ):
             self._update_result(self._do_activate_plugin(name))
             if 'failed' in self.result: return self.result
 
@@ -122,16 +116,25 @@ class ActionModule(ActionBase):
         if 'symlinked' in desired_state and 'installed' in desired_state:
             raise ValueError('Plug-in %s cannot be both `symlinked` and `installed`' % name)
 
-        installation_state = self._desired_installation_state(desired_state)
-        activation_state = self._desired_activation_state(desired_state)
+        installation_state = self._installation_state(desired_state)
+        activation_state = self._activation_state(desired_state)
 
-        if 'absent' == installation_state and activation_state:
+        if installation_state == 'absent' and (activation_state in ('active', 'must-use')):
             raise ValueError('Plug-in %s cannot be simultaneously absent and %s' %
-                             (name, activation_state))
+                             name, activation_state)
 
-        return desired_state
+        if activation_state in ('active', 'must-use'):
+            # Cannot activate (or make a mu-plugin) if not installed
+            if not installation_state:
+                installation_state = 'symlinked'
+        if installation_state == 'absent':
+            # Must (attempt to) deactivate prior to uninstalling
+            if not activation_state:
+                activation_state = "inactive"
 
-    def _desired_installation_state(self, desired_state):
+        return (installation_state, activation_state)
+
+    def _installation_state(self, desired_state):
         installation_state = desired_state.intersection(['present', 'absent', 'symlinked'])
         if len(installation_state) == 0:
             return None
@@ -140,7 +143,7 @@ class ActionModule(ActionBase):
         else:
             raise ValueError('Plug-in cannot be simultaneously %s' % str(list(installation_state)))
 
-    def _desired_activation_state(self, desired_state):
+    def _activation_state(self, desired_state):
         activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
         if len(activation_state) == 0:
             return None
@@ -203,7 +206,7 @@ class ActionModule(ActionBase):
     def _get_plugin_activation_state (self, name):
         oldresult = deepcopy(self.result)
         result = self._run_wp_cli_action('plugin list --format=csv')
-        if 'failed' in self.result: return self.result
+        if 'failed' in self.result: return
 
         self.result = oldresult  # We don't want "changed" to pollute the state
 
