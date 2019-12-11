@@ -65,6 +65,7 @@ RUN chmod 755 /usr/local/bin/wp
 
 # Add Polylang-related extension packages to wp-cli
 COPY ./config.yml /var/www/.wp-cli/config.yml
+COPY ./cortneyray/* /tmp/cortneyray/
 RUN mkdir /var/www/.composer; \
     chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
 RUN su -s /bin/sh www-data -c " \
@@ -73,9 +74,10 @@ RUN su -s /bin/sh www-data -c " \
         composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
     fi;                                                                   \
     wp package install https://github.com/diggy/polylang-cli.git ;        \
-    wp package install https://github.com/cortneyray/wp-cli-polylang.git; \
+    wp package install /tmp/cortneyray/; \
     wp package install https://github.com/epfl-idevelop/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
+
 
 ######################################################################
 # Install and patch WordPresses
