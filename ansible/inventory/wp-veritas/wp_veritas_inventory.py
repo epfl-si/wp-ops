@@ -50,17 +50,21 @@ class WpVeritasSite:
             return True
 
     def __init__(self, site_data):
-        self.id = site_data['_id']
-        self.url = site_data['url']
-        self.parsed_url = urlparse(site_data['url'])
-        self.tagline = site_data['tagline']
-        self.title = site_data['title']
-        self.openshift_env = site_data['openshiftEnv']
-        self.category = site_data['category']
-        self.theme = site_data['theme']
-        self.faculty = site_data['faculty']
-        self.languages = site_data['languages']
-        self.unit_id = site_data['unitId']
+        try:
+            self.id = site_data['_id']
+            self.url = site_data['url']
+            self.parsed_url = urlparse(site_data['url'])
+            self.tagline = site_data['tagline']
+            self.title = site_data['title']
+            self.openshift_env = site_data['openshiftEnv']
+            self.category = site_data['category']
+            self.theme = site_data['theme']
+            self.languages = site_data['languages']
+            self.unit_id = site_data['unitId']
+        except KeyError, e:
+            logging.debug("Error: Missing field in provided data: %s" % site_data)
+            raise e
+
 
     @property
     def instance_name(self):
@@ -132,6 +136,9 @@ class OpenShiftDeploymentConfig:
         r = requests.get(url, headers=headers, verify=True)
 
         if not r.ok:
+            if r.status_code == 401:
+                logging.debug("""You are Unauthorized on this OC instance,
+                 check/refresh your local key (by doing a "oc login") or verify the permissions.""")
             r.raise_for_status()
 
         return r.json()
@@ -173,7 +180,6 @@ class Inventory:
             "openshift_env": site.openshift_env,
             "category": site.category,
             "theme": site.theme,
-            "faculty": site.faculty,
             "languages": site.languages,
             "unit_id": site.unit_id,
             "wp_path": site.path
@@ -215,4 +221,5 @@ class Inventory:
 
 
 if __name__ == '__main__':
+    #logging.basicConfig(level=logging.DEBUG)  # may be needed
     sys.stdout.write(Inventory(WpVeritasSite.all()).to_json())
