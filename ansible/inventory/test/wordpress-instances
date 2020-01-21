@@ -31,13 +31,13 @@ class WPInventory():
 
         self._as_ansible_struct()
 
-    def categorize(self, wordpress_instance):
+    def categorize(self, wp):
         """
         Determines which Ansible group a given Wordpress goes into
 
         :param wp: Dict with WP information
         """
-        wp_env = wordpress_instance['wp_env']
+        wp_env = wp['wp_env']
 
         if wp_env == 'form':
             cat_nickname = 'formation'
@@ -142,7 +142,7 @@ class WPInventory():
 
         :param wp: Dict with WP information
         """
-        
+
         hostname = wp['wp_hostname']
         path = wp['wp_path']
 
