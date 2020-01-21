@@ -1,193 +1,159 @@
-#!/usr/bin/env perl
-#
+#!/usr/bin/python3
+import subprocess
+import shlex
+import json
+import re
 
-use warnings;
-use utf8;
 
-=head1 NAME
+targets = [{ 
+            'ssh_port': '32222',
+            'ssh_user': 'www-data',
+            'ssh_host': 'ssh-wwp.epfl.ch',
+            'remote_path': '/srv/*/*/htdocs'
+            }]
 
-wordpress-instances - Dynamic (executable) Ansible inventory of production Wordpresses
+class WPInventory():
 
-=head1 DESCRIPTION
+    def __init__(self, targets):
 
-Produces an Ansible-compatible JSON dump of all production WordPress
-instances to standard output.
+        self.nicknames_already_taken = []
+        self.wordpresses = {}
 
-Just run this script manually to find out what it does (assuming you
-have production access) - It won't do any harm by itself.
+        for target in targets:
+            for wordpress_instance in self.collect_wordpress_installs_over_ssh(target):
+                wordpress_instance = {**target, **wordpress_instance}
+                category = self.categorize(wordpress_instance)
+                
+                if category not in self.wordpresses:
+                    self.wordpresses[category] = []
+                
+                self.wordpresses[category].append(wordpress_instance)
 
-=cut
+        self.as_ansible_struct()
 
-use strict;
-use warnings;
+    def categorize(self, wordpress_instance):
+        """
+        Determines which Ansible group a given Wordpress goes into
+        """
+        wp_env = wordpress_instance['wp_env']
 
-our @targets = (
-  {
-      ssh_port => 32222,
-      ssh_user => 'www-data',
-      ssh_host => 'ssh-wwp.epfl.ch',
-      remote_paths  => qw(/srv/*/*/htdocs)
-  },
-  # Feel free to add more (in case we spin up more production OpenShifts)
-);
+        if wp_env == 'form':
+            cat_nickname = 'formation'
+        elif wp_env.startswith('unm-'):
+            cat_nickname = 'unmanaged'
+        else:
+            cat_nickname = wp_env
 
-# Determines which Ansible group a given Wordpress goes into:
-sub categorize {
-  my $opts = {@_};
-  my $wp_env = $opts->{wp_env};
-  my $cat_nickname =
-    $wp_env eq "form"       ? "formation" :
-    $wp_env =~ m/^unm-/     ? "unmanaged" :
-                              $wp_env;
-  return "prod-$cat_nickname";
-}
+        return "prod-{}".format(cat_nickname)
 
-=for Perl wizards only beyond this point =====================================
 
-=cut
+    def collect_wordpress_installs_over_ssh(self, target_dict):
 
-my $wordpresses = {};
+        cmd_to_exec = "find {} \( -type d \( -name wp-* -o -name .git -o -name *packages -o -name ansible-backup-* \) -prune -false -o -name wp-config.php \)".format(target_dict['remote_path'])
 
-# Practical Extraction...
-foreach my $target (@targets) {
-  foreach my $wordpress_instance
-    (collect_wordpress_installs_over_ssh(%$target)) {
-      my $wordpress_details = {%$target, %$wordpress_instance};
-      my $category = categorize(%$wordpress_details);
-      push @{$wordpresses->{$category}}, $wordpress_details;
-  }
-}
+        ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
+                                                                        target_dict['ssh_user'],
+                                                                        target_dict['ssh_host'],
+                                                                        cmd_to_exec)
+        args = shlex.split(ssh_cmd)
+        ssh =  subprocess.Popen(args, 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                shell=False)
 
-# ... and Report Language
-print poor_mans_json(as_ansible_struct($wordpresses)) . "\n";
+        result = ssh.stdout.readlines()
+        if result == []:
+            error = ssh.stderr.readlines()
+            raise ValueError("ERROR: {}".format(error))
 
-exit(0);  ###################################################################
+        retval = []
 
-sub collect_wordpress_installs_over_ssh {
-  my $opts = {@_};
-  $opts->{ssh_user} ||= 'www-data';
-  my $ssh_mantra = "$opts->{ssh_user}\@$opts->{ssh_host}";
-  if ($opts->{ssh_port}) {
-    $ssh_mantra = "-p $opts->{ssh_port} $ssh_mantra";
-  }
-  open(my $ssh_fd, '-|',
-       join(' ',
-            qw(ssh -xT), $ssh_mantra,
-            'find', $opts->{remote_paths},
-            # Need to shell-escape everything *twice* - once for the
-            # local bash that will parse this open('-|'), and a second
-            # time for the remote shell.
-            qw<'\(' -type d
-               '\(' -name wp-\'*\' -o -name .git -o -name \'*\'packages
-                    -o -name 'ansible-backup-*' '\)'
-               '\)' -prune -false -o -name wp-config.php>))
-    or die "Cannot ssh $ssh_mantra: $!";
+        for line in result:
+            line = line.decode().strip()
+            values = re.findall(r'/srv/([^/]*)/([^/]*)/htdocs/(.*?)/?wp-config.php$', line)
 
-  my @retval;
-  while(<$ssh_fd>) {
-    chomp;
-    do { warn "Bizarre line in $ssh_mantra: $_"; next } unless
-      my ($wp_env, $hostname, $wp_path) = m|/srv/([^/]*)/([^/]*)/htdocs/(.*?)/?wp-config.php$|;
+            if values:
+                retval.append({'wp_env': values[0][0],
+                                'wp_hostname': values[0][1],
+                                'wp_path': values[0][2]})
+            else:
+                raise ValueError("Bizarre in line {}".format(line))
 
-    push @retval,
-      { wp_env => $wp_env, wp_hostname => $hostname, wp_path => $wp_path };
-  }
-  return @retval;
-}
+        return retval
 
-sub as_ansible_struct {
-  my ($wordpresses) = @_;
 
-  foreach my $wp (flatten_wordpresses($wordpresses)) {
-    $wp->{nickname} = nickname($wp);
-  }
+    def as_ansible_struct(self):
+        # https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
 
-  # https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
-  return {
-    "all-wordpresses" => { "children" => [ "prod-wordpresses" ] },
-    "prod-wordpresses" => {
-      "children" => [ keys %$wordpresses ]
-    },
+        self.ansible_struct = {'all-wordpresses': { 'children': [ 'prod-wordpresses' ] },
+                                '_meta': { 'hostvars': {} } }
 
-    (map {
-      my $k = $_;
-      my @wordpresses = @{$wordpresses->{$k}};
-      $k => {
-        "hosts" => [ map { $_->{nickname} } @wordpresses ]
-      }
-    } (keys %$wordpresses)),
+        for category  in self.wordpresses:
+            for wp in self.wordpresses[category]:
 
-    _meta => {  # SRSLY?
-      hostvars => {
-        map {
-          my $wp = $_;
-          $wp->{nickname} => as_ansible_hostvars(%$wp)
-        } (flatten_wordpresses($wordpresses))
-      }
-    }
-  };
-}
+                wp = self.as_ansible_hostvars(wp)
 
-sub flatten_wordpresses {
-  my ($wordpresses) = @_;
-  return map { @$_ } (values %$wordpresses);
-}
+                nickname = self.nickname(wp)
 
-sub as_ansible_hostvars {
-  my $wp = {@_};
-  $wp->{ansible_python_interpreter} = "/usr/bin/python3";
-  my $retval = {};
-  while(my ($k, $v) = each %$wp) {
-    next unless $k =~ m/^(ssh|wp|ansible)_/;
-    $k =~ s/^ssh_/ansible_/;
-    $retval->{$k} = $v || '';
-  }
-  $retval->{openshift_namespace} = "wwp-prod";
-  $retval->{wp_ensure_symlink_version} = "5.2";
-  return $retval;
-}
+                if category not in self.ansible_struct:
+                    self.ansible_struct[category] = {'hosts': []}
+                
+                self.ansible_struct[category]['hosts'].append(nickname)
 
-use vars qw(%nicknames_already_taken);
-sub nickname {
-  my ($wordpress) = @_;
-  my $hostname = $wordpress->{wp_hostname};
-  $hostname =~ s|\Wepfl\.ch$||;
-  $hostname =~ s|\W|-|g;
+                self.ansible_struct['_meta']['hostvars'][nickname] = wp
+        
+        # Adding all categories as children
+        self.ansible_struct['prod-wordpresses'] = { 'children': list(self.wordpresses.keys())}
 
-  my $path = $wordpress->{wp_path};
-  my $stem;
-  if (! $path) {
-    $stem = $hostname;
-  } else {
-    $path =~ s|/$||;
-    $path =~ s|/|-|g;
-    $stem = "$hostname-$path";
-  }
+    
+    def as_ansible_hostvars(self, wp):
+        retval = {
+            'ansible_python_interpreter': '/usr/bin/python3',
+            'openshift_namespace': 'wwp-prod',
+            'wp_ensure_symlink_version': '5.2'
+        }
+        
+        for key, val in wp.items():
+            if re.match(r'^(ssh|wp|ansible)_', key):
+                key = re.sub(r'^ssh_', 'ansible_', key)
+                retval[key] = val if val is not None else ''
 
-  my ($nickname, $uniq);
-  for($nickname = $stem, $uniq = 0;
-      $nicknames_already_taken{$nickname};
-      $nickname = $stem . ++$uniq)
-    { }
-  $nicknames_already_taken{$nickname} = 1;
-  return $nickname;
-}
+        return retval
 
-sub poor_mans_json {
-  my ($struct, $indent_lvl) = @_;
-  if (! ref($struct)) {
-    (my $retval = $struct) =~ s/([\"])/\$1/g;
-    return qq("$retval");
-  }
-  $indent_lvl ||= 0;
-  my @recursive_snippets = (ref($struct) eq "ARRAY")     ?
-    map { poor_mans_json($_, $indent_lvl + 1) } @$struct :
-    map {
-      my ($k, $v) = ($_, $struct->{$_});
-      poor_mans_json($k) . ": " . poor_mans_json($v, $indent_lvl + 1);
-    } (keys %$struct);
-  my ($nl, $innernl) = map { "\n" . "  " x $_ } ($indent_lvl, $indent_lvl + 1);
-  return sprintf(
-    (ref($struct) eq "HASH" ? "{%s}" : "[%s]"),
-    ($innernl . join(",$innernl", @recursive_snippets) . $nl));
-}
+
+    def nickname(self, wp):
+        hostname = wp['wp_hostname']
+        path = wp['wp_path']
+
+        hostname = re.sub(r'\Wepfl\.ch$', '', hostname)
+        hostname = re.sub(r'\W', '-', hostname)
+
+        if path == "":
+            steam = hostname
+        else:
+            path = re.sub(r'\/$', '', path)
+            path = re.sub(r'\/', '-', path)
+            steam = "{}-{}".format(hostname, path)
+        
+        uniq = 0
+        nickname = steam
+
+        # We unsure to have a uniq nickname for WP instance
+        while nickname in self.nicknames_already_taken:
+            uniq += 1
+            nickname = "{}{}".format(steam, uniq)
+        
+        self.nicknames_already_taken.append(nickname)
+
+        return nickname
+
+
+    def get_inventory(self):
+        return self.ansible_struct
+
+
+if __name__ == '__main__':
+
+    inventory = WPInventory(targets)
+
+    print(json.dumps(inventory.get_inventory(), sort_keys=True, indent=4))
