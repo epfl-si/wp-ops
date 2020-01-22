@@ -15,7 +15,7 @@ class ActionModule(ActionBase):
         self._tmp = tmp
         self._task_vars = task_vars
 
-        self.plugin_name = args.get('name')
+        self._plugin_name = self._task.args.get('name')
 
         current_activation_state = self._get_plugin_activation_state()
         (desired_installation_state,
@@ -148,14 +148,14 @@ class ActionModule(ActionBase):
             raise TypeError("Unexpected value for `state`: %s" % desired_state)
 
         if 'symlinked' in desired_state and 'installed' in desired_state:
-            raise ValueError('Plug-in %s cannot be both `symlinked` and `installed`' % self.plugin_name)
+            raise ValueError('Plug-in %s cannot be both `symlinked` and `installed`' % self._plugin_name)
 
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
         if installation_state == 'absent' and (activation_state in ('active', 'must-use')):
             raise ValueError('Plug-in %s cannot be simultaneously absent and %s' %
-                             self.plugin_name, activation_state)
+                             self._plugin_name, activation_state)
 
         if activation_state in ('active', 'must-use'):
             # Cannot activate (or make a mu-plugin) if not installed
@@ -228,14 +228,14 @@ class ActionModule(ActionBase):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('plugin activate %s' % self.plugin_name)
+        return self._run_wp_cli_action('plugin activate %s' % self._plugin_name)
 
 
     def _do_deactivate_plugin (self):
         """
         Uses WP-CLI to deactivate plugin
         """
-        return self._run_wp_cli_action('plugin deactivate %s' % self.plugin_name)
+        return self._run_wp_cli_action('plugin deactivate %s' % self._plugin_name)
 
 
     def _do_rimraf_file (self, basename, is_mu):
@@ -330,7 +330,7 @@ class ActionModule(ActionBase):
         for line in result["stdout"].splitlines()[1:]:
             fields = line.split(',')
             if len(fields) < 2: continue
-            if fields[0] == self.plugin_name: return fields[1]
+            if fields[0] == self._plugin_name: return fields[1]
         return 'inactive'
 
 
