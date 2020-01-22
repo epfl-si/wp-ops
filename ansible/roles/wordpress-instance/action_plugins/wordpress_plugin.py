@@ -336,7 +336,9 @@ class ActionModule(ActionBase):
 
     def _get_ansible_var (self, name):
         """
+        Returns Ansible var value
 
+        :param name: Var name
         """
         unexpanded = self._task_vars.get(name, None)
         if unexpanded is None:
@@ -344,7 +346,13 @@ class ActionModule(ActionBase):
         else:
             return self._templar.template(unexpanded)
 
+
     def _update_result (self, result):
+        """
+        Updates result dict
+
+        :param result: dict to update with
+        """
         oldresult = deepcopy(self.result)
         self.result.update(result)
 
