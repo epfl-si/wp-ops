@@ -48,44 +48,38 @@ SQL_CREATE_USER
     if wp eval '1;' 2>&1 |grep "wp core install"; then
         wp_hostname="$(pwd | cut -d/ -f4)"
         wp_path="$(pwd | cut -d/ -f6-)"
-        ( set -x;
+        ( set -e -x
           wp core install --url="http://$wp_hostname/$wp_path" \
              --title="$(basename "$(pwd)")" \
              --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
              --wpversion="$WORDPRESS_VERSION"
+
+          # Configure permalinks
+          wp rewrite structure '/%postname%/' --hard
+
+          # Configure TimeZone
+          wp option update timezone_string Europe/Zurich
+          # Configure Time Format 24H
+          wp option update time_format H:i
+          # Configure Date Format d.m.Y
+          wp option update date_format d.m.Y
+
+          # Add french for the admin interface
+          wp language core install fr_FR
+
+          # remove unfiltered_upload capability. Will be reactivated during
+          # export if needed.
+          wp cap remove administrator unfiltered_upload
+
+          # Disable avatars for security reason. Because a call to gravatar.com is done when user is logged and
+          # hash with email address associated to account is given
+          wp option update show_avatars ''
+
         )
         echo "http://$wp_hostname/$wp_path"
     fi
 
     ( set -x; wp eval '1;' )
-
-    # Plugins jam
-    [ -d 'wp-content/mu-plugins' ] || mkdir 'wp-content/mu-plugins'
-    for muplugin in $(ls /wp/wp-content/mu-plugins | egrep -v locked); do 
-        echo "Creating symling for must-use plugin $muplugin:"
-        ln -s ../../wp/wp-content/mu-plugins/$muplugin wp-content/mu-plugins/$muplugin;
-    done
-
-    [ -d 'wp-content/plugins' ] || mkdir 'wp-content/plugins'
-    for plugin in $(ls /wp/wp-content/plugins); do 
-        echo "Creating symling for plugin $plugin:"
-        ln -s ../../wp/wp-content/plugins/$plugin wp-content/plugins/$plugin;
-    done
-    # polylang is a dependency for some other plugins, activate it first !
-    wp plugin activate polylang
-    # Try to activate all others newly linked plugins
-    for plugin in $(wp plugin list --status=inactive --field=name | egrep -v "epfl-menus|mainwp-child" ); do 
-        wp plugin activate $plugin
-    done
-
-    # Themes jam
-    [ -d 'wp-content/themes' ] || mkdir 'wp-content/themes'
-    for theme in $(ls /wp/wp-content/themes); do 
-        echo "Creating symling for theme $theme:"
-        ln -s ../../wp/wp-content/themes/$theme wp-content/themes/$theme; 
-    done
-    # As the default theme twentynineteen is removed, we have to activate another theme
-    wp theme activate wp-theme-light
 
 }
 
