@@ -98,7 +98,9 @@ RUN set -x;                                                              \
 
 RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
           /wp/*/wp-content/plugins/hello.php                             \
-    /wp/*/wp-content/themes/twenty*
+    /wp/*/wp-content/themes/twenty*                                      \
+    /wp/*/setup-config.php /wp/*/wp-activate.php                         \
+    /wp/*/wp-config-sample.php
 
 ADD wordpress-anywhere.patch /tmp/
 RUN set -e -x;                                                           \
