@@ -7,7 +7,10 @@ class WPInventory():
 
     def __init__(self, targets, prune_elements, env_prefix):
         """
+        Class constructor
 
+        :param targets: Dict with options to connect to env on which doing inventory.
+                        Contains following keys: ssh_port, ssh_user, ssh_host, remote_path
         :param prune_elements: Dict with elements to prune while using 'find' command.
                                 Can have 'name' and 'path' keys with a list of element to prune
         :param env_prefix: Prefix to use for environement (prod, test, dev)
@@ -52,7 +55,8 @@ class WPInventory():
         Use SSH to get all installed WordPress website information.
 
         :param target_dict: dict containing information about target to connect to get WP instances information.
-        :param prune_list: Name of elements to prune while using 'find' command.
+        :param prune_elements: Dict with elements to prune while using 'find' command.
+                                Can have 'name' and 'path' keys with a list of element to prune
         """
 
         # We assume we always have 'name' key inside prune_elements dict
