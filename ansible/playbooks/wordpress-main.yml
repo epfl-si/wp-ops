@@ -13,8 +13,8 @@
 
 # In this play, "hosts" are not really hosts; rather, they are
 # WordPress instances. See the list in
-# ../inventory/test/wordpress-instances (a plain file) and
-# ../inventory/prod/wordpress-instances (an executable script, that lists
+# ../inventory/test/wordpress-instances and
+# ../inventory/prod/wordpress-instances (executable scripts, that lists
 # them on standard output)
 - name: WordPress instances
   hosts: all-wordpresses
