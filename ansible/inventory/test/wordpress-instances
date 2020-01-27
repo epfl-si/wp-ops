@@ -3,7 +3,7 @@
 import sys
 import os
 # To be able to include package wp_inventory in parent directory
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 from wp_inventory import WPInventory
 import json
