@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+import sys
+# To be able to include package wp_inventory in parent directory
+sys.path.append("..")
+
 from wp_inventory import WPInventory
 import json
 
@@ -10,6 +14,7 @@ targets = [{
             'remote_path': '/srv'
             }]
 
+# Elements to prune while using "find" command to get WordPress instances
 prune_elements = { 
                 'name': ['wp-*', '.git', '*packages', 'jahia-data', 'ansible-backup-*'],
                 'path': ['/srv/lvenries', '/srv/jenkins']
