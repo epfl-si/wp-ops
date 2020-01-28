@@ -330,7 +330,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-404
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-404
 
 - name: ewww-image-optimizer plugin
   wordpress_plugin:
