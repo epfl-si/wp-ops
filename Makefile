@@ -10,10 +10,12 @@ checkout:
 	$(MAKE) k8s-backup/wwp || true
 
 k8s-backup/wwp-test:
-	git clone keybase://team/epfl_wp_test/k8s-backup
+	mkdir k8s-backup || true
+	cd k8s-backup && git clone keybase://team/epfl_wp_test/k8s-backup
 
 k8s-backup/wwp:
-	git clone keybase://team/epfl_wp_prod/k8s-backup
+	mkdir k8s-backup || true
+	cd k8s-backup && git clone keybase://team/epfl_wp_prod/k8s-backup
 
 _BACKUP_REPOS = $(patsubst %, k8s-backup/%, $(BACKUP_NAMESPACES))
 _BACKUP_YAMLS = $(patsubst %, %/configmaps.yaml, $(_BACKUP_REPOS))
