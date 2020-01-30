@@ -20,15 +20,15 @@ k8s-backup/wwp:
 _BACKUP_REPOS = $(patsubst %, k8s-backup/%, $(BACKUP_NAMESPACES))
 _BACKUP_YAMLS = $(patsubst %, %/configmaps.yaml, $(_BACKUP_REPOS))
 
+COMMIT_MSG = "Automatic commit"
+
 .PHONY: gitbackup
 gitbackup: $(_BACKUP_YAMLS)
-	set -e -x;                                                                \
-        for keybase_repo in $(_BACKUP_REPOS); do                                  \
-	  (cd $$keybase_repo;                                                     \
-	   git add *.yaml;                                                        \
-	   git commit -m "`echo "Automatic commit\n\nmade with $(MAKE)"`" *.yaml; \
-	   git push);                                                             \
+	set -e -x;                                                                         \
+        for keybase_repo in $(_BACKUP_REPOS); do                                           \
+	  (cd $$keybase_repo;                                                              \
+	   oc get -o yaml -n "`basename "$$keybase_repo"`" configmaps > configmaps.yaml;   \
+	   git add *.yaml;                                                                 \
+	   git commit -m "`echo "$(COMMIT_MSG)\n\nmade with $(MAKE)"`" *.yaml || true;     \
+	   git push);                                                                      \
 	done
-
-k8s-backup/%/configmaps.yaml:
-	oc get -o yaml -n $* configmaps > $@
