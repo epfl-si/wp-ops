@@ -6,8 +6,8 @@ BACKUP_NAMESPACES = wwp wwp-test
 
 .PHONY: checkout
 checkout:
-	$(MAKE) wp-k8s-backup/wwp-test || true
-	$(MAKE) wp-k8s-backup/wwp || true
+	$(MAKE) k8s-backup/wwp-test || true
+	$(MAKE) k8s-backup/wwp || true
 
 k8s-backup/wwp-test:
 	git clone keybase://team/epfl_wp_test/k8s-backup
