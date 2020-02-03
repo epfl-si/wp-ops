@@ -22,6 +22,8 @@ class ActionModule(WordPressActionModule):
         
         self._plugin_name = self._task.args.get('name')
 
+        self._log("=== {} ===".format(self._plugin_name))
+
         current_activation_state = self._get_plugin_activation_state()
         (desired_installation_state,
          desired_activation_state) = self._get_desired_state()
@@ -48,13 +50,15 @@ class ActionModule(WordPressActionModule):
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
             
-            with open('/tmp/ansible/log.lulu', 'a') as f:
-                f.write("Activating plugin\n")
+            
             self._update_result(self._do_activate_plugin())
             if 'failed' in self.result: return self.result
 
         return self.result
 
+    def _log(self, str):
+        with open('/tmp/ansible/log', 'a') as f:
+            f.write("{}\n".format(str))
 
     def _ensure_all_files_state (self, desired_state, is_mu):
         """
@@ -63,16 +67,20 @@ class ActionModule(WordPressActionModule):
         :param desired_state: can be 'installed', 'symlinked', ...
         :param is_mu: Boolean to tell if plugin is a MU-Plugin
         """
+
+        self._log("_ensure_all_files_state")
         froms = self._task.args.get('from')
         if isinstance(froms, six.string_types):
             froms = [froms]
         if not froms:
             froms = []
-
+        
         basenames = [os.path.basename(f) for f in froms
                 if self._is_filename(f)]
         if not basenames:
-            basenames = [self._task.args.get('name')]
+            basenames = [self._plugin_name]
+
+        self._log("basenames: {}".format(basenames))
 
         # Going through each files/folder for plugin
         for basename in basenames:
