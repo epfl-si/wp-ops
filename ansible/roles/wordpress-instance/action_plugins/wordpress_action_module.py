@@ -33,6 +33,7 @@ class WordPressActionModule(ActionBase):
 
         :param cmd: Command to execute.
         """
+        
         return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
 
 
@@ -43,8 +44,7 @@ class WordPressActionModule(ActionBase):
         :param action_name: Ansible module name to use
         :param args: dict with arguments to give to module
         """
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins
-        # at § “Action Plugins”
+        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)

@@ -3,7 +3,12 @@
 # There is a name clash with a module in Ansible named "copy":
 deepcopy = __import__('copy').deepcopy
 import re
+import sys
 import os.path
+import json
+
+# To be able to include package wp_inventory in parent directory
+sys.path.append(os.path.dirname(__file__))
 
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
@@ -12,6 +17,7 @@ from wordpress_action_module import WordPressActionModule
 
 class ActionModule(WordPressActionModule):
     def run (self, tmp=None, task_vars=None):
+
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
         self._plugin_name = self._task.args.get('name')
