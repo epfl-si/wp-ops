@@ -47,6 +47,9 @@ class ActionModule(WordPressActionModule):
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
+            
+            with open('/tmp/ansible/log.lulu', 'a') as f:
+                f.write("Activating plugin\n")
             self._update_result(self._do_activate_plugin())
             if 'failed' in self.result: return self.result
 

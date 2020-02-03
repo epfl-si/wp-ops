@@ -33,7 +33,8 @@ class WordPressActionModule(ActionBase):
 
         :param cmd: Command to execute.
         """
-        
+        with open('/tmp/ansible/log.lulu', 'a') as f:
+            f.write("{}\n".format(cmd))
         return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
 
 
