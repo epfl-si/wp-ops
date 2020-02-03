@@ -88,15 +88,6 @@ class ActionModule(WordPressActionModule):
             if 'failed' in self.result: return self.result
 
 
-    def _is_filename (self, from_piece):
-        """
-        Tells if a path is a filename or not.
-
-        :param from_piece: string describing plugin source.
-        """
-        return (from_piece != "wordpress.org/plugins"
-                and not from_piece.endswith(".zip"))
-
 
     def _ensure_file_state (self, desired_state, basename, is_mu):
         """
