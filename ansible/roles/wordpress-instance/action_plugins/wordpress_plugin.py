@@ -79,6 +79,8 @@ class ActionModule(ActionBase):
         :param from_piece: string describing plugin source.
         """
         return (from_piece != "wordpress.org/plugins"
+                # check if match a github repo
+                and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
                 and not from_piece.endswith(".zip"))
 
 
