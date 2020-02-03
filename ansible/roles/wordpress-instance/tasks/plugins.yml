@@ -232,7 +232,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-settings
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-settings
 
 - name: custom_breadcrumb option for EPFL-settings plugin
   wordpress_option:

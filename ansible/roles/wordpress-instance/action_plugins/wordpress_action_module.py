@@ -73,13 +73,13 @@ class WordPressActionModule(ActionBase):
         else:
             return self._templar.template(unexpanded)
 
+
     def _is_filename (self, from_piece):
         """
-        Tells if a path is a filename or not.
+        Tells if a path is a filename/folder name or not.
 
         :param from_piece: string describing plugin source.
         """
-        self._log(re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece))
         return (from_piece != "wordpress.org/plugins"
                 # check if match a github repo
                 and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
