@@ -1,6 +1,32 @@
 - include_vars: mgmt-vars.yml
+  tags: always
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
+  tags: always
 - include_vars: image-vars.yml              # For mgmt_image_name
+  tags: always
+- include_vars: ../../../vars/persistent-ressources.yml
+  tags: always
+
+- name: "PersistentVolumeClaim"
+  connection: local
+  openshift:
+    state: latest
+    kind: PersistentVolumeClaim
+    name: "{{openshift_pvc_name}}"
+    namespace: "{{openshift_namespace}}"
+    apiVersion: v1
+    metadata:
+      name: '{{openshift_pvc_name}}'
+      annotations:
+        volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+         requests:
+           storage: 250Gi
+
+  tags: pvc
 
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
   openshift:
