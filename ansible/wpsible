@@ -82,6 +82,10 @@ while [ "$#" -gt 0 ]; do
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
+            shift ;; 
+        --connector)
+            export ANSIBLE_CONNECTION_MODE=$2
+            shift 
             shift ;;
         *)
             ansible_args+=("$1")

@@ -13,7 +13,7 @@ cluster_ip = "128.178.222.83"
 
 
 port = 2222
-connection_type= "ssh"
+connection_type= subprocess.check_output('echo $ANSIBLE_CONNECTION_MODE', shell=True).decode('utf-8').replace('\n','')
 
 def connector_info():
     if connection_type == "ssh":
