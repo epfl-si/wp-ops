@@ -11,6 +11,36 @@ pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" 
 pod_name= pod_name.decode('utf-8').replace('\n','')
 cluster_ip = "128.178.222.83"
 
+
+port = 2222
+connection_type= "ssh"
+
+def connector_info():
+    if connection_type == "ssh":
+        return {
+                   "ansible_python_interpreter": "python3",
+                   "ansible_connection": "ssh",
+                   "ansible_port": port,
+                   "ansible_host": "localhost",
+                   "ansible_user":"root",
+                   "ansible_become": "true",
+                   "ansible_become_user": "www-data",
+                   "ansible_become_method": "su"
+                }
+    elif connection_type == "oc":
+        return {
+                   "ansible_python_interpreter": "python3",
+                   "ansible_connection": "oc",
+                   "ansible_host": "localhost",
+                   "ansible_user":"root",
+                   "ansible_oc_namespace": "wwp-int",
+                   "ansible_oc_pod": "%(pod_name)s" % {"pod_name": pod_name},
+                   "ansible_become": "true",
+                   "ansible_become_user": "www-data",
+                   "ansible_become_method": "su"
+                }
+
+
 def limit_hosts(inv,nb):
     """ returns a valid inventory with at most nb instances per group """    
 
@@ -33,15 +63,7 @@ def bkp_to_dict():
     last_site=""
     last_namespace=""
     inv["all-wordpresses"]={"children":["wordpress_instances_test_blue"]}
-    inv["wordpress_instances_test_blue"]={"vars":{
-                   "ansible_python_interpreter": "python3",
-                   "ansible_connection": "oc",
-                   "ansible_oc_namespace": "wwp-int",
-                   "ansible_oc_pod": "%(pod_name)s" % {"pod_name": pod_name},
-                   "ansible_become": "true",
-                   "ansible_become_user": "www-data",
-                   "ansible_become_method": "su"
-    }, "children":[]}
+    inv["wordpress_instances_test_blue"]={"vars":connector_info(), "children":[]}
     inv["_meta"]={}
 
     for path in ls_list_raw:
@@ -62,6 +84,13 @@ def bkp_to_dict():
                if len(backups[last_site]) > 1:
                    hostvars["restore_archive_name"]= backups[last_site][0]
                    hostvars["restore_sql_name"]= backups[last_site][1]
+                   archive_id= backups[last_site][0].split(".")[0]
+                   sql_id= backups[last_site][1].split(".")[0]
+                   if archive_id != sql_id:
+                       f = open("bad_archives.txt", "a")
+                       f.write(last_site+ " :: "+backups[last_site][0] + " -- "+ backups[last_site][1]+"\n")
+                       f.close()
+
                else:
                    hostvars["restore_archive_name"]= ""
                    hostvars["restore_sql_name"]= ""
@@ -147,4 +176,4 @@ def generate_inventory(sorted= True, limit=0, max_depth=-1):
     return inventory
     
 
-generate_inventory(limit=5, max_depth=1)
+generate_inventory()

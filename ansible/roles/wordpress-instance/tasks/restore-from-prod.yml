@@ -2,6 +2,15 @@
 
 - include_vars: restore-vars.yml
 
+
+- name: copy ssh host var
+  delegate_to: 127.0.0.1
+  shell:
+    cmd: |
+      PODNAME=$(oc get pods -o name |grep mgmt | cut -d "/" -f2 |head -1)
+      oc exec $PODNAME -- bash -c 'echo "export DB_HOST=$DB_HOST export DB_USER=$DB_USER export DB_PASS=$DB_PASS"'
+  register: localcmd
+
 # Create folder structure if needed, and only during a restore procedure from backup folders
 - name: directories
   file:  
@@ -75,6 +84,7 @@
 - name: Create databases & wp-config files for wordpress instances [IF NEEDED]
   shell:
     cmd: |
+       {{localcmd.stdout}}
        mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -e "CREATE DATABASE IF NOT EXISTS {{ db_name }}"
        {{wp_cli_command }} config create --dbname={{db_name}} --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --extra-php << "PHP"
        define('WP_CONTENT_DIR', '{{wp_dir}}/wp-content');
