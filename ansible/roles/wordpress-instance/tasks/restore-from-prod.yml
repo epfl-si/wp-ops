@@ -120,9 +120,7 @@
 - name: reactivate plugins
   shell:
     cmd: |
-      {{wp_cli_command}} plugin deactivate epfl
-      {{wp_cli_command}} plugin deactivate polylang
-      {{wp_cli_command}} plugin activate polylang
-      {{wp_cli_command}} plugin activate epfl
+      {{wp_cli_command}} plugin deactivate epfl epfl-menus polylang
+      {{wp_cli_command}} plugin activate polylang epfl-menus epfl ||true
   when: restore_backup_folder is defined
 
