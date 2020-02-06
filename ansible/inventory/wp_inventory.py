@@ -106,7 +106,7 @@ class WPInventory():
             if values:
                 # Recovering instance details
                 details = self._instance_details(target_dict, line.replace('wp-config.php', ''))
-                
+
                 retval.append({'wp_env': values[0][0],
                                 'wp_hostname': values[0][1],
                                 'wp_path': values[0][2],
@@ -131,6 +131,10 @@ class WPInventory():
                           'plugin:epfl_accred:unit',
                           'epfl:site_category',
                           'current_theme']
+
+        # Default value for options
+        for option_name in options_to_get:
+            details['options'][option_name] = None
 
         try:
             instance_options = self._exec_ssh(target_dict, 'wp option list --path={} --format=csv --skip-themes --skip-plugins'.format(path_to_instance))
