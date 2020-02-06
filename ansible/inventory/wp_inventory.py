@@ -50,6 +50,32 @@ class WPInventory():
         return "{}-{}".format(self._env_prefix, cat_nickname)
 
 
+    def _exec_ssh(self, target_dict, cmd):
+        """
+        Executes a SSH command using information contained in target_dict dictionnary.
+        Returns result.
+
+
+        """
+        ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
+                                                                        target_dict['ssh_user'],
+                                                                        target_dict['ssh_host'],
+                                                                        cmd)
+        args = shlex.split(ssh_cmd)
+        ssh =  subprocess.Popen(args, 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                shell=False)
+
+        result = ssh.stdout.readlines()
+
+        if result == []:
+            error = ssh.stderr.readlines()
+            raise ValueError("ERROR: {}".format(error))
+    
+        return result
+
+
     def _collect_wordpress_installs_over_ssh(self, target_dict, prune_elements):
         """
         Use SSH to get all installed WordPress website information.
@@ -69,21 +95,8 @@ class WPInventory():
 
         cmd_to_exec = "find {} \( -type d \( {} \) -prune -false -o -name wp-config.php \)".format(target_dict['remote_path'], prune_options)
 
-        ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
-                                                                        target_dict['ssh_user'],
-                                                                        target_dict['ssh_host'],
-                                                                        cmd_to_exec)
-        args = shlex.split(ssh_cmd)
-        ssh =  subprocess.Popen(args, 
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                shell=False)
-
-        result = ssh.stdout.readlines()
-        if result == []:
-            error = ssh.stderr.readlines()
-            raise ValueError("ERROR: {}".format(error))
-
+        result = self._exec_ssh(target_dict, cmd_to_exec)
+        
         retval = []
 
         for line in result:
@@ -91,13 +104,52 @@ class WPInventory():
             values = re.findall(r'/srv/([^/]*)/([^/]*)/htdocs/(.*?)/?wp-config.php$', line)
 
             if values:
+                # Recovering instance details
+                details = self._instance_details(target_dict, line.replace('wp-config.php', ''))
+                
                 retval.append({'wp_env': values[0][0],
                                 'wp_hostname': values[0][1],
-                                'wp_path': values[0][2]})
+                                'wp_path': values[0][2],
+                                'wp_details': details})
             else:
                 raise ValueError("Bizarre in line {}".format(line))
 
         return retval
+
+
+    def _instance_details(self, target_dict, path_to_instance):
+        """
+        Gathers more information about a WordPress install and return a dict 
+
+        :param target_dict: dict containing information about target to connect to get WP instances information.
+        :param path_to_instance: Path to access instance
+        """
+        details = {'options': {}}
+
+        # List of options to get from Instance
+        options_to_get = ['plugin:epfl_accred:unit_id', 
+                          'plugin:epfl_accred:unit',
+                          'epfl:site_category',
+                          'current_theme']
+
+        try:
+            instance_options = self._exec_ssh(target_dict, 'wp option list --path={} --format=csv --skip-themes --skip-plugins'.format(path_to_instance))
+
+            # Looping through instance options to find the ones we want
+            for instance_option in instance_options:
+
+                # Extracting information
+                values = re.findall(r'^([\w:_-]+),\"?(.+)\"?$', instance_option.decode().strip())
+
+                if values and values[0][0] in options_to_get:
+                    # We save option and remove potential " around the string.
+                    details['options'][values[0][0]] = (values[0][1]).strip('"')
+
+        except Exception as e:
+            details['options']['_error'] = 'Error getting options: {}'.format(e)
+
+        
+        return details
 
 
     def _as_ansible_struct(self):
