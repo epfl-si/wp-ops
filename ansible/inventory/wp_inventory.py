@@ -130,7 +130,7 @@ class WPInventory():
         options_to_get = ['plugin:epfl_accred:unit_id', 
                           'plugin:epfl_accred:unit',
                           'epfl:site_category',
-                          'current_theme']
+                          'siteurl']
 
         # Default value for options
         for option_name in options_to_get:
