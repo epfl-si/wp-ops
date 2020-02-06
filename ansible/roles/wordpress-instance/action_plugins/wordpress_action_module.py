@@ -34,8 +34,7 @@ class WordPressActionModule(ActionBase):
 
         :param cmd: Command to execute.
         """
-        with open('/tmp/ansible/log.lulu', 'a') as f:
-            f.write("{}\n".format(cmd))
+        
         return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
 
 
@@ -84,6 +83,11 @@ class WordPressActionModule(ActionBase):
                 # check if match a github repo
                 and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
                 and not from_piece.endswith(".zip"))
+
+
+    def _log(self, str):
+        with open('/tmp/ansible.log', 'a') as f:
+            f.write("{}\n".format(str))
 
 
     def _update_result (self, result):

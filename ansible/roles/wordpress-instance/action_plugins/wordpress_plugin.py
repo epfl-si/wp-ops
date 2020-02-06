@@ -22,8 +22,6 @@ class ActionModule(WordPressActionModule):
         
         self._plugin_name = self._task.args.get('name')
 
-        self._log("=== {} ===".format(self._plugin_name))
-
         current_activation_state = self._get_plugin_activation_state()
         (desired_installation_state,
          desired_activation_state) = self._get_desired_state()
@@ -56,10 +54,6 @@ class ActionModule(WordPressActionModule):
 
         return self.result
 
-    def _log(self, str):
-        with open('/tmp/ansible/log', 'a') as f:
-            f.write("{}\n".format(str))
-
     def _ensure_all_files_state (self, desired_state, is_mu):
         """
         Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
@@ -68,7 +62,6 @@ class ActionModule(WordPressActionModule):
         :param is_mu: Boolean to tell if plugin is a MU-Plugin
         """
 
-        self._log("_ensure_all_files_state")
         froms = self._task.args.get('from')
         if isinstance(froms, six.string_types):
             froms = [froms]
@@ -79,8 +72,6 @@ class ActionModule(WordPressActionModule):
                 if self._is_filename(f)]
         if not basenames:
             basenames = [self._plugin_name]
-
-        self._log("basenames: {}".format(basenames))
 
         # Going through each files/folder for plugin
         for basename in basenames:
