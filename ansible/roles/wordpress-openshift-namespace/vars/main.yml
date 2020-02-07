@@ -2,6 +2,7 @@
 # vars file for wordpress-openshift-namespace
 
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
+openshift_is_wp_int: "{{ openshift_namespace == 'wwp-int' }}"
 openshift_registry_tag: "{{ 'prod' if openshift_is_production else 'latest' }}"
 
 # for imageStream authentification
