@@ -155,12 +155,8 @@
     from: wordpress.org/plugins
 
 - name: mainwp_child_uniqueId option
-  wordpress_option:
-    name: mainwp_child_uniqueId
-    value: "{{ plugin_mainwp_child_uniqueid }}"
-    # TODO: this value has "autoload: no" in
-    # jahia2wp/data/plugins/generic/mainwp-child/config-plugin.yml ;
-    # not sure what it means (if anything)
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_mainwp_child_options }}"
 
 - name: Tequila plugin
   wordpress_plugin:
@@ -212,15 +208,9 @@
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/cache-control
 
 - name: Cache-Control options
-  wordpress_option:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-  with_items:
-    - name: cache_control_front_page_max_age
-      value: "{{ plugin_cache_control_front_page_max_age }}"
-    - name: cache_control_pages_max_age
-      value: "{{ plugin_cache_control_pages_max_age }}"
-
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_cache_control_options }}"
+    
 - name: varnish-http-purge plugin
   wordpress_plugin:
     name: varnish-http-purge

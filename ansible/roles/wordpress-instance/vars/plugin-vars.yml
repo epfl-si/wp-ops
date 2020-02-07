@@ -31,11 +31,17 @@ plugins_for_inside_category: '{{ ["symlinked", "active"] if wp_env == "inside" e
 #### Plugins Configuration
 
 # Main-WP Child
-plugin_mainwp_child_uniqueid: "WinterIsComing"
+plugin_mainwp_child_options:
+  - name: mainwp_child_uniqueId
+    value: 'WinterIsComing'
 
 # Cache Control
-plugin_cache_control_front_page_max_age: 300
-plugin_cache_control_pages_max_age: 300
+plugin_cache_control_options:
+  - name: cache_control_front_page_max_age
+    value: 300
+  - name: cache_control_pages_max_age
+    value: 300
+
 
 # WP Media Folder
 plugin_wpmf_options:
