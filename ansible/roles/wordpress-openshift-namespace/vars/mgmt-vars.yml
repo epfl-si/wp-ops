@@ -1,6 +1,8 @@
 # See also ssh keys and more in
 # ../../../hosts-{dev,prod}/group_vars/openshift-namespaces-*
 
+mgmt_app_name: mgmt-test
+
 mgmt_service_account: "{{ openshift_namespace }}"
 
 mgmt_access_list:

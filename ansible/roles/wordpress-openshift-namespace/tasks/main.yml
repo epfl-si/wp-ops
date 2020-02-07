@@ -38,11 +38,5 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
-  when: not openshift_namespace == "wwp-int"
   import_tasks: mgmt.yml
   tags: mgmt
-
-- name: wwp-int-mgmt-deployment
-  when: openshift_namespace == "wwp-int"
-  include_tasks:
-    file: wwp-int-mgmt.yml
