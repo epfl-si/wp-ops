@@ -2,6 +2,7 @@
 import subprocess
 import shlex
 import re
+import json
 
 class WPInventory():
 
@@ -57,6 +58,7 @@ class WPInventory():
 
 
         """
+        
         ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
                                                                         target_dict['ssh_user'],
                                                                         target_dict['ssh_host'],
@@ -124,8 +126,12 @@ class WPInventory():
         :param target_dict: dict containing information about target to connect to get WP instances information.
         :param path_to_instance: Path to access instance
         """
-        details = {'options': {}}
+        details = {}
 
+
+        ## 1. Options
+        section = 'options'
+        details[section] = {}
         # List of options to get from Instance
         options_to_get = ['plugin:epfl_accred:unit_id', 
                           'plugin:epfl_accred:unit',
@@ -134,7 +140,7 @@ class WPInventory():
 
         # Default value for options
         for option_name in options_to_get:
-            details['options'][option_name] = None
+            details[section][option_name] = None
 
         try:
             instance_options = self._exec_ssh(target_dict, 'wp option list --path={} --format=csv --skip-themes --skip-plugins'.format(path_to_instance))
@@ -147,12 +153,39 @@ class WPInventory():
 
                 if values and values[0][0] in options_to_get:
                     # We save option and remove potential " around the string.
-                    details['options'][values[0][0]] = (values[0][1]).strip('"')
+                    details[section][values[0][0]] = (values[0][1]).strip('"')
 
         except Exception as e:
-            details['options']['_error'] = 'Error getting options: {}'.format(e)
+            details[section]['_error'] = 'Error getting options: {}'.format(e)
 
         
+        ## 2. Defined boolean
+        section = 'debug'
+        details[section] = {}
+
+        defined_to_check = ['WP_DEBUG', 'WP_DEBUG_DISPLAY', 'WP_DEBUG_LOG']
+        for defined in defined_to_check:
+            try:
+                result = self._exec_ssh(target_dict, "wp config get {} --path={} --skip-themes --skip-plugins".format(defined, path_to_instance))
+
+                # To handle result, we have to decode it because it comes in 'byte' mode.
+                details[section][defined] = result[0].decode().strip('\n')=="1"
+
+            # If exception, it means we can't get the value because it's not present in config file
+            except Exception as e:
+                details[section][defined] = False
+        
+        # Check debug log file size
+        try:
+            
+            result = self._exec_ssh(target_dict, "if [ -e '{0}/wp-content/debug.log' ] ;then stat --printf='%s' '{0}/wp-content/debug.log' ;else echo '0'; fi".format(path_to_instance))
+            details[section]['log_file_size'] = int(result[0].decode().strip('\n'))
+
+        except Exception as e:
+            details[section]['log_file_size'] = 0
+            details[section]['_error'] = 'Error getting log file infos: {}'.format(e)
+
+
         return details
 
 
