@@ -488,35 +488,36 @@
 - name: epfl-intranet plugin
   wordpress_plugin:
     name: epfl-intranet
-    state: "{{ plugins_symlinked_and_active_in_inside_only }}"
+    state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-intranet
 
 - name: epfl-emploi plugin
   wordpress_plugin:
     name: epfl-emploi
-    state: "{{ plugins_symlinked_in_emploi_only }}"
+    state: "{{ plugins_for_emploi_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-emploi
 
 - name: epfl-restauration plugin
   wordpress_plugin:
     name: epfl-restauration
-    state: "{{ plugins_symlinked_in_restauration_only }}"
+    state: "{{ plugins_for_restauration_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
 
 - name: epfl-scienceqa plugin
   wordpress_plugin:
     name: epfl-scienceqa
-    state: "{{ plugins_symlinked_in_scienceqa_only }}"
+    state: "{{ plugins_for_scienceqa_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
 
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
-    state: "{{ plugins_symlinked_in_library_only }}"
+    state: "{{ plugins_for_library_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
 
 - name: epfl-courses-se plugin
   wordpress_plugin:
     name: epfl-courses-se
-    state: "{{ plugins_symlinked_in_cdhshs_only }}"
+    state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
+    
