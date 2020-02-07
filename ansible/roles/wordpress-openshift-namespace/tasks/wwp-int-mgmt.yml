@@ -1,4 +1,15 @@
 ---
+
+- include_vars: mgmt-vars.yml
+  tags: always
+- include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
+  tags: always
+- include_vars: image-vars.yml              # For mgmt_image_name
+  tags: always
+- include_vars: ../../../vars/persistent-ressources.yml
+  tags: always
+
+
 - name: "PersistentVolumeClaim"
   connection: local
   openshift:
@@ -20,113 +31,106 @@
 
   tags: pvc
 
+- name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
+  openshift:
+    state: latest
+    content: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ mgmt_secret_name }}"
+        namespace: "{{ openshift_namespace }}"
+        labels:
+          app: mgmt-test
+      data:
+        {{ mgmt_secret_contents | to_yaml | indent(width=2) }}
 
 - name: DeploymentConfigs
   connection: local
   openshift:
     state: latest
-    kind: DeploymentConfig
-    apiVersion: apps.openshift.io/v1
-    metadata:
-      labels:
-        run: "mgmt"
-      name: "mgmt"
-      namespace: "{{ openshift_namespace }}"
-    spec:
-      replicas: 1
-      template:
-        metadata:
-          labels:
-            run: "mgmt"
-        spec:
-          serviceAccount: wwp-int
-          serviceAccountName: wwp-int
-          containers:
-            - name: "mgmt"
-              env:
-                - name: DB_HOST
-                  valueFrom:
-                    secretKeyRef:
-                      key: host
-                      name: database-access
-                - name: DB_USER
-                  valueFrom:
-                    secretKeyRef:
-                      key: username
-                      name: database-access
-                - name: DB_PASS
-                  valueFrom:
-                    secretKeyRef:
-                      key: password
-                      name: database-access
-              volumeMounts:
-                - mountPath: /srv
-                  name: "nfsvol-mgmt"
-                - mountPath: /backups
-                  name: "backups"
-          volumes:
-            - name: "nfsvol-mgmt"
-              persistentVolumeClaim:
-                claimName: 'nfs-pvc-mgmt'
-            - name: backups
-              persistentVolumeClaim:
-                claimName: backups-readonly
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            containerNames:
-            - "mgmt"
-            from:
-              kind: ImageStreamTag
-              name: "mgmt:prod"
-              namespace: "{{ openshift_namespace }}"
-             
+    content: |
+      apiVersion: v1
+      kind: DeploymentConfig
+      metadata:
+        name: "mgmt-test"
+        namespace: "{{ openshift_namespace }}"
+        labels:
+          app: "mgmt-test"
+      spec:
+        replicas: 1
+        selector:
+          app: "mgmt-test"
+          deploymentconfig: "mgmt-test"
+        template:
+          metadata:
+            labels:
+              app: "mgmt-test"
+              deploymentconfig: "mgmt-test"
+          spec:   
+            containers:
+              - name: "mgmt-test"
+                imagePullPolicy: Always
+                ports:
+                - containerPort: 22
+                  protocol: TCP
+      {% if openshift_is_wp_int %}
+                env:
+                  - name: DB_HOST
+                    valueFrom:
+                      secretKeyRef:
+                        key: host
+                        name: database-access
+                  - name: DB_USER
+                    valueFrom:
+                      secretKeyRef:
+                        key: username
+                        name: database-access
+                  - name: DB_PASS
+                    valueFrom:
+                      secretKeyRef:
+                        key: password
+                        name: database-access
+      {% endif %}
+                volumeMounts:
+                  - mountPath: /srv
+                    name: "nfsvol-mgmt"
+      {% if (openshift_is_production or openshift_is_wp_int) %}
+                  - mountPath: /backups
+                    name: "backups"
+      {% endif %}
+                  - name: ssh
+                    mountPath: /var/lib/secrets/ssh
+            serviceAccount: wwp-int
+            serviceAccountName: wwp-int
+            volumes:
+              - name: "nfsvol-mgmt"
+                persistentVolumeClaim:
+                  claimName: '{{openshift_pvc_name}}'
+              - name: ssh
+                secret:
+                  secretName: "{{ mgmt_secret_name }}"
+      {% if (openshift_is_production or openshift_is_wp_int) %}
+              - name: backups
+                persistentVolumeClaim:
+                  claimName: backups-readonly
+      {% endif %}
+        triggers:
+          - type: ConfigChange
+          - type: ImageChange
+            imageChangeParams:
+              containerNames:
+              - "mgmt-test"
+              from:
+                kind: ImageStreamTag
+                name: "mgmt:prod"
+                namespace: "{{ openshift_namespace }}"
+               
   tags: dc
 
-- name: "Service"
-  connection: local
-  openshift:
-    state: latest
-    kind: Service
-    name: "mgmt"
-    namespace: "{{ openshift_namespace }}"
-    apiVersion: v1
-    metadata:
-        name: "mgmt"
-        labels:
-          run: "mgmt"
-        namespace: "{{openshift_namespace}}"
-    spec:
-        selector:
-            run: "mgmt"
-        ports:
-        - port: 80
-          protocol: TCP
-          targetPort: 80
-  tags: svc
-
-- name: "Route"
-  connection: local
-  openshift:
-    state: latest
-    kind: Route
-    name: "mgmt"
-    namespace: "{{ openshift_namespace }}"
-    apiVersion: v1
-    metadata:
-        name: "mgmt"
-    spec:
-        host: "mgmt-{{openshift_namespace}}.128.178.222.83.nip.io"
-        port:
-            targetPort: 80
-        to:
-            kind: Service
-            name: "mgmt"
-  tags: rt
 
 - name: "Deployment rollout"
   connection: local
   shell:
-    cmd: oc rollout latest dc/mgmt
+    cmd: oc rollout latest dc/mgmt-test
   tags: rollout
