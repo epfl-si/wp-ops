@@ -22,7 +22,8 @@ class ActionModule(WordPressActionModule):
         """
         Update and existing option or add it if not exists
         """
-        return self._run_wp_cli_action('option update {} "{}"'.format(self._task.args.get('name'), 
-                                                                      self._task.args.get('value')))
+        
+        cmd = "option update {} '{}'".format(self._task.args.get('name'), self._task.args.get('value'))                                                                 
+        return self._run_wp_cli_action(cmd)
 
     
