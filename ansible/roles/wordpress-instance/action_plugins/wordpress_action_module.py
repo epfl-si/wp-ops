@@ -49,7 +49,16 @@ class WordPressActionModule(ActionBase):
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
+        
+        
+        # If command was to update an option using WP CLI
+        if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
+            
+            # We update 'changed' key depending on what was done by WPCLI
+            result['changed'] = not result['stdout'].endswith('option is unchanged.')
+        
         self._update_result(result)
+
         return self.result
 
 

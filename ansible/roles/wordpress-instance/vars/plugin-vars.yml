@@ -128,41 +128,42 @@ plugin_wpmf_options:
     value: '0'
 
 plugin_ewww_image_optimizer_options:
-  - option_name: exactdn_all_the_things
-    option_value: ''
-  - option_name: exactdn_lossy
-    option_value: ''
-  - option_name: ewww_image_optimizer_tracking_notice
-    option_value: '1'
-  - option_name: ewww_image_optimizer_enable_help_notice
-    option_value: '1'
-  - option_name: ewww_image_optimizer_cloud_key
-    option_value: ''
-  - option_name: ewww_image_optimizer_jpg_quality
-    option_value: ''
-  - option_name: ewww_image_optimizer_include_media_paths
-    option_value: '1'
-  - option_name: ewww_image_optimizer_aux_paths
-    option_value: ''
-  - option_name: ewww_image_optimizer_exclude_paths
-    option_value: ''
-  - option_name: ewww_image_optimizer_allow_tracking
-    option_value: ''
-  - option_name: ewww_image_optimizer_maxmediawidth
-    option_value: '2048'
-  - option_name: ewww_image_optimizer_maxmediaheight
-    option_value: '2048'
-  - option_name: ewww_image_optimizer_resize_existing
-    option_value: '1'
-  - option_name: ewww_image_optimizer_disable_resizes
-    option_value: ''
-  - option_name: ewww_image_optimizer_disable_resizes_opt
-    option_value: ''
-  - option_name: ewww_image_optimizer_jpg_background
-    option_value: ''
-  - option_name: ewww_image_optimizer_webp_paths
-    option_value: ''
-  - option_name: ewww_image_optimizer_dismiss_media_notice
-    option_value: '1'
-  - option_name: ewww_image_optimizer_debug
-    option_value: false
+  - name: exactdn_all_the_things
+    value: ''
+  - name: exactdn_lossy
+    value: ''
+  - name: ewww_image_optimizer_tracking_notice
+    value: '1'
+  - name: ewww_image_optimizer_enable_help_notice
+    value: '1'
+  - name: ewww_image_optimizer_cloud_key
+    value: ''
+  - name: ewww_image_optimizer_jpg_quality
+    value: ''
+  - name: ewww_image_optimizer_include_media_paths
+    value: '1'
+  - name: ewww_image_optimizer_aux_paths
+    value: ''
+  - name: ewww_image_optimizer_exclude_paths
+    value: ''
+  - name: ewww_image_optimizer_allow_tracking
+    value: ''
+  - name: ewww_image_optimizer_maxmediawidth
+    value: '2048'
+  - name: ewww_image_optimizer_maxmediaheight
+    value: '2048'
+  - name: ewww_image_optimizer_resize_existing
+    value: '1'
+  - name: ewww_image_optimizer_disable_resizes
+    value: ''
+  - name: ewww_image_optimizer_disable_resizes_opt
+    value: ''
+  - name: ewww_image_optimizer_jpg_background
+    value: ''
+  - name: ewww_image_optimizer_webp_paths
+    value: ''
+  - name: ewww_image_optimizer_dismiss_media_notice
+    value: '1'
+  - name: ewww_image_optimizer_debug
+    value: false
+    
