@@ -21,9 +21,13 @@ class ActionModule(WordPressActionModule):
     def _update_option(self):
         """
         Update and existing option or add it if not exists
+
+        NOTE: Apart 'name' and 'value', we could also have an 'autoload' value but after some tests,
+        WP-CLI, even if documented to use '--autoload' parameter, raises an error...
         """
         
-        cmd = "option update {} '{}'".format(self._task.args.get('name'), self._task.args.get('value'))                                                                 
+        cmd = "option update {} '{}'".format(self._task.args.get('name'), self._task.args.get('value'))        
+
         return self._run_wp_cli_action(cmd)
 
     
