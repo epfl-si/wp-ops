@@ -507,7 +507,7 @@
   wordpress_plugin:
     name: epfl-scienceqa
     state: "{{ plugins_symlinked_in_scienceqa_only }}"
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-scienceqa
 
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
