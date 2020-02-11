@@ -179,4 +179,8 @@ plugin_ewww_image_optimizer_options:
     value: '1'
   - name: ewww_image_optimizer_debug
     value: false
-    
+
+# SVG Support
+plugin_svg_support_options:
+  - name: bodhi_svgs_admin_notice_dismissed
+    value: '1'
