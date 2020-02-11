@@ -233,7 +233,7 @@
   wordpress_plugin:
     name: EPFL-Content-Filter
     state: '{{ ["symlinked", "active"] if plugins_locked else "absent" }}'
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Content-Filter
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-content-filter
 
 # TODO: we are not quite sure anymore whether this plugin is useful.
 - name: svg-support plugin
@@ -497,7 +497,7 @@
   wordpress_plugin:
     name: epfl-scienceqa
     state: "{{ plugins_for_scienceqa_category }}"
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-scienceqa
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-scienceqa
 
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
