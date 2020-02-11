@@ -186,6 +186,33 @@ class WPInventory():
             details[section]['_error'] = 'Error getting log file infos: {}'.format(e)
 
 
+        ## 3. Polylang
+        section = 'polylang'
+        details[section] = {}
+
+        try:
+            # Listing languages. Format is like (default one is the first in the list) :
+            # fr — Français [DEFAULT]
+            # en — English
+            lang_list = self._exec_ssh(target_dict, 'wp polylang languages --path={} --skip-themes'.format(path_to_instance))
+
+            languages = []
+
+            if not lang_list[0].decode().strip().startswith('Success: No languages are currently configured'):
+
+                # Looping through languages
+                for lang_details in lang_list:
+                    
+                    # Extracting information
+                    values = re.findall(r'^([\w]+)\s.+', lang_details.decode().strip())
+                    languages.append(values[0])
+            
+            details[section]['langs'] = languages
+
+        except Exception as e:
+            details[section]['_error'] = 'Error getting lang list: {}'.format(e)
+
+
         return details
 
 
