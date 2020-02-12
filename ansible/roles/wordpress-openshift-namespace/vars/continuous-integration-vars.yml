@@ -8,13 +8,13 @@ ci_buildconfig_name: "{{ ci_name_stem }}-{{ ci_prod_or_dev }}"
 
 ci_jenkins_master_image_name: jenkins-openshift-epfl
 ci_jenkins_master_git_build:
-  repository: 'https://github.com/epfl-idevelop/wp-ops'
+  repository: 'https://github.com/epfl-si/wp-ops'
   ref: wwp-continuous-integration
   path: docker/jenkins
 
 ci_jenkins_test_sidekick_image_name: cucumberjs
 ci_jenkins_test_sidekick_git_build:
-  repository: 'https://github.com/epfl-idevelop/wp-dev'
+  repository: 'https://github.com/epfl-si/wp-dev'
   path: acceptance
 
 ci_jenkins_slave_image_name: "jenkins-agent"

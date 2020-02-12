@@ -2,4 +2,4 @@ httpd_image_name: httpd
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 
-wp_ops_git_uri: https://github.com/epfl-idevelop/wp-ops
+wp_ops_git_uri: https://github.com/epfl-si/wp-ops
