@@ -355,6 +355,14 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_enlighter_options }}"
 
+- name: disable-wp-rest-api plugin
+  wordpress_plugin:
+    name: disable-wp-rest-api
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+
 
 ##################### 2010-only plugins ###########################
 
