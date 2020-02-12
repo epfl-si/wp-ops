@@ -78,6 +78,7 @@
                   - /bin/prometheus
                   - --config.file=/prometheus-config/static/prometheus.yml
                   - --storage.tsdb.path=/prometheus
+                  - --query.lookback-delta=15m     # Menu values change slowly
                   - --web.console.libraries=/usr/share/prometheus/console_libraries
                   - --web.console.templates=/usr/share/prometheus/consoles/prometheus
               - name: configurator
