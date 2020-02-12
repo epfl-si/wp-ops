@@ -344,6 +344,17 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_ewww_image_optimizer_options }}"
 
+- name: enlighter plugin
+  wordpress_plugin:
+    name: enlighter
+      - symlinked
+      - active
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/enlighter.zip
+
+- name: enlighter configuration
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_enlighter_options }}"
+
 
 ##################### 2010-only plugins ###########################
 
