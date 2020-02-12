@@ -394,12 +394,6 @@
     state: "{{ plugins_symlinked_and_active_in_2010_only }}"
     from: wordpress.org/plugins
 
-- name: Enlighter plugin
-  wordpress_plugin:
-    name: enlighter
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: wordpress.org/plugins
-
 - name: epfl-scheduler plugin
   wordpress_plugin:
     name: epfl-scheduler
