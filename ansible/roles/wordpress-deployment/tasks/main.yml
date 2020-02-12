@@ -1,0 +1,5 @@
+---
+# tasks file for wordpress-deployment
+
+- name: "httpd Deployment"
+  import_tasks: wwp-int-httpd-deployment.yml

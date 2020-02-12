@@ -1,0 +1,15 @@
+# restore_archive_name, restore_sql_name and restore_backup_folder
+# come from the inventory
+# (../../../inventory/wp-int/wordpress-instances)
+
+restore_tar_full_path: '/backups/{{restore_backup_folder}}/{{restore_archive_name}}'
+
+# The path of the original site (as found inside the backup)
+# TODO: this is a buggy heuristics, as subdirectory names may
+# contain underscores.
+restore_intar_dir: "{{ restore_backup_folder | replace('_', '/') }}"
+restore_intar_htaccess: "{{ restore_intar_dir }}/.htaccess"
+
+# The .htaccess commanding over this WordPress instance
+restore_htaccess_path: "{{ wp_dir }}/.htaccess"
+restore_htaccess_path_tar: "{{ restore_intar_htaccess | sanitize_tar_path }}"

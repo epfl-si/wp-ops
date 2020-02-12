@@ -1,0 +1,25 @@
+---
+
+- name: "PersistentVolume"
+  openshift:
+    as_user: "system:admin"
+    state: latest
+    kind: PersistentVolume
+    name: "pv"
+    namespace: "myproject"
+    apiVersion: v1
+    metadata:
+      name: 'pv'
+      labels:
+          id: "pv"
+    spec:
+      capacity:
+        storage: 1Gi
+      accessModes:
+        - ReadWriteMany
+      persistentVolumeReclaimPolicy: Retain
+      nfs:
+        path: '/srv'
+        server: "{{nfs_ip}}"
+        readOnly: false
+  tags: pv

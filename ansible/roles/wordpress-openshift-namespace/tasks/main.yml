@@ -1,38 +1,22 @@
 ---
 # tasks for WordPress OpenShift namespaces
 
-#empty safety test before launching ...
-- name: "is_minishift"
-  when: is_minishift
-  shell:
-    cmd: |
-       set -e -x
-- name: "not is_minishift"
-  when: not is_minishift
-  shell:
-    cmd: |
-       set -e -x
-
 
 - name: "Disk usage report microservice"
-  when: not is_minishift
   import_tasks: disk-usage-report.yml
   tags: diskusage
 
-
 - name: "Image secret setup"
-  when: is_minishift
+  when: openshift_namespace == "myproject"
   import_tasks: image-secret.yml
-  
-
 
 - name: "Images and builds"
   import_tasks: images.yml
   tags: images
-- meta: end_play
+
 
 - name: "DeploymentConfigs (previously known as pods)"
-  when: not is_minishift
+  when: not (openshift_namespace == "wwp-int" or openshift_namespace == "myproject")
   include_tasks:
     file: deploymentconfig-httpd.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
@@ -58,20 +42,5 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
-  when: not is_minishift
   import_tasks: mgmt.yml
   tags: mgmt
-
-
-
-- name: blue-deployment
-  when: is_minishift
-  include_tasks:
-    file: blue-deployment.yml
-  loop: "{{MyList}}"
-  loop_control:
-    loop_var: dc
-  tags:
-    - blue
-
-

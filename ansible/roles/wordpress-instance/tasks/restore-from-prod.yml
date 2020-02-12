@@ -1,0 +1,137 @@
+---
+
+- include_vars: restore-vars.yml
+
+
+- name: copy ssh host var
+  delegate_to: 127.0.0.1
+  shell:
+    cmd: |
+      PODNAME=$(oc get pods -o name |grep mgmt | cut -d "/" -f2 |head -1)
+      oc exec $PODNAME -- bash -c 'echo "export DB_HOST=$DB_HOST export DB_USER=$DB_USER export DB_PASS=$DB_PASS"'
+  register: localcmd
+
+# Create folder structure if needed, and only during a restore procedure from backup folders
+- name: directories
+  file:  
+    path: "{{wp_dir}}"
+    owner: www-data
+    state: directory
+  when: restore_backup_folder is defined
+
+- name: wp evaluation
+  shell:
+    cmd: |
+      echo $({{wp_cli_command }} eval '1;')
+  register: out
+  changed_when: false
+- debug:
+    var: out.stderr
+
+# wp installation process using symlinks
+
+- name: wp symlink
+  file:
+    state: link
+    src: /wp/5
+    dest: "{{wp_dir}}/wp"
+
+
+- name: symlink
+  shell:
+    chdir: "{{wp_dir}}"
+    cmd: |
+      ln -sf wp/wp-admin wp-admin
+      ln -sf wp/index.php index.php
+      ln -sf wp/wp-cron.php wp-cron.php
+      ln -sf wp/wp-load.php wp-load.php
+      ln -sf wp/wp-settings.php wp-settings.php
+      ln -sf wp/wp-includes wp-includes 
+      ln -sf wp/wp-login.php wp-login.php
+      mkdir wp-content
+      ln -sf ../wp/wp-content/themes wp-content/themes
+      ln -sf ../wp/wp-content/plugins wp-content/plugins
+      ln -sf ../wp/wp-content/mu-plugins wp-content/mu-plugins
+      ln -sf ../wp/wp-content/index.php wp-content/index.php
+  when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
+
+
+# Unziping data from wp-content folder after a fresh symlink "installation"
+# Uncomment lines 68,70 and 'uploads_rm_timer' to test deployments times without leaving contents on disk
+- name: unzip backup archive
+  shell:
+    cmd: |
+      cd "{{wp_dir}}"
+      tar --transform 's,^.*/wp-content,wp-content,S' -xvf {{ restore_tar_full_path }} --wildcards '*/wp-content/uploads' --wildcards '{{ restore_htaccess_path_tar}}' > /dev/null
+      cp {{ restore_htaccess_path_tar }} .htaccess
+      rm -r srv
+#      bash -c 'time rm -rf {{wp_dir}}/wp-content/uploads'
+  when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
+#  register: rm_timer
+
+#- name: uploads_rm_timer
+#  debug:
+#    var: rm_timer.stderr
+
+- name: wp evaluation
+  shell:
+    cmd: |
+      echo $({{wp_cli_command }} eval '1;')
+  register: out
+  changed_when: false
+- debug:
+    var: out.stderr
+
+
+
+# cleaning potential unfinished setup from previously failed backups
+- name: delete stale wp-config file
+  shell:
+    cmd: |
+      rm {{wp_dir}}/wp-config.php
+  when: "'Error establishing a database connection' in out.stderr and restore_backup_folder is defined"
+
+# restoring database and data pointing information in a NEWLY GENERATED wp-config.php file
+- name: Create databases & wp-config files for wordpress instances [IF NEEDED]
+  shell:
+    cmd: |
+       {{localcmd.stdout}}
+       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -e "CREATE DATABASE IF NOT EXISTS {{ db_name }}"
+       {{wp_cli_command }} config create --dbname={{db_name}} --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --extra-php << "PHP"
+       define('WP_CONTENT_DIR', '{{wp_dir}}/wp-content');
+       if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+         $_SERVER['HTTPS']='on';
+       }
+       define('ALLOW_UNFILTERED_UPLOADS', true);
+       PHP
+       mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST {{db_name}} < /backups/{{restore_backup_folder}}/{{restore_sql_name}}
+       
+  when: "(('wp-config.php' in out.stderr and 'not found' in out.stderr) or 'Error establishing a database connection' in out.stderr) and restore_backup_folder is defined "
+
+# Always extract .htaccess file when we are restoring from backups
+#- name: extract .htaccess
+#  shell:
+#    creates: "{{restore_htaccess_path}}"
+#    chdir: "{{wp_dir}}"
+#    cmd: |
+#      tar -xvf {{ restore_tar_full_path }} --wildcards --to-stdout {{ restore_htaccess_path_tar }} > .htaccess
+#  when: restore_backup_folder is defined
+
+
+# Always rename wordpress site when we are restoring from backups
+- name: rename wordpress site
+  shell:
+    cmd: |
+      for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}/{{wp_path}}; done;
+      {{wp_cli_command}} search-replace {{url_from}} {{wp_hostname}}
+      {{wp_cli_command}} transient delete --all
+  when: restore_backup_folder is defined
+
+# Always empty polylang plugin config by reactivating it when we are restoring from backups
+- name: reactivate plugins
+  shell:
+    cmd: |
+      {{wp_cli_command}} plugin deactivate epfl epfl-menus polylang
+      {{wp_cli_command}} plugin activate polylang epfl-menus epfl ||true
+  when: restore_backup_folder is defined
+

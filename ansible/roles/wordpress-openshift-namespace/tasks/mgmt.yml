@@ -1,6 +1,48 @@
+---
+
 - include_vars: mgmt-vars.yml
+  tags: always
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
+  tags: always
 - include_vars: image-vars.yml              # For mgmt_image_name
+  tags: always
+- include_vars: ../../../vars/persistent-ressources.yml
+  tags: always
+
+
+- name: "PersistentVolumeClaim"
+  connection: local
+  openshift:
+    state: latest
+    content: |
+      kind: PersistentVolumeClaim
+      name: "{{openshift_pvc_name}}"
+      namespace: "{{openshift_namespace}}"
+      apiVersion: v1
+      metadata:
+        name: '{{openshift_pvc_name}}'
+      {% if not openshift_is_minishift %}
+        annotations:
+          volume.beta.kubernetes.io/storage-class: wwp-int-wordpress-sites       
+      {% endif %}
+      spec:
+        accessModes:
+        - ReadWriteMany
+      {% if not openshift_is_minishift %}
+        resources:
+          requests:
+            storage: 250Gi
+      {% endif %}
+      {% if openshift_is_minishift %}
+        resources:
+          requests:
+            storage: 1Gi
+        selector:
+          matchLabels:
+            id: "pv"
+      {% endif %}
+
+  tags: pvc
 
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
   openshift:
@@ -12,69 +54,89 @@
         name: "{{ mgmt_secret_name }}"
         namespace: "{{ openshift_namespace }}"
         labels:
-          app: mgmt
+          app: "{{mgmt_app_name}}"
       data:
         {{ mgmt_secret_contents | to_yaml | indent(width=2) }}
 
-- name: mgmt DeploymentConfig
+- name: DeploymentConfigs
+  connection: local
   openshift:
     state: latest
     content: |
       apiVersion: v1
       kind: DeploymentConfig
       metadata:
-        name: mgmt
+        name: "{{mgmt_app_name}}"
         namespace: "{{ openshift_namespace }}"
         labels:
-          app: mgmt
+          app: "{{mgmt_app_name}}"
       spec:
         replicas: 1
         selector:
-          app: mgmt
-          deploymentconfig: mgmt
+          app: "{{mgmt_app_name}}"
+          deploymentconfig: "{{mgmt_app_name}}"
         template:
           metadata:
             labels:
-              app: mgmt
-              deploymentconfig: mgmt
-          spec:
+              app: "{{mgmt_app_name}}"
+              deploymentconfig: "{{mgmt_app_name}}"
+          spec:   
             containers:
-            - name: mgmt
-              imagePullPolicy: Always
-              ports:
-              - containerPort: 22
-                protocol: TCP
-              volumeMounts:
-              - name: srv
-                mountPath: /srv
-              - name: ssh
-                mountPath: /var/lib/secrets/ssh
-      {% if openshift_is_production %}
-              - name: backups
-                mountPath: /backups
+              - name: "{{mgmt_app_name}}"
+                imagePullPolicy: Always
+                ports:
+                - containerPort: 22
+                  protocol: TCP
+      {% if (openshift_is_wp_int or openshift_is_minishift) %}
+                env:
+                  - name: DB_HOST
+                    valueFrom:
+                      secretKeyRef:
+                        key: host
+                        name: database-access
+                  - name: DB_USER
+                    valueFrom:
+                      secretKeyRef:
+                        key: username
+                        name: database-access
+                  - name: DB_PASS
+                    valueFrom:
+                      secretKeyRef:
+                        key: password
+                        name: database-access
       {% endif %}
-            serviceAccount: {{ mgmt_service_account }}
-            serviceAccountName: {{ mgmt_service_account }}
+                volumeMounts:
+                  - name: srv
+                    mountPath: /srv
+                  - name: ssh
+                    mountPath: /var/lib/secrets/ssh
+      {% if (openshift_is_production or openshift_is_wp_int) %}
+                  - name: backups
+                    mountPath: /backups
+      {% endif %}
+            serviceAccount: "{{ mgmt_service_account }}"
+            serviceAccountName: "{{ mgmt_service_account }}"
             volumes:
-            - name: srv
-              persistentVolumeClaim:
-                claimName: wordpress-0
-            - name: ssh
-              secret:
-                secretName: "{{ mgmt_secret_name }}"
-      {% if openshift_is_production %}
-            - name: backups
-              persistentVolumeClaim:
-                claimName: backups-0
+              - name: srv
+                persistentVolumeClaim:
+                  claimName: '{{openshift_pvc_name}}'
+              - name: ssh
+                secret:
+                  secretName: "{{ mgmt_secret_name }}"
+      {% if (openshift_is_production or openshift_is_wp_int) %}
+              - name: backups
+                persistentVolumeClaim:
+                  claimName: "{{ openshift_backup_volume_name }}"
       {% endif %}
         triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-            - mgmt
-            from:
-              kind: ImageStreamTag
-              name: "{{ mgmt_image_name }}:{{ openshift_registry_tag }}"
-              namespace: "{{ openshift_namespace }}"
+          - type: ConfigChange
+          - type: ImageChange
+            imageChangeParams:
+              automatic: true
+              containerNames:
+              - "{{mgmt_app_name}}"
+              from:
+                kind: ImageStreamTag
+                name: "{{ mgmt_image_name }}:{{ openshift_registry_tag }}"
+                namespace: "{{ openshift_namespace }}"
+              

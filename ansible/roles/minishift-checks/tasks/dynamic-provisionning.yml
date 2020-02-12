@@ -1,0 +1,14 @@
+
+
+- name: "Dynamic Provisionning"
+  openshift:
+    state: latest
+    content: |
+      kind: StorageClass
+      apiVersion: storage.k8s.io/v1beta1
+      metadata:
+        name: wwp-int-wordpress-sites
+      provisioner: kubernetes.io/gce-pd 
+      parameters:
+        type: pd-ssd
+        zone: us-east1-d  

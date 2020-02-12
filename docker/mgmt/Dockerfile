@@ -9,6 +9,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     mysql-client \
     openssh-server \
     tree \
+    pwgen \
     python3 \
     python3-pip \
     python3-virtualenv \
@@ -20,6 +21,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apt-get -qy autoremove && \
     apt-get clean
 
+RUN pip3 install ansible
 
 RUN mkdir /var/run/sshd && \
     sed -ri 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && \
@@ -35,7 +37,13 @@ RUN mkdir /var/run/sshd && \
     mkdir /root/.ssh
 
 COPY jahia2wp.sh /etc/profile.d/
+COPY new-wp-site.sh /usr/local/bin/new-wp-site
+RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
+
+ARG WP_OPS_BRANCH=master
+RUN set -e -x; cd /wp; git clone https://github.com/epfl-idevelop/wp-ops; \
+    cd wp-ops; git checkout ${WP_OPS_BRANCH}
 
 # setup access rights
 RUN sed -ir 's#www-data.*:/usr/sbin/nologin#www-data:x:33:33:www-data:/var/www:/bin/bash#' /etc/passwd && \

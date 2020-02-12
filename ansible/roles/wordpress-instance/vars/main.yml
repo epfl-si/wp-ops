@@ -16,9 +16,6 @@
 # The top-level directory of this WordPress instance
 wp_dir: "/srv/{{ wp_env }}/{{ wp_hostname }}/htdocs/{{ wp_path }}"
 
-# The .htaccess commanding over this WordPress instance
-wp_htaccess_path: "{{ wp_dir }}/.htaccess"
-
 # The path to the wp-config.php file
 wp_path_config_php: "{{ wp_dir }}/wp-config.php"
 
@@ -43,3 +40,7 @@ wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
 # Range of IPv4 addresses that we could be making RPCs from (in
 # particular, to Tequila)
 wp_ops_rpcclient_ipv4_range: 10.180.21.0/24
+
+
+wp_use_gutenberg: '{{ wp_ensure_symlink_version is defined and (wp_ensure_symlink_version | float) >= 5.0 }}'
+is_minishift_instance: "{{'wordpress_instances_test_blue' in group_names}}"

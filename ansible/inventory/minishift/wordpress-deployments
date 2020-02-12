@@ -1,0 +1,18 @@
+all:
+  vars:
+    openshift_namespace: myproject
+    cluster_ip: 192.168.99.100
+  children:
+    all-wordpress-deployments:
+      children:
+        wordpress_deployment_test_blue:
+          hosts:
+            site1:
+              env: site1
+              name: httpd-site1
+            site2:
+              env: site2
+              name: httpd-site2
+            site3:
+              env: site3
+              name: httpd-site3

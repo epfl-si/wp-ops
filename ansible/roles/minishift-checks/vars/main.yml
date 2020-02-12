@@ -7,3 +7,5 @@ secret_name: creds
 epfl_openshift_registry_address: os-docker-registry.epfl.ch
 epfl_openshift_portal_address: pub-os-exopge.epfl.ch
 epfl_openshift_credentials: "{{ epfl_openshift_portal_address | kube_credentials }}"
+
+nfs_ip: 128.179.147.22

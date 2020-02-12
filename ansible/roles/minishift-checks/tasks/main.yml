@@ -4,4 +4,11 @@
 - name: "Minishift Precondition Checks"
   import_tasks: checks.yml
   tags:
+    - never
     - check
+
+- name: "Minishift Database Secrets"
+  import_tasks: db-secrets.yml
+
+- name: "persistent volume"
+  import_tasks: mnsft-persistent-volume.yml

@@ -5,12 +5,13 @@
 - include_vars: jahia2wp-vars.yml
 - include_vars: wp-destructive.yml
 
+
 - assert:
     that:
       - (wp_can.wipe) or (not _wp_config_php_stat.stat.exists)
 
 - name: Create auxiliary YAML file for "jahia2wp.py generate"
-  when: wp_restore_from == 'generate'
+  when: wp_restore_from == 'generate' and not is_minishift_instance
   copy:
     content: |
       langs: en,fr
@@ -20,9 +21,9 @@
   register: jahia2wp_generate_yaml_tmp
 
 - name: jahia2wp.py generate
-  when: wp_restore_from == 'generate'
+  when: wp_restore_from == 'generate' and not is_minishift_instance
   shell: "{{ jahia2wp_shell }} generate {{ wp_env }} {{ jahia2wp_url }} --extra-config={{ jahia2wp_generate_yaml_tmp.dest }}"
   environment: "{{ jahia2wp_env }}"
 
 - include_tasks: generate-quick.yml
-  when: wp_restore_from != 'generate'
+  when: wp_restore_from != 'generate' and not is_minishift_instance

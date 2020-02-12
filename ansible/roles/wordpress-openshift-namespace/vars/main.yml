@@ -2,11 +2,15 @@
 # vars file for wordpress-openshift-namespace
 
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
-openshift_registry_tag: "{{ 'prod' if openshift_is_production else 'latest' }}"
-is_minishift: "{{'openshift-namespaces-blue' in group_names}}"
-minishift_namespace: myproject
+openshift_is_wp_int: "{{ openshift_namespace == 'wwp-int' }}"
+openshift_is_minishift: "{{ openshift_namespace == 'myproject' }}"
+openshift_registry_tag: "{{ 'prod' if openshift_is_production or openshift_is_wp_int or openshift_is_minishift else 'latest' }}"
+openshift_backup_volume_name: "{{ 'backups-readonly' if openshift_is_wp_int else 'backup-0' }}"
 
+# for imageStream authentification
+#TODO: remove the need for authentification
+secret_name: camptocamp-docker-pull-token
 epfl_openshift_registry_address: os-docker-registry.epfl.ch
-epfl_openshift_registry_repo: "{{ epfl_openshift_registry_address }}/epfl-gitlab-prod"
+epfl_openshift_registry_repo: "{{ epfl_openshift_registry_address }}/wwp-int"
 epfl_openshift_portal_address: pub-os-exopge.epfl.ch
 epfl_openshift_credentials: "{{ epfl_openshift_portal_address | kube_credentials }}"

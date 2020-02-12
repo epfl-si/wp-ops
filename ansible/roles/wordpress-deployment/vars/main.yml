@@ -1,0 +1,4 @@
+---
+# vars file for wordpress-deployment
+openshift_is_minishift: "{{ openshift_namespace == 'myproject' }}"
+deployment_service_account: "{{ 'default' if openshift_is_minishift else 'wp-int' }}"

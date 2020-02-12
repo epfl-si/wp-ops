@@ -6,6 +6,7 @@
 # hostvars[some_hostname]["ansible_facts"]["ansible_local"]). See
 # https://medium.com/@jezhalford/ansible-custom-facts-1e1d1bf65db8
 - name: Fact directory
+  check_mode: no
   # Speed matters here, when running short tasks (with -t) - We don't
   # want (mandatory) facts collection time to dominate the execution
   # time in that case, so we want to populate the whole facts.d
@@ -41,7 +42,7 @@
       WP_INSTALLED_SCRIPT
 
       make_fact_script wp_is_symlinked <<'WP_SYMLINKED_SCRIPT'
-      if [ -f "{{ wp_path_wpadmin }}" ]; then
+      if [ -L "{{ wp_path_wpadmin }}" ]; then
         echo true
       else
         echo false
@@ -119,6 +120,7 @@
 # clean up all these yadda-yadda-facts.d directories within a few
 # seconds, than have them litter the entire serving tree.
 - name: Delete fact directory
+  check_mode: no
   when: '"_debug2_facts" not in ansible_run_tags'
   file:
     path: "{{ _facts_dir.stdout }}"

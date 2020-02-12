@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+
+import subprocess
+import yaml
+import json
+from sys import stdout
+from collections import OrderedDict
+import random
+import string
+
+pod_name = subprocess.check_output('oc get pods -o name |grep mgmt | cut -d "/" -f2 |head -1', shell=True)
+pod_name= pod_name.decode('utf-8').replace('\n','')
+cluster_ip = "128.178.222.83"
+
+
+port = subprocess.check_output('echo $ANSIBLE_FORWARD_PORT', shell=True).decode('utf-8').replace('\n','')
+connection_type= subprocess.check_output('echo $ANSIBLE_CONNECTION_MODE', shell=True).decode('utf-8').replace('\n','')
+
+
+def connector_info():
+    connection_type= subprocess.check_output('echo $ANSIBLE_CONNECTION_MODE', shell=True).decode('utf-8').replace('\n','')
+    if connection_type != "ssh" and connection_type != "oc":
+        connection_type = "oc"
+    if connection_type == "ssh":
+        return {
+                   "ansible_python_interpreter": "python3",
+                   "ansible_connection": "ssh",
+                   "ansible_port": port,
+                   "ansible_host": "localhost",
+                   "ansible_user":"root",
+                   "ansible_become": "true",
+                   "ansible_become_user": "www-data",
+                   "ansible_become_method": "su"
+                }
+    elif connection_type == "oc":
+        return {
+                   "ansible_python_interpreter": "python3",
+                   "ansible_connection": "oc",
+                   "ansible_host": "localhost",
+                   "ansible_user":"root",
+                   "ansible_oc_namespace": "wwp-int",
+                   "ansible_oc_pod": "%(pod_name)s" % {"pod_name": pod_name},
+                   "ansible_become": "true",
+                   "ansible_become_user": "www-data",
+                   "ansible_become_method": "su"
+                }
+
+
+def limit_hosts(inv,nb):
+    """ returns a valid inventory with at most nb instances per group """    
+
+    limited_inv = inv
+    for group in limited_inv:
+        if "hosts" in limited_inv[group]:
+            if len(limited_inv[group]["hosts"])>nb:
+                limited_inv[group]["hosts"]=limited_inv[group]["hosts"][0:nb]
+    return limited_inv
+
+def get_last_validarchive(backup_files):
+    """ Fetches last valid and synced tar/sql pair for a given site, assumes there is always a valid and synced tar/sql pair"""
+    for path in backup_files:
+        identity = path.split('.')[0]
+        if(identity+'.tar.gz' in backup_files and identity+'.sql' in backup_files):
+          return {"tar": identity+'.tar.gz', "sql": identity+'.sql'}
+
+
+
+
+def bkp_to_dict():
+    """ Populates a python dictionary using the expected inventory structure by ansible's inventory sript plugin """ 
+
+    command = "oc exec %(pod_name)s -- find /backups -maxdepth 2 -mindepth 2 -type f" %{"pod_name":pod_name}
+    ls_output = subprocess.check_output(command, shell=True).decode('utf-8')
+    ls_list_raw = list(filter(lambda x: len(x) > 0, ls_output.split('\n')))
+    inv= {}
+    backups= {}
+    last_site=""
+    last_namespace=""
+    inv["all-wordpresses"]={"children":["wordpress_instances_test_blue"]}
+    inv["wordpress_instances_test_blue"]={"vars":connector_info(), "children":[]}
+    inv["_meta"]={}
+
+    for path in ls_list_raw:
+       path_list =path.split('/')
+       
+       site_name=path_list[2]
+
+       if not site_name in backups:
+           
+           if len(last_site)>0:
+               backups[last_site] = list(filter(lambda x: "full" in x,backups[last_site]))
+               backups[last_site].sort()
+
+               # picking the last valid full archive along with its valid sql backup if it exists
+               archives=get_last_validarchive(backups[last_site])
+               
+               backups[last_site] = backups[last_site][::-1][0:2]
+                
+               hostvars= parse_bkp_name1(last_site)
+
+               if len(backups[last_site]) > 1:
+                   hostvars["restore_archive_name"] = archives["tar"]
+                   hostvars["restore_sql_name"] = archives["sql"]
+                   #UNCOMMENT to detect wrongly archived sites
+                   #hostvars["restore_archive_name"]= backups[last_site][0]
+                   #hostvars["restore_sql_name"]= backups[last_site][1]
+                   #archive_id= backups[last_site][0].split(".")[0]
+                   #sql_id= backups[last_site][1].split(".")[0]
+                   #if archive_id != sql_id:
+                   #    f = open("bad_archives.txt", "a")
+                   #    f.write(last_site+ " :: "+backups[last_site][0] + " -- "+ backups[last_site][1]+"\n")
+                   #    f.close()
+
+               else:
+                   hostvars["restore_archive_name"]= ""
+                   hostvars["restore_sql_name"]= ""
+
+               backups[last_site]= hostvars
+               if "wp_env" in hostvars:
+                   wp_env = hostvars["wp_env"]
+                   if not wp_env in inv:
+                       inv[wp_env] = {"hosts":[]}
+                   if "restore_backup_folder" in hostvars:
+                       inv[wp_env]["hosts"].append(hostvars["restore_backup_folder"])
+                   if not wp_env in inv["wordpress_instances_test_blue"]["children"]:
+                       inv["wordpress_instances_test_blue"]["children"].append(wp_env)
+
+           backups[site_name]= []
+           last_site=site_name
+       backups[site_name].append(path_list[3])
+    inv["_meta"]["hostvars"] = backups;
+    return inv
+
+def parse_env_path(bkp_name):
+    """ parses core informations contained within the backup folder name """
+   
+    bkp_list = bkp_name.split('_')
+    bkp_path = bkp_name.split("htdocs_")
+    if len(bkp_list) > 1:
+        if len(bkp_path)> 1:
+            wp_path = bkp_name.split("htdocs_")[1].replace('_','/')
+        else: wp_path=""
+        return{
+            "wp_path":wp_path,
+            "wp_env": bkp_list[2],
+            "url_from": bkp_list[3]
+        }  
+    else: return {}  
+
+def parse_bkp_name1(bkp_name):
+    """ populates generated and parsed variable for a given wordpress instance """
+
+    env_path = parse_env_path(bkp_name)
+    if "wp_env" in env_path and "wp_path" in env_path:
+        random_db_name = "wp_"+''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        return{
+                "wp_env": env_path["wp_env"],
+                "wp_path":env_path["wp_path"],
+                "wp_hostname": env_path["wp_env"]+"-wwp-int."+cluster_ip+".nip.io",
+                "restore_backup_folder": bkp_name,
+                "db_name":random_db_name,
+                "url_from": env_path["url_from"]
+         } 
+    else: return {} 
+
+def sort_inv_by_deph(inv_dict):
+    """ sorts instances lists on each group by depth to process from root site and downwards instead of random ordering """
+    for group in inv_dict:
+        if "hosts" in inv_dict[group]:
+            inv_dict[group]["hosts"].sort( key= lambda h: len(h.split('_')) )
+    return inv_dict
+
+def limit_depth(inv_dict, max_depth):
+    """ limits instances lists on each group by depth to process from root site and downwards instead of random ordering
+           a depth of 0 limits only for root worpress sites
+    """
+    root_depth =5
+    for group in inv_dict:
+        if "hosts" in inv_dict[group]:
+            inv_dict[group]["hosts"] = list(filter( lambda x : len(x.split('_')) - root_depth <= max_depth, inv_dict[group]["hosts"] ))
+    return inv_dict
+
+def generate_inventory(sorted= True, limit=0, max_depth=-1):
+    """ Helper function for clearer execution flow """
+    inventory = {}
+    if sorted:
+        inventory= sort_inv_by_deph(bkp_to_dict())
+    else:
+        inventory= bkp_to_dict()
+    if limit > 0:
+        inventory = limit_hosts(inventory, limit)
+    if max_depth >= 0:
+        inventory = limit_depth(inventory, max_depth)
+
+    print( json.dumps(inventory))
+    return inventory
+    
+
+generate_inventory()
