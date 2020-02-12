@@ -349,7 +349,7 @@
     name: enlighter
       - symlinked
       - active
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/enlighter
+    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/enlighter.zip
 
 - name: enlighter configuration
   wordpress_option: "{{ item }}"
