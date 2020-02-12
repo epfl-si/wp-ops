@@ -1,8 +1,11 @@
-FROM python:3.7-alpine
+# https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
+FROM node:13
 
-WORKDIR /code
-ADD requirements.txt .
-RUN pip install -r requirements.txt
-ADD *.py ./
-RUN chmod a+x main.py
-ENTRYPOINT ["/code/main.py"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+EXPOSE 8080
+CMD [ "node", "index.js" ]
