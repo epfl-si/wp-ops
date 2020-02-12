@@ -1,4 +1,4 @@
-FROM epflidevelop/os-wp-base
+FROM epflsi/os-wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \
