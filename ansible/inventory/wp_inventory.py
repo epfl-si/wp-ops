@@ -6,7 +6,7 @@ import json
 
 class WPInventory():
 
-    def __init__(self, targets, prune_elements, env_prefix):
+    def __init__(self, targets, prune_elements, env_prefix, include_details=False):
         """
         Class constructor
 
@@ -15,13 +15,14 @@ class WPInventory():
         :param prune_elements: Dict with elements to prune while using 'find' command.
                                 Can have 'name' and 'path' keys with a list of element to prune
         :param env_prefix: Prefix to use for environement (prod, test, dev)
+        :param include_details: To tell if we have to recover details about WordPress installs
         """
         self._nicknames_already_taken = []
         self._wordpresses = {}
         self._env_prefix = env_prefix
 
         for target in targets:
-            for wordpress_instance in self._collect_wordpress_installs_over_ssh(target, prune_elements):
+            for wordpress_instance in self._collect_wordpress_installs_over_ssh(target, prune_elements, include_details):
                 wordpress_instance = {**target, **wordpress_instance}
                 category = self._categorize(wordpress_instance)
                 
@@ -78,13 +79,14 @@ class WPInventory():
         return result
 
 
-    def _collect_wordpress_installs_over_ssh(self, target_dict, prune_elements):
+    def _collect_wordpress_installs_over_ssh(self, target_dict, prune_elements, include_details):
         """
         Use SSH to get all installed WordPress website information.
 
         :param target_dict: dict containing information about target to connect to get WP instances information.
         :param prune_elements: Dict with elements to prune while using 'find' command.
                                 Can have 'name' and 'path' keys with a list of element to prune
+        :param include_details: To tell if we have to recover details about WordPress installs    
         """
 
         # We assume we always have 'name' key inside prune_elements dict
@@ -107,7 +109,7 @@ class WPInventory():
 
             if values:
                 # Recovering instance details
-                details = self._instance_details(target_dict, line.replace('wp-config.php', ''))
+                details = self._instance_details(target_dict, line.replace('wp-config.php', ''), include_all_details=include_details)
 
                 retval.append({'wp_env': values[0][0],
                                 'wp_hostname': values[0][1],
@@ -119,12 +121,14 @@ class WPInventory():
         return retval
 
 
-    def _instance_details(self, target_dict, path_to_instance):
+    def _instance_details(self, target_dict, path_to_instance, include_all_details=False):
         """
         Gathers more information about a WordPress install and return a dict 
 
         :param target_dict: dict containing information about target to connect to get WP instances information.
         :param path_to_instance: Path to access instance
+        :param include_all_details: To tell if we have to recover all details about WordPress installs. Be default, we 
+                                    only take epfl:site_category
         """
         details = {}
 
@@ -132,11 +136,18 @@ class WPInventory():
         ## 1. Options
         section = 'options'
         details[section] = {}
-        # List of options to get from Instance
-        options_to_get = ['plugin:epfl_accred:unit_id', 
-                          'plugin:epfl_accred:unit',
-                          'epfl:site_category',
-                          'siteurl']
+
+        # We have to return all details
+        if include_all_details:
+            # List of options to get from Instance
+            options_to_get = ['plugin:epfl_accred:unit_id', 
+                            'plugin:epfl_accred:unit',
+                            'epfl:site_category',
+                            'siteurl']
+                            
+        # We take only the minimum details we need for script correct execution    
+        else:
+            options_to_get = [ 'epfl:site_category']
 
         # Default value for options
         for option_name in options_to_get:
@@ -158,6 +169,9 @@ class WPInventory():
         except Exception as e:
             details[section]['_error'] = 'Error getting options: {}'.format(e)
 
+        # If we don't want all details, 
+        if not include_all_details:
+            return details
         
         ## 2. Defined boolean
         section = 'debug'

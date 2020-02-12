@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# USAGE:  ./wordpress-instance [--full]
+#           --full : to get all details about each WP instance
+
 import sys
 import os
 # To be able to include package wp_inventory in parent directory
@@ -23,6 +26,9 @@ prune_elements = {
 
 env_prefix = 'test'
 
-inventory = WPInventory(targets, prune_elements, env_prefix)
+# Defining if we have to include all details for WP instances
+include_details = len(sys.argv)> 1 and sys.argv[1] == '--full'
+
+inventory = WPInventory(targets, prune_elements, env_prefix, include_details=include_details)
 
 print(json.dumps(inventory.get_inventory(), sort_keys=True, indent=4))
