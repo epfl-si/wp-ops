@@ -224,11 +224,6 @@
       - active
     from: https://github.com/epfl-idevelop/wp-plugin-epfl-settings
 
-- name: custom_breadcrumb option for EPFL-settings plugin
-  wordpress_option:
-    name: epfl:custom_breadcrumb
-    value: ""
-
 - name: EPFL-Content-Filter plugin
   wordpress_plugin:
     name: EPFL-Content-Filter
@@ -245,8 +240,8 @@
     from: wordpress.org/plugins
 
 - name: SVG-support plugin options
-    wordpress_option: "{{ item }}"
-    with_items: "{{ plugin_svg_support_options }}"
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_svg_support_options }}"
 
 - name: remote-content-shortcode plugin
   wordpress_plugin:
