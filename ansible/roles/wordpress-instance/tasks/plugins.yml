@@ -331,13 +331,22 @@
 - name: enlighter plugin
   wordpress_plugin:
     name: enlighter
+    state:
       - symlinked
       - active
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/enlighter.zip
+    from: https://github.com/epfl-idevelop/jahia2wp/raw/release2018/data/wp/wp-content/plugins/enlighter.zip
 
 - name: enlighter configuration
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_enlighter_options }}"
+
+- name: disable-wp-rest-api plugin
+  wordpress_plugin:
+    name: disable-wp-rest-api
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
 
 
 ##################### 2010-only plugins ###########################
@@ -367,12 +376,6 @@
 - name: Shortcodes Ultimate plugin
   wordpress_plugin:
     name: shortcodes-ultimate
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: wordpress.org/plugins
-
-- name: Enlighter plugin
-  wordpress_plugin:
-    name: enlighter
     state: "{{ plugins_symlinked_and_active_in_2010_only }}"
     from: wordpress.org/plugins
 
@@ -484,7 +487,7 @@
   wordpress_plugin:
     name: epfl-intranet
     state: "{{ plugins_for_inside_category }}"
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-intranet
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-intranet
 
 - name: epfl-emploi plugin
   wordpress_plugin:
