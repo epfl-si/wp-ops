@@ -17,10 +17,7 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 
-#AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/split-repo-epfl-settings/ansible/roles/wordpress-instance/tasks/plugins.yml'
-#AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/705b9d075b418e20cee7bbfaa1e0cd4075fdab44/ansible/roles/wordpress-instance/tasks/plugins.yml'
-AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/5389723342a1605fb79a918e598c94736f030e5e/ansible/roles/wordpress-instance/tasks/plugins.yml'
-
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/split-repo-epfl-settings/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
