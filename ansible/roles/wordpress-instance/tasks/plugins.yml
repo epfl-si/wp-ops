@@ -503,7 +503,7 @@
   wordpress_plugin:
     name: epfl-intranet
     state: "{{ plugins_symlinked_and_active_in_inside_only }}"
-    from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-intranet
+    from: https://github.com/epfl-idevelop/wp-plugin-epfl-intranet
 
 - name: epfl-emploi plugin
   wordpress_plugin:
