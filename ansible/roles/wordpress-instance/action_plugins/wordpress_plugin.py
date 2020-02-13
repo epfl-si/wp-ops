@@ -3,18 +3,23 @@
 # There is a name clash with a module in Ansible named "copy":
 deepcopy = __import__('copy').deepcopy
 import re
+import sys
 import os.path
+import json
+
+# To be able to include package wp_inventory in parent directory
+sys.path.append(os.path.dirname(__file__))
 
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
+from wordpress_action_module import WordPressActionModule
 
-class ActionModule(ActionBase):
+class ActionModule(WordPressActionModule):
     def run (self, tmp=None, task_vars=None):
-        self.result = super(ActionModule, self).run(tmp, task_vars)
-        self._tmp = tmp
-        self._task_vars = task_vars
 
+        self.result = super(ActionModule, self).run(tmp, task_vars)
+        
         self._plugin_name = self._task.args.get('name')
 
         current_activation_state = self._get_plugin_activation_state()
@@ -42,11 +47,12 @@ class ActionModule(ActionBase):
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
+            
+            
             self._update_result(self._do_activate_plugin())
             if 'failed' in self.result: return self.result
 
         return self.result
-
 
     def _ensure_all_files_state (self, desired_state, is_mu):
         """
@@ -55,33 +61,23 @@ class ActionModule(ActionBase):
         :param desired_state: can be 'installed', 'symlinked', ...
         :param is_mu: Boolean to tell if plugin is a MU-Plugin
         """
+
         froms = self._task.args.get('from')
         if isinstance(froms, six.string_types):
             froms = [froms]
         if not froms:
             froms = []
-
+        
         basenames = [os.path.basename(f) for f in froms
                 if self._is_filename(f)]
         if not basenames:
-            basenames = [self._task.args.get('name')]
+            basenames = [self._plugin_name]
 
         # Going through each files/folder for plugin
         for basename in basenames:
             self._ensure_file_state(desired_state, basename, is_mu)
             if 'failed' in self.result: return self.result
 
-
-    def _is_filename (self, from_piece):
-        """
-        Tells if a path is a filename/folder name or not.
-
-        :param from_piece: string describing plugin source.
-        """
-        return (from_piece != "wordpress.org/plugins"
-                # check if match a github repo
-                and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
-                and not from_piece.endswith(".zip"))
 
 
     def _ensure_file_state (self, desired_state, basename, is_mu):
@@ -253,48 +249,6 @@ class ActionModule(ActionBase):
         return self.result
 
 
-    def _run_wp_cli_action (self, args):
-        """
-        Executes a given WP-CLI command
-
-        :param args: WP-CLI command to execute
-        """
-        return self._run_shell_action(
-            '%s %s' % (self._get_ansible_var('wp_cli_command'), args))
-
-
-    def _run_shell_action (self, cmd):
-        """
-        Executes a Shell command
-
-        :param cmd: Command to execute.
-        """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
-
-
-    def _run_action (self, action_name, args):
-        """
-        Executes an action, using an Ansible module.
-
-        :param action_name: Ansible module name to use
-        :param args: dict with arguments to give to module
-        """
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins
-        # at § “Action Plugins”
-        result = self._execute_module(module_name=action_name,
-                                      module_args=args, tmp=self._tmp,
-                                      task_vars=self._task_vars)
-        self._update_result(result)
-        return self.result
-
-
-    def _get_wp_dir (self):
-        """
-        Returns directory in which WordPress is installed
-        """
-        return self._get_ansible_var('wp_dir')
-
-
     def _get_symlink_path (self, basename, is_mu):
         """
         Returns symlink source path
@@ -334,38 +288,3 @@ class ActionModule(ActionBase):
             if len(fields) < 2: continue
             if fields[0] == self._plugin_name: return fields[1]
         return 'inactive'
-
-
-    def _get_ansible_var (self, name):
-        """
-        Returns Ansible var value
-
-        :param name: Var name
-        """
-        unexpanded = self._task_vars.get(name, None)
-        if unexpanded is None:
-            return None
-        else:
-            return self._templar.template(unexpanded)
-
-
-    def _update_result (self, result):
-        """
-        Updates result dict
-
-        :param result: dict to update with
-        """
-        oldresult = deepcopy(self.result)
-        self.result.update(result)
-
-        def _keep_flag(flag_name):
-            if (flag_name in oldresult and
-                oldresult[flag_name] and
-                flag_name in self.result and
-                not result[flag_name]
-            ):
-                self.result[flag_name] = oldresult[flag_name]
-
-        _keep_flag('changed')
-
-        return self.result

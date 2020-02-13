@@ -128,6 +128,10 @@
       - active
     from: wordpress.org/plugins
 
+# TODO: recapture intent of jahia2wp's
+# src/wordpress/plugins/custom/polylang.py
+# (perhaps not in this file)
+
 - name: Polylang plugin
   wordpress_plugin:
     name: polylang
@@ -142,10 +146,6 @@
     state: symlinked
     from: wordpress.org/plugins
 
-# TODO: recapture intent of jahia2wp's
-# src/wordpress/plugins/custom/polylang.py
-# (perhaps not in this file)
-
 - name: mainwp-child plugin
   wordpress_plugin:
     name: mainwp-child
@@ -155,12 +155,8 @@
     from: wordpress.org/plugins
 
 - name: mainwp_child_uniqueId option
-  wordpress_option:
-    name: mainwp_child_uniqueId
-    value: "{{ plugin_mainwp_child_uniqueid }}"
-    # TODO: this value has "autoload: no" in
-    # jahia2wp/data/plugins/generic/mainwp-child/config-plugin.yml ;
-    # not sure what it means (if anything)
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_mainwp_child_options }}"
 
 - name: Tequila plugin
   wordpress_plugin:
@@ -212,15 +208,9 @@
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/cache-control
 
 - name: Cache-Control options
-  wordpress_option:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-  with_items:
-    - name: cache_control_front_page_max_age
-      value: "{{ plugin_cache_control_front_page_max_age }}"
-    - name: cache_control_pages_max_age
-      value: "{{ plugin_cache_control_pages_max_age }}"
-
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_cache_control_options }}"
+    
 - name: varnish-http-purge plugin
   wordpress_plugin:
     name: varnish-http-purge
@@ -234,11 +224,6 @@
       - active
     from: https://github.com/epfl-idevelop/wp-plugin-epfl-settings
 
-- name: custom_breadcrumb option for EPFL-settings plugin
-  wordpress_option:
-    name: epfl:custom_breadcrumb
-    value: ""
-
 - name: EPFL-Content-Filter plugin
   wordpress_plugin:
     name: EPFL-Content-Filter
@@ -246,7 +231,7 @@
     from: https://github.com/epfl-idevelop/wp-plugin-epfl-content-filter
 
 # TODO: we are not quite sure anymore whether this plugin is useful.
-- name: svg-support plugin
+- name: SVG-support plugin
   wordpress_plugin:
     name: svg-support
     state:
@@ -254,10 +239,9 @@
       - active
     from: wordpress.org/plugins
 
-- name: Dismiss svg-support popup
-  wordpress_option:
-    name: bodhi_svgs_admin_notice_dismissed
-    value: 1
+- name: SVG-support plugin options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_svg_support_options }}"
 
 - name: remote-content-shortcode plugin
   wordpress_plugin:
@@ -502,35 +486,36 @@
 - name: epfl-intranet plugin
   wordpress_plugin:
     name: epfl-intranet
-    state: "{{ plugins_symlinked_and_active_in_inside_only }}"
+    state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-idevelop/wp-plugin-epfl-intranet
 
 - name: epfl-emploi plugin
   wordpress_plugin:
     name: epfl-emploi
-    state: "{{ plugins_symlinked_in_emploi_only }}"
+    state: "{{ plugins_for_emploi_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-emploi
 
 - name: epfl-restauration plugin
   wordpress_plugin:
     name: epfl-restauration
-    state: "{{ plugins_symlinked_in_restauration_only }}"
+    state: "{{ plugins_for_restauration_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
 
 - name: epfl-scienceqa plugin
   wordpress_plugin:
     name: epfl-scienceqa
-    state: "{{ plugins_symlinked_in_scienceqa_only }}"
+    state: "{{ plugins_for_scienceqa_category }}"
     from: https://github.com/epfl-idevelop/wp-plugin-epfl-scienceqa
 
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
-    state: "{{ plugins_symlinked_in_library_only }}"
+    state: "{{ plugins_for_library_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
 
 - name: epfl-courses-se plugin
   wordpress_plugin:
     name: epfl-courses-se
-    state: "{{ plugins_symlinked_in_cdhshs_only }}"
+    state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-idevelop/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
+    

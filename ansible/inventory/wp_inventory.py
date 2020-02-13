@@ -2,10 +2,11 @@
 import subprocess
 import shlex
 import re
+import json
 
 class WPInventory():
 
-    def __init__(self, targets, prune_elements, env_prefix):
+    def __init__(self, targets, prune_elements, env_prefix, include_details=False):
         """
         Class constructor
 
@@ -14,13 +15,14 @@ class WPInventory():
         :param prune_elements: Dict with elements to prune while using 'find' command.
                                 Can have 'name' and 'path' keys with a list of element to prune
         :param env_prefix: Prefix to use for environement (prod, test, dev)
+        :param include_details: To tell if we have to recover details about WordPress installs
         """
         self._nicknames_already_taken = []
         self._wordpresses = {}
         self._env_prefix = env_prefix
 
         for target in targets:
-            for wordpress_instance in self._collect_wordpress_installs_over_ssh(target, prune_elements):
+            for wordpress_instance in self._collect_wordpress_installs_over_ssh(target, prune_elements, include_details):
                 wordpress_instance = {**target, **wordpress_instance}
                 category = self._categorize(wordpress_instance)
                 
@@ -50,13 +52,41 @@ class WPInventory():
         return "{}-{}".format(self._env_prefix, cat_nickname)
 
 
-    def _collect_wordpress_installs_over_ssh(self, target_dict, prune_elements):
+    def _exec_ssh(self, target_dict, cmd):
+        """
+        Executes a SSH command using information contained in target_dict dictionnary.
+        Returns result.
+
+
+        """
+        
+        ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
+                                                                        target_dict['ssh_user'],
+                                                                        target_dict['ssh_host'],
+                                                                        cmd)
+        args = shlex.split(ssh_cmd)
+        ssh =  subprocess.Popen(args, 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                shell=False)
+
+        result = ssh.stdout.readlines()
+
+        if result == []:
+            error = ssh.stderr.readlines()
+            raise ValueError("ERROR: {}".format(error))
+    
+        return result
+
+
+    def _collect_wordpress_installs_over_ssh(self, target_dict, prune_elements, include_details):
         """
         Use SSH to get all installed WordPress website information.
 
         :param target_dict: dict containing information about target to connect to get WP instances information.
         :param prune_elements: Dict with elements to prune while using 'find' command.
                                 Can have 'name' and 'path' keys with a list of element to prune
+        :param include_details: To tell if we have to recover details about WordPress installs    
         """
 
         # We assume we always have 'name' key inside prune_elements dict
@@ -69,21 +99,8 @@ class WPInventory():
 
         cmd_to_exec = "find {} \( -type d \( {} \) -prune -false -o -name wp-config.php \)".format(target_dict['remote_path'], prune_options)
 
-        ssh_cmd = 'ssh -xT -q -p {} -o StrictHostKeyChecking=no {}@{} "{}"'.format(target_dict['ssh_port'],
-                                                                        target_dict['ssh_user'],
-                                                                        target_dict['ssh_host'],
-                                                                        cmd_to_exec)
-        args = shlex.split(ssh_cmd)
-        ssh =  subprocess.Popen(args, 
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                shell=False)
-
-        result = ssh.stdout.readlines()
-        if result == []:
-            error = ssh.stderr.readlines()
-            raise ValueError("ERROR: {}".format(error))
-
+        result = self._exec_ssh(target_dict, cmd_to_exec)
+        
         retval = []
 
         for line in result:
@@ -91,13 +108,126 @@ class WPInventory():
             values = re.findall(r'/srv/([^/]*)/([^/]*)/htdocs/(.*?)/?wp-config.php$', line)
 
             if values:
+                # Recovering instance details
+                details = self._instance_details(target_dict, line.replace('wp-config.php', ''), include_all_details=include_details)
+
                 retval.append({'wp_env': values[0][0],
                                 'wp_hostname': values[0][1],
-                                'wp_path': values[0][2]})
+                                'wp_path': values[0][2],
+                                'wp_details': details})
             else:
                 raise ValueError("Bizarre in line {}".format(line))
 
         return retval
+
+
+    def _instance_details(self, target_dict, path_to_instance, include_all_details=False):
+        """
+        Gathers more information about a WordPress install and return a dict 
+
+        :param target_dict: dict containing information about target to connect to get WP instances information.
+        :param path_to_instance: Path to access instance
+        :param include_all_details: To tell if we have to recover all details about WordPress installs. Be default, we 
+                                    only take epfl:site_category
+        """
+        details = {}
+
+
+        ## 1. Options
+        section = 'options'
+        details[section] = {}
+
+        # We have to return all details
+        if include_all_details:
+            # List of options to get from Instance
+            options_to_get = ['plugin:epfl_accred:unit_id', 
+                            'plugin:epfl_accred:unit',
+                            'epfl:site_category',
+                            'siteurl']
+                            
+        # We take only the minimum details we need for script correct execution    
+        else:
+            options_to_get = [ 'epfl:site_category']
+
+        # Default value for options
+        for option_name in options_to_get:
+            details[section][option_name] = None
+
+        try:
+            instance_options = self._exec_ssh(target_dict, 'wp option list --path={} --format=csv --skip-themes --skip-plugins'.format(path_to_instance))
+
+            # Looping through instance options to find the ones we want
+            for instance_option in instance_options:
+
+                # Extracting information
+                values = re.findall(r'^([\w:_-]+),\"?(.+)\"?$', instance_option.decode().strip())
+
+                if values and values[0][0] in options_to_get:
+                    # We save option and remove potential " around the string.
+                    details[section][values[0][0]] = (values[0][1]).strip('"')
+
+        except Exception as e:
+            details[section]['_error'] = 'Error getting options: {}'.format(e)
+
+        # If we don't want all details, 
+        if not include_all_details:
+            return details
+        
+        ## 2. Defined boolean
+        section = 'debug'
+        details[section] = {}
+
+        defined_to_check = ['WP_DEBUG', 'WP_DEBUG_DISPLAY', 'WP_DEBUG_LOG']
+        for defined in defined_to_check:
+            try:
+                result = self._exec_ssh(target_dict, "wp config get {} --path={} --skip-themes --skip-plugins".format(defined, path_to_instance))
+
+                # To handle result, we have to decode it because it comes in 'byte' mode.
+                details[section][defined] = result[0].decode().strip('\n')=="1"
+
+            # If exception, it means we can't get the value because it's not present in config file
+            except Exception as e:
+                details[section][defined] = False
+        
+        # Check debug log file size
+        try:
+            
+            result = self._exec_ssh(target_dict, "if [ -e '{0}/wp-content/debug.log' ] ;then stat --printf='%s' '{0}/wp-content/debug.log' ;else echo '0'; fi".format(path_to_instance))
+            details[section]['log_file_size'] = int(result[0].decode().strip('\n'))
+
+        except Exception as e:
+            details[section]['log_file_size'] = 0
+            details[section]['_error'] = 'Error getting log file infos: {}'.format(e)
+
+
+        ## 3. Polylang
+        section = 'polylang'
+        details[section] = {}
+
+        try:
+            # Listing languages. Format is like (default one is the first in the list) :
+            # fr — Français [DEFAULT]
+            # en — English
+            lang_list = self._exec_ssh(target_dict, 'wp polylang languages --path={} --skip-themes'.format(path_to_instance))
+
+            languages = []
+
+            if not lang_list[0].decode().strip().startswith('Success: No languages are currently configured'):
+
+                # Looping through languages
+                for lang_details in lang_list:
+                    
+                    # Extracting information
+                    values = re.findall(r'^([\w]+)\s.+', lang_details.decode().strip())
+                    languages.append(values[0])
+            
+            details[section]['langs'] = languages
+
+        except Exception as e:
+            details[section]['_error'] = 'Error getting lang list: {}'.format(e)
+
+
+        return details
 
 
     def _as_ansible_struct(self):
