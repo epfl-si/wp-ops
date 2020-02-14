@@ -327,7 +327,12 @@ class WpOpsPlugins:
                 raise Exception(pprint.pformat(thing))
             action = thing['wordpress_plugin']
 
+            action['state'] = ['symlinked', 'active']
+
             if 'state' not in action or 'symlinked' not in action['state']:
+                continue
+
+            if 'from' not in action:
                 continue
 
             name = action['name']
