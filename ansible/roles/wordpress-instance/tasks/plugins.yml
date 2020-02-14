@@ -189,6 +189,7 @@
     name: plugin:epfl_accred:administrator_group
     value: "{{ wp_administrator_group }}"
 
+# TODO WHEN WE WILL HAVE INFORMATION FROM WP-VERITAS
 # - name: accred unit name
 #   wordpress_option:
 #     name: plugin:epfl_accred:unit
