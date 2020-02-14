@@ -1,5 +1,13 @@
 ---
 # tasks file for wordpress-deployment
 
+- name: "Persistent Minishift Volume"
+  import_tasks: "mnsft-persistent-volume.yml"
+  when: openshift_is_minishift
+
+- name: "Persistent Minishift Volume Claim"
+  import_tasks: "mnsft-persistent-claim.yml"
+  when: openshift_is_minishift
+
 - name: "httpd Deployment"
   import_tasks: wwp-int-httpd-deployment.yml

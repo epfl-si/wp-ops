@@ -48,11 +48,7 @@
       ln -sf wp/wp-settings.php wp-settings.php
       ln -sf wp/wp-includes wp-includes 
       ln -sf wp/wp-login.php wp-login.php
-      mkdir wp-content
-      ln -sf ../wp/wp-content/themes wp-content/themes
-      ln -sf ../wp/wp-content/plugins wp-content/plugins
-      ln -sf ../wp/wp-content/mu-plugins wp-content/mu-plugins
-      ln -sf ../wp/wp-content/index.php wp-content/index.php
+
   when: "'This does not seem to be a WordPress install.' in out.stderr and restore_backup_folder is defined"
 
 
@@ -62,7 +58,7 @@
   shell:
     cmd: |
       cd "{{wp_dir}}"
-      tar --transform 's,^.*/wp-content,wp-content,S' -xvf {{ restore_tar_full_path }} --wildcards '*/wp-content/uploads' --wildcards '{{ restore_htaccess_path_tar}}' > /dev/null
+      tar --transform 's,^.*/wp-content,wp-content,S' -xf {{ restore_tar_full_path }} --wildcards '*/wp-content' --wildcards '{{ restore_htaccess_path_tar}}'
       cp {{ restore_htaccess_path_tar }} .htaccess
       rm -r srv
 #      bash -c 'time rm -rf {{wp_dir}}/wp-content/uploads'
@@ -133,5 +129,5 @@
     cmd: |
       {{wp_cli_command}} plugin deactivate epfl epfl-menus polylang
       {{wp_cli_command}} plugin activate polylang epfl-menus epfl ||true
-  when: restore_backup_folder is defined
+  when: restore_backup_folder is defined 
 

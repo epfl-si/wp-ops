@@ -1,0 +1,25 @@
+---
+
+
+
+- name: "PersistentVolumeClaim"
+  connection: local
+  openshift:
+    as_admin: true
+    state: latest
+    kind: PersistentVolumeClaim
+    name: "nfs-pvc-{{env}}"
+    namespace: "{{ openshift_namespace}}"
+    apiVersion: v1
+    metadata:
+      name: 'nfs-pvc-{{env}}'
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+         requests:
+           storage: 1Gi
+      selector:
+          matchLabels:
+              id: "{{env}}"
+  tags: pvc

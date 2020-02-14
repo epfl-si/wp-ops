@@ -5,48 +5,57 @@
   connection: local
   openshift:
     state: latest
-    kind: DeploymentConfig
-    apiVersion: apps.openshift.io/v1
-    metadata:
-      labels:
-        run: "{{name}}"
-      name: "{{name}}"
-      namespace: "{{ openshift_namespace }}"
-    spec:
-      replicas: 1
-      template:
-        metadata:
-          labels:
-            run: "{{name}}"
-        spec:
-          serviceAccount: "{{ deployment_service_account }}"
-          serviceAccountName: "{{ deployment_service_account }}"
-          containers:
-            - env:
-              - name: WP_ENV
-                value: "{{env}}"
-              name: "{{name}}"
-              ports:
-                - containerPort: 80
-                  protocol: TCP
-              volumeMounts:
-                - mountPath: /srv/{{env}}
-                  name: "nfsvol-{{env}}"
-                  subPath: "{{env}}"
-          volumes:
-            - name: "nfsvol-{{env}}"
-              persistentVolumeClaim:
-                claimName: "{{ openshift_pvc_name }}"
-      triggers:
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-            - "{{ name }}"
-            from:
-              kind: ImageStreamTag
-              name: "httpd:prod"
-              namespace: "{{openshift_namespace}}"
+    content: |
+      kind: DeploymentConfig
+      apiVersion: apps.openshift.io/v1
+      metadata:
+        labels:
+          run: "{{name}}"
+        name: "{{name}}"
+        namespace: "{{ openshift_namespace }}"
+      spec:
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              run: "{{name}}"
+          spec:
+            serviceAccount: "{{ deployment_service_account }}"
+            serviceAccountName: "{{ deployment_service_account }}"
+            containers:
+              - env:
+                - name: WP_ENV
+                  value: "{{env}}"
+                name: "{{name}}"
+                ports:
+                  - containerPort: 80
+                    protocol: TCP
+                volumeMounts:
+                  - mountPath: /srv/{{env}}
+                    name: "nfsvol-{{env}}"
+      {% if not openshift_is_minishift %}
+                    subPath: "{{env}}"
+      {% endif %}
+            volumes:
+              - name: "nfsvol-{{env}}"
+                persistentVolumeClaim:
+      {% if not openshift_is_minishift %}
+                  claimName: "{{ openshift_pvc_name }}"
+      {%  endif %}
+      {% if openshift_is_minishift %}
+                  claimName: "nfs-pvc-{{env}}"
+      {%  endif %}
+
+        triggers:
+          - type: ImageChange
+            imageChangeParams:
+              automatic: true
+              containerNames:
+              - "{{ name }}"
+              from:
+                kind: ImageStreamTag
+                name: "httpd:prod"
+                namespace: "{{openshift_namespace}}"
              
   tags: dc
 

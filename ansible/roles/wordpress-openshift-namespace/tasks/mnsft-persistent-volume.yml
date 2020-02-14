@@ -7,13 +7,13 @@
     as_user: "system:admin"
     state: latest
     kind: PersistentVolume
-    name: "nfs-pv-{{dc.name}}"
-    namespace: "myproject"
+    name: "nfs-pv-{{name}}"
+    namespace: "{{ openshift_namespace }}"
     apiVersion: v1
     metadata:
-      name: 'nfs-pv-{{dc.name}}'
+      name: 'nfs-pv-{{name}}'
       labels:
-          id: "{{dc.name}}"
+          id: "{{name}}"
     spec:
       capacity:
         storage: 1Gi
@@ -21,7 +21,7 @@
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
       nfs:
-        path: '/wp/{{dc.name}}'
-        server: "{{dc.nfs_ip}}"
+        path: '/site/{{name}}'
+        server: "{{nfs_ip}}"
         readOnly: false
   tags: pv

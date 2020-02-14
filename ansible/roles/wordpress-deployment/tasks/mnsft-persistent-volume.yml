@@ -1,18 +1,26 @@
 ---
 
+- name: "Prepare nfs files"
+  connection: local
+  shell:
+      cmd: |
+        PODNAME=$(oc get pods -o name |grep mgmt | cut -d "/" -f2 |head -1)
+        oc exec $PODNAME -- mkdir -p /srv/{{env}}
+
 
 - name: "PersistentVolume"
+  connection: local
   openshift:
     as_user: "system:admin"
     state: latest
     kind: PersistentVolume
-    name: "pv"
+    name: "nfs-pv-{{env}}"
     namespace: "myproject"
     apiVersion: v1
     metadata:
-      name: 'pv'
+      name: 'nfs-pv-{{env}}'
       labels:
-          id: "pv"
+          id: "{{env}}"
     spec:
       capacity:
         storage: 1Gi
@@ -20,7 +28,7 @@
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
       nfs:
-        path: '/srv'
-        server: "{{infra_ip}}"
+        path: '/srv/{{env}}'
+        server: "{{IPADRS}}"
         readOnly: false
   tags: pv

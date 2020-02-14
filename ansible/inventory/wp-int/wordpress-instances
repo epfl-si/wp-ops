@@ -92,7 +92,7 @@ def bkp_to_dict():
                backups[last_site].sort()
 
                # picking the last valid full archive along with its valid sql backup if it exists
-               archives=get_last_validarchive(backups[last_site])
+               archives=get_last_validarchive(backups[last_site][::-1])
                
                backups[last_site] = backups[last_site][::-1][0:2]
                 

@@ -23,7 +23,7 @@ inventory = {
               },
               "wordpress_deployments_test_blue":{
                  "vars":{
-                   "openshift_namespace":"wwp-int"
+                   "openshift_namespace":"wwp-int",
                    "cluster_ip":"128.178.222.83"
                  }
               },

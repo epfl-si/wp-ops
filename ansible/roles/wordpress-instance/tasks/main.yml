@@ -17,34 +17,10 @@
     # Can we use a handler instead?
     - config
 
-# TODO: Tu peux shooter les tâches (et leurs dépendances) "Backup",
-# "Wipe" "Recreate", "Create" et "Restore" qui suivent (cependant, tu
-# voudras peut-être utiliser un create.yml que tu réécris de zéro,
-# afin que ce fichier-ci ne devienne pas trop long)
 
-- name: Backup
-  # We include_tasks (not import_tasks) here, because we do *not* want
-  # to propagate tags - Within backup.yml, tasks shall be individually
-  # marked with the appropriate subset of the `backup.code`,
-  # `backup.data` and `backup.uploads` tags (or alternatively, the
-  # `always` tag).
-  include_tasks: "backup.yml"
-  tags:
-    - never  # That is, skip unless "-t wipe", "-t backup", "-t backup.code" etc. is
-             # passed on the command line
-    - wipe
-    - backup
-    - backup.code
-    - backup.data
-    - backup.uploads
-  when: not is_minishift_instance  
 
-- name: Wipe
-  import_tasks: "wipe.yml"
-  when: not is_minishift_instance
-  tags:
-    - never
-    - wipe
+
+
 
 - name: restore from /backups
   import_tasks: "restore-from-prod.yml"
@@ -76,7 +52,6 @@
   when:
     - wp_ensure_symlink_version is defined
     - (wp_can.configure and wp_can.write_code) or ansible_check_mode
-    - not is_minishift_instance
   tags:
     - never
     - symlink

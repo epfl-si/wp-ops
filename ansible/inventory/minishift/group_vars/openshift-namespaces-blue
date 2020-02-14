@@ -27,6 +27,8 @@ MyList:
 #      db_ip: 128.179.146.8
 #      nfs_ip: 128.179.146.8
 
+infra_ip: "{{ IPADRS }}"
+
 eyaml_keys:
   priv: "/keybase/team/epfl_wwp_blue/private_key.pkcs7.pem"
   pub: "/keybase/team/epfl_wwp_blue/public_key.pkcs7.pem"
