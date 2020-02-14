@@ -121,7 +121,7 @@
       for opt in home siteurl; do {{wp_cli_command}} option set $opt https://{{wp_hostname}}/{{wp_path}}; done;
       {{wp_cli_command}} search-replace {{url_from}} {{wp_hostname}}
       {{wp_cli_command}} transient delete --all
-  when: restore_backup_folder is defined
+  when: restore_backup_folder is defined and is_wp_int_instance
 
 # Always empty polylang plugin config by reactivating it when we are restoring from backups
 - name: reactivate plugins
@@ -129,5 +129,5 @@
     cmd: |
       {{wp_cli_command}} plugin deactivate epfl epfl-menus polylang
       {{wp_cli_command}} plugin activate polylang epfl-menus epfl ||true
-  when: restore_backup_folder is defined 
+  when: restore_backup_folder is defined and is_wp_int_instance
 

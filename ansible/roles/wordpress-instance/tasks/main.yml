@@ -32,17 +32,6 @@
     - config
   import_tasks: "serving-infrastructure.yml"
 
-# TODO: À partir d'ici, à garder; avant de livrer, ces tâches doivent
-# redevenir fonctionnelles et ne pas contenir de "if" qui ferait de
-# wp-int et/ou MiniShift des cas spéciaux.
-#
-# C'est-à-dire : étant donné un SITE qui fonctionne, après
-#
-#    wpsible -t symlink -l SITE
-#
-# il doit être symlinké (c'est-à-dire que son code réside dans le /wp
-# de l'image), et continuer à fonctionner. Si ce n'est pas le cas
-# c'est un bug (du code préexistant).
 
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
