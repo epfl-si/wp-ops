@@ -1,3 +1,3 @@
-FROM epflidevelop/os-wp-mgmt
+FROM epflsi/os-wp-mgmt
 
 USER www-data
