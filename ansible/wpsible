@@ -21,6 +21,12 @@ cd "$(dirname "$(realpath "$0")")"
 playbook_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
 ansible_flags="-e @roles/wordpress-instance/vars/main.yml"
 
+git_current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+case "$git_current_branch" in
+    "") : ;;
+    *) playbook_flags="$playbook_flags -e git_current_branch=$git_current_branch" ;;
+esac
+
 warn () {
     if [ -n "$1" ]; then
         echo "$@" >&2

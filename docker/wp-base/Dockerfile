@@ -75,7 +75,7 @@ RUN su -s /bin/sh www-data -c " \
     fi;                                                                   \
     wp package install https://github.com/diggy/polylang-cli.git ;        \
     wp package install /tmp/cortneyray/; \
-    wp package install https://github.com/epfl-idevelop/wp-cli.git;       \
+    wp package install https://github.com/epfl-si/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
 
 

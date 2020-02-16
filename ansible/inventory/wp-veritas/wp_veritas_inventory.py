@@ -3,7 +3,7 @@
 # All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, VPSI, 2019
 #
 # Build an Ansible inventory from wp-veritas
-# this file is found in https://github.com/epfl-idevelop/wp-ops under
+# this file is found in https://github.com/epfl-si/wp-ops under
 # subdirectory ansible/tower/inventory_scripts
 #
 # Example invocation:

@@ -44,3 +44,8 @@
 - name: "Management container (ssh server, PHP CLI)"
   import_tasks: mgmt.yml
   tags: mgmt
+
+- name: "Monitoring"
+  when: openshift_namespace == "wwp"
+  include: monitoring.yml
+  tags: monitoring

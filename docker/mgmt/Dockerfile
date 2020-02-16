@@ -1,4 +1,4 @@
-FROM epflidevelop/os-wp-base
+FROM epflsi/os-wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \
@@ -42,7 +42,7 @@ RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
 
 ARG WP_OPS_BRANCH=master
-RUN set -e -x; cd /wp; git clone https://github.com/epfl-idevelop/wp-ops; \
+RUN set -e -x; cd /wp; git clone https://github.com/epfl-si/wp-ops; \
     cd wp-ops; git checkout ${WP_OPS_BRANCH}
 
 # setup access rights

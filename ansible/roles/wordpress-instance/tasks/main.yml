@@ -33,6 +33,12 @@
   import_tasks: "serving-infrastructure.yml"
 
 
+- name: Serving infrastructure
+  when: wp_can.configure
+  tags:
+    - config
+  import_tasks: "serving-infrastructure.yml"
+
 - name: Check that WordPress is working
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false

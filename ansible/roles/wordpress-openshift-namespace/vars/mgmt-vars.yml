@@ -8,8 +8,6 @@ mgmt_service_account: "{{ 'default' if openshift_is_minishift else openshift_nam
 mgmt_access_list:
   wwp: '{{ _mgmt_access_list_wwp_test_and_wwp }}'
   wwp-test: '{{ _mgmt_access_list_wwp_test_and_wwp + _mgmt_access_list_wwp_test_only }}'
-  wwp-int: '{{ _mgmt_access_list_wwp_test_and_wwp + _mgmt_access_list_wwp_test_only }}'
-  myproject: '{{ _mgmt_access_list_wwp_test_and_wwp + _mgmt_access_list_wwp_test_only }}'
 
 _mgmt_access_list_wwp_test_and_wwp:
   - christophe.burki@camptocamp.com
