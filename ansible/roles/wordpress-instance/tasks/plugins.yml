@@ -15,6 +15,8 @@
     - plugin-vars.yml
     - accred-vars.yml
 
+##################### Plugins to clean ###########################
+
 - name: Delete plugins bundled with WordPress
   wordpress_plugin:
     name: "{{ item }}"
@@ -28,9 +30,9 @@
 - name: Custom editor menu (must-use plugin)
   wordpress_plugin:
     name: EPFL_custom_editor_menu
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from:
       - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-custom-editor-menu
       - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu_loader.php
@@ -39,63 +41,64 @@
 - name: Blocks white-list (must-use plugin)
   wordpress_plugin:
     name: EPFL_block_white_list
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_block_white_list.php
 
 - name: Disable comments (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_comments
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_comments.php
 
 - name: Disable automatic updates (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_updates_automatic
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_updates_automatic.php
 
 - name: Google Analytics hook (must-use plugin)
   wordpress_plugin:
     name: EPFL_google_analytics_hook
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_google_analytics_hook.php
 
 - name: Locked installs (must-use plugin)
   wordpress_plugin:
     name: EPFL_installs_locked
-    state: '{{ ["symlinked", "must-use"] if wp_is_managed else "absent" }}'
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_installs_locked.php
 
 - name: Jahia redirect tracker (must-use plugin)
   wordpress_plugin:
     name: EPFL_jahia_redirect
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_jahia_redirect.php
 
 - name: EPFL functions (must-use plugin)
   wordpress_plugin:
     name: epfl-functions
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-functions.php
 
 - name: Quota (must-use plugin)
   wordpress_plugin:
     name: EPFL_quota_loader
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from:
       - https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-quota
       - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_quota_loader.php
@@ -103,9 +106,9 @@
 - name: Stats (must-use plugin)
   wordpress_plugin:
     name: EPFL_stats_loader
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from:
       - https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-stats
       - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_stats_loader.php
