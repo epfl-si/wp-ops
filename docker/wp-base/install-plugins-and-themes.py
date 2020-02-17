@@ -17,7 +17,8 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 
-AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
+#AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/68286b2307cd195ecbc5c8db32b7a260d9100852/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
