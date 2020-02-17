@@ -492,7 +492,7 @@
   wordpress_plugin:
     name: epfl-restauration
     state: "{{ plugins_for_restauration_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
+    from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
 - name: epfl-scienceqa plugin
   wordpress_plugin:
