@@ -10,7 +10,6 @@ import json
 # To be able to include package wp_inventory in parent directory
 sys.path.append(os.path.dirname(__file__))
 
-from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
 from wordpress_action_module import WordPressActionModule
@@ -21,6 +20,7 @@ class ActionModule(WordPressActionModule):
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
         self._plugin_name = self._task.args.get('name')
+        self._is_mu = self._task.args.get('is_mu', False)
 
         current_activation_state = self._get_plugin_activation_state()
         (desired_installation_state,
@@ -37,13 +37,13 @@ class ActionModule(WordPressActionModule):
             # We don't second-guess mu-plugins - If the activation
             # state is left vague, then they will be "demoted" to
             # ordinary plug-ins.
-            desired_as_muplugin = desired_activation_state == 'must-use'
-            self._ensure_all_files_state(desired_installation_state, desired_as_muplugin)
+            self._ensure_all_files_state(desired_installation_state)
             if 'failed' in self.result: return self.result
-            self._ensure_all_files_state('absent', not desired_as_muplugin)
+            self._ensure_all_files_state('absent')
             if 'failed' in self.result: return self.result
 
         if (
+                not self._is_mu and
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
@@ -54,12 +54,11 @@ class ActionModule(WordPressActionModule):
 
         return self.result
 
-    def _ensure_all_files_state (self, desired_state, is_mu):
+    def _ensure_all_files_state (self, desired_state):
         """
         Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
 
         :param desired_state: can be 'installed', 'symlinked', ...
-        :param is_mu: Boolean to tell if plugin is a MU-Plugin
         """
 
         froms = self._task.args.get('from')
@@ -75,20 +74,19 @@ class ActionModule(WordPressActionModule):
 
         # Going through each files/folder for plugin
         for basename in basenames:
-            self._ensure_file_state(desired_state, basename, is_mu)
+            self._ensure_file_state(desired_state, basename)
             if 'failed' in self.result: return self.result
 
 
 
-    def _ensure_file_state (self, desired_state, basename, is_mu):
+    def _ensure_file_state (self, desired_state, basename):
         """
         Check if a given (mu-)plugin file/folder is at the desired state
 
         :param desired_state: can be 'installed', 'symlinked', ...
         :param basename: name of element to check (can be a file or folder)
-        :param is_mu: Boolean to tell if it's a Mu-Plugin
         """
-        current_state = set([self._get_current_file_state(basename, is_mu)])
+        current_state = set([self._get_current_file_state(basename)])
         to_do = set([desired_state]) - current_state
         to_undo = current_state - set([desired_state])
 
@@ -100,22 +98,21 @@ class ActionModule(WordPressActionModule):
                                       'not supported (yet)' % basename)
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
-            self._update_result(self._do_rimraf_file(basename, is_mu))
+            self._update_result(self._do_rimraf_file(basename, self._is_mu))
             if 'failed' in self.result: return self.result
 
         if 'symlinked' in to_do:
-            self._update_result(self._do_symlink_file(basename, is_mu))
+            self._update_result(self._do_symlink_file(basename, self._is_mu))
             if 'failed' in self.result: return self.result
 
 
-    def _get_current_file_state (self, basename, is_mu):
+    def _get_current_file_state (self, basename):
         """
         Returns state of a given plugin file/folder.
 
         :param basename: name of element to check (can be a file or folder)
-        :param is_mu: Boolean to tell if it's a Mu-Plugin
         """
-        path = self._get_symlink_path(basename, is_mu)
+        path = self._get_symlink_path(basename, self._is_mu)
         plugin_stat = self._run_action('stat', { 'path': path })
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() %s" % path)
@@ -124,7 +121,7 @@ class ActionModule(WordPressActionModule):
                 return 'absent'
         elif plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
-                self._get_symlink_target(basename, is_mu)):
+                self._get_symlink_target(basename, self._is_mu)):
                 return 'symlinked'
             else:
                 return 'symlink_damaged'
@@ -151,11 +148,11 @@ class ActionModule(WordPressActionModule):
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
-        if installation_state == 'absent' and (activation_state in ('active', 'must-use')):
+        if installation_state == 'absent' and (activation_state == 'active' or self._is_mu):
             raise ValueError('Plug-in %s cannot be simultaneously absent and %s' %
                              self._plugin_name, activation_state)
 
-        if activation_state in ('active', 'must-use'):
+        if activation_state == 'active' or self._is_mu:
             # Cannot activate (or make a mu-plugin) if not installed
             if not installation_state:
                 installation_state = 'symlinked'
@@ -184,11 +181,16 @@ class ActionModule(WordPressActionModule):
 
     def _activation_state(self, desired_state):
         """
-        Returns plugin activation state based on desired state (active, inactive, must-use)
+        Returns plugin activation state based on desired state (active, inactive)
 
         :param desired_state: Plugin desired activation state
         """
-        activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
+
+        # Active by default
+        if self._is_mu:
+            return 'active'
+
+        activation_state = desired_state.intersection(['active', 'inactive'])
         if len(activation_state) == 0:
             return None
         elif len(activation_state) == 1:
