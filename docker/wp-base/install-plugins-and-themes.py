@@ -17,7 +17,7 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 
-AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-idevelop/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
@@ -293,13 +293,13 @@ class Themes:
     def all(cls):
         return (
             Plugin('wp-theme-2018',
-                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-2018']),
+                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
-                   ['https://github.com/epfl-idevelop/wp-theme-2018/tree/master/wp-theme-light']),
+                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light']),
             Plugin('epfl-blank',
-                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank']),
+                   ['https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank']),
             Plugin('epfl-master',
-                   ['https://github.com/epfl-idevelop/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master'])
+                   ['https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master'])
         )
 
 
@@ -327,7 +327,14 @@ class WpOpsPlugins:
                 raise Exception(pprint.pformat(thing))
             action = thing['wordpress_plugin']
 
+
+            if 'state' in action and 'must-use' not in action['state']:
+                action['state'] = ['symlinked', 'active']
+
             if 'state' not in action or 'symlinked' not in action['state']:
+                continue
+
+            if 'from' not in action:
                 continue
 
             name = action['name']
