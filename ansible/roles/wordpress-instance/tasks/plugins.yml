@@ -495,7 +495,7 @@
   wordpress_plugin:
     name: epfl-restauration
     state: "{{ plugins_for_restauration_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
+    from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
 - name: epfl-scienceqa plugin
   wordpress_plugin:
@@ -507,7 +507,7 @@
   wordpress_plugin:
     name: EPFL-Library-Plugins
     state: "{{ plugins_for_library_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
+    from: https://github.com/epfl-si/wp-plugin-epfl-library
 
 - name: epfl-courses-se plugin
   wordpress_plugin:
