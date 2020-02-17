@@ -10,7 +10,6 @@ import json
 # To be able to include package wp_inventory in parent directory
 sys.path.append(os.path.dirname(__file__))
 
-from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
 from wordpress_action_module import WordPressActionModule
@@ -21,6 +20,7 @@ class ActionModule(WordPressActionModule):
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
         self._plugin_name = self._task.args.get('name')
+        self._is_mu = self._task.args.get('is_mu', False)
 
         current_activation_state = self._get_plugin_activation_state()
         (desired_installation_state,
@@ -37,13 +37,13 @@ class ActionModule(WordPressActionModule):
             # We don't second-guess mu-plugins - If the activation
             # state is left vague, then they will be "demoted" to
             # ordinary plug-ins.
-            desired_as_muplugin = desired_activation_state == 'must-use'
-            self._ensure_all_files_state(desired_installation_state, desired_as_muplugin)
+            self._ensure_all_files_state(desired_installation_state, self._is_mu)
             if 'failed' in self.result: return self.result
-            self._ensure_all_files_state('absent', not desired_as_muplugin)
+            self._ensure_all_files_state('absent', not self._is_mu)
             if 'failed' in self.result: return self.result
 
         if (
+                not self._is_mu and
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
@@ -151,11 +151,11 @@ class ActionModule(WordPressActionModule):
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
-        if installation_state == 'absent' and (activation_state in ('active', 'must-use')):
+        if installation_state == 'absent' and (activation_state == 'active' or self._is_mu):
             raise ValueError('Plug-in %s cannot be simultaneously absent and %s' %
                              self._plugin_name, activation_state)
 
-        if activation_state in ('active', 'must-use'):
+        if activation_state == 'active' or self._is_mu:
             # Cannot activate (or make a mu-plugin) if not installed
             if not installation_state:
                 installation_state = 'symlinked'
@@ -184,11 +184,16 @@ class ActionModule(WordPressActionModule):
 
     def _activation_state(self, desired_state):
         """
-        Returns plugin activation state based on desired state (active, inactive, must-use)
+        Returns plugin activation state based on desired state (active, inactive)
 
         :param desired_state: Plugin desired activation state
         """
-        activation_state = desired_state.intersection(['active', 'inactive', 'must-use'])
+
+        # Active by default
+        if self._is_mu:
+            return 'active'
+
+        activation_state = desired_state.intersection(['active', 'inactive'])
         if len(activation_state) == 0:
             return None
         elif len(activation_state) == 1:
