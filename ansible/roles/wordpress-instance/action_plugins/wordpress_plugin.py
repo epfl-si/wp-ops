@@ -37,9 +37,9 @@ class ActionModule(WordPressActionModule):
             # We don't second-guess mu-plugins - If the activation
             # state is left vague, then they will be "demoted" to
             # ordinary plug-ins.
-            self._ensure_all_files_state(desired_installation_state, self._is_mu)
+            self._ensure_all_files_state(desired_installation_state)
             if 'failed' in self.result: return self.result
-            self._ensure_all_files_state('absent', not self._is_mu)
+            self._ensure_all_files_state('absent')
             if 'failed' in self.result: return self.result
 
         if (
@@ -54,12 +54,11 @@ class ActionModule(WordPressActionModule):
 
         return self.result
 
-    def _ensure_all_files_state (self, desired_state, is_mu):
+    def _ensure_all_files_state (self, desired_state):
         """
         Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
 
         :param desired_state: can be 'installed', 'symlinked', ...
-        :param is_mu: Boolean to tell if plugin is a MU-Plugin
         """
 
         froms = self._task.args.get('from')
@@ -75,20 +74,19 @@ class ActionModule(WordPressActionModule):
 
         # Going through each files/folder for plugin
         for basename in basenames:
-            self._ensure_file_state(desired_state, basename, is_mu)
+            self._ensure_file_state(desired_state, basename)
             if 'failed' in self.result: return self.result
 
 
 
-    def _ensure_file_state (self, desired_state, basename, is_mu):
+    def _ensure_file_state (self, desired_state, basename):
         """
         Check if a given (mu-)plugin file/folder is at the desired state
 
         :param desired_state: can be 'installed', 'symlinked', ...
         :param basename: name of element to check (can be a file or folder)
-        :param is_mu: Boolean to tell if it's a Mu-Plugin
         """
-        current_state = set([self._get_current_file_state(basename, is_mu)])
+        current_state = set([self._get_current_file_state(basename)])
         to_do = set([desired_state]) - current_state
         to_undo = current_state - set([desired_state])
 
@@ -100,22 +98,21 @@ class ActionModule(WordPressActionModule):
                                       'not supported (yet)' % basename)
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
-            self._update_result(self._do_rimraf_file(basename, is_mu))
+            self._update_result(self._do_rimraf_file(basename, self._is_mu))
             if 'failed' in self.result: return self.result
 
         if 'symlinked' in to_do:
-            self._update_result(self._do_symlink_file(basename, is_mu))
+            self._update_result(self._do_symlink_file(basename, self._is_mu))
             if 'failed' in self.result: return self.result
 
 
-    def _get_current_file_state (self, basename, is_mu):
+    def _get_current_file_state (self, basename):
         """
         Returns state of a given plugin file/folder.
 
         :param basename: name of element to check (can be a file or folder)
-        :param is_mu: Boolean to tell if it's a Mu-Plugin
         """
-        path = self._get_symlink_path(basename, is_mu)
+        path = self._get_symlink_path(basename, self._is_mu)
         plugin_stat = self._run_action('stat', { 'path': path })
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() %s" % path)
@@ -124,7 +121,7 @@ class ActionModule(WordPressActionModule):
                 return 'absent'
         elif plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
-                self._get_symlink_target(basename, is_mu)):
+                self._get_symlink_target(basename, self._is_mu)):
                 return 'symlinked'
             else:
                 return 'symlink_damaged'
