@@ -327,8 +327,13 @@ class WpOpsPlugins:
                 raise Exception(pprint.pformat(thing))
             options = thing['wordpress_plugin']
 
+            # Defining if is MU-Plugin or not
+            is_mu = False if 'is_mu' not in options else options['is_mu']
+
             # For unwanted plugins, ... ugly ducklings !
-            if 'from' not in options or ('state' in options and 'absent' in options['state']):
+            if 'from' not in options:
+                continue
+            if not is_mu and ('state' in options and 'absent' in options['state']):
                 continue
 
             name = options['name']
@@ -336,8 +341,6 @@ class WpOpsPlugins:
             if isinstance(urls, string_types):
                 urls = [urls]
 
-            # Defining if is MU-Plugin or not
-            is_mu = False if 'is_mu' not in options else options['is_mu']
 
             yield (Plugin(name, urls), is_mu)
 
