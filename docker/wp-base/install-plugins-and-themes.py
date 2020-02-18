@@ -330,10 +330,8 @@ class WpOpsPlugins:
             # Defining if is MU-Plugin or not
             is_mu = False if 'is_mu' not in options else options['is_mu']
 
-            # For unwanted plugins, ... ugly ducklings !
+            # For unwanted plugins, the ones who are present but have to be uninstalled, ... ugly ducklings !
             if 'from' not in options:
-                continue
-            if not is_mu and ('state' in options and 'absent' in options['state']):
                 continue
 
             name = options['name']
