@@ -7,6 +7,7 @@ from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
 
 import re
+import os
 
 class WordPressActionModule(ActionBase):
 
@@ -22,7 +23,7 @@ class WordPressActionModule(ActionBase):
 
         # Has to be set with element name in child class
         self._name = None
-        
+
         # Tells if the element has to be here without any negociation (like mu-plugins) or not
         self._mandatory = None
 
@@ -94,6 +95,85 @@ class WordPressActionModule(ActionBase):
 
         return (installation_state, activation_state)
     
+
+    def _ensure_file_state (self, desired_state, basename):
+        """
+        Check if a given (mu-)plugin file/folder is at the desired state
+
+        :param desired_state: can be 'installed', 'symlinked', ...
+        :param basename: name of element to check (can be a file or folder)
+        """
+        current_state = set([self._get_current_file_state(basename)])
+        to_do = set([desired_state]) - current_state
+        to_undo = current_state - set([desired_state])
+
+        if not (to_do or to_undo):
+            return
+
+        if 'installed' in to_do:
+            raise NotImplementedError('Installing "regular" (non-symlinked) %s %s '
+                                      'not supported (yet)' % self._get_type(), basename)
+
+        if 'symlinked' in to_undo or 'installed' in to_undo:
+            self._update_result(self._do_rimraf_file(basename))
+            if 'failed' in self.result: return self.result
+
+        if 'symlinked' in to_do:
+            self._update_result(self._do_symlink_file(basename))
+            if 'failed' in self.result: return self.result
+
+
+    def _ensure_all_files_state (self, desired_state):
+        """
+        Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
+
+        :param desired_state: can be 'installed', 'symlinked', ...
+        """
+        froms = self._task.args.get('from')
+        if isinstance(froms, six.string_types):
+            froms = [froms]
+        if not froms:
+            froms = []
+        
+        basenames = [os.path.basename(f) for f in froms
+                if self._is_filename(f)]
+        if not basenames:
+            basenames = [self._get_name()]
+
+        # Going through each files/folder for plugin
+        for basename in basenames:
+            self._ensure_file_state(desired_state, basename)
+            if 'failed' in self.result: return self.result
+
+
+    def _get_current_file_state (self, basename):
+        """
+        Returns state of a given plugin file/folder.
+
+        :param basename: name of element to check (can be a file or folder)
+        """
+        path = self._get_symlink_path(basename)
+        plugin_stat = self._run_action('stat', { 'path': path })
+        if 'failed' in plugin_stat:
+            raise AnsibleActionFail("Cannot stat() %s" % path)
+        file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
+        if not file_exists:
+                return 'absent'
+        elif plugin_stat['stat']['islnk']:
+            if (plugin_stat['stat']['lnk_target'] ==
+                self._get_symlink_target(basename)):
+                return 'symlinked'
+            else:
+                return 'symlink_damaged'
+        else:
+            return 'installed'
+
+
+    def _do_activate_element(self):
+        """
+        Uses WP-CLI to activate plugin
+        """
+        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
 
 
     def _activation_state(self, desired_state):
