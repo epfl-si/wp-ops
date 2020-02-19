@@ -20,7 +20,7 @@ class ActionModule(WordPressActionModule):
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
         self._name = self._task.args.get('name')
-        self._is_mandatory = self._task.args.get('is_mu', False)
+        self._mandatory = self._task.args.get('is_mu', False)
         self._type = 'mu-plugin' if self._task.args.get('is_mu', False) else 'plugin'
 
         current_activation_state = self._get_plugin_activation_state()
@@ -40,7 +40,7 @@ class ActionModule(WordPressActionModule):
             if 'failed' in self.result: return self.result
 
         if (
-                not self.is_mandatory and
+                not self._is_mandatory() and
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
@@ -67,7 +67,7 @@ class ActionModule(WordPressActionModule):
         basenames = [os.path.basename(f) for f in froms
                 if self._is_filename(f)]
         if not basenames:
-            basenames = [self.name]
+            basenames = [self._get_name()]
 
         # Going through each files/folder for plugin
         for basename in basenames:
@@ -131,14 +131,14 @@ class ActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('plugin activate %s' % self.name)
+        return self._run_wp_cli_action('plugin activate %s' % self._get_name())
 
 
     def _do_deactivate_plugin (self):
         """
         Uses WP-CLI to deactivate plugin
         """
-        return self._run_wp_cli_action('plugin deactivate %s' % self.name)
+        return self._run_wp_cli_action('plugin deactivate %s' % self._get_name())
 
 
     def _get_plugin_activation_state (self):
@@ -154,5 +154,5 @@ class ActionModule(WordPressActionModule):
         for line in result["stdout"].splitlines()[1:]:
             fields = line.split(',')
             if len(fields) < 2: continue
-            if fields[0] == self.name: return fields[1]
+            if fields[0] == self._get_name(): return fields[1]
         return 'inactive'

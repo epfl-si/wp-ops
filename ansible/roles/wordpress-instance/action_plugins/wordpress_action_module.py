@@ -19,16 +19,18 @@ class WordPressActionModule(ActionBase):
         # mu-plugin
         # theme
         self._type = None
+
         # Has to be set with element name in child class
         self._name = None
+        
         # Tells if the element has to be here without any negociation (like mu-plugins) or not
-        self._is_mandatory = None
+        self._mandatory = None
 
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
-    @property
-    def type(self):
+
+    def _get_type(self):
         """
         Return element type or raise an exception if not initialized
         """
@@ -37,8 +39,8 @@ class WordPressActionModule(ActionBase):
             
         return self._type
 
-    @property
-    def name(self):
+
+    def _get_name(self):
         """
         Return element name or raise an exception if not initialized
         """
@@ -48,15 +50,14 @@ class WordPressActionModule(ActionBase):
         return self._name
     
 
-    @property
-    def is_mandatory(self):
+    def _is_mandatory(self):
         """
         Return if element is mandatory or raise an exception if not initialized
         """
-        if self._is_mandatory is None:
-            raise ValueError("Please initiliaze 'self._is_mandatory' in children class {}".format(type(self).__name__))
+        if self._mandatory is None:
+            raise ValueError("Please initiliaze 'self._mandatory' in children class {}".format(type(self).__name__))
             
-        return self._is_mandatory
+        return self._mandatory
 
 
     def _get_desired_state(self):
@@ -73,16 +74,16 @@ class WordPressActionModule(ActionBase):
             raise TypeError("Unexpected value for `state`: %s" % desired_state)
 
         if 'symlinked' in desired_state and 'installed' in desired_state:
-            raise ValueError('% %s cannot be both `symlinked` and `installed`' % self.type, self.name)
+            raise ValueError('% %s cannot be both `symlinked` and `installed`' % self._get_type(), self._get_name())
 
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
-        if installation_state == 'absent' and (activation_state == 'active' or self.is_mandatory):
+        if installation_state == 'absent' and (activation_state == 'active' or self._is_mandatory()):
             raise ValueError('%s %s cannot be simultaneously absent and %s' %
-                             self.type, self.name, activation_state)
+                             self._get_type(), self._get_name(), activation_state)
 
-        if activation_state == 'active' or self.is_mandatory:
+        if activation_state == 'active' or self._is_mandatory():
             # Cannot activate (or make a mu-plugin) if not installed
             if not installation_state:
                 installation_state = 'symlinked'
@@ -103,7 +104,7 @@ class WordPressActionModule(ActionBase):
         """
 
         # Active by default
-        if self.is_mandatory:
+        if self._is_mandatory():
             return 'active'
 
         activation_state = desired_state.intersection(['active', 'inactive'])
@@ -112,7 +113,7 @@ class WordPressActionModule(ActionBase):
         elif len(activation_state) == 1:
             return list(activation_state)[0]
         else:
-            raise ValueError('%s %s cannot be simultaneously %s' % self.type, self.name, str(list(activation_state)))
+            raise ValueError('%s %s cannot be simultaneously %s' % self._get_type(), self._get_name(), str(list(activation_state)))
 
 
     def _installation_state(self, desired_state):
@@ -127,7 +128,7 @@ class WordPressActionModule(ActionBase):
         elif len(installation_state) == 1:
             return list(installation_state)[0]
         else:
-            raise ValueError('%s %s cannot be simultaneously %s' % self.type, self.name, str(list(installation_state)))
+            raise ValueError('%s %s cannot be simultaneously %s' % self._get_type(), self._get_name(), str(list(installation_state)))
 
 
     def _do_symlink_file (self, basename):
@@ -183,7 +184,7 @@ class WordPressActionModule(ActionBase):
         """
         return '%s/wp-content/%ss/%s' % (
             prefix,
-            self.type,
+            self._get_type(),
             basename)        
 
     def _run_wp_cli_action (self, args):
