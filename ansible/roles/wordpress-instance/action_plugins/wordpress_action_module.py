@@ -28,6 +28,12 @@ class WordPressActionModule(ActionBase):
             '%s %s' % (self._get_ansible_var('wp_cli_command'), args))
 
 
+    def _run_php_code(self, code):
+        result = self._run_shell_action("php -r '%s'" % (code))
+
+        return result['stdout_lines']
+
+
     def _run_shell_action (self, cmd):
         """
         Executes a Shell command
@@ -50,11 +56,11 @@ class WordPressActionModule(ActionBase):
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
         
-        
         # If command was to update an option using WP CLI
         if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
-            
             # We update 'changed' key depending on what was done by WPCLI
+            # NOTE: For an unknown reason, for some options, even if we set 'changed' to False 
+            # when nothing is changed, somewhere, the value is changed to True... !?!
             result['changed'] = not result['stdout'].endswith('option is unchanged.')
         
         self._update_result(result)

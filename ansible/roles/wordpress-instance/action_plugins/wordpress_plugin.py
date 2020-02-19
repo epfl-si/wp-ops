@@ -34,12 +34,8 @@ class ActionModule(WordPressActionModule):
             if 'failed' in self.result: return self.result
 
         if desired_installation_state:
-            # We don't second-guess mu-plugins - If the activation
-            # state is left vague, then they will be "demoted" to
-            # ordinary plug-ins.
+            # Setting desired installation state
             self._ensure_all_files_state(desired_installation_state)
-            if 'failed' in self.result: return self.result
-            self._ensure_all_files_state('absent')
             if 'failed' in self.result: return self.result
 
         if (
@@ -60,7 +56,6 @@ class ActionModule(WordPressActionModule):
 
         :param desired_state: can be 'installed', 'symlinked', ...
         """
-
         froms = self._task.args.get('from')
         if isinstance(froms, six.string_types):
             froms = [froms]
