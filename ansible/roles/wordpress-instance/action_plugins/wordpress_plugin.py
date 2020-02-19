@@ -20,8 +20,7 @@ class ActionModule(WordPressActionModule):
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
         self._name = self._task.args.get('name')
-        self._is_mu = self._task.args.get('is_mu', False)
-
+        self._is_mandatory = self._task.args.get('is_mu', False)
         self._type = 'mu-plugin' if self._task.args.get('is_mu', False) else 'plugin'
 
         current_activation_state = self._get_plugin_activation_state()
@@ -41,7 +40,7 @@ class ActionModule(WordPressActionModule):
             if 'failed' in self.result: return self.result
 
         if (
-                not self._is_mu and
+                not self.is_mandatory and
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
@@ -51,6 +50,7 @@ class ActionModule(WordPressActionModule):
             if 'failed' in self.result: return self.result
 
         return self.result
+
 
     def _ensure_all_files_state (self, desired_state):
         """

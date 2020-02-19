@@ -21,6 +21,8 @@ class WordPressActionModule(ActionBase):
         self._type = None
         # Has to be set with element name in child class
         self._name = None
+        # Tells if the element has to be here without any negociation (like mu-plugins) or not
+        self._is_mandatory = None
 
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
@@ -30,7 +32,7 @@ class WordPressActionModule(ActionBase):
         """
         Return element type or raise an exception if not initialized
         """
-        if not self._type:
+        if self._type is None:
             raise ValueError("Please initiliaze 'self._type' in children class {}".format(type(self).__name__))
             
         return self._type
@@ -40,15 +42,26 @@ class WordPressActionModule(ActionBase):
         """
         Return element name or raise an exception if not initialized
         """
-        if not self._name:
+        if self._name is None:
             raise ValueError("Please initiliaze 'self._name' in children class {}".format(type(self).__name__))
             
         return self._name
     
 
+    @property
+    def is_mandatory(self):
+        """
+        Return if element is mandatory or raise an exception if not initialized
+        """
+        if self._is_mandatory is None:
+            raise ValueError("Please initiliaze 'self._is_mandatory' in children class {}".format(type(self).__name__))
+            
+        return self._is_mandatory
+
+
     def _get_desired_state(self):
         """
-        Returns array with installation state and activation state for a (mu-)plugin.
+        Returns array with installation state and activation state for a (mu-)plugin or a theme.
         We look into YAML given args (plugins.yml)
         """
         desired_state = self._task.args.get('state', 'absent')
@@ -65,11 +78,11 @@ class WordPressActionModule(ActionBase):
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
-        if installation_state == 'absent' and (activation_state == 'active' or self._is_mu):
+        if installation_state == 'absent' and (activation_state == 'active' or self.is_mandatory):
             raise ValueError('%s %s cannot be simultaneously absent and %s' %
                              self.type, self.name, activation_state)
 
-        if activation_state == 'active' or self._is_mu:
+        if activation_state == 'active' or self.is_mandatory:
             # Cannot activate (or make a mu-plugin) if not installed
             if not installation_state:
                 installation_state = 'symlinked'
@@ -90,7 +103,7 @@ class WordPressActionModule(ActionBase):
         """
 
         # Active by default
-        if self._is_mu:
+        if self.is_mandatory:
             return 'active'
 
         activation_state = desired_state.intersection(['active', 'inactive'])
