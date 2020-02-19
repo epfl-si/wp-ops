@@ -23,7 +23,7 @@ class ActionModule(WordPressActionModule):
         self._mandatory = self._task.args.get('is_mu', False)
         self._type = 'mu-plugin' if self._task.args.get('is_mu', False) else 'plugin'
 
-        current_activation_state = self._get_plugin_activation_state()
+        current_activation_state = self._get_activation_state()
         (desired_installation_state,
          desired_activation_state) = self._get_desired_state()
 
@@ -56,21 +56,5 @@ class ActionModule(WordPressActionModule):
         """
         Uses WP-CLI to deactivate plugin
         """
-        return self._run_wp_cli_action('plugin deactivate %s' % self._get_name())
+        return self._run_wp_cli_action('plugin deactivate {}'.format(self._get_name()))
 
-
-    def _get_plugin_activation_state (self):
-        """
-        Returns plugin activation state
-        """
-        oldresult = deepcopy(self.result)
-        result = self._run_wp_cli_action('plugin list --format=csv')
-        if 'failed' in self.result: return
-
-        self.result = oldresult  # We don't want "changed" to pollute the state
-
-        for line in result["stdout"].splitlines()[1:]:
-            fields = line.split(',')
-            if len(fields) < 2: continue
-            if fields[0] == self._get_name(): return fields[1]
-        return 'inactive'

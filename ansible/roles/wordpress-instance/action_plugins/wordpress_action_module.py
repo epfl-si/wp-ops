@@ -13,6 +13,10 @@ class WordPressActionModule(ActionBase):
 
     def run(self, tmp=None, task_vars=None):
 
+        # We have to initialize this var to avoid any errors.
+        # It will be initialized in child classes
+        self.result = None
+
         self._tmp = tmp
         self._task_vars = task_vars
         # Has to be set in child classes with one of the following value:
@@ -72,17 +76,17 @@ class WordPressActionModule(ActionBase):
         elif isinstance(desired_state, list):
             desired_state = set(desired_state)
         else:
-            raise TypeError("Unexpected value for `state`: %s" % desired_state)
+            raise TypeError("Unexpected value for `state`: {}".format(desired_state))
 
         if 'symlinked' in desired_state and 'installed' in desired_state:
-            raise ValueError('% %s cannot be both `symlinked` and `installed`' % self._get_type(), self._get_name())
+            raise ValueError('{} {} cannot be both `symlinked` and `installed`'.format(self._get_type(), self._get_name()))
 
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
         if installation_state == 'absent' and (activation_state == 'active' or self._is_mandatory()):
-            raise ValueError('%s %s cannot be simultaneously absent and %s' %
-                             self._get_type(), self._get_name(), activation_state)
+            raise ValueError('{} {} cannot be simultaneously absent and {}'.format(
+                             self._get_type(), self._get_name(), activation_state))
 
         if activation_state == 'active' or self._is_mandatory():
             # Cannot activate (or make a mu-plugin) if not installed
@@ -111,8 +115,8 @@ class WordPressActionModule(ActionBase):
             return
 
         if 'installed' in to_do:
-            raise NotImplementedError('Installing "regular" (non-symlinked) %s %s '
-                                      'not supported (yet)' % self._get_type(), basename)
+            raise NotImplementedError('Installing "regular" (non-symlinked) {} {} '
+                                      'not supported (yet)'.format(self._get_type(), basename))
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
             self._update_result(self._do_rimraf_file(basename))
@@ -155,7 +159,7 @@ class WordPressActionModule(ActionBase):
         path = self._get_symlink_path(basename)
         plugin_stat = self._run_action('stat', { 'path': path })
         if 'failed' in plugin_stat:
-            raise AnsibleActionFail("Cannot stat() %s" % path)
+            raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
         if not file_exists:
                 return 'absent'
@@ -193,7 +197,7 @@ class WordPressActionModule(ActionBase):
         elif len(activation_state) == 1:
             return list(activation_state)[0]
         else:
-            raise ValueError('%s %s cannot be simultaneously %s' % self._get_type(), self._get_name(), str(list(activation_state)))
+            raise ValueError('{} {} cannot be simultaneously {}'.format(self._get_type(), self._get_name(), str(list(activation_state))))
 
 
     def _installation_state(self, desired_state):
@@ -208,7 +212,7 @@ class WordPressActionModule(ActionBase):
         elif len(installation_state) == 1:
             return list(installation_state)[0]
         else:
-            raise ValueError('%s %s cannot be simultaneously %s' % self._get_type(), self._get_name(), str(list(installation_state)))
+            raise ValueError('{} {} cannot be simultaneously {}'.format(self._get_type(), self._get_name(), str(list(installation_state))))
 
 
     def _do_symlink_file (self, basename):
@@ -262,10 +266,7 @@ class WordPressActionModule(ActionBase):
         :param prefix: string to add at the beginning of the path to have an absolute one
         :param basename: given plugin file/folder for which we want the symlink source path
         """
-        return '%s/wp-content/%ss/%s' % (
-            prefix,
-            self._get_type(),
-            basename)        
+        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
     def _run_wp_cli_action (self, args):
         """
@@ -274,7 +275,7 @@ class WordPressActionModule(ActionBase):
         :param args: WP-CLI command to execute
         """
         return self._run_shell_action(
-            '%s %s' % (self._get_ansible_var('wp_cli_command'), args))
+            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args))
 
 
     def _run_php_code(self, code):
@@ -283,7 +284,7 @@ class WordPressActionModule(ActionBase):
 
         :param code: Code to execute
         """
-        result = self._run_shell_action("php -r '%s'" % (code))
+        result = self._run_shell_action("php -r '{}'".format(code))
 
         return result['stdout_lines']
 
@@ -354,10 +355,24 @@ class WordPressActionModule(ActionBase):
                 and not from_piece.endswith(".zip"))
 
 
-    def _log(self, str):
-        with open('/tmp/ansible.log', 'a') as f:
-            f.write("{}\n".format(str))
+    def _get_activation_state (self):
+        """
+        Returns plugin activation state
+        """
+        # To use 'wp plugin' for MU-Plugins
+        wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
+        oldresult = deepcopy(self.result)
+        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command))
+        if 'failed' in self.result: return
+
+        self.result = oldresult  # We don't want "changed" to pollute the state
+
+        for line in result["stdout"].splitlines()[1:]:
+            fields = line.split(',')
+            if len(fields) < 2: continue
+            if fields[0] == self._get_name(): return fields[1]
+        return 'inactive'
 
     def _update_result (self, result):
         """
