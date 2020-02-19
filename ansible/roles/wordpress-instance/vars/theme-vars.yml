@@ -1,7 +1,9 @@
 # Theme variables go here
 
-# TODO: This should be computed from wp-veritas state
-theme_name: "wp-theme-2018"
+# This should come from WP-Veritas inventory. If Ansible is run with an "existing sites" inventory,
+# current theme value will be read in database to fill "wp_details.options.stylesheet" and nothing will change
+# Using WP-Veritas inventory, value will be correct
+theme_name: '{{ hostvars[inventory_hostname]["wp_details"]["options"]["stylesheet"] }}'
 
 
 ### 2018 Themes

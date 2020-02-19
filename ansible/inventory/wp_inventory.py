@@ -147,7 +147,9 @@ class WPInventory():
                             
         # We take only the minimum details we need for script correct execution    
         else:
-            options_to_get = [ 'epfl:site_category']
+            options_to_get = [ 'epfl:site_category',
+                                # contains theme name
+                                'stylesheet']
 
         # Default value for options
         for option_name in options_to_get:
