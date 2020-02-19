@@ -192,16 +192,15 @@
     name: plugin:epfl_accred:administrator_group
     value: "{{ wp_administrator_group }}"
 
-# TODO WHEN WE WILL HAVE INFORMATION FROM WP-VERITAS
-# - name: accred unit name
-#   wordpress_option:
-#     name: plugin:epfl_accred:unit
-#     value: "{{ wp_unit_name }}"
+- name: accred unit name
+  wordpress_option:
+    name: plugin:epfl_accred:unit
+    value: "{{ wp_unit_name }}"
 
-# - name: accred unit ID
-#   wordpress_option:
-#     name: plugin:epfl_accred:unit_id
-#     value: "{{ wp_unit_id }}"
+- name: accred unit ID
+  wordpress_option:
+    name: plugin:epfl_accred:unit_id
+    value: "{{ wp_unit_id }}"
 
 - name: Cache-Control plugin
   wordpress_plugin:
