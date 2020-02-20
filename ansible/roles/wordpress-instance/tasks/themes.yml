@@ -4,7 +4,27 @@
 
 - include_vars: theme-vars.yml
 
-- name: WordPress theme
+### 2018 Themes
+- name: WordPress theme 2018
   wordpress_theme:
-    name: '{{ theme_name }}'
-    state: symlinked
+    name: wp-theme-2018
+    state: '{{ [ "symlinked", "active" ] if theme_wp_theme_2018_active else "symlinked" }}'
+
+- name: WordPress theme 2018 (light)
+  wordpress_theme:
+    name: wp-theme-light
+    state: '{{ [ "symlinked", "active" ] if theme_wp_theme_light_active else "symlinked" }}'
+
+
+### 2010 Themes
+- name: WordPress theme 2010
+  wordpress_theme:
+    name: epfl-master
+    state: '{{ [ "symlinked", "active" ] if theme_epfl_master_active else "symlinked" }}'
+
+- name: WordPress theme 2010 (blank)
+  wordpress_theme:
+    name: epfl-blank
+    state: '{{ [ "symlinked", "active" ] if theme_epfl_blank_active else "symlinked" }}'
+
+

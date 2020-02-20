@@ -137,17 +137,19 @@ class WPInventory():
         section = 'options'
         details[section] = {}
 
-        # We have to return all details
-        if include_all_details:
-            # List of options to get from Instance
-            options_to_get = ['plugin:epfl_accred:unit_id', 
+        # List of basic options to get from Instance
+        options_to_get = [ 'plugin:epfl_accred:unit_id', 
                             'plugin:epfl_accred:unit',
                             'epfl:site_category',
-                            'siteurl']
-                            
-        # We take only the minimum details we need for script correct execution    
-        else:
-            options_to_get = [ 'epfl:site_category']
+                            # contains theme name
+                            'stylesheet']
+
+        
+        # We have to return all details
+        if include_all_details:
+            # Adding options to initial list
+            options_to_get += ['siteurl']
+             
 
         # Default value for options
         for option_name in options_to_get:
