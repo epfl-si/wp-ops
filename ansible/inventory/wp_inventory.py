@@ -109,7 +109,10 @@ class WPInventory():
 
             if values:
                 # Recovering instance details
-                details = self._instance_details(target_dict, line.replace('wp-config.php', ''), include_all_details=include_details)
+                if not include_details:
+                  details = None
+                else:
+                  details = self._instance_details(target_dict, line.replace('wp-config.php', ''), include_all_details=include_details)
 
                 retval.append({'wp_env': values[0][0],
                                 'wp_hostname': values[0][1],
