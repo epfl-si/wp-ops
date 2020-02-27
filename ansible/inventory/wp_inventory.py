@@ -296,8 +296,8 @@ class WPInventory():
             steam = hostname
         else:
             path = re.sub(r'\/$', '', path)
-            path = re.sub(r'\/', '-', path)
-            steam = "{}-{}".format(hostname, path)
+            path = re.sub(r'\/', '_', path)
+            steam = "{}__{}".format(hostname, path)
         
         uniq = 0
         nickname = steam

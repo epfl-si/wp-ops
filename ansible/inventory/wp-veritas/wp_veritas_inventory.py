@@ -76,20 +76,26 @@ class WpVeritasSite:
 
     @property
     def instance_name(self):
+        """
+        Generates an unique nickname for a WP instance.
+
+        :param site: Dict with WP information
+        """
         path = self.parsed_url.path
-        # dont override groups name with hosts name
-        # labs are in www, it's a special case
-        if self.openshift_env == 'labs':
-            instance_name = path
+        
+        hostname = self.parsed_url.netloc
+        hostname = re.sub(r'\.epfl\.ch$', '', hostname)
+        hostname = re.sub(r'\W', '-', hostname)
+
+        if path == "":
+            return hostname
         else:
-            instance_name = self.openshift_env + path
+            path = re.sub(r'\/$', '', path)
+            path = re.sub(r'^\/', '', path)
+            path = re.sub(r'\/', '_', path)
+            return "{}__{}".format(hostname, path)
 
-        # always clear instance_name last separator
-        instance_name = (instance_name[:1] if instance_name.endswith('/') else instance_name)
-        if not instance_name.startswith('/'):
-            instance_name = '/' + instance_name
-
-        return instance_name
+         
 
     #@property
     # def wp_veritas_url(self):
@@ -115,29 +121,7 @@ class Inventory:
         self.groups = set()
         for site in sites:
             self._add(site)
-
-
-    def _nickname(self, site):
-        """
-        Generates an unique nickname for a WP instance.
-
-        :param site: Dict with WP information
-        """
-        path = site.parsed_url.path
-        
-        hostname = site.parsed_url.netloc
-        hostname = re.sub(r'\.epfl\.ch$', '', hostname)
-        hostname = re.sub(r'\W', '-', hostname)
-
-        if path == "":
-            nickname = hostname
-        else:
-            path = re.sub(r'\/$', '', path)
-            path = re.sub(r'^\/', '', path)
-            path = re.sub(r'\/', '-', path)
-            nickname = "{}-{}".format(hostname, path)
-
-        return nickname            
+       
 
     def to_json(self):
         return json.dumps(self.inventory, sort_keys=True, indent=4)
@@ -175,12 +159,12 @@ class Inventory:
         # Adding more information to site
         meta_site = {**meta_site, **props_to_merge}
 
-        self.inventory['_meta']['hostvars'][self._nickname(site)] = meta_site
+        self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
         self._add_site_to_group(site, site.openshift_env)
 
     def _add_site_to_group(self, site, group):
         self._add_group(group)
-        self.inventory[group]['hosts'].append(self._nickname(site))
+        self.inventory[group]['hosts'].append(site.instance_name)
 
     def _add_group(self, group):
         if group in self.groups:
