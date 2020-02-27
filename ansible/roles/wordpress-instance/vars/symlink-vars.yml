@@ -16,13 +16,3 @@ symlinks_paths_wp:
   - wp-content/themes/index.php
   - wp-content/mu-plugins/index.php
 
-symlinks_themes:
-  - epfl-blank
-  - epfl-master
-  - wp-theme-2018
-  - wp-theme-light
-
-symlinks_managed_in_bulk: >
-  {{ symlinks_paths_wp
-    + ('wp-content/themes/%s'     | map_format(symlinks_themes))
-  }}
