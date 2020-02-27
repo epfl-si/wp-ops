@@ -496,12 +496,6 @@
     state: "{{ plugins_for_restauration_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
-- name: epfl-scienceqa plugin
-  wordpress_plugin:
-    name: epfl-scienceqa
-    state: "{{ plugins_for_scienceqa_category }}"
-    from: https://github.com/epfl-si/wp-plugin-epfl-scienceqa
-
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
