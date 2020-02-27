@@ -56,14 +56,8 @@ class WpVeritasSite:
 
     def __init__(self, site_data):
         try:
-            
-            
-            
-            #self.id = site_data['_id']
             self.url = site_data['url']
             self.parsed_url = urlparse(site_data['url'])
-            #self.tagline = site_data['tagline']
-            #self.title = site_data['title']
             self.openshift_env = site_data['openshiftEnv']
             self.category = site_data['category']
             self.theme = site_data['theme']
@@ -94,18 +88,6 @@ class WpVeritasSite:
             path = re.sub(r'^\/', '', path)
             path = re.sub(r'\/', '_', path)
             return "{}__{}".format(hostname, path)
-
-         
-
-    #@property
-    # def wp_veritas_url(self):
-    #     return 'https://wp-veritas.epfl.ch/edit/' + self.id
-
-    # path on disk is not a provided data, so we have to build it
-    @property
-    def path(self):
-        return os.path.join('/srv', self.openshift_env, self.parsed_url.netloc,
-                            'htdocs', self.parsed_url.path)
 
 
 class Inventory:
@@ -142,15 +124,7 @@ class Inventory:
 
         # fulfill vars for the site
         meta_site = {
-            #"wp_veritas_url": site.wp_veritas_url,
-            #"url": site.url,
-            #"tagline": site.tagline,
-            #"title": site.title,
             "wp_env": site.openshift_env,
-            #"category": site.category,
-            #"theme": site.theme,
-            #"languages": site.languages,
-            #"unit_id": site.unit_id,
             "wp_hostname": site.parsed_url.netloc,
             "wp_path": re.sub(r'^/', '', site.parsed_url.path),
             "wp_details": wp_details
@@ -173,20 +147,6 @@ class Inventory:
 
         self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
-        self._fill_dc_group_info(group)
-
-    def _fill_dc_group_info(self, group):
-        """Add static data about group vars, if we any instance in it"""
-        
-        self.inventory[group]['vars'] = {
-            "wp_hostname": "www.epfl.ch",
-            "ansible_connection": "oc",
-            "ansible_python_interpreter": "/usr/bin/python3",
-          #  "ansible_oc_pod": ansible_oc_pod,
-            "wp_env": group,
-            "ansible_oc_namespace": "wwp",
-            "ansible_oc_container": "httpd-" + group,
-        }
 
 
 if __name__ == '__main__':
