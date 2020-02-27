@@ -171,6 +171,10 @@ class WPInventory():
         except Exception as e:
             details[section]['_error'] = 'Error getting options: {}'.format(e)
 
+        # Fallback in case we don't find category. This option can be absent on an "Unmanaged" WordPress
+        if 'epfl:site_category' not in details[section]:
+            details[section]['epfl:site_category'] = 'Unmanaged'
+
         # If we don't want all details, 
         if not include_all_details:
             return details
