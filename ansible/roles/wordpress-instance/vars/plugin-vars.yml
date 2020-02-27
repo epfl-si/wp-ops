@@ -27,6 +27,9 @@ plugins_for_scienceqa_category: '{{ [ "symlinked", "active" ] if wp_site_categor
 # Category based on environment
 plugins_for_inside_category: '{{ ["symlinked", "active"] if wp_env == "inside" else "absent" }}'
 
+# Defining if WP is managed or not
+wp_is_managed: "{{ wp_site_category != 'Unmanaged' }}"
+
 
 #### Plugins Configuration
 

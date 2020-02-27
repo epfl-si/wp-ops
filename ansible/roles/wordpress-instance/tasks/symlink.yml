@@ -19,10 +19,6 @@
     that:
       - (wp_can.configure and wp_can.write_code) or ansible_check_mode
 
-# Required by _symlinks_muplugins_yaml in symlink-vars.yml:
-- include_vars: category-vars.yml
-  tags: always
-
 - include_vars: symlink-vars.yml
   tags: always
 
