@@ -294,7 +294,7 @@ class WPInventory():
         path = wp['wp_path']
 
         hostname = re.sub(r'\Wepfl\.ch$', '', hostname)
-        hostname = re.sub(r'\W', '-', hostname)
+        hostname = re.sub(r'\W', '_', hostname)
 
         if path == "":
             steam = hostname

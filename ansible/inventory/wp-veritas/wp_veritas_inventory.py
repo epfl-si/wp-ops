@@ -79,7 +79,7 @@ class WpVeritasSite:
         
         hostname = self.parsed_url.netloc
         hostname = re.sub(r'\.epfl\.ch$', '', hostname)
-        hostname = re.sub(r'\W', '-', hostname)
+        hostname = re.sub(r'\W', '_', hostname)
 
         if path == "":
             return hostname
