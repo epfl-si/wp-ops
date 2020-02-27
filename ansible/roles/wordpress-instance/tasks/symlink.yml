@@ -116,37 +116,6 @@
     "INDEX_PHP_CHANGED" in _unsymlink_script.stdout or
     "NO_SYMLINKS" not in _unsymlink_script.stdout
 
-- name: "Verify that there are no stale files on symlinked site"
-  tags: symlink
-  check_mode: no
-  shell:
-    cmd: |
-      # Trim all files at top level (except for a whitelist), and
-      # the auto-update muplugin
-
-      set -e -x
-      cd "{{ wp_dir }}"
-
-      for path in * \
-          wp-content/mu-plugins/EPFL_enable_updates_automatic.php
-      do
-          case "$path" in
-              .ht*) continue ;;
-              *.ini) continue ;;
-              wp|wp-config.php|index.php) continue ;;
-              ansible-backup-*) continue ;;
-              {{ symlinks_paths_wp | join('|') }}) continue ;;
-          esac
-          if [ ! -e "$path" ]; then continue; fi
-          {# We can't remove “flying” directories, as they might contain
-             sub-sites: #}
-          if [ -d "$path" ]; then continue; fi
-
-          echo FILES_TO_TRIM=$path
-      done
-  register: _symlink_cleanup_script
-  changed_when: '"FILES_TO_TRIM" in _symlink_cleanup_script.stdout'
-
 - name: "Reconfigure wp-config.php after unsymlinking"
   tags: unsymlink
   include_tasks:
