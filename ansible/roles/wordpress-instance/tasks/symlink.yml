@@ -47,13 +47,13 @@
       set -e -x
       cd {{ wp_dir }}
 
-      if make_symlinks_to_wp --check {{ symlinks_managed_in_bulk | join(" ") }}; then exit; else :; fi
+      if make_symlinks_to_wp --check {{ symlinks_paths_wp | join(" ") }}; then exit; else :; fi
 
       {% if not ansible_check_mode %}
       enter_maintenance_mode
       trap leave_maintenance_mode EXIT HUP INT QUIT
 
-      if make_symlinks_to_wp {{ symlinks_managed_in_bulk | join(" ") }}; then :; else
+      if make_symlinks_to_wp {{ symlinks_paths_wp | join(" ") }}; then :; else
           case "$?" in
               1) echo "SYMLINKS_CHANGED" ;;
               *) exit $?                 ;;
@@ -135,7 +135,7 @@
               *.ini) continue ;;
               wp|wp-config.php|index.php) continue ;;
               ansible-backup-*) continue ;;
-              {{ symlinks_managed_in_bulk | join('|') }}) continue ;;
+              {{ symlinks_paths_wp | join('|') }}) continue ;;
           esac
           if [ ! -e "$path" ]; then continue; fi
           {# We can't remove “flying” directories, as they might contain
