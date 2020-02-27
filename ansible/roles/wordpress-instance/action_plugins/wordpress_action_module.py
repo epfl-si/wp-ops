@@ -84,7 +84,7 @@ class WordPressActionModule(ActionBase):
         installation_state = self._installation_state(desired_state)
         activation_state = self._activation_state(desired_state)
 
-        if installation_state == 'absent' and (activation_state == 'active' or self._is_mandatory()):
+        if installation_state == 'absent' and activation_state == 'active' and not self._is_mandatory():
             raise ValueError('{} {} cannot be simultaneously absent and {}'.format(
                              self._get_type(), self._get_name(), activation_state))
 
