@@ -22,7 +22,6 @@ plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if wp_site_category =
 plugins_for_emploi_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Emploi" else "absent" }}'
 plugins_for_library_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
 plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
-plugins_for_scienceqa_category: '{{ [ "symlinked", "active" ] if wp_site_category == "ScienceQA" else "absent" }}'
 
 # Category based on environment
 plugins_for_inside_category: '{{ ["symlinked", "active"] if wp_env == "inside" else "absent" }}'
