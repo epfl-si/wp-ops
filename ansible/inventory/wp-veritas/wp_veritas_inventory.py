@@ -25,7 +25,8 @@ props_to_merge = {
     'ansible_port': '32222',
     'ansible_python_interpreter': '/usr/bin/python3',
     'ansible_user': 'www-data',
-    'wp_ensure_symlink_version': '5.2'
+    'wp_ensure_symlink_version': '5.2',
+    'openshift_namespace': 'wwp-prod'
 }
 
 class WpVeritasSite:
@@ -44,8 +45,7 @@ class WpVeritasSite:
 
     @classmethod
     def _keep(cls, site_data):
-        if site_data['status'] != 'created' or \
-           site_data['type'] == 'unmanaged' or \
+        if site_data['type'] == 'unmanaged' or \
            site_data['url'] == '' or \
            site_data['openshiftEnv'] == '' or \
            site_data['openshiftEnv'] == 'manager' or \
@@ -103,7 +103,7 @@ class Inventory:
         self.groups = set()
         for site in sites:
             self._add(site)
-       
+
 
     def to_json(self):
         return json.dumps(self.inventory, sort_keys=True, indent=4)
@@ -114,8 +114,7 @@ class Inventory:
             'options' : {
                 'epfl.site_category': site.category,
                 'plugin:epfl_accred:unit_id': site.unit_id,
-                'stylesheet': site.theme,
-                'siteurl': site.url
+                'stylesheet': site.theme
             },
             'polylang': {
                 'langs': site.languages
@@ -136,7 +135,8 @@ class Inventory:
         self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
         self._add_site_to_group(site, site.openshift_env)
 
-    def _add_site_to_group(self, site, group):
+    def _add_site_to_group(self, site, openshift_env):
+        group = 'prod-{}'.format(openshift_env)
         self._add_group(group)
         self.inventory[group]['hosts'].append(site.instance_name)
 
@@ -145,7 +145,7 @@ class Inventory:
             return
         self.groups.add(group)
 
-        self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
+        #self.inventory.setdefault('prod-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
 
