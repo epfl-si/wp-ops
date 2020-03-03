@@ -34,16 +34,16 @@ async function siteToMetrics(siteUrl) {
     return new prometheus.Gauge({ name, help, labelNames: ['lang'], registers: [r] })
   }
   const metrics = {
-    menuTime: gauge('epfl_menu_request_time_seconds',
-                    'Time in seconds it took to scrape the JSON menu'),
-    menuCount: gauge('epfl_menu_count',
-                     'Number of menu entries that live on this site (not parent nor sub-sites)'),
+    menuTime:        gauge('epfl_menu_request_time_seconds',
+                           'Time in seconds it took to scrape the JSON menu'),
+    menuCount:       gauge('epfl_menu_count',
+                           'Number of menu entries that live on this site (not parent nor sub-sites)'),
     menuCountUnique: gauge('epfl_menu_unique_count',
-                     'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
+                           'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
     menuOrphanCount: gauge('epfl_menu_orphan_count',
-                     'Number of orphan menu entries'),
-    menuCycleCount: gauge('epfl_menu_cycle_count',
-                     'Number of cycles in menu entries'),
+                           'Number of orphan menu entries'),
+    menuCycleCount:  gauge('epfl_menu_cycle_count',
+                           'Number of cycles in menu entries'),
   }
 
   await scrapeMenus(siteUrl, metrics)
