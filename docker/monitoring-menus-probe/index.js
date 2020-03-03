@@ -32,10 +32,14 @@ async function siteToMetrics(siteUrl) {
   r.setDefaultLabels({url: siteUrl})
 
   function menuGauge(name, help) {
-    return new prometheus.Gauge({ name, help, labelNames: ['lang'], registers: [r] })
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['lang'],
+                                  registers: [r] })
   }
   function externalMenuGauge(name, help) {
-    return new prometheus.Gauge({ name, help, labelNames: ['slug'], registers: [r] })
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['lang', 'slug', 'external_menu_uri'],
+                                  registers: [r] })
   }
 
   const metrics = {
@@ -75,12 +79,23 @@ async function scrapeExternalMenus (siteUrl, metrics) {
   for (let externalMenu of
        await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu'))
   {
-    const slug = externalMenu.slug,
-          sync = externalMenu.sync_status || {},
+    let labels
+    if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
+      labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
+                 external_menu_uri: externalMenu.meta['epfl-emi-site-url'],
+                 lang: externalMenu.lang
+               }
+    } else {  // For compatibility, until
+              // https://github.com/epfl-si/wp-plugin-epfl-menus/pull/3
+              // gets pushed to production
+      labels = { slug: externalMenu.slug }
+    }
+
+    const sync = externalMenu.sync_status || {},
           lastSuccess = Number(sync.last_success),
           failingSince = Number(sync.failing_since)
-    if (lastSuccess)  metrics.externalMenuSyncLastSuccess.set ({slug}, lastSuccess)
-    if (failingSince) metrics.externalMenuSyncFailingSince.set({slug}, failingSince)
+    if (lastSuccess)  metrics.externalMenuSyncLastSuccess.set (labels, lastSuccess)
+    if (failingSince) metrics.externalMenuSyncFailingSince.set(labels, failingSince)
   }
 }
 
