@@ -46,15 +46,19 @@ async function siteToMetrics(siteUrl) {
                      'Number of cycles in menu entries'),
   }
 
-  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
-    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
-                     withLabels({lang}, metrics))
-  }
+  await scrapeMenus(siteUrl, metrics)
 
   return r.metrics()
 }
 
-async function scrapeMenu(menuUrl, metrics) {
+async function scrapeMenus (siteUrl, metrics) {
+  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
+    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
+                     withLabels({lang}, metrics))
+  }
+}
+
+async function scrapeMenu (menuUrl, metrics) {
   const end = startTimer()
   let menu = await fetchJson(menuUrl)
   metrics.menuTime.set(end())
@@ -85,7 +89,7 @@ async function scrapeMenu(menuUrl, metrics) {
   metrics.menuCycleCount.set(graphlib.alg.findCycles(g).length)
 }
 
-async function fetchJson(url) {
+async function fetchJson (url) {
   return fetch(url).then((resp) => resp.json())
 }
 
@@ -97,7 +101,7 @@ function getQueue (url) {
   return queues[url]
 }
 
-function startTimer() {
+function startTimer () {
   const now = process.hrtime.bigint()
   return () => {
     const elapsed = process.hrtime.bigint() - now
@@ -106,7 +110,7 @@ function startTimer() {
   }
 }
 
-function withLabels(labels, metrics) {
+function withLabels (labels, metrics) {
   return _.mapValues(metrics, (metric) => {
     const setOrig = metric.set.bind(metric)
     return _.extend({
