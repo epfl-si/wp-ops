@@ -76,11 +76,11 @@ async function scrapeExternalMenus (siteUrl, metrics) {
        await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu'))
   {
     const slug = externalMenu.slug,
-          sync = externalMenu.sync_status || {}
-    metrics.externalMenuSyncLastSuccess.set(
-      {slug}, Number(sync.last_success))
-    metrics.externalMenuSyncFailingSince.set(
-      {slug}, Number(sync.failing_since))
+          sync = externalMenu.sync_status || {},
+          lastSuccess = Number(sync.last_success),
+          failingSince = Number(sync.failing_since)
+    if (lastSuccess)  metrics.externalMenuSyncLastSuccess.set ({slug}, lastSuccess)
+    if (failingSince) metrics.externalMenuSyncFailingSince.set({slug}, failingSince)
   }
 }
 
