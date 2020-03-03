@@ -30,23 +30,36 @@ app.listen(8080) ///////////////////////////////////////////////////////////////
 async function siteToMetrics(siteUrl) {
   const r = new prometheus.Registry()
   r.setDefaultLabels({url: siteUrl})
-  function gauge(name, help) {
+
+  function menuGauge(name, help) {
     return new prometheus.Gauge({ name, help, labelNames: ['lang'], registers: [r] })
   }
-  const metrics = {
-    menuTime:        gauge('epfl_menu_request_time_seconds',
-                           'Time in seconds it took to scrape the JSON menu'),
-    menuCount:       gauge('epfl_menu_count',
-                           'Number of menu entries that live on this site (not parent nor sub-sites)'),
-    menuCountUnique: gauge('epfl_menu_unique_count',
-                           'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
-    menuOrphanCount: gauge('epfl_menu_orphan_count',
-                           'Number of orphan menu entries'),
-    menuCycleCount:  gauge('epfl_menu_cycle_count',
-                           'Number of cycles in menu entries'),
+  function externalMenuGauge(name, help) {
+    return new prometheus.Gauge({ name, help, labelNames: ['slug'], registers: [r] })
   }
 
-  await scrapeMenus(siteUrl, metrics)
+  const metrics = {
+    menuTime:                     menuGauge('epfl_menu_request_time_seconds',
+                                            'Time in seconds it took to scrape the JSON menu'),
+    menuCount:                    menuGauge('epfl_menu_count',
+                                            'Number of menu entries that live on this site (not parent nor sub-sites)'),
+    menuCountUnique:              menuGauge('epfl_menu_unique_count',
+                                            'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
+    menuOrphanCount:              menuGauge('epfl_menu_orphan_count',
+                                            'Number of orphan menu entries'),
+    menuCycleCount:               menuGauge('epfl_menu_cycle_count',
+                                            'Number of cycles in menu entries'),
+
+    externalMenuSyncLastSuccess:  externalMenuGauge('epfl_externalmenu_sync_last_success',
+                                                    'Last time (in UNIX epoch format) when this external menu was successfully synced'),
+    externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
+                                                    'Time (in UNIX epoch format) at which the current streak of sync failures started'),
+  }
+
+  await Promise.all([
+    scrapeMenus(siteUrl, metrics),
+    scrapeExternalMenus(siteUrl, metrics)
+  ])
 
   return r.metrics()
 }
@@ -55,6 +68,19 @@ async function scrapeMenus (siteUrl, metrics) {
   for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
     await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
                      withLabels({lang}, metrics))
+  }
+}
+
+async function scrapeExternalMenus (siteUrl, metrics) {
+  for (let externalMenu of
+       await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu'))
+  {
+    const slug = externalMenu.slug,
+          sync = externalMenu.sync_status || {}
+    metrics.externalMenuSyncLastSuccess.set(
+      {slug}, Number(sync.last_success))
+    metrics.externalMenuSyncFailingSince.set(
+      {slug}, Number(sync.failing_since))
   }
 }
 
