@@ -30,31 +30,76 @@ app.listen(8080) ///////////////////////////////////////////////////////////////
 async function siteToMetrics(siteUrl) {
   const r = new prometheus.Registry()
   r.setDefaultLabels({url: siteUrl})
-  function gauge(name, help) {
-    return new prometheus.Gauge({ name, help, labelNames: ['lang'], registers: [r] })
+
+  function menuGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['lang'],
+                                  registers: [r] })
   }
-  const metrics = {
-    menuTime: gauge('epfl_menu_request_time_seconds',
-                    'Time in seconds it took to scrape the JSON menu'),
-    menuCount: gauge('epfl_menu_count',
-                     'Number of menu entries that live on this site (not parent nor sub-sites)'),
-    menuCountUnique: gauge('epfl_menu_unique_count',
-                     'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
-    menuOrphanCount: gauge('epfl_menu_orphan_count',
-                     'Number of orphan menu entries'),
-    menuCycleCount: gauge('epfl_menu_cycle_count',
-                     'Number of cycles in menu entries'),
+  function externalMenuGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['lang', 'slug', 'external_menu_uri'],
+                                  registers: [r] })
   }
 
-  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
-    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
-                     withLabels({lang}, metrics))
+  const metrics = {
+    menuTime:                     menuGauge('epfl_menu_request_time_seconds',
+                                            'Time in seconds it took to scrape the JSON menu'),
+    menuCount:                    menuGauge('epfl_menu_count',
+                                            'Number of menu entries that live on this site (not parent nor sub-sites)'),
+    menuCountUnique:              menuGauge('epfl_menu_unique_count',
+                                            'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
+    menuOrphanCount:              menuGauge('epfl_menu_orphan_count',
+                                            'Number of orphan menu entries'),
+    menuCycleCount:               menuGauge('epfl_menu_cycle_count',
+                                            'Number of cycles in menu entries'),
+
+    externalMenuSyncLastSuccess:  externalMenuGauge('epfl_externalmenu_sync_last_success',
+                                                    'Last time (in UNIX epoch format) when this external menu was successfully synced'),
+    externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
+                                                    'Time (in UNIX epoch format) at which the current streak of sync failures started'),
   }
+
+  await Promise.all([
+    scrapeMenus(siteUrl, metrics),
+    scrapeExternalMenus(siteUrl, metrics)
+  ])
 
   return r.metrics()
 }
 
-async function scrapeMenu(menuUrl, metrics) {
+async function scrapeMenus (siteUrl, metrics) {
+  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
+    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
+                     withLabels({lang}, metrics))
+  }
+}
+
+async function scrapeExternalMenus (siteUrl, metrics) {
+  for (let externalMenu of
+       await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu'))
+  {
+    let labels
+    if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
+      labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
+                 external_menu_uri: externalMenu.meta['epfl-emi-site-url'],
+                 lang: externalMenu.lang
+               }
+    } else {  // For compatibility, until
+              // https://github.com/epfl-si/wp-plugin-epfl-menus/pull/3
+              // gets pushed to production
+      labels = { slug: externalMenu.slug }
+    }
+
+    const sync = externalMenu.sync_status || {},
+          lastSuccess = Number(sync.last_success),
+          failingSince = Number(sync.failing_since)
+    if (lastSuccess)  metrics.externalMenuSyncLastSuccess.set (labels, lastSuccess)
+    if (failingSince) metrics.externalMenuSyncFailingSince.set(labels, failingSince)
+  }
+}
+
+async function scrapeMenu (menuUrl, metrics) {
   const end = startTimer()
   let menu = await fetchJson(menuUrl)
   metrics.menuTime.set(end())
@@ -85,7 +130,7 @@ async function scrapeMenu(menuUrl, metrics) {
   metrics.menuCycleCount.set(graphlib.alg.findCycles(g).length)
 }
 
-async function fetchJson(url) {
+async function fetchJson (url) {
   return fetch(url).then((resp) => resp.json())
 }
 
@@ -97,7 +142,7 @@ function getQueue (url) {
   return queues[url]
 }
 
-function startTimer() {
+function startTimer () {
   const now = process.hrtime.bigint()
   return () => {
     const elapsed = process.hrtime.bigint() - now
@@ -106,7 +151,7 @@ function startTimer() {
   }
 }
 
-function withLabels(labels, metrics) {
+function withLabels (labels, metrics) {
   return _.mapValues(metrics, (metric) => {
     const setOrig = metric.set.bind(metric)
     return _.extend({
