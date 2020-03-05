@@ -42,3 +42,7 @@
   when: openshift_namespace == "wwp"
   include: monitoring.yml
   tags: monitoring
+
+- name: "Ansible Tower"
+  include: awx.yml
+  tags: awx

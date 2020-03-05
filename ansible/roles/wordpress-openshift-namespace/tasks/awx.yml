@@ -1,0 +1,45 @@
+#- include_vars: monitoring-vars.yml
+
+- name: Ansible Tower Rabbit MQ service
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: awx-rmq-mgmt
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: awx
+        name: awx-rmq-mgmt
+    spec:
+      ports:
+        - name: rmqmgmt
+          port: 15672
+          protocol: TCP
+          targetPort: 15672
+      selector:
+        name: awx-web-deploy
+
+- name: Ansible Tower HTTP service
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: awx-web-svc
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: awx
+        name: awx-web-svc
+    spec:
+      externalTrafficPolicy: Cluster
+      ports:
+        - name: http
+          nodePort: 30234
+          port: 80
+          protocol: TCP
+          targetPort: 8052
+      selector:
+        name: awx-web-deploy
+      sessionAffinity: None
+      type: NodePort
