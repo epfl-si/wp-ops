@@ -43,3 +43,14 @@
         name: awx-web-deploy
       sessionAffinity: None
       type: NodePort
+
+- name: Ansible Tower ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: awx-config
+      namespace: "{{ openshift_namespace }}"
+    data:
+      awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
