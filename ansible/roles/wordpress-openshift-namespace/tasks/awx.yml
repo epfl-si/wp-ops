@@ -1,4 +1,4 @@
-#- include_vars: monitoring-vars.yml
+- include_vars: awx-vars.yml
 
 - name: Ansible Tower Rabbit MQ service
   openshift:
