@@ -56,6 +56,7 @@ class WpVeritasSite:
 
     def __init__(self, site_data):
         try:
+            #print(site_data)
             self.url = site_data['url']
             self.parsed_url = urlparse(site_data['url'])
             self.openshift_env = site_data['openshiftEnv']
@@ -63,6 +64,7 @@ class WpVeritasSite:
             self.theme = site_data['theme']
             self.languages = site_data['languages']
             self.unit_id = site_data['unitId']
+            self.unit_name = site_data['unitName']
         except KeyError as e:
             logging.debug("Error: Missing field in provided data: %s" % site_data)
             raise e
@@ -112,8 +114,9 @@ class Inventory:
 
         wp_details = {
             'options' : {
-                'epfl.site_category': site.category,
+                'epfl:site_category': site.category,
                 'plugin:epfl_accred:unit_id': site.unit_id,
+                'plugin:epfl_accred:unit': site.unit_name,
                 'stylesheet': site.theme
             },
             'polylang': {
