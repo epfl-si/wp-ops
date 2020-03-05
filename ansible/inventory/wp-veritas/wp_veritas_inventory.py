@@ -88,7 +88,8 @@ class WpVeritasSite:
         else:
             path = re.sub(r'\/$', '', path)
             path = re.sub(r'^\/', '', path)
-            path = re.sub(r'\/', '_', path)
+            path = re.sub(r'\/', '__', path)
+            path = re.sub(r'\W', '_', path)
             return "{}__{}".format(hostname, path)
 
 
@@ -96,8 +97,6 @@ class Inventory:
     """Model the entire wp-veritas inventory."""
 
     def __init__(self, sites):
-
-        self._nicknames_already_taken = []
 
         self.inventory = {
             '_meta': {'hostvars': {}}
