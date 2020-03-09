@@ -45,9 +45,10 @@ class WpVeritasSite:
 
     @classmethod
     def _keep(cls, site_data):
-        if site_data['type'] == 'unmanaged' or \
+        if site_data['wpInfra'] is False or \
            site_data['url'] == '' or \
            site_data['openshiftEnv'] == '' or \
+           site_data['openshiftEnv'].startswith('unm-') or \
            site_data['openshiftEnv'] == 'manager' or \
            site_data['openshiftEnv'] == 'subdomains':
             return False
