@@ -511,3 +511,9 @@
     name: epfl-courses-se
     state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
+
+- name: MainWP plugin
+  wordpress_plugin:
+    name: mainwp
+    state: "{{ plugins_for_admin_category }}"
+    from: wordpress.org/plugins
