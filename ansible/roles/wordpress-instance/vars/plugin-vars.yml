@@ -23,6 +23,8 @@ plugins_for_emploi_category: '{{ [ "symlinked", "active" ] if wp_site_category =
 plugins_for_library_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
 plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
 plugins_for_inside_category: '{{ ["symlinked", "active"] if wp_site_category == "Inside" else "absent" }}'
+plugins_for_admin_category: '{{ [ "symlinked", "active" ] if wp_site_category == "admin" else "absent" }}'
+
 
 # Defining if WP is managed or not
 wp_is_managed: "{{ wp_site_category != 'Unmanaged' }}"
