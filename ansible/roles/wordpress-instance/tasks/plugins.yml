@@ -191,20 +191,9 @@
       - active
     from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
 
-- name: accred administrator group
-  wordpress_option:
-    name: plugin:epfl_accred:administrator_group
-    value: "{{ wp_administrator_group }}"
-
-- name: accred unit name
-  wordpress_option:
-    name: plugin:epfl_accred:unit
-    value: "{{ wp_unit_name }}"
-
-- name: accred unit ID
-  wordpress_option:
-    name: plugin:epfl_accred:unit_id
-    value: "{{ wp_unit_id }}"
+- name: Accred options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_accred_options }}"
 
 - name: Cache-Control plugin
   wordpress_plugin:
@@ -488,6 +477,10 @@
     state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-intranet
 
+- name: epfl-intranet status
+  wordpress_wpcli: "{{ item }}"
+  with_items: "{{ plugin_epfl_intranet_wpcli }}"
+    
 - name: epfl-emploi plugin
   wordpress_plugin:
     name: epfl-emploi
