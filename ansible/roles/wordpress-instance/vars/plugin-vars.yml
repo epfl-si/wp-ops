@@ -32,10 +32,6 @@ wp_is_managed: "{{ wp_site_category != 'Unmanaged' }}"
 
 #### Plugins Configuration
 
-# EPFL Intranet
-plugin_epfl_intranet_wpcli:
-  - wpcli_command: '{{ "epfl intranet enable-protection" if wp_site_category == "Inside" else "" }}'
-
 
 # Main-WP Child
 plugin_mainwp_child_options:
