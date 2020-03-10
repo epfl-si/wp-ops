@@ -57,7 +57,6 @@ class WpVeritasSite:
 
     def __init__(self, site_data):
         try:
-            #print(site_data)
             self.url = site_data['url']
             self.parsed_url = urlparse(site_data['url'])
             self.openshift_env = site_data['openshiftEnv']
@@ -148,7 +147,6 @@ class Inventory:
             return
         self.groups.add(group)
 
-        #self.inventory.setdefault('prod-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
 
