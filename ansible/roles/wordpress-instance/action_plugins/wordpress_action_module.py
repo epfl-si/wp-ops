@@ -268,49 +268,55 @@ class WordPressActionModule(ActionBase):
         """
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
-    def _run_wp_cli_action (self, args):
+    def _run_wp_cli_action (self, args, update_result=True):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         return self._run_shell_action(
-            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args))
+            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result)
 
 
-    def _run_php_code(self, code):
+    def _run_php_code(self, code, update_result=True):
         """
         Execute PHP code and returns result
 
         :param code: Code to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        result = self._run_shell_action("php -r '{}'".format(code))
+        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
 
         return result['stdout_lines']
 
 
-    def _run_shell_action (self, cmd):
+    def _run_shell_action (self, cmd, update_result=True):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result)
 
 
-    def _run_action (self, action_name, args):
+    def _run_action (self, action_name, args, update_result=True):
         """
         Executes an action, using an Ansible module.
 
         :param action_name: Ansible module name to use
         :param args: dict with arguments to give to module
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         result = self._execute_module(module_name=action_name,
                                       module_args=args, tmp=self._tmp,
                                       task_vars=self._task_vars)
         
+        
+
         # If command was to update an option using WP CLI
         if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
             # We update 'changed' key depending on what was done by WPCLI
@@ -318,9 +324,13 @@ class WordPressActionModule(ActionBase):
             # when nothing is changed, somewhere, the value is changed to True... !?!
             result['changed'] = not result['stdout'].endswith('option is unchanged.')
         
-        self._update_result(result)
+        if update_result:
+            self._update_result(result)
+            return self.result
 
-        return self.result
+        else:
+            return result
+        
 
 
     def _get_wp_dir (self):
@@ -362,11 +372,9 @@ class WordPressActionModule(ActionBase):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
-        oldresult = deepcopy(self.result)
-        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command))
-        if 'failed' in self.result: return
+        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), update_result=False)
 
-        self.result = oldresult  # We don't want "changed" to pollute the state
+        if 'failed' in result: return
 
         for line in result["stdout"].splitlines()[1:]:
             fields = line.split(',')
