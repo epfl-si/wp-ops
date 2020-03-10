@@ -13,7 +13,7 @@ class ActionModule(WordPressActionModule):
         
         self.result = super(ActionModule, self).run(tmp, task_vars)
 
-        self._update_result(self._update_option())
+        self._update_option()
 
         return self.result
 

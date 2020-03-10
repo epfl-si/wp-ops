@@ -46,7 +46,7 @@ class ActionModule(WordPressActionModule):
         ):
             
             
-            self._update_result(self._do_activate_element())
+            self._do_activate_element()
             if 'failed' in self.result: return self.result
 
         return self.result
