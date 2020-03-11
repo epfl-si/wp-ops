@@ -19,6 +19,11 @@ class ActionModule(WordPressActionModule):
 
         self.result = super(ActionModule, self).run(tmp, task_vars)
         
+        # Handling --check execution mode
+        if task_vars['ansible_check_mode']:
+            self.result['skipped'] = True
+            return self.result
+
         self._name = self._task.args.get('name')
         self._mandatory = self._task.args.get('is_mu', False)
         self._type = 'mu-plugin' if self._task.args.get('is_mu', False) else 'plugin'
