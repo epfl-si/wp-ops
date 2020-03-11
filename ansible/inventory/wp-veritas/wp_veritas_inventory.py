@@ -146,7 +146,7 @@ class Inventory:
         if group in self.groups:
             return
         self.groups.add(group)
-
+        self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
 

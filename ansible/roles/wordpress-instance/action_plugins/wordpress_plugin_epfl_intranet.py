@@ -15,6 +15,11 @@ class ActionModule(WordPressActionModule):
         
         self.result = super(ActionModule, self).run(tmp, task_vars)
 
+        # Handling --check execution mode
+        if task_vars['ansible_check_mode']:
+            self.result['skipped'] = True
+            return self.result
+
         # We only can do the job if plugin is installed
         if self._plugin_is_installed():
 
