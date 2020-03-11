@@ -7,43 +7,308 @@ from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
 
 import re
+import os
 
 class WordPressActionModule(ActionBase):
 
     def run(self, tmp=None, task_vars=None):
 
+        # We have to initialize this var to avoid any errors.
+        # It will be initialized in child classes
+        self.result = None
+
         self._tmp = tmp
         self._task_vars = task_vars
+        # Has to be set in child classes with one of the following value:
+        # plugin
+        # mu-plugin
+        # theme
+        self._type = None
+
+        # Has to be set with element name in child class
+        self._name = None
+
+        # Tells if the element has to be here without any negociation (like mu-plugins) or not
+        self._mandatory = None
+
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
 
-    def _run_wp_cli_action (self, args):
+    def _get_type(self):
+        """
+        Return element type or raise an exception if not initialized
+        """
+        if self._type is None:
+            raise ValueError("Please initiliaze 'self._type' in children class {}".format(type(self).__name__))
+            
+        return self._type
+
+
+    def _get_name(self):
+        """
+        Return element name or raise an exception if not initialized
+        """
+        if self._name is None:
+            raise ValueError("Please initiliaze 'self._name' in children class {}".format(type(self).__name__))
+            
+        return self._name
+    
+
+    def _is_mandatory(self):
+        """
+        Return if element is mandatory or raise an exception if not initialized
+        """
+        if self._mandatory is None:
+            raise ValueError("Please initiliaze 'self._mandatory' in children class {}".format(type(self).__name__))
+            
+        return self._mandatory
+
+
+    def _get_desired_state(self):
+        """
+        Returns array with installation state and activation state for a (mu-)plugin or a theme.
+        We look into YAML given args (plugins.yml)
+        """
+        desired_state = self._task.args.get('state', 'absent')
+        if isinstance(desired_state, six.string_types):
+             desired_state = set([desired_state.strip()])
+        elif isinstance(desired_state, list):
+            desired_state = set(desired_state)
+        else:
+            raise TypeError("Unexpected value for `state`: {}".format(desired_state))
+
+        if 'symlinked' in desired_state and 'installed' in desired_state:
+            raise ValueError('{} {} cannot be both `symlinked` and `installed`'.format(self._get_type(), self._get_name()))
+
+        installation_state = self._installation_state(desired_state)
+        activation_state = self._activation_state(desired_state)
+
+        if installation_state == 'absent' and activation_state == 'active' and not self._is_mandatory():
+            raise ValueError('{} {} cannot be simultaneously absent and {}'.format(
+                             self._get_type(), self._get_name(), activation_state))
+
+        if activation_state == 'active' or self._is_mandatory():
+            # Cannot activate (or make a mu-plugin) if not installed
+            if not installation_state:
+                installation_state = 'symlinked'
+        if installation_state == 'absent':
+            # Must (attempt to) deactivate prior to uninstalling
+            if not activation_state:
+                activation_state = "inactive"
+
+        return (installation_state, activation_state)
+    
+
+    def _ensure_file_state (self, desired_state, basename):
+        """
+        Check if a given (mu-)plugin file/folder is at the desired state
+
+        :param desired_state: can be 'installed', 'symlinked', ...
+        :param basename: name of element to check (can be a file or folder)
+        """
+        current_state = set([self._get_current_file_state(basename)])
+        to_do = set([desired_state]) - current_state
+        to_undo = current_state - set([desired_state])
+
+        if not (to_do or to_undo):
+            return
+
+        if 'installed' in to_do:
+            raise NotImplementedError('Installing "regular" (non-symlinked) {} {} '
+                                      'not supported (yet)'.format(self._get_type(), basename))
+
+        if 'symlinked' in to_undo or 'installed' in to_undo:
+            self._update_result(self._do_rimraf_file(basename))
+            if 'failed' in self.result: return self.result
+
+        if 'symlinked' in to_do:
+            self._update_result(self._do_symlink_file(basename))
+            if 'failed' in self.result: return self.result
+
+
+    def _ensure_all_files_state (self, desired_state):
+        """
+        Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
+
+        :param desired_state: can be 'installed', 'symlinked', ...
+        """
+        froms = self._task.args.get('from')
+        if isinstance(froms, six.string_types):
+            froms = [froms]
+        if not froms:
+            froms = []
+        
+        basenames = [os.path.basename(f) for f in froms
+                if self._is_filename(f)]
+        if not basenames:
+            basenames = [self._get_name()]
+
+        # Going through each files/folder for plugin
+        for basename in basenames:
+            self._ensure_file_state(desired_state, basename)
+            if 'failed' in self.result: return self.result
+
+
+    def _get_current_file_state (self, basename):
+        """
+        Returns state of a given plugin file/folder.
+
+        :param basename: name of element to check (can be a file or folder)
+        """
+        path = self._get_symlink_path(basename)
+        plugin_stat = self._run_action('stat', { 'path': path })
+        if 'failed' in plugin_stat:
+            raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
+        file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
+        if not file_exists:
+                return 'absent'
+        elif plugin_stat['stat']['islnk']:
+            if (plugin_stat['stat']['lnk_target'] ==
+                self._get_symlink_target(basename)):
+                return 'symlinked'
+            else:
+                return 'symlink_damaged'
+        else:
+            return 'installed'
+
+
+    def _do_activate_element(self):
+        """
+        Uses WP-CLI to activate plugin
+        """
+        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+
+
+    def _activation_state(self, desired_state):
+        """
+        Returns plugin activation state based on desired state (active, inactive)
+
+        :param desired_state: Plugin desired activation state
+        """
+
+        # Active by default
+        if self._is_mandatory():
+            return 'active'
+
+        activation_state = desired_state.intersection(['active', 'inactive'])
+        if len(activation_state) == 0:
+            return None
+        elif len(activation_state) == 1:
+            return list(activation_state)[0]
+        else:
+            raise ValueError('{} {} cannot be simultaneously {}'.format(self._get_type(), self._get_name(), str(list(activation_state))))
+
+
+    def _installation_state(self, desired_state):
+        """
+        Returns plugin installation state based on desired state (present, absent, symlinked)
+
+        :param desired_state: Plugin desired installation state
+        """
+        installation_state = desired_state.intersection(['present', 'absent', 'symlinked'])
+        if len(installation_state) == 0:
+            return None
+        elif len(installation_state) == 1:
+            return list(installation_state)[0]
+        else:
+            raise ValueError('{} {} cannot be simultaneously {}'.format(self._get_type(), self._get_name(), str(list(installation_state))))
+
+
+    def _do_symlink_file (self, basename):
+        """
+        Creates a symlink for a given plugin file/folder
+
+        :param basename: given plugin file/folder for which we have to create a symlink
+        """
+        return self._run_action('file', {
+            'state': 'link',
+            # Beware src / path inversion, as is customary with everything symlink:
+            'src': self._get_symlink_target(basename),
+            'path': self._get_symlink_path(basename),
+            })
+
+    
+    def _do_rimraf_file (self, basename):
+        """
+        Remove a file/folder belonging to a plugin
+
+        :param basename: given plugin file/folder
+        """
+        self._run_action('file',
+                         {'state': 'absent',
+                          'path': self._get_symlink_path(basename)})
+        return self.result
+
+    
+    def _get_symlink_path (self, basename):
+        """
+        Returns symlink source path
+
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return self._make_element_path(self._get_wp_dir(), basename)
+
+
+    def _get_symlink_target (self, basename):
+        """
+        Returns a path to symlink target (mu-)plugin or theme file/folder
+
+        :param basename: given plugin file/folder for which we want the symlink target path
+        """
+        return self._make_element_path('../../wp', basename)
+
+
+    def _make_element_path (self, prefix, basename):
+        """
+        Generates an absolute (mu-)plugin or theme path.
+
+        :param prefix: string to add at the beginning of the path to have an absolute one
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
+
+    def _run_wp_cli_action (self, args, update_result=True):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         return self._run_shell_action(
-            '%s %s' % (self._get_ansible_var('wp_cli_command'), args))
+            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result)
 
 
-    def _run_shell_action (self, cmd):
+    def _run_php_code(self, code, update_result=True):
+        """
+        Execute PHP code and returns result
+
+        :param code: Code to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
+
+        return result['stdout_lines']
+
+
+    def _run_shell_action (self, cmd, update_result=True):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True })
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result)
 
 
-    def _run_action (self, action_name, args):
+    def _run_action (self, action_name, args, update_result=True):
         """
         Executes an action, using an Ansible module.
 
         :param action_name: Ansible module name to use
         :param args: dict with arguments to give to module
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         result = self._execute_module(module_name=action_name,
@@ -51,15 +316,21 @@ class WordPressActionModule(ActionBase):
                                       task_vars=self._task_vars)
         
         
+
         # If command was to update an option using WP CLI
         if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
-            
             # We update 'changed' key depending on what was done by WPCLI
+            # NOTE: For an unknown reason, for some options, even if we set 'changed' to False 
+            # when nothing is changed, somewhere, the value is changed to True... !?!
             result['changed'] = not result['stdout'].endswith('option is unchanged.')
         
-        self._update_result(result)
+        if update_result:
+            self._update_result(result)
+            return self.result
 
-        return self.result
+        else:
+            return result
+        
 
 
     def _get_wp_dir (self):
@@ -94,10 +365,22 @@ class WordPressActionModule(ActionBase):
                 and not from_piece.endswith(".zip"))
 
 
-    def _log(self, str):
-        with open('/tmp/ansible.log', 'a') as f:
-            f.write("{}\n".format(str))
+    def _get_activation_state (self):
+        """
+        Returns plugin activation state
+        """
+        # To use 'wp plugin' for MU-Plugins
+        wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
+        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), update_result=False)
+
+        if 'failed' in result: return
+
+        for line in result["stdout"].splitlines()[1:]:
+            fields = line.split(',')
+            if len(fields) < 2: continue
+            if fields[0] == self._get_name(): return fields[1]
+        return 'inactive'
 
     def _update_result (self, result):
         """

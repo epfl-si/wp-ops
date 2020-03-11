@@ -137,17 +137,19 @@ class WPInventory():
         section = 'options'
         details[section] = {}
 
-        # We have to return all details
-        if include_all_details:
-            # List of options to get from Instance
-            options_to_get = ['plugin:epfl_accred:unit_id', 
+        # List of basic options to get from Instance
+        options_to_get = [ 'plugin:epfl_accred:unit_id', 
                             'plugin:epfl_accred:unit',
                             'epfl:site_category',
-                            'siteurl']
-                            
-        # We take only the minimum details we need for script correct execution    
-        else:
-            options_to_get = [ 'epfl:site_category']
+                            # contains theme name
+                            'stylesheet']
+
+        
+        # We have to return all details
+        if include_all_details:
+            # Adding options to initial list
+            options_to_get += ['siteurl']
+             
 
         # Default value for options
         for option_name in options_to_get:
@@ -169,11 +171,43 @@ class WPInventory():
         except Exception as e:
             details[section]['_error'] = 'Error getting options: {}'.format(e)
 
+        # Fallback in case we don't find category. This option can be absent on an "Unmanaged" WordPress
+        if 'epfl:site_category' not in details[section]:
+            details[section]['epfl:site_category'] = 'Unmanaged'
+
+
+        ## 2. Polylang
+        section = 'polylang'
+        details[section] = {}
+
+        try:
+            # Listing languages. Format is like (default one is the first in the list) :
+            # fr — Français [DEFAULT]
+            # en — English
+            lang_list = self._exec_ssh(target_dict, 'wp polylang languages --path={} --skip-themes'.format(path_to_instance))
+
+            languages = []
+
+            if not lang_list[0].decode().strip().startswith('Success: No languages are currently configured'):
+
+                # Looping through languages
+                for lang_details in lang_list:
+                    
+                    # Extracting information
+                    values = re.findall(r'^([\w]+)\s.+', lang_details.decode().strip())
+                    languages.append(values[0])
+            
+            details[section]['langs'] = languages
+
+        except Exception as e:
+            details[section]['_error'] = 'Error getting lang list: {}'.format(e)
+
+
         # If we don't want all details, 
         if not include_all_details:
             return details
         
-        ## 2. Defined boolean
+        ## 3. Defined boolean
         section = 'debug'
         details[section] = {}
 
@@ -199,32 +233,6 @@ class WPInventory():
             details[section]['log_file_size'] = 0
             details[section]['_error'] = 'Error getting log file infos: {}'.format(e)
 
-
-        ## 3. Polylang
-        section = 'polylang'
-        details[section] = {}
-
-        try:
-            # Listing languages. Format is like (default one is the first in the list) :
-            # fr — Français [DEFAULT]
-            # en — English
-            lang_list = self._exec_ssh(target_dict, 'wp polylang languages --path={} --skip-themes'.format(path_to_instance))
-
-            languages = []
-
-            if not lang_list[0].decode().strip().startswith('Success: No languages are currently configured'):
-
-                # Looping through languages
-                for lang_details in lang_list:
-                    
-                    # Extracting information
-                    values = re.findall(r'^([\w]+)\s.+', lang_details.decode().strip())
-                    languages.append(values[0])
-            
-            details[section]['langs'] = languages
-
-        except Exception as e:
-            details[section]['_error'] = 'Error getting lang list: {}'.format(e)
 
 
         return details
@@ -288,14 +296,15 @@ class WPInventory():
         path = wp['wp_path']
 
         hostname = re.sub(r'\Wepfl\.ch$', '', hostname)
-        hostname = re.sub(r'\W', '-', hostname)
+        hostname = re.sub(r'\W', '_', hostname)
 
         if path == "":
             steam = hostname
         else:
             path = re.sub(r'\/$', '', path)
-            path = re.sub(r'\/', '-', path)
-            steam = "{}-{}".format(hostname, path)
+            path = re.sub(r'\/', '__', path)
+            path = re.sub(r'\W', '_', path)
+            steam = "{}__{}".format(hostname, path)
         
         uniq = 0
         nickname = steam

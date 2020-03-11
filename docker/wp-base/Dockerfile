@@ -98,7 +98,9 @@ RUN set -x;                                                              \
 
 RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
           /wp/*/wp-content/plugins/hello.php                             \
-    /wp/*/wp-content/themes/twenty*
+    /wp/*/wp-content/themes/twenty*                                      \
+    /wp/*/setup-config.php /wp/*/wp-activate.php                         \
+    /wp/*/wp-config-sample.php
 
 ADD wordpress-anywhere.patch /tmp/
 RUN set -e -x;                                                           \
@@ -143,12 +145,14 @@ RUN set -e -x; for wp in /wp/*; do                                         \
 # Manually add the wordpress-importer plugin, used in "ventilation"
 # operations. Patch it to nuke the stat() cache inbetween downloading
 # things
+# If don't want to see stat() results
+# fix the patch format clearstatcache-wp-import.patch and add this two lines
+#        cd wordpress-importer ;                                          \
+#        git apply < /tmp/clearstatcache-wp-import.patch ;                \
 RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \
             wordpress-importer wordpress.org/plugins ;                   \
-        cd wordpress-importer ;                                          \
-        git apply < /tmp/clearstatcache-wp-import.patch ;                \
     done;                                                                \
     rm /tmp/clearstatcache-wp-import.patch
 

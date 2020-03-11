@@ -10,10 +10,13 @@
 - assert:
     that: wp_can.configure
 
+
 - include_vars: "{{ item }}"
   with_items:
     - plugin-vars.yml
     - accred-vars.yml
+
+##################### Plugins to clean ###########################
 
 - name: Delete plugins bundled with WordPress
   wordpress_plugin:
@@ -28,87 +31,91 @@
 - name: Custom editor menu (must-use plugin)
   wordpress_plugin:
     name: EPFL_custom_editor_menu
-    state:
-      - symlinked
-      - must-use
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from:
-      - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-custom-editor-menu
-      - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_custom_editor_menu_loader.php
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-custom-editor-menu
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_custom_editor_menu_loader.php
 
 
 - name: Blocks white-list (must-use plugin)
   wordpress_plugin:
     name: EPFL_block_white_list
-    state:
-      - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_block_white_list.php
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
+
 
 - name: Disable comments (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_comments
-    state:
-      - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_comments.php
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_disable_comments.php
+
+- name: Enable automatic updates (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_enable_updates_automatic
+    is_mu: yes
+    state: '{{ "absent" if wp_is_managed else "symlinked" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_enable_updates_automatic.php
 
 - name: Disable automatic updates (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_updates_automatic
-    state:
-      - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_disable_updates_automatic.php
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_disable_updates_automatic.php
 
 - name: Google Analytics hook (must-use plugin)
   wordpress_plugin:
     name: EPFL_google_analytics_hook
+    is_mu: yes
     state:
       - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_google_analytics_hook.php
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_google_analytics_hook.php
 
 - name: Locked installs (must-use plugin)
   wordpress_plugin:
     name: EPFL_installs_locked
-    state: '{{ ["symlinked", "must-use"] if wp_is_managed else "absent" }}'
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_installs_locked.php
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_installs_locked.php
 
 - name: Jahia redirect tracker (must-use plugin)
   wordpress_plugin:
     name: EPFL_jahia_redirect
-    state:
-      - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_jahia_redirect.php
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_jahia_redirect.php
 
 - name: EPFL functions (must-use plugin)
   wordpress_plugin:
     name: epfl-functions
+    is_mu: yes
     state:
       - symlinked
-      - must-use
-    from: https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/epfl-functions.php
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-functions.php
 
 - name: Quota (must-use plugin)
   wordpress_plugin:
     name: EPFL_quota_loader
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from:
-      - https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-quota
-      - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_quota_loader.php
+      - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-quota
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_quota_loader.php
 
 - name: Stats (must-use plugin)
   wordpress_plugin:
     name: EPFL_stats_loader
+    is_mu: yes
     state:
       - symlinked
-      - must-use
     from:
-      - https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/mu-plugins/epfl-stats
-      - https://github.com/epfl-si/jahia2wp/blob/release2018/data/wp/wp-content/mu-plugins/EPFL_stats_loader.php
+      - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-stats
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_stats_loader.php
 
 ##################### "2018" plugins ###########################
 
@@ -118,7 +125,7 @@
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    from: https://github.com/epfl-si/jahia2wp/raw/release2018/data/plugins/generic/tinymce-advanced/tinymce-advanced.5.2.1.zip
 
 - name: Gutenberg PDF Viewer Block
   wordpress_plugin:
@@ -138,7 +145,7 @@
     state:
       - symlinked
       - active
-    from: https://downloads.wordpress.org/plugin/polylang.2.5.2.zip
+    from: wordpress.org/plugins
 
 - name: Coming Soon plugin
   wordpress_plugin:
@@ -184,21 +191,9 @@
       - active
     from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
 
-- name: accred administrator group
-  wordpress_option:
-    name: plugin:epfl_accred:administrator_group
-    value: "{{ wp_administrator_group }}"
-
-# TODO WHEN WE WILL HAVE INFORMATION FROM WP-VERITAS
-# - name: accred unit name
-#   wordpress_option:
-#     name: plugin:epfl_accred:unit
-#     value: "{{ wp_unit_name }}"
-
-# - name: accred unit ID
-#   wordpress_option:
-#     name: plugin:epfl_accred:unit_id
-#     value: "{{ wp_unit_id }}"
+- name: Accred options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_accred_options }}"
 
 - name: Cache-Control plugin
   wordpress_plugin:
@@ -352,7 +347,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/raw/release2018/data/wp/wp-content/plugins/enlighter.zip
+    from: https://github.com/epfl-si/wp-plugin-enlighter
 
 - name: enlighter configuration
   wordpress_option: "{{ item }}"
@@ -499,6 +494,11 @@
     state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-intranet
 
+- name: epfl-intranet status
+  wordpress_plugin_epfl_intranet: 
+    protection_enabled: '{{ "yes" if wp_site_category == "Inside" else "no" }}'
+    restrict_to_groups: ''
+    
 - name: epfl-emploi plugin
   wordpress_plugin:
     name: epfl-emploi
@@ -509,22 +509,22 @@
   wordpress_plugin:
     name: epfl-restauration
     state: "{{ plugins_for_restauration_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-restauration
-
-- name: epfl-scienceqa plugin
-  wordpress_plugin:
-    name: epfl-scienceqa
-    state: "{{ plugins_for_scienceqa_category }}"
-    from: https://github.com/epfl-si/wp-plugin-epfl-scienceqa
+    from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
     state: "{{ plugins_for_library_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/EPFL-Library-Plugins
+    from: https://github.com/epfl-si/wp-plugin-epfl-library
 
 - name: epfl-courses-se plugin
   wordpress_plugin:
     name: epfl-courses-se
     state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
+
+- name: MainWP plugin
+  wordpress_plugin:
+    name: mainwp
+    state: "{{ plugins_for_admin_category }}"
+    from: wordpress.org/plugins

@@ -317,7 +317,7 @@ class WpOpsPlugins:
                 manifest_url, req.status_code))
         self.plugins_yaml = req.content
 
-    def _plugins_muplugins_and_their_state(self):
+    def _plugins_and_is_mu(self):
         for thing in yaml.load(self.plugins_yaml):
             try:
                 if 'wordpress_plugin' not in thing:
@@ -325,36 +325,35 @@ class WpOpsPlugins:
             except Exception as e:
                 import pprint
                 raise Exception(pprint.pformat(thing))
-            action = thing['wordpress_plugin']
+            options = thing['wordpress_plugin']
 
+            # Defining if is MU-Plugin or not
+            is_mu = False if 'is_mu' not in options else options['is_mu']
 
-            if 'state' in action and 'must-use' not in action['state']:
-                action['state'] = ['symlinked', 'active']
-
-            if 'state' not in action or 'symlinked' not in action['state']:
+            # For unwanted plugins, the ones who are present but have to be uninstalled, ... ugly ducklings !
+            # those ones have 'absent' for 'state' but this field is not used, it is only the missing 'from' which
+            # prevent plugin from being present in image.
+            if 'from' not in options:
                 continue
 
-            if 'from' not in action:
-                continue
-
-            name = action['name']
-            urls = action['from']
+            name = options['name']
+            urls = options['from']
             if isinstance(urls, string_types):
                 urls = [urls]
-            state = action['state']
 
-            yield (Plugin(name, urls), state)
+
+            yield (Plugin(name, urls), is_mu)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
-        for p, state in self._plugins_muplugins_and_their_state():
-            if 'must-use' not in state:
+        for p, is_mu in self._plugins_and_is_mu():
+            if not is_mu:
                 yield p
 
     def must_use_plugins(self):
         """Yield all the must-use plug-ins to be installed according to the "ops" metadata."""
-        for p, state in self._plugins_muplugins_and_their_state():
-            if 'must-use' in state:
+        for p, is_mu in self._plugins_and_is_mu():
+            if is_mu:
                 yield p
 
 
