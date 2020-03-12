@@ -1,5 +1,5 @@
 # Variables related to EPFL accred system and access control
-wp_administrator_group: WP_SuperAdmin
+wp_administrator_group: WP-SuperAdmin
 
 # This should come from WP-Veritas inventory. If Ansible is run with an "existing sites" inventory,
 # current theme value will be read in database to fill "...["wp_details"]["options"]["plugin:epfl_accred:unit"]" and nothing will change
