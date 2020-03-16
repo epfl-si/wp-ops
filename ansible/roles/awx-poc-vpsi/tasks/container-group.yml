@@ -28,7 +28,7 @@
               host="{{ k8s_apiserver_address }}",
               verify_ssl=True,
               ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
-              bearer_token=subprocess.check_output(["oc", "whoami", "-t"])
+              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
           )
 
 - name: "{{ awx_elastic_container_group_name }} container group"
@@ -46,4 +46,19 @@
 
       with AnsibleGetOrCreate(InstanceGroup,
                   name="{{ awx_elastic_container_group_name }}") as instance_group:
-          pass
+          instance_group.credential = cred
+          instance_group.pod_spec_override = """
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: {{ openshift_namespace }}
+      spec:
+        containers:
+          - image: ansible/ansible-runner
+            tty: true
+            stdin: true
+            imagePullPolicy: Always
+            args:
+              - sleep
+              - infinity
+      """
