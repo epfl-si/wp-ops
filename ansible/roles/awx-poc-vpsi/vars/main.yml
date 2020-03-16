@@ -1,7 +1,4 @@
 awx_organization_name: "WWP"
-awx_wpveritas_inventory_script_name: "Fetch wp-veritas sites"
-awx_wpveritas_inventory_script_path: "../../../inventory/wp-veritas/wp_veritas_inventory.py"
-
 awx_project_name: "WWP"
 awx_project_github_url: "https://github.com/epfl-si/wp-ops"
 

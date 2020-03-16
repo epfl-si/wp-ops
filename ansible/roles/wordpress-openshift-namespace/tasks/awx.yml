@@ -1,0 +1,224 @@
+- include_vars: awx-vars.yml
+
+- name: Ansible Tower Rabbit MQ service
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: awx-rmq-mgmt
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: awx
+        name: awx-rmq-mgmt
+    spec:
+      ports:
+        - name: rmqmgmt
+          port: 15672
+          protocol: TCP
+          targetPort: 15672
+      selector:
+        name: awx-web-deploy
+
+- name: Ansible Tower HTTP service
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: awx-web-svc
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: awx
+        name: awx-web-svc
+    spec:
+      externalTrafficPolicy: Cluster
+      ports:
+        - name: http
+          nodePort: 30234
+          port: 80
+          protocol: TCP
+          targetPort: 8052
+      selector:
+        name: awx-web-deploy
+      sessionAffinity: None
+      type: NodePort
+
+- name: Ansible Tower ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: awx-config
+      namespace: "{{ openshift_namespace }}"
+    data:
+      awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
+      nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
+
+- name: Ansible Tower StatefulSet
+  openshift:
+    state: latest
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: awx
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      selector:
+        matchLabels:
+          app: awx
+          name: awx-web-deploy
+          service: django
+      serviceName: awx
+      template:
+        metadata:
+          labels:
+            app: awx
+            name: awx-web-deploy
+            service: django
+        spec:
+          containers:
+          #####################################################
+          - name: awx-web
+            image: "ansible/awx_web:{{ awx_version }}"
+            ports:
+            - containerPort: 8052
+              protocol: TCP
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+            volumeMounts:
+            - name: awx-application-config
+              mountPath: /etc/tower
+              readOnly: true
+            - name: awx-application-credentials
+              mountPath: /etc/tower/conf.d/
+              readOnly: true
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          #####################################################
+          - name: awx-celery
+            command:
+            - /usr/bin/launch_awx_task.sh
+            image: "ansible/awx_task:{{ awx_version }}"
+            resources:
+              requests:
+                cpu: 250m
+                memory: 2Gi
+            volumeMounts:
+            - name: awx-application-config
+              mountPath: /etc/tower
+              readOnly: true
+            - name: awx-application-credentials
+              mountPath: /etc/tower/conf.d/
+              readOnly: true
+          #####################################################
+          - name: awx-rabbit
+            env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: RABBITMQ_NODENAME
+              value: rabbit@$(MY_POD_IP)
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  key: rabbitmq_erlang_cookie
+                  name: awx-secrets
+            - name: K8S_SERVICE_NAME
+              value: rabbitmq
+            image: "ansible/awx_rabbitmq:{{ awx_rabbitmq_version }}"
+            livenessProbe:
+              exec:
+                command:
+                - rabbitmqctl
+                - status
+              failureThreshold: 3
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            ports:
+            - containerPort: 15672
+              name: http
+              protocol: TCP
+            - containerPort: 5672
+              name: amqp
+              protocol: TCP
+            readinessProbe:
+              exec:
+                command:
+                - rabbitmqctl
+                - status
+              failureThreshold: 3
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            resources:
+              requests:
+                cpu: 250m
+                memory: 2Gi
+            volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /etc/rabbitmq
+          #####################################################
+          - name: awx-memcached
+            image: memcached:latest
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+          #####################################################
+
+
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          serviceAccount: awx
+          serviceAccountName: awx
+          terminationGracePeriodSeconds: 10
+          volumes:
+          - name: awx-application-config
+            configMap:
+              name: awx-config
+              defaultMode: 420
+              items:
+              - key: awx_settings
+                path: settings.py
+          - name: awx-application-credentials
+            secret:
+              defaultMode: 420
+              items:
+              - key: credentials_py
+                path: credentials.py
+              - key: environment_sh
+                path: environment.sh
+              - key: django_secret_key
+                path: django_secret_key
+              secretName: awx-secrets
+          - name: rabbitmq-config
+            configMap:
+              name: rabbitmq-config
+              defaultMode: 420
+              items:
+              - key: rabbitmq.conf
+                path: rabbitmq.conf
+              - key: enabled_plugins
+                path: enabled_plugins
+              - key: rabbitmq_definitions.json
+                path: rabbitmq_definitions.json
+          - name: nginx-config
+            configMap:
+              name: awx-config
+              items:
+                - key: nginx_conf
+                  path: nginx.conf
