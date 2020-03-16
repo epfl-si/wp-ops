@@ -77,7 +77,7 @@ class AnsibleGetOrCreate:
     def _begin(self):
         self._obj, self._created = self._obj_class.objects.get_or_create(
             **self._get_or_create_kwargs)
-        update_json_status()
+        update_json_status(changed=self._created)
         return AnsibleDjangoObserver(self._obj)
 
     def _commit_unless_check_mode(self):
