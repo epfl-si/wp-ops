@@ -5,7 +5,9 @@ awx_project_github_url: "https://github.com/epfl-si/wp-ops"
 awx_wpveritas_inventory_script_name: "Fetch wp-veritas sites"
 awx_wpveritas_inventory_script_path: "../../../inventory/wp-veritas/wp_veritas_inventory.py"
 awx_wpveritas_inventory_source_name: "wp-veritas fetching"
-awx_wpveritas_selfk8s_credential_name: "oc wwp-test K8S bearer token"
+
+awx_selfk8s_credential_name: "oc wwp-test K8S bearer token"
+awx_elastic_container_group_name: "tower-elastic"
 
 k8s_apiserver_address: "https://pub-os-exopge.epfl.ch:443"
 k8s_service_ca_crt_file: "/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"

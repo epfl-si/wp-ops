@@ -6,7 +6,7 @@
 # This requires a so-called AWX credential, so that AWX may talk to
 # the Kubernetes API server and start and stop pods.
 
-- name: "{{ awx_wpveritas_selfk8s_credential_name }} credential"
+- name: "{{ awx_selfk8s_credential_name }} credential"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -14,14 +14,12 @@
 
       from awx.main.models.organization import Organization
       from awx.main.models.credential import Credential, CredentialType
-      from awx.main.fields import CredentialTypeInputField
-      from awx.main.utils import encrypt_value
 
       import subprocess
 
       with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
         with AnsibleGetOrCreate(Credential,
-                  name="{{ awx_wpveritas_selfk8s_credential_name }}",
+                  name="{{ awx_selfk8s_credential_name }}",
                   credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
         ) as cred:
           cred.organization = org
@@ -32,3 +30,20 @@
               ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
               bearer_token=subprocess.check_output(["oc", "whoami", "-t"])
           )
+
+- name: "{{ awx_elastic_container_group_name }} container group"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.credential import Credential
+      from awx.main.models.ha import InstanceGroup
+
+      org = Organization.objects.get(name="{{ awx_organization_name }}")
+      cred = Credential.objects.get(name="{{ awx_selfk8s_credential_name }}")
+
+      with AnsibleGetOrCreate(InstanceGroup,
+                  name="{{ awx_elastic_container_group_name }}") as instance_group:
+          pass
