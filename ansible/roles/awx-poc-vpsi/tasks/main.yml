@@ -12,6 +12,6 @@
             prj.scm_type = "git"
             prj.scm_url = "{{ awx_project_github_url }}"
 
-- import_tasks: inventories.yml
-
 - import_tasks: container-group.yml
+
+- import_tasks: inventories.yml
