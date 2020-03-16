@@ -11,6 +11,7 @@
             prj.organization = org
             prj.scm_type = "git"
             prj.scm_url = "{{ awx_project_github_url }}"
+            prj.scm_branch = "{{ git_current_branch }}"
 
 - import_tasks: container-group.yml
 
