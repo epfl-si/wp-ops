@@ -1,6 +1,8 @@
 import sys
+import six
 from django.db import transaction
-
+from awx.main.utils import decrypt_field
+from cryptography.fernet import InvalidToken
 
 class AnsibleDjangoObserver:
     def __init__(self, obj):
@@ -19,10 +21,33 @@ class AnsibleDjangoObserver:
         if isinstance(value, self.__class__):
             value = value.__obj
 
-        oldvalue = getattr(self.__obj, name, None)
-        if not (oldvalue == value or oldvalue is value):
+        if not self.__is_unchanged(name, value):
             setattr(self.__obj, name, value)
             update_json_status(changed=True)
+
+    def __is_unchanged (self, field, newvalue):
+        if field == 'inputs':
+            if type(newvalue) is not dict:
+                return False
+            for k in newvalue.keys():
+                # Some fields of 'inputs' are encrypted; retrieve the
+                # original values using the .get_input() accessor
+                try:
+                    oldv = self.__obj.get_input(k)
+                    newv = newvalue[k]
+                    if oldv == newv:
+                        return True
+                    elif isinstance(oldv, six.string_types) and isinstance(newv, six.string_types) and (
+                            str(oldv) == str(newvv)):
+                        return True
+                    else:
+                        return False
+                except InvalidToken:   # Field is not decipherable
+                    return False
+            return True  # New inputs are a subset of existing inputs
+        else:
+            oldvalue = getattr(self.__obj, field, None)
+            return (oldvalue == newvalue or oldvalue is newvalue)
 
 
 class AnsibleGetOrCreate:
