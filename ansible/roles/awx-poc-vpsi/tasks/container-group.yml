@@ -1,0 +1,34 @@
+# Set up a container group for systolic Ansible execution.
+#
+# As AWX runs tasks in the `tower-elastic` container group, additional containers will be started
+# to handle the load; they will be stopped after the Ansible operation completes.
+#
+# This requires a so-called AWX credential, so that AWX may talk to
+# the Kubernetes API server and start and stop pods.
+
+- name: "{{ awx_wpveritas_selfk8s_credential_name }} credential"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.credential import Credential, CredentialType
+      from awx.main.fields import CredentialTypeInputField
+      from awx.main.utils import encrypt_value
+
+      import subprocess
+
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+        with AnsibleGetOrCreate(Credential,
+                  name="{{ awx_wpveritas_selfk8s_credential_name }}",
+                  credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
+        ) as cred:
+          cred.organization = org
+          cred.description = "The K8S credentials of the service account awx itself is running under"
+          cred.inputs = dict(
+              host="{{ k8s_apiserver_address }}",
+              verify_ssl=True,
+              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
+              bearer_token=subprocess.check_output(["oc", "whoami", "-t"])
+          )
