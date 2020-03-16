@@ -1,2 +1,2 @@
-awx_version: 2.9.3
+awx_version: 9.2.0
 awx_rabbitmq_version: 3.7.21
