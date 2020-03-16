@@ -2,7 +2,7 @@ import os
 import socket
 ADMINS = ()
 
-AWX_PROOT_ENABLED = True
+AWX_PROOT_ENABLED = False
 
 # Automatically deprovision pods that go offline
 AWX_AUTO_DEPROVISION_INSTANCES = True
