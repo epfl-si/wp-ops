@@ -54,11 +54,19 @@
         namespace: {{ openshift_namespace }}
       spec:
         containers:
-          - image: ansible/ansible-runner
+          # TODO: use variables in next line.
+          - image: docker-registry.default.svc:5000/wwp-test/wp-ansible-runner:latest
             tty: true
             stdin: true
             imagePullPolicy: Always
             args:
               - sleep
               - infinity
+            volumeMounts:
+              - name: srv
+                mountPath: /srv
+        volumes:
+          - name: srv
+            persistentVolumeClaim:
+              claimName: wordpress-0
       """
