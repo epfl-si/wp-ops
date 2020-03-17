@@ -20,11 +20,7 @@ from urllib.parse import urlparse
 import requests
 from six.moves.urllib.parse import urlparse, quote
 
-props_to_merge = {
-    'ansible_host': 'ssh-wwp.epfl.ch',
-    'ansible_port': '32222',
-    'ansible_python_interpreter': '/usr/bin/python3',
-    'ansible_user': 'www-data',
+constant_props = {
     'wp_ensure_symlink_version': '5.2',
     'openshift_namespace': 'wwp-prod'
 }
@@ -78,7 +74,7 @@ class WpVeritasSite:
         :param site: Dict with WP information
         """
         path = self.parsed_url.path
-        
+
         hostname = self.parsed_url.netloc
         hostname = re.sub(r'\.epfl\.ch$', '', hostname)
         hostname = re.sub(r'\W', '_', hostname)
@@ -119,7 +115,7 @@ class Inventory:
         }
 
         # Adding more information to site
-        meta_site = {**meta_site, **props_to_merge}
+        meta_site = {**meta_site, **constant_props, **self._connection_props()}
 
         self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
         self._add_site_to_group(site, site.openshift_env)
@@ -135,6 +131,56 @@ class Inventory:
         self.groups.add(group)
         self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
+
+    def _connection_props(self):
+        if Environnement.has_wordpress():
+            return { 'ansible_connection': 'local' }
+        else:
+            return {
+                'ansible_host': 'ssh-wwp.epfl.ch',
+                'ansible_port': '32222',
+                'ansible_python_interpreter': '/usr/bin/python3',
+                'ansible_user': 'www-data'
+            }
+
+
+def cached(fn):
+    cache_key = '__cached_' + fn.__name__
+    def uncached(self_or_cls):
+        if not hasattr(self_or_cls, cache_key):
+            setattr(self_or_cls, cache_key, fn(self_or_cls))
+        return getattr(self_or_cls, cache_key)
+    return uncached
+
+
+def to_string(string_or_bytes):
+    if hasattr(string_or_bytes, 'decode'):
+        return string_or_bytes.decode()
+    else:
+        return string_or_bytes
+
+
+class Environment:
+    @classmethod
+    @cached
+    def has_wordpress(cls):
+        return cls._is_srv_wordpress_nfs() and cls._has_wp()
+    @classmethod
+    def _is_srv_wordpress_nfs(cls):
+        df_srv_lines = subprocess.check_output('df /srv 2>/dev/null || true',
+                                               shell=True).split(b'\n')
+        if len(df_srv_lines) < 3:
+            return False
+        else:
+            df_srv = to_string(df_srv_lines[-2])
+            mountpoint = df_srv.split()[-1]
+            device = df_srv.split()[-0]
+            return  mountpoint == '/srv' and ':' in device and 'wordpress' in device
+
+    @classmethod
+    def _has_wp(cls):
+        path = subprocess.check_output('which wp 2>/dev/null || true', shell=True)
+        return '/' in to_string(path)
 
 
 if __name__ == '__main__':
