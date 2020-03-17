@@ -124,7 +124,7 @@
     name: "{{ monitoring_prober_image_name }}"
     namespace: "{{ openshift_namespace }}"
     git:
-      repository: https://github.com/epfl-idevelop/wp-ops
+      repository: https://github.com/epfl-si/wp-ops
       ref: "{{ git_current_branch }}"
       path: docker/monitoring-menus-probe
     metadata:
