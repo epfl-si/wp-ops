@@ -35,7 +35,6 @@
       externalTrafficPolicy: Cluster
       ports:
         - name: http
-          nodePort: 30234
           port: 80
           protocol: TCP
           targetPort: 8052
