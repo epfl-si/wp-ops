@@ -55,6 +55,28 @@
       awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
 
+- name: Ansible Tower secret (awx-secrets)
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: awx-secrets
+      namespace: "{{ openshift_namespace }}"
+      type: Opaque
+    data:
+      admin_password: "{{ awx_admin_passwords[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      credentials_py: "{{ lookup('template', 'awx/credentials.py') | b64encode }}"
+
+- name: awx service account
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: awx
+      namespace: "{{ openshift_namespace }}"
+
 - name: Ansible Tower StatefulSet
   openshift:
     state: latest
@@ -221,6 +243,24 @@
               items:
                 - key: nginx_conf
                   path: nginx.conf
+
+- name: Ansible Tower route for the Web front-end
+  openshift:
+    state: latest
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: awx-web-svc
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      host: "{{ awx_web_hostnames[openshift_namespace] }}"
+      port:
+        targetPort: http
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: awx-web-svc
 
 - when: "openshift_namespace == awx_mgmt_build_namespace"
   include_tasks:
