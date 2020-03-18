@@ -66,7 +66,12 @@
       type: Opaque
     data:
       admin_password: "{{ awx_admin_passwords[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      credentials_py: "{{ lookup('template', 'awx/credentials.py') | b64encode }}"
+      credentials_py: "{{ lookup('template', 'awx/credentials_py.py') | b64encode }}"
+      environment_sh: "{{ lookup('template', 'awx/environment_sh.py') | b64encode }}"
+      django_secret_key: "{{ django_secret_keys[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      rabbitmq_erlang_cookie: "{{ awx_erlang_cookies[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      rabbitmq_password: "{{ awx_rabbitmq_passwords[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
 
 - name: awx service account
   openshift:
