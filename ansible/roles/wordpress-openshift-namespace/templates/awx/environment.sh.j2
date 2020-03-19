@@ -6,4 +6,4 @@ DATABASE_PASSWORD={{ awx_postgresql_database['password'] | eyaml(eyaml_keys) }}
 MEMCACHED_HOST=localhost
 RABBITMQ_HOST=localhost
 AWX_ADMIN_USER=awx-poc-admin
-AWX_ADMIN_PASSWORD={{ awx_admin_passwords[openshift_namespace] | eyaml(eyaml_keys) }}
+AWX_ADMIN_PASSWORD={{ awx_admin_password | eyaml(eyaml_keys) }}

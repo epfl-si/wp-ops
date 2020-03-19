@@ -1,4 +1,5 @@
 - include_vars: awx-vars.yml
+- include_vars: "awx-secrets-{{ openshift_namespace }}.yml"
 
 - name: Ansible Tower Rabbit MQ service
   openshift:
@@ -65,13 +66,13 @@
       namespace: "{{ openshift_namespace }}"
       type: Opaque
     data:
-      admin_password: "{{ awx_admin_passwords[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      admin_password: "{{ awx_admin_password | eyaml(eyaml_keys) | trim_lines | b64encode }}"
       credentials_py: "{{ lookup('template', 'awx/credentials.py.j2') | b64encode }}"
       environment_sh: "{{ lookup('template', 'awx/environment.sh.j2') | b64encode }}"
-      django_secret_key: "{{ django_secret_keys[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | trim_lines | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      rabbitmq_erlang_cookie: "{{ awx_erlang_cookies[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      rabbitmq_password: "{{ awx_rabbitmq_passwords[openshift_namespace] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | trim_lines | b64encode }}"
 
 - name: awx service account
   openshift:
