@@ -82,13 +82,13 @@
       namespace: "{{ openshift_namespace }}"
     type: Opaque
     data:
-      admin_password: "{{ awx_admin_password | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
       credentials_py: "{{ lookup('template', 'awx/credentials.py.j2') | b64encode }}"
       environment_sh: "{{ lookup('template', 'awx/environment.sh.j2') | b64encode }}"
-      django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | trim_lines | b64encode }}"
-      rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | trim_lines | b64encode }}"
+      django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
+      pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
+      rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | b64encode }}"
+      rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | b64encode }}"
 
 - name: awx service account
   openshift:
@@ -146,8 +146,9 @@
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
-            environment:
-              WPVERITAS_INVENTORIES: "{{ awx_wpveritas_inventory }}"
+            env:
+              - name: WPVERITAS_INVENTORIES
+                value: "{{ awx_wpveritas_inventory }}"
           #####################################################
           - name: awx-celery
             command:
