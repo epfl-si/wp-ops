@@ -64,7 +64,7 @@
     metadata:
       name: awx-secrets
       namespace: "{{ openshift_namespace }}"
-      type: Opaque
+    type: Opaque
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys) | trim_lines | b64encode }}"
       credentials_py: "{{ lookup('template', 'awx/credentials.py.j2') | b64encode }}"
