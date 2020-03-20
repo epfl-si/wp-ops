@@ -146,6 +146,8 @@
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
+            environment:
+              WPVERITAS_INVENTORIES: "{{ awx_wpveritas_inventory }}"
           #####################################################
           - name: awx-celery
             command:

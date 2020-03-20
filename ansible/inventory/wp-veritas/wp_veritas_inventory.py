@@ -27,11 +27,12 @@ constant_props = {
 
 class WpVeritasSite:
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
+    VERIFY_SSL = True
 
     @classmethod
     def all(cls):
         logging.debug('Fetching sites from  ' + cls.WP_VERITAS_SITES_API_URL)
-        r = requests.get(cls.WP_VERITAS_SITES_API_URL)
+        r = requests.get(cls.WP_VERITAS_SITES_API_URL, verify=cls.VERIFY_SSL)
 
         if not r.ok:
             r.raise_for_status()
@@ -89,6 +90,15 @@ class WpVeritasSite:
             return "{}__{}".format(hostname, path)
 
 
+class WpVeritasTestSite(WpVeritasSite):
+    WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
+    VERIFY_SSL = False
+
+    @property
+    def instance_name(self):
+        return 'test_' + super().instance_name
+
+
 class Inventory:
     """Model the entire wp-veritas inventory."""
 
@@ -133,7 +143,7 @@ class Inventory:
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
     def _connection_props(self):
-        if Environnement.has_wordpress():
+        if Environment.has_wordpress():
             return { 'ansible_connection': 'local' }
         else:
             return {
@@ -185,4 +195,14 @@ class Environment:
 
 if __name__ == '__main__':
     #logging.basicConfig(level=logging.DEBUG)  # may be needed
-    sys.stdout.write(Inventory(WpVeritasSite.all()).to_json())
+    inventories = os.environ.get('WPVERITAS_INVENTORIES', 'test').split(',')
+
+    sites = []
+
+    if 'test' in inventories:
+        sites.extend(WpVeritasTestSite.all())
+
+    if 'prod' in inventories:
+        sites.extend(WpVeritasSite.all())
+
+    sys.stdout.write(Inventory(sites).to_json())

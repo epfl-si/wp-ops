@@ -18,3 +18,8 @@ awx_runner_wp_mixin_image_fullname: "docker-registry.default.svc:5000/{{ awx_mgm
 # The namespace we build in (and consume build images from).
 # awx-runner.yml is inoperative, except in this namespace.
 awx_mgmt_build_namespace: wwp-test
+
+awx_wpveritas_inventory: "{{ awx_wpveritas_inventories[openshift_namespace] }}"
+awx_wpveritas_inventories:
+  wwp: prod
+  wwp-test: test
