@@ -56,6 +56,22 @@
       awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
 
+- name: RabbitMQ ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: rabbitmq-config
+      namespace: "{{ openshift_namespace }}"
+    data:
+      enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
+      rabbitmq.conf: "{{ lookup('template', 'awx/rabbitmq/conf.j2') }}"
+      rabbitmq_definitions.json: |
+        {# the empty line under this comment is a necessity (otherwise Ansible will parse the JSON as JSON) #}
+
+        {{ lookup('template', 'awx/rabbitmq/rabbitmq_definitions.json.j2') }}
+
 - name: Ansible Tower secret (awx-secrets)
   openshift:
     state: latest
