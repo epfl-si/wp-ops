@@ -1,0 +1,2 @@
+dependencies:
+  - name: epfl_si.ansible_module_openshift
