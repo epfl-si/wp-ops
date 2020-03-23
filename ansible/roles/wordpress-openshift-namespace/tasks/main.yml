@@ -51,3 +51,4 @@
   tags:
     - awx
     - awx.dump
+    - awx.restore
