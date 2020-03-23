@@ -44,5 +44,10 @@
   tags: monitoring
 
 - name: "Ansible Tower"
-  include: awx.yml
-  tags: awx
+  include_tasks:
+    file: awx.yml
+    apply:
+      tags: ["awx"]
+  tags:
+    - awx
+    - awx.dump
