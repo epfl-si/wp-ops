@@ -12,7 +12,7 @@ def get_or_create_job_template(
     job_tags,
     job_type,
     job_schedule_name,
-    job_rrule
+    job_schedule_rrule
 ):
 
       inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
@@ -49,10 +49,8 @@ def get_or_create_job_template(
           schedule = Schedule.objects.create(
               unified_job_template=jt,
               name=job_schedule_name,
-              rrule=job_rrule
+              rrule=job_schedule_rrule
               )
           changed=True
 
       return changed
-
-

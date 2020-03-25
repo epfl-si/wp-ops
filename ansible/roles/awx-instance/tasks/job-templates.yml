@@ -1,19 +1,52 @@
 # Set up job templates available to AWX.
 
-- name: "Set up templates job"
-  tags: awx.job_template
+- name: "Preconfigure templates job"
+  tags: awx.job-template
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      # Remove the Demo job template if found
+      from awx.main.models.jobs import JobTemplate
+      try:
+          jt = JobTemplate.objects.get(name="Demo Job Template")
+          if not jt.project and not jt.inventory:
+            jt.delete()
+          update_json_status(changed=True)
+      except JobTemplate.DoesNotExist:
+          update_json_status(changed=False)
+
+- name: "Set up templates job for theme selection"
+  tags: awx.job-template
   awx_script:
     supports_check_mode: yes
     script: |
       {{ lookup("template", "job-templates-create.py") }}
 
       kwarg = dict(
-          job_name = "Set up Themes",
-          job_description = "Apply the chosen theme to a WP site",
+          job_name = "Set up theme to sites",
+          job_description = "Apply the theme defined in the inventory to sites",
           job_tags = "themes",
           job_type = "run",
           job_schedule_name = "Set up the theme on WP sites every thursday",
-          job_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+      )
+
+      update_json_status(changed=get_or_create_job_template(**kwarg))
+
+- name: "Set up templates job for aligning sites"
+  tags: awx.job-template
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "job-templates-create.py") }}
+
+      kwarg = dict(
+          job_name = "Align sites",
+          job_description = "Revert any changes manualy applied to sites that were not included as a standard",
+          job_tags = "config,plugins,symlink",
+          job_type = "run",
+          job_schedule_name = "Align sites during Wagon's day",
+          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
       )
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
