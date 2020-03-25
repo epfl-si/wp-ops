@@ -6,7 +6,8 @@
 # This requires a so-called AWX credential, so that AWX may talk to
 # the Kubernetes API server and start and stop pods.
 
-- name: "{{ awx_selfk8s_credential_name }} credential"
+- name: "Set up K8S bearer token credential"
+  tags: awx.credential
   awx_script:
     supports_check_mode: yes
     script: |
@@ -31,7 +32,8 @@
               bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
           )
 
-- name: "{{ awx_elastic_container_group_name }} container group"
+- name: "Set up {{ awx_elastic_container_group_name }} container group"
+  tags: awx.container-group
   awx_script:
     supports_check_mode: yes
     script: |

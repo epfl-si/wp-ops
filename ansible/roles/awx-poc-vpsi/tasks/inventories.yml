@@ -1,6 +1,7 @@
 # Set up inventories available to AWX.
 
 - name: "Set up `{{ awx_wpveritas_inventory_script_name }}` custom inventory script"
+  tags: awx.inventory
   awx_script:
     script: |
       {{ lookup("template", "awx_script_lib.py") }}
@@ -22,7 +23,8 @@
     vars:
       script_text: '{{ lookup("file", awx_wpveritas_inventory_script_path) }}'
 
-- name: "{{ awx_wpveritas_inventory_name }} inventory"
+- name: "Set up {{ awx_wpveritas_inventory_name }} inventory"
+  tags: awx.inventory
   awx_script:
     supports_check_mode: yes
     script: |
