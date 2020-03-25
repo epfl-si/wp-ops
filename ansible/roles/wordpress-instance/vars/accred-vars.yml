@@ -2,7 +2,5 @@
 wp_administrator_group: WP-SuperAdmin
 
 # This should come from WP-Veritas inventory. If Ansible is run with an "existing sites" inventory,
-# current theme value will be read in database to fill "...["wp_details"]["options"]["plugin:epfl_accred:unit"]" and nothing will change
-# Using WP-Veritas inventory, value will be correct
-wp_unit_name: '{{ hostvars[inventory_hostname]["wp_details"]["options"]["plugin:epfl_accred:unit"] }}'
-wp_unit_id: '{{ hostvars[inventory_hostname]["wp_details"]["options"]["plugin:epfl_accred:unit_id"] }}'
+wp_unit_name: '{{ lookup("wpveritas", "unitName") }}'
+wp_unit_id: '{{ lookup("wpveritas", "unitId") }}'
