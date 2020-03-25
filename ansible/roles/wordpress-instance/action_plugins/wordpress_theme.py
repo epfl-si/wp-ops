@@ -5,7 +5,7 @@ deepcopy = __import__('copy').deepcopy
 import sys
 import os.path
 
-# To be able to include package wp_inventory in parent directory
+# To be able to import wordpress_action_module
 sys.path.append(os.path.dirname(__file__))
 
 from wordpress_action_module import WordPressPluginOrThemeActionModule
