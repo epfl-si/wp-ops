@@ -77,3 +77,6 @@
 
 - import_tasks: inventories.yml
   tags: awx
+
+- import_tasks: job-templates.yml
+  tags: awx
