@@ -5,56 +5,15 @@
   awx_script:
     supports_check_mode: yes
     script: |
-      {{ lookup("template", "awx_script_lib.py") }}
+      {{ lookup("template", "job-templates-create.py") }}
 
-      from awx.main.models.inventory import Inventory
-      from awx.main.models.projects import Project
-      from awx.main.models.ha import InstanceGroup
+      kwarg = dict(
+          job_name = "Set up Themes",
+          job_description = "Apply the chosen theme to a WP site",
+          job_tags = "themes",
+          job_type = "run",
+          job_schedule_name = "Set up the theme on WP sites every thursday",
+          job_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+      )
 
-      from awx.main.models.jobs import JobTemplate
-      from awx.main.models.schedules import Schedule
-
-      inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
-      project = Project.objects.get(name="{{ awx_project_name }}")
-      container_group = InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")
-
-      changed = False
-      try:
-          jt = JobTemplate.objects.get(name="This is a template jobs created from script")
-      except JobTemplate.DoesNotExist:
-          pass
-
-      try:
-          jt = JobTemplate.objects.get(name="This is a template jobs created from script")
-      except JobTemplate.DoesNotExist:
-          jt = JobTemplate.objects.create(
-                  name="This is a template jobs created from script",
-                  description = "somehow a better description than nothing",
-                  job_tags = "themes",
-                  job_type = "run",
-                  project = project,
-                  playbook = '{{ awx_template_jobs_playbook }}',
-                  inventory = inventory,
-                  job_slice_count = {{ awx_template_jobs_slice_count }},
-                  verbosity = {{ awx_template_jobs_verbosity }}
-              )
-          changed=True
-
-      # Set instance group
-      if not jt.instance_groups.filter(name=container_group.name):
-          jt.instance_groups.add(container_group)
-          changed=True
-
-      # Set schedule for the job
-      schedule_name = "Every two weeks the thursday, from 2022, do the scripted job"
-      try:
-          schedule = Schedule.objects.get(unified_job_template=jt, name=schedule_name)
-      except Schedule.DoesNotExist:
-          schedule = Schedule.objects.create(
-              unified_job_template=jt,
-              name=schedule_name,
-              rrule="DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH"
-              )
-          changed=True
-
-      update_json_status(changed=changed)
+      update_json_status(changed=get_or_create_job_template(**kwarg))
