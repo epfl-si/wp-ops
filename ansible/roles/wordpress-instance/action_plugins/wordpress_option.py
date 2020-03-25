@@ -49,8 +49,9 @@ class ActionModule(WordPressActionModule):
             if option_value != '':
                 json_format = '--format=json'
 
+        changed_status_orig = self.result['changed']
         cmd = "option update {} {} '{}' --skip-themes --skip-plugins".format(json_format, self._task.args.get('name'), option_value)
+        result = self._run_wp_cli_action(cmd)
 
-        return self._run_wp_cli_action(cmd)
-
-    
+        if 'option is unchanged.' in result.stdout:
+            self.result['changed'] = changed_status_orig
