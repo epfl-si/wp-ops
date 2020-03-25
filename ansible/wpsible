@@ -85,6 +85,11 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+# https://github.com/ansible/ansible/issues/32499, https://bugs.python.org/issue35219
+case "$(uname -s)" in
+    Darwin) export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ;;
+esac
+
 set -e
 
 case "$mode" in
