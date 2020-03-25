@@ -19,20 +19,191 @@ class WordPressActionModule(ActionBase):
 
         self._tmp = tmp
         self._task_vars = task_vars
-        # Has to be set in child classes with one of the following value:
-        # plugin
-        # mu-plugin
-        # theme
-        self._type = None
-
-        # Has to be set with element name in child class
-        self._name = None
-
-        # Tells if the element has to be here without any negociation (like mu-plugins) or not
-        self._mandatory = None
-
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
+
+
+    def _do_symlink_file (self, basename):
+        """
+        Creates a symlink for a given plugin file/folder
+
+        :param basename: given plugin file/folder for which we have to create a symlink
+        """
+        return self._run_action('file', {
+            'state': 'link',
+            # Beware src / path inversion, as is customary with everything symlink:
+            'src': self._get_symlink_target(basename),
+            'path': self._get_symlink_path(basename),
+            })
+
+
+    def _do_rimraf_file (self, basename):
+        """
+        Remove a file/folder belonging to a plugin
+
+        :param basename: given plugin file/folder
+        """
+        self._run_action('file',
+                         {'state': 'absent',
+                          'path': self._get_symlink_path(basename)})
+        return self.result
+
+
+    def _get_symlink_path (self, basename):
+        """
+        Returns symlink source path
+
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return self._make_element_path(self._get_wp_dir(), basename)
+
+
+    def _get_symlink_target (self, basename):
+        """
+        Returns a path to symlink target (mu-)plugin or theme file/folder
+
+        :param basename: given plugin file/folder for which we want the symlink target path
+        """
+        return self._make_element_path('../../wp', basename)
+
+
+    def _make_element_path (self, prefix, basename):
+        """
+        Generates an absolute (mu-)plugin or theme path.
+
+        :param prefix: string to add at the beginning of the path to have an absolute one
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
+
+
+    def _run_wp_cli_action (self, args, update_result=True):
+        """
+        Executes a given WP-CLI command
+
+        :param args: WP-CLI command to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+        return self._run_shell_action(
+            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result)
+
+
+    def _run_php_code(self, code, update_result=True):
+        """
+        Execute PHP code and returns result
+
+        :param code: Code to execute
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
+
+        return result['stdout_lines']
+
+
+    def _run_shell_action (self, cmd, update_result=True):
+        """
+        Executes a Shell command
+
+        :param cmd: Command to execute.
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result)
+
+
+    def _run_action (self, action_name, args, update_result=True):
+        """
+        Executes an action, using an Ansible module.
+
+        :param action_name: Ansible module name to use
+        :param args: dict with arguments to give to module
+        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
+        result = self._execute_module(module_name=action_name,
+                                      module_args=args, tmp=self._tmp,
+                                      task_vars=self._task_vars)
+
+        # If command was to update an option using WP CLI
+        if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
+            # We update 'changed' key depending on what was done by WPCLI
+            # NOTE: For an unknown reason, for some options, even if we set 'changed' to False
+            # when nothing is changed, somewhere, the value is changed to True... !?!
+            result['changed'] = not result['stdout'].endswith('option is unchanged.')
+
+        if update_result:
+            self._update_result(result)
+            return self.result
+
+        else:
+            return result
+
+
+    def _get_wp_dir (self):
+        """
+        Returns directory in which WordPress is installed
+        """
+        return self._get_ansible_var('wp_dir')
+
+
+    def _get_ansible_var (self, name):
+        """
+        Returns Ansible var value
+
+        :param name: Var name
+        """
+        unexpanded = self._task_vars.get(name, None)
+        if unexpanded is None:
+            return None
+        else:
+            return self._templar.template(unexpanded)
+
+
+    def _is_filename (self, from_piece):
+        """
+        Tells if a path is a filename/folder name or not.
+
+        :param from_piece: string describing plugin source.
+        """
+        return (from_piece != "wordpress.org/plugins"
+                # check if match a github repo
+                and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
+                and not from_piece.endswith(".zip"))
+
+
+    def _update_result (self, result):
+        """
+        Updates result dict
+
+        :param result: dict to update with
+        """
+        oldresult = deepcopy(self.result)
+        self.result.update(result)
+
+        def _keep_flag(flag_name):
+            if (flag_name in oldresult and
+                oldresult[flag_name] and
+                flag_name in self.result and
+                not result[flag_name]
+            ):
+                self.result[flag_name] = oldresult[flag_name]
+
+        _keep_flag('changed')
+
+        return self.result
+
+
+class WordPressPluginOrThemeActionModule(WordPressActionModule):
+    """Common superclass for the wordpress_plugin and wordpress_theme action modules."""
+    # Has to be set in child classes with one of the following value:
+    # plugin
+    # mu-plugin
+    # theme
+    _type = None
+    # Has to be set with element name in child class
+    _name = None
+    # Tells if the element has to be here without any negociation (like mu-plugins) or not
+    _mandatory = None
 
 
     def _get_type(self):
@@ -40,10 +211,9 @@ class WordPressActionModule(ActionBase):
         Return element type or raise an exception if not initialized
         """
         if self._type is None:
-            raise ValueError("Please initiliaze 'self._type' in children class {}".format(type(self).__name__))
-            
-        return self._type
+            raise ValueError("Please initiliaze 'self._type' in subclass {}".format(type(self).__name__))
 
+        return self._type
 
     def _get_name(self):
         """
@@ -51,9 +221,9 @@ class WordPressActionModule(ActionBase):
         """
         if self._name is None:
             raise ValueError("Please initiliaze 'self._name' in children class {}".format(type(self).__name__))
-            
+
         return self._name
-    
+
 
     def _is_mandatory(self):
         """
@@ -61,7 +231,7 @@ class WordPressActionModule(ActionBase):
         """
         if self._mandatory is None:
             raise ValueError("Please initiliaze 'self._mandatory' in children class {}".format(type(self).__name__))
-            
+
         return self._mandatory
 
 
@@ -98,7 +268,7 @@ class WordPressActionModule(ActionBase):
                 activation_state = "inactive"
 
         return (installation_state, activation_state)
-    
+
 
     def _ensure_file_state (self, desired_state, basename):
         """
@@ -138,7 +308,7 @@ class WordPressActionModule(ActionBase):
             froms = [froms]
         if not froms:
             froms = []
-        
+
         basenames = [os.path.basename(f) for f in froms
                 if self._is_filename(f)]
         if not basenames:
@@ -215,156 +385,6 @@ class WordPressActionModule(ActionBase):
             raise ValueError('{} {} cannot be simultaneously {}'.format(self._get_type(), self._get_name(), str(list(installation_state))))
 
 
-    def _do_symlink_file (self, basename):
-        """
-        Creates a symlink for a given plugin file/folder
-
-        :param basename: given plugin file/folder for which we have to create a symlink
-        """
-        return self._run_action('file', {
-            'state': 'link',
-            # Beware src / path inversion, as is customary with everything symlink:
-            'src': self._get_symlink_target(basename),
-            'path': self._get_symlink_path(basename),
-            })
-
-    
-    def _do_rimraf_file (self, basename):
-        """
-        Remove a file/folder belonging to a plugin
-
-        :param basename: given plugin file/folder
-        """
-        self._run_action('file',
-                         {'state': 'absent',
-                          'path': self._get_symlink_path(basename)})
-        return self.result
-
-    
-    def _get_symlink_path (self, basename):
-        """
-        Returns symlink source path
-
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return self._make_element_path(self._get_wp_dir(), basename)
-
-
-    def _get_symlink_target (self, basename):
-        """
-        Returns a path to symlink target (mu-)plugin or theme file/folder
-
-        :param basename: given plugin file/folder for which we want the symlink target path
-        """
-        return self._make_element_path('../../wp', basename)
-
-
-    def _make_element_path (self, prefix, basename):
-        """
-        Generates an absolute (mu-)plugin or theme path.
-
-        :param prefix: string to add at the beginning of the path to have an absolute one
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
-
-    def _run_wp_cli_action (self, args, update_result=True):
-        """
-        Executes a given WP-CLI command
-
-        :param args: WP-CLI command to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        return self._run_shell_action(
-            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result)
-
-
-    def _run_php_code(self, code, update_result=True):
-        """
-        Execute PHP code and returns result
-
-        :param code: Code to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
-
-        return result['stdout_lines']
-
-
-    def _run_shell_action (self, cmd, update_result=True):
-        """
-        Executes a Shell command
-
-        :param cmd: Command to execute.
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result)
-
-
-    def _run_action (self, action_name, args, update_result=True):
-        """
-        Executes an action, using an Ansible module.
-
-        :param action_name: Ansible module name to use
-        :param args: dict with arguments to give to module
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
-        result = self._execute_module(module_name=action_name,
-                                      module_args=args, tmp=self._tmp,
-                                      task_vars=self._task_vars)
-        
-        
-
-        # If command was to update an option using WP CLI
-        if '_raw_params' in args and re.match(r'^wp\s--path=(.+)\soption\supdate', args['_raw_params']):
-            # We update 'changed' key depending on what was done by WPCLI
-            # NOTE: For an unknown reason, for some options, even if we set 'changed' to False 
-            # when nothing is changed, somewhere, the value is changed to True... !?!
-            result['changed'] = not result['stdout'].endswith('option is unchanged.')
-        
-        if update_result:
-            self._update_result(result)
-            return self.result
-
-        else:
-            return result
-        
-
-
-    def _get_wp_dir (self):
-        """
-        Returns directory in which WordPress is installed
-        """
-        return self._get_ansible_var('wp_dir')
-
-
-    def _get_ansible_var (self, name):
-        """
-        Returns Ansible var value
-
-        :param name: Var name
-        """
-        unexpanded = self._task_vars.get(name, None)
-        if unexpanded is None:
-            return None
-        else:
-            return self._templar.template(unexpanded)
-
-
-    def _is_filename (self, from_piece):
-        """
-        Tells if a path is a filename/folder name or not.
-
-        :param from_piece: string describing plugin source.
-        """
-        return (from_piece != "wordpress.org/plugins"
-                # check if match a github repo
-                and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
-                and not from_piece.endswith(".zip"))
-
-
     def _get_activation_state (self):
         """
         Returns plugin activation state
@@ -381,24 +401,3 @@ class WordPressActionModule(ActionBase):
             if len(fields) < 2: continue
             if fields[0] == self._get_name(): return fields[1]
         return 'inactive'
-
-    def _update_result (self, result):
-        """
-        Updates result dict
-
-        :param result: dict to update with
-        """
-        oldresult = deepcopy(self.result)
-        self.result.update(result)
-
-        def _keep_flag(flag_name):
-            if (flag_name in oldresult and
-                oldresult[flag_name] and
-                flag_name in self.result and
-                not result[flag_name]
-            ):
-                self.result[flag_name] = oldresult[flag_name]
-
-        _keep_flag('changed')
-
-        return self.result
