@@ -8,14 +8,6 @@
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
-- name: WordPress facts
-  import_tasks: facts.yml
-  tags:
-    - facts
-    # TODO: configure.yml uses wp_is_symlinked, which requires facts.yml to have run.
-    # Can we use a handler instead?
-    - config
-
 - name: Backup
   # We include_tasks (not import_tasks) here, because we do *not* want
   # to propagate tags - Within backup.yml, tasks shall be individually
@@ -37,6 +29,9 @@
   tags:
     - never
     - wipe
+
+- wordpress_facts:
+  tags: always
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"

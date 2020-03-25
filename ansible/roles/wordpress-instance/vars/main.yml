@@ -19,13 +19,6 @@ wp_dir: "/srv/{{ wp_env }}/{{ wp_hostname }}/htdocs/{{ wp_path }}"
 # The .htaccess commanding over this WordPress instance
 wp_htaccess_path: "{{ wp_dir }}/.htaccess"
 
-# The path to the wp-config.php file
-wp_path_config_php: "{{ wp_dir }}/wp-config.php"
-
-# The path to the wp-admin directory - we stat(2) this to determine
-# whether a given site is "symlinked"
-wp_path_wpadmin: "{{ wp_dir }}/wp-admin"
-
 # The prefix to invoke the WP-CLI for this WordPress instance
 wp_cli_command: "wp --path={{ wp_dir }}"
 
@@ -35,7 +28,7 @@ wp_base_url: "https://{{ wp_hostname }}/{{ wp_path }}"
 wp_themes_dir:  "{{ wp_dir }}/wp-content/themes"
 wp_plugins_dir: "{{ wp_dir }}/wp-content/plugins"
 
-# Shortcuts to facts collected by ../tasks/facts.yml
+# Shortcuts to facts collected by the wordpress_facts task
 wp_is_installed: "{{ ansible_facts.ansible_local.wp_is_installed }}"
 wp_is_symlinked: "{{ ansible_facts.ansible_local.wp_is_symlinked }}"
 wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
