@@ -111,24 +111,11 @@ class Inventory:
 
     def _add(self, site):
 
-        wp_details = {
-            'options' : {
-                'epfl:site_category': site.category,
-                'plugin:epfl_accred:unit_id': site.unit_id,
-                'plugin:epfl_accred:unit': site.unit_name,
-                'stylesheet': site.theme
-            },
-            'polylang': {
-                'langs': site.languages
-            }
-        }
-
         # fulfill vars for the site
         meta_site = {
             "wp_env": site.openshift_env,
             "wp_hostname": site.parsed_url.netloc,
             "wp_path": re.sub(r'^/', '', site.parsed_url.path),
-            "wp_details": wp_details
         }
 
         # Adding more information to site

@@ -38,3 +38,8 @@ wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
 wp_ops_rpcclient_ipv4_range: 10.180.21.0/24
 
 wp_use_gutenberg: '{{ wp_ensure_symlink_version is defined and (wp_ensure_symlink_version | float) >= 5.0 }}'
+
+wpveritas_api_url: '{{ _wpveritas_servers[openshift_namespace] }}'
+_wpveritas_servers:
+  wwp: https://wp-veritas.epfl.ch/api
+  wwp-test: https://wp-veritas.128.178.222.83.nip.io/api
