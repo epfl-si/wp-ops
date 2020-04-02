@@ -7,14 +7,14 @@ import sys
 import os.path
 import json
 
-# To be able to include package wp_inventory in parent directory
+# To be able to import wordpress_action_module
 sys.path.append(os.path.dirname(__file__))
 
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
-from wordpress_action_module import WordPressActionModule
+from wordpress_action_module import WordPressPluginOrThemeActionModule
 
-class ActionModule(WordPressActionModule):
+class ActionModule(WordPressPluginOrThemeActionModule):
     def run (self, tmp=None, task_vars=None):
 
         self.result = super(ActionModule, self).run(tmp, task_vars)
