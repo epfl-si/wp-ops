@@ -26,4 +26,3 @@
   gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/awx-instance
-  tags: awx

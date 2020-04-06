@@ -1,6 +1,7 @@
 - name: "Ansible Tower OpenShift objects"
   import_tasks: k8s.yml
   tags:
+    - awx
     - awx.k8s
     - awx.openshift
 
@@ -11,11 +12,11 @@
   # This means that every task in awx-ops.yml must have its own
   # specific set of tags.
   tags:
-    - never
     - awx.dump
     - awx.restore
 
 - name: "Set up `{{ awx_project_name }}` project"
+  tags: awx
   awx_script:
     supports_check_mode: yes
     script: |
@@ -31,5 +32,7 @@
             prj.scm_branch = "{{ git_current_branch }}"
 
 - import_tasks: container-group.yml
+  tags: awx
 
 - import_tasks: inventories.yml
+  tags: awx
