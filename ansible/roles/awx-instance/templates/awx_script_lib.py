@@ -26,29 +26,31 @@ class AnsibleDjangoObserver:
             update_json_status(changed=True)
 
     def __is_unchanged (self, field, newvalue):
-        if field == 'inputs':
-            if type(newvalue) is not dict:
-                return False
-            for k in newvalue.keys():
-                # Some fields of 'inputs' are encrypted; retrieve the
-                # original values using the .get_input() accessor
-                try:
-                    oldv = self.__obj.get_input(k)
-                    newv = newvalue[k]
-                    if oldv == newv:
-                        return True
-                    elif isinstance(oldv, six.string_types) and isinstance(newv, six.string_types) and (
-                            str(oldv) == str(newvv)):
-                        return True
-                    else:
-                        return False
-                except InvalidToken:   # Field is not decipherable
-                    return False
-            return True  # New inputs are a subset of existing inputs
-        else:
+        if field != 'inputs':
             oldvalue = getattr(self.__obj, field, None)
             return (oldvalue == newvalue or oldvalue is newvalue)
 
+        if type(newvalue) is not dict:
+            return False
+        for k in newvalue.keys():
+            # Some fields of 'inputs' are encrypted; retrieve the
+            # original values using the .get_input() accessor
+            try:
+                oldv = self.__obj.get_input(k)
+            except InvalidToken:    # Field is not decipherable
+                return False
+            except AttributeError:  # Field doesn't exist (yet)
+                return False
+
+            newv = newvalue[k]
+            if oldv == newv:
+                continue
+            elif isinstance(oldv, six.string_types) and isinstance(newv, six.string_types) and (
+                    str(oldv) == str(newvv)):
+                continue
+            else:
+                return False
+        return True  # New inputs are a subset of existing inputs
 
 class AnsibleGetOrCreate:
     def __init__(self, clazz, **get_or_create_kwargs):
