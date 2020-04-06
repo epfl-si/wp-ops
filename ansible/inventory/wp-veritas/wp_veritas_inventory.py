@@ -143,7 +143,7 @@ class Inventory:
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
     def _connection_props(self):
-        if Environment.has_wordpress():
+        if Environment.is_awx():
             return { 'ansible_connection': 'local' }
         else:
             return {
@@ -172,32 +172,32 @@ def to_string(string_or_bytes):
 
 class Environment:
     @classmethod
-    @cached
-    def has_wordpress(cls):
-        return cls._is_srv_wordpress_nfs() and cls._has_wp()
-    @classmethod
-    def _is_srv_wordpress_nfs(cls):
-        df_srv_lines = subprocess.check_output('df /srv 2>/dev/null || true',
-                                               shell=True).split(b'\n')
-        if len(df_srv_lines) < 3:
-            return False
-        else:
-            df_srv = to_string(df_srv_lines[-2])
-            mountpoint = df_srv.split()[-1]
-            device = df_srv.split()[-0]
-            return  mountpoint == '/srv' and ':' in device and 'wordpress' in device
+    def is_awx(cls):
+        return "system:serviceaccount:" in cls._oc_whoami()
 
     @classmethod
-    def _has_wp(cls):
-        path = subprocess.check_output('which wp 2>/dev/null || true', shell=True)
-        return '/' in to_string(path)
+    @cached
+    def _oc_whoami(cls):
+        return subprocess.run(["oc", "whoami"], stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    @classmethod
+    def wpveritas_inventories(cls):
+        if cls.is_awx():
+            whoami = cls._oc_whoami()
+            if 'wwp-test' in whoami:
+                return ['test']
+            elif 'wwp' in whoami:
+                return ['prod']
+            else:
+                raise  ValueError('Unknown service account %s' % whoami)
+        else:
+            return os.environ.get('WPVERITAS_INVENTORIES', 'test').split(',')
 
 
 if __name__ == '__main__':
-    #logging.basicConfig(level=logging.DEBUG)  # may be needed
-    inventories = os.environ.get('WPVERITAS_INVENTORIES', 'test').split(',')
-
     sites = []
+
+    inventories = Environment.wpveritas_inventories()
 
     if 'test' in inventories:
         sites.extend(WpVeritasTestSite.all())
