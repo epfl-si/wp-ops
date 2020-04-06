@@ -21,9 +21,9 @@
   roles:
     - role: ../roles/wordpress-openshift-namespace
 
-- name: Ansible Tower (AWX) configuration
-  hosts: awx-poc-vpsi
+- name: Ansible Tower (AWX) instances
+  hosts: awx-instances
   gather_facts: no    # Ansible facts are useless for this play
   roles:
-    - role: ../roles/awx-poc-vpsi
+    - role: ../roles/awx-instance
   tags: awx
