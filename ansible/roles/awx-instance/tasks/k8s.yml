@@ -56,8 +56,8 @@
       name: awx-config
       namespace: "{{ ansible_oc_namespace }}"
     data:
-      awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
-      nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
+      awx_settings: "{{ lookup('template', 'awx-settings.py') }}"
+      nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
 
 - name: RabbitMQ ConfigMap
   openshift:
@@ -69,11 +69,11 @@
       namespace: "{{ ansible_oc_namespace }}"
     data:
       enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
-      rabbitmq.conf: "{{ lookup('template', 'awx/rabbitmq/conf.j2') }}"
+      rabbitmq.conf: "{{ lookup('template', 'rabbitmq/conf.j2') }}"
       rabbitmq_definitions.json: |
         {# the empty line under this comment is a necessity (otherwise Ansible will parse the JSON as JSON) #}
 
-        {{ lookup('template', 'awx/rabbitmq/rabbitmq_definitions.json.j2') }}
+        {{ lookup('template', 'rabbitmq/rabbitmq_definitions.json.j2') }}
 
 - name: Ansible Tower secret (awx-secrets)
   openshift:
@@ -86,8 +86,8 @@
     type: Opaque
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
-      credentials_py: "{{ lookup('template', 'awx/credentials.py.j2') | b64encode }}"
-      environment_sh: "{{ lookup('template', 'awx/environment.sh.j2') | b64encode }}"
+      credentials_py: "{{ lookup('template', 'credentials.py.j2') | b64encode }}"
+      environment_sh: "{{ lookup('template', 'environment.sh.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
       rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | b64encode }}"
