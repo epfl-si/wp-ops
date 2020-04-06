@@ -183,7 +183,7 @@
                   key: rabbitmq_erlang_cookie
                   name: awx-secrets
             - name: K8S_SERVICE_NAME
-              value: rabbitmq
+              value: awx-rmq-mgmt
             image: "ansible/awx_rabbitmq:{{ awx_rabbitmq_version }}"
             livenessProbe:
               exec:
