@@ -65,6 +65,8 @@ inventories () {
 
 ###########################################################################
 
+export WPVERITAS_INVENTORIES=test
+
 mode=ansible-playbook
 
 declare -a ansible_args
@@ -72,6 +74,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
         --prod)
             inventory_mode="test_and_prod"
+            WPVERITAS_INVENTORIES="test,prod"
             shift ;;
         --wp-veritas)
             inventory_mode="wp_veritas"
@@ -98,7 +101,7 @@ case "$mode" in
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
-                         playbooks/wordpress-main.yml
+                         .interactive-playbooks/main.yml
         ;;
     ansible)
         ansible $(inventories) $ansible_flags "${ansible_args[@]}"

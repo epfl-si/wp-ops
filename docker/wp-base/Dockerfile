@@ -142,13 +142,6 @@ RUN set -e -x; for wp in /wp/*; do                                         \
   rm tinymce-advanced.zip;                                                 \
   done
 
-# Manually add the wordpress-importer plugin, used in "ventilation"
-# operations. Patch it to nuke the stat() cache inbetween downloading
-# things
-# If don't want to see stat() results
-# fix the patch format clearstatcache-wp-import.patch and add this two lines
-#        cd wordpress-importer ;                                          \
-#        git apply < /tmp/clearstatcache-wp-import.patch ;                \
 RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \

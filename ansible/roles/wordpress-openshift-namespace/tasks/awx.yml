@@ -1,4 +1,5 @@
 - include_vars: awx-vars.yml
+- include_vars: "awx-secrets-{{ openshift_namespace }}.yml"
 
 - name: Ansible Tower Rabbit MQ service
   openshift:
@@ -35,7 +36,6 @@
       externalTrafficPolicy: Cluster
       ports:
         - name: http
-          nodePort: 30234
           port: 80
           protocol: TCP
           targetPort: 8052
@@ -56,6 +56,52 @@
       awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
 
+- name: RabbitMQ ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: rabbitmq-config
+      namespace: "{{ openshift_namespace }}"
+    data:
+      enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
+      rabbitmq.conf: "{{ lookup('template', 'awx/rabbitmq/conf.j2') }}"
+      rabbitmq_definitions.json: |
+        {# the empty line under this comment is a necessity (otherwise Ansible will parse the JSON as JSON) #}
+
+        {{ lookup('template', 'awx/rabbitmq/rabbitmq_definitions.json.j2') }}
+
+- name: Ansible Tower secret (awx-secrets)
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: awx-secrets
+      namespace: "{{ openshift_namespace }}"
+    type: Opaque
+    data:
+      admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
+      credentials_py: "{{ lookup('template', 'awx/credentials.py.j2') | b64encode }}"
+      environment_sh: "{{ lookup('template', 'awx/environment.sh.j2') | b64encode }}"
+      django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
+      pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
+      rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | b64encode }}"
+      rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | b64encode }}"
+
+- name: awx service account
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: awx
+      namespace: "{{ openshift_namespace }}"
+
+# For awx-rabbitmq containers to discover each other using rabbit_peer_discovery_k8s,
+# it is necessary to run the pods as part of a StatefulSet; see
+# https://www.rabbitmq.com/cluster-formation.html#peer-discovery-k8s
 - name: Ansible Tower StatefulSet
   openshift:
     state: latest
@@ -100,6 +146,9 @@
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
+            env:
+              - name: WPVERITAS_INVENTORIES
+                value: "{{ awx_wpveritas_inventory }}"
           #####################################################
           - name: awx-celery
             command:
@@ -222,3 +271,27 @@
               items:
                 - key: nginx_conf
                   path: nginx.conf
+
+- name: Ansible Tower route for the Web front-end
+  openshift:
+    state: latest
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: awx-web-svc
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      host: "{{ awx_web_hostnames[openshift_namespace] }}"
+      port:
+        targetPort: http
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: awx-web-svc
+
+- when: "openshift_namespace == awx_mgmt_build_namespace"
+  include_tasks:
+    file: awx-runner.yml
+    apply:
+      tags: [ "awx" ]
