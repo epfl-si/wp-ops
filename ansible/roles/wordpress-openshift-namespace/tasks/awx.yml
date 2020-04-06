@@ -62,7 +62,7 @@
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: rabbitmq-config
+      name: awx-rabbitmq-config
       namespace: "{{ openshift_namespace }}"
     data:
       enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
@@ -217,7 +217,7 @@
                 cpu: 250m
                 memory: 2Gi
             volumeMounts:
-            - name: rabbitmq-config
+            - name: awx-rabbitmq-config
               mountPath: /etc/rabbitmq
           #####################################################
           - name: awx-memcached
@@ -254,9 +254,9 @@
               - key: django_secret_key
                 path: django_secret_key
               secretName: awx-secrets
-          - name: rabbitmq-config
+          - name: awx-rabbitmq-config
             configMap:
-              name: rabbitmq-config
+              name: awx-rabbitmq-config
               defaultMode: 420
               items:
               - key: rabbitmq.conf
