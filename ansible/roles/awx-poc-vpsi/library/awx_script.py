@@ -79,8 +79,8 @@ class AwxScriptTask(object):
 
     def update_json_status(self, **kwargs):
         self.update_json_status_called = True
-        # TODO: This is too crude; we don't want to e.g. override
-        # {'changed': True} with {'changed': False}
+        if 'changed' in kwargs and kwargs['changed'] == False:
+            del kwargs['changed']
         self.json_status.update(**kwargs)
 
 
