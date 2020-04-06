@@ -16,5 +16,3 @@
 - import_tasks: container-group.yml
 
 - import_tasks: inventories.yml
-
-- import_tasks: job-templates.yml
