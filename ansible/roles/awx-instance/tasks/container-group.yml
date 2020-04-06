@@ -53,7 +53,7 @@
       apiVersion: v1
       kind: Pod
       metadata:
-        namespace: {{ openshift_namespace }}
+        namespace: {{ ansible_oc_namespace }}
       spec:
         containers:
           # TODO: use variables in next line.

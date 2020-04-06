@@ -8,7 +8,7 @@
     kind: ImageStream
     metadata:
       name: "{{ awx_runner_base_image_name }}"
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     spec:
       tags:
         - name: latest
@@ -25,7 +25,7 @@
     kind: ImageStream
     metadata:
       name: "{{ awx_runner_image_name }}"
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     # No spec — We build it from a BuildConfig, below
 
 
@@ -36,7 +36,7 @@
     kind: BuildConfig
     metadata:
       name: "{{ awx_runner_image_name }}"
-      namespace:  "{{ openshift_namespace }}"
+      namespace:  "{{ ansible_oc_namespace }}"
     spec:
       strategy:
         type: Docker

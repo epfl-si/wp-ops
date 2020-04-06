@@ -1,14 +1,17 @@
-- include_vars: awx-vars.yml
-- include_vars: "awx-secrets-{{ openshift_namespace }}.yml"
+# Kubernetes (OpenShift) objects required to run AWX
+
+- include_vars: k8s-vars.yml
+- include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
 - name: Ansible Tower Rabbit MQ service
+  connection: local
   openshift:
     state: latest
     apiVersion: v1
     kind: Service
     metadata:
       name: awx-rmq-mgmt
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
       labels:
         app: awx
         name: awx-rmq-mgmt
@@ -28,7 +31,7 @@
     kind: Service
     metadata:
       name: awx-web-svc
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
       labels:
         app: awx
         name: awx-web-svc
@@ -51,7 +54,7 @@
     kind: ConfigMap
     metadata:
       name: awx-config
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     data:
       awx_settings: "{{ lookup('template', 'awx/awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'awx/nginx.conf') }}"
@@ -63,7 +66,7 @@
     kind: ConfigMap
     metadata:
       name: awx-rabbitmq-config
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     data:
       enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
       rabbitmq.conf: "{{ lookup('template', 'awx/rabbitmq/conf.j2') }}"
@@ -79,7 +82,7 @@
     kind: Secret
     metadata:
       name: awx-secrets
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     type: Opaque
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
@@ -97,7 +100,7 @@
     kind: ServiceAccount
     metadata:
       name: awx
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
 
 # For awx-rabbitmq containers to discover each other using rabbit_peer_discovery_k8s,
 # it is necessary to run the pods as part of a StatefulSet; see
@@ -109,7 +112,7 @@
     kind: StatefulSet
     metadata:
       name: awx
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     spec:
       selector:
         matchLabels:
@@ -279,9 +282,9 @@
     kind: Route
     metadata:
       name: awx-web-svc
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ ansible_oc_namespace }}"
     spec:
-      host: "{{ awx_web_hostnames[openshift_namespace] }}"
+      host: "{{ awx_web_hostnames[ansible_oc_namespace] }}"
       port:
         targetPort: http
       tls:
@@ -290,7 +293,7 @@
         kind: Service
         name: awx-web-svc
 
-- when: "openshift_namespace == awx_mgmt_build_namespace"
+- when: "ansible_oc_namespace == awx_mgmt_build_namespace"
   include_tasks:
     file: awx-runner.yml
     apply:

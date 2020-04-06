@@ -8,13 +8,13 @@
     set -e -x
     cd ..   # Out of .interactive-playbooks
     [ -d state/awx ] || mkdir -p state/awx 2>/dev/null
-    oc exec -c awx-web -n {{ openshift_namespace }} awx-0 -- \
+    oc exec -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
          awx-manage dumpdata --indent=4 --natural-primary --natural-foreign \
-         > state/awx/awx-{{openshift_namespace}}.djangodump
+         > state/awx/awx-{{ansible_oc_namespace}}.djangodump
     # belt *and* suspenders:
-    oc exec -c awx-web -n {{ openshift_namespace }} awx-0 -- \
+    oc exec -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
         bash -c '. /etc/tower/conf.d/environment.sh; PGPASSWORD="$DATABASE_PASSWORD" pg_dump -c -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"' \
-        > state/awx/awx-{{openshift_namespace}}.sql
+        > state/awx/awx-{{ansible_oc_namespace}}.sql
 
 - name: Restore Ansible Tower database
   tags: awx.restore
@@ -25,6 +25,6 @@
     [ -d state/awx ] || mkdir -p state/awx 2>/dev/null
     # TODO: we would like to restore from the .djangodump instead; unfortunately it raises django.db.utils.IntegrityError
     # (presumably because the model-level integrity constraints were not applied timely).
-    oc exec -i -c awx-web -n {{ openshift_namespace }} awx-0 -- \
+    oc exec -i -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
         bash -c '. /etc/tower/conf.d/environment.sh; PGPASSWORD="$DATABASE_PASSWORD" psql -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"' \
-        < state/awx/awx-{{ openshift_namespace }}.sql
+        < state/awx/awx-{{ ansible_oc_namespace }}.sql
