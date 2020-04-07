@@ -150,8 +150,7 @@ class WPInventory():
         
         retval = {
             'ansible_python_interpreter': '/usr/bin/python3',
-            'openshift_namespace': 'wwp-{}'.format(self._env_prefix),
-            'wp_ensure_symlink_version': '5.2'
+            'openshift_namespace': 'wwp-{}'.format(self._env_prefix)
         }
         
         for key, val in wp.items():

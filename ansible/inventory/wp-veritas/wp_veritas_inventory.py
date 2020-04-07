@@ -20,11 +20,6 @@ from urllib.parse import urlparse
 import requests
 from six.moves.urllib.parse import urlparse, quote
 
-constant_props = {
-    'wp_ensure_symlink_version': '5.2',
-    'openshift_namespace': 'wwp-prod'
-}
-
 class WpVeritasSite:
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
     VERIFY_SSL = True
@@ -89,6 +84,39 @@ class WpVeritasSite:
             path = re.sub(r'\W', '_', path)
             return "{}__{}".format(hostname, path)
 
+    @property
+    def hostvars(self):
+        hostvars = {
+            "wp_env": self.openshift_env,
+            "wp_hostname": self.parsed_url.netloc,
+            "wp_path": re.sub(r'^/', '', self.parsed_url.path),
+            "openshift_namespace": self._openshift_namespace
+        }
+
+        # Adding more information to site
+        hostvars.update(self._connection_props())
+
+        return hostvars
+
+    def _connection_props(self):
+        if Environment.is_awx():
+            return { 'ansible_connection': 'local' }
+        else:
+            return {
+                'ansible_host': self._mgmt_ssh_host,
+                'ansible_port': '32222',
+                'ansible_python_interpreter': '/usr/bin/python3',
+                'ansible_user': 'www-data'
+            }
+
+    @property
+    def _openshift_namespace(self):
+        return 'wwp'
+
+    @property
+    def _mgmt_ssh_host(self):
+        return 'ssh-wwp.epfl.ch'
+
 
 class WpVeritasTestSite(WpVeritasSite):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
@@ -97,6 +125,14 @@ class WpVeritasTestSite(WpVeritasSite):
     @property
     def instance_name(self):
         return 'test_' + super().instance_name
+
+    @property
+    def _openshift_namespace(self):
+        return 'wwp-test'
+
+    @property
+    def _mgmt_ssh_host(self):
+        return 'test-ssh-wwp.epfl.ch'
 
 
 class Inventory:
@@ -116,18 +152,7 @@ class Inventory:
         return json.dumps(self.inventory, sort_keys=True, indent=4)
 
     def _add(self, site):
-
-        # fulfill vars for the site
-        meta_site = {
-            "wp_env": site.openshift_env,
-            "wp_hostname": site.parsed_url.netloc,
-            "wp_path": re.sub(r'^/', '', site.parsed_url.path),
-        }
-
-        # Adding more information to site
-        meta_site = {**meta_site, **constant_props, **self._connection_props()}
-
-        self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
+        self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
         self._add_site_to_group(site, site.openshift_env)
 
     def _add_site_to_group(self, site, openshift_env):
@@ -141,17 +166,6 @@ class Inventory:
         self.groups.add(group)
         self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
-
-    def _connection_props(self):
-        if Environment.is_awx():
-            return { 'ansible_connection': 'local' }
-        else:
-            return {
-                'ansible_host': 'ssh-wwp.epfl.ch',
-                'ansible_port': '32222',
-                'ansible_python_interpreter': '/usr/bin/python3',
-                'ansible_user': 'www-data'
-            }
 
 
 def cached(fn):
