@@ -103,7 +103,7 @@ class WpVeritasSite:
             return { 'ansible_connection': 'local' }
         else:
             return {
-                'ansible_host': 'ssh-wwp.epfl.ch',
+                'ansible_host': self._mgmt_ssh_host,
                 'ansible_port': '32222',
                 'ansible_python_interpreter': '/usr/bin/python3',
                 'ansible_user': 'www-data'
@@ -112,6 +112,10 @@ class WpVeritasSite:
     @property
     def _openshift_namespace(self):
         return 'wwp-prod'
+
+    @property
+    def _mgmt_ssh_host(self):
+        return 'ssh-wwp.epfl.ch'
 
 
 class WpVeritasTestSite(WpVeritasSite):
