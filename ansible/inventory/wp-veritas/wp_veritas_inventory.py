@@ -173,6 +173,12 @@ def to_string(string_or_bytes):
 class Environment:
     @classmethod
     def is_awx(cls):
+        # We don't really have or need a situation in which we run the
+        # inventory on the cluster, except AWX.
+        return cls.__is_on_openshift()
+
+    @classmethod
+    def __is_on_openshift(cls):
         return "system:serviceaccount:" in cls._oc_whoami()
 
     @classmethod
