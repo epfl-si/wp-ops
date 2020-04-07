@@ -21,7 +21,6 @@ import requests
 from six.moves.urllib.parse import urlparse, quote
 
 constant_props = {
-    'wp_ensure_symlink_version': '5.2',
     'openshift_namespace': 'wwp-prod'
 }
 
