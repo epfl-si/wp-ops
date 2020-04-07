@@ -20,10 +20,6 @@ from urllib.parse import urlparse
 import requests
 from six.moves.urllib.parse import urlparse, quote
 
-constant_props = {
-    'openshift_namespace': 'wwp-prod'
-}
-
 class WpVeritasSite:
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
     VERIFY_SSL = True
@@ -121,13 +117,17 @@ class Inventory:
             "wp_env": site.openshift_env,
             "wp_hostname": site.parsed_url.netloc,
             "wp_path": re.sub(r'^/', '', site.parsed_url.path),
+            "openshift_namespace": self._openshift_namespace()
         }
 
         # Adding more information to site
-        meta_site = {**meta_site, **constant_props, **self._connection_props()}
+        meta_site.update(self._connection_props())
 
         self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
         self._add_site_to_group(site, site.openshift_env)
+
+    def _openshift_namespace(self):
+        return 'wwp-prod'
 
     def _add_site_to_group(self, site, openshift_env):
         group = 'prod-{}'.format(openshift_env)
