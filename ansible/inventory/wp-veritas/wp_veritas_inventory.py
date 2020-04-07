@@ -84,6 +84,35 @@ class WpVeritasSite:
             path = re.sub(r'\W', '_', path)
             return "{}__{}".format(hostname, path)
 
+    @property
+    def hostvars(self):
+        hostvars = {
+            "wp_env": self.openshift_env,
+            "wp_hostname": self.parsed_url.netloc,
+            "wp_path": re.sub(r'^/', '', self.parsed_url.path),
+            "openshift_namespace": self._openshift_namespace
+        }
+
+        # Adding more information to site
+        hostvars.update(self._connection_props())
+
+        return hostvars
+
+    def _connection_props(self):
+        if Environment.is_awx():
+            return { 'ansible_connection': 'local' }
+        else:
+            return {
+                'ansible_host': 'ssh-wwp.epfl.ch',
+                'ansible_port': '32222',
+                'ansible_python_interpreter': '/usr/bin/python3',
+                'ansible_user': 'www-data'
+            }
+
+    @property
+    def _openshift_namespace(self):
+        return 'wwp-prod'
+
 
 class WpVeritasTestSite(WpVeritasSite):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
@@ -111,23 +140,8 @@ class Inventory:
         return json.dumps(self.inventory, sort_keys=True, indent=4)
 
     def _add(self, site):
-
-        # fulfill vars for the site
-        meta_site = {
-            "wp_env": site.openshift_env,
-            "wp_hostname": site.parsed_url.netloc,
-            "wp_path": re.sub(r'^/', '', site.parsed_url.path),
-            "openshift_namespace": self._openshift_namespace()
-        }
-
-        # Adding more information to site
-        meta_site.update(self._connection_props())
-
-        self.inventory['_meta']['hostvars'][site.instance_name] = meta_site
+        self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
         self._add_site_to_group(site, site.openshift_env)
-
-    def _openshift_namespace(self):
-        return 'wwp-prod'
 
     def _add_site_to_group(self, site, openshift_env):
         group = 'prod-{}'.format(openshift_env)
@@ -140,17 +154,6 @@ class Inventory:
         self.groups.add(group)
         self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
-
-    def _connection_props(self):
-        if Environment.is_awx():
-            return { 'ansible_connection': 'local' }
-        else:
-            return {
-                'ansible_host': 'ssh-wwp.epfl.ch',
-                'ansible_port': '32222',
-                'ansible_python_interpreter': '/usr/bin/python3',
-                'ansible_user': 'www-data'
-            }
 
 
 def cached(fn):
