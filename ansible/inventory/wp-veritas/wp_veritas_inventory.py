@@ -111,7 +111,7 @@ class WpVeritasSite:
 
     @property
     def _openshift_namespace(self):
-        return 'wwp-prod'
+        return 'wwp'
 
     @property
     def _mgmt_ssh_host(self):
@@ -125,6 +125,14 @@ class WpVeritasTestSite(WpVeritasSite):
     @property
     def instance_name(self):
         return 'test_' + super().instance_name
+
+    @property
+    def _openshift_namespace(self):
+        return 'wwp-test'
+
+    @property
+    def _mgmt_ssh_host(self):
+        return 'test-ssh-wwp.epfl.ch'
 
 
 class Inventory:
