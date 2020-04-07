@@ -6,14 +6,13 @@
 #              ../vars/*.yml)
 
 - include_vars: wp-destructive.yml   # For wp_can
-  tags: always
+  tags: "{{ all_wordpress_instance_tags }}"
 
 - name: Backup
   # We include_tasks (not import_tasks) here, because we do *not* want
   # to propagate tags - Within backup.yml, tasks shall be individually
   # marked with the appropriate subset of the `backup.code`,
-  # `backup.data` and `backup.uploads` tags (or alternatively, the
-  # `always` tag).
+  # `backup.data` and `backup.uploads` tags.
   include_tasks: "backup.yml"
   tags:
     - never  # That is, skip unless "-t wipe", "-t backup", "-t backup.code" etc. is
@@ -31,7 +30,7 @@
     - wipe
 
 - wordpress_facts:
-  tags: always
+  tags: "{{ all_wordpress_instance_tags }}"
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   include_tasks: "create.yml"

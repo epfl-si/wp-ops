@@ -20,10 +20,10 @@
       - (wp_can.configure and wp_can.write_code) or ansible_check_mode
 
 - include_vars: symlink-vars.yml
-  tags: always
+  tags: "{{ all_wordpress_instance_tags }}"
 
 - name: "Set wp_is_symlinked"
-  tags: always
+  tags: "{{ all_wordpress_instance_tags }}"
   set_fact:
     wp_is_symlinked: '{{ "symlink" in ansible_run_tags }}'
 

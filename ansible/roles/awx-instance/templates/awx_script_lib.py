@@ -30,25 +30,32 @@ class AnsibleDjangoObserver:
             if type(newvalue) is not dict:
                 return False
             for k in newvalue.keys():
-                # Some fields of 'inputs' are encrypted; retrieve the
-                # original values using the .get_input() accessor
-                try:
-                    oldv = self.__obj.get_input(k)
-                    newv = newvalue[k]
-                    if oldv == newv:
-                        return True
-                    elif isinstance(oldv, six.string_types) and isinstance(newv, six.string_types) and (
-                            str(oldv) == str(newvv)):
-                        return True
-                    else:
-                        return False
-                except InvalidToken:   # Field is not decipherable
+                if not self.__is_unchanged_input(k, newvalue):
                     return False
-            return True  # New inputs are a subset of existing inputs
+                return True
         else:
             oldvalue = getattr(self.__obj, field, None)
             return (oldvalue == newvalue or oldvalue is newvalue)
 
+    def __is_unchanged_input (self, k, newvalue):
+        # Some fields of 'inputs' are encrypted; retrieve the
+        # original values using the .get_input() accessor
+        try:
+            oldv = self.__obj.get_input(k)
+        except InvalidToken:    # Field is not decipherable
+            return False
+        except AttributeError:  # Field doesn't exist (yet)
+            return False
+
+        newv = newvalue[k]
+        if oldv == newv:
+            return True
+        elif isinstance(oldv, six.string_types):
+            if isinstance(newv, six.string_types) and str(oldv) == str(newvv):
+                return True
+            elif bytes(oldv, 'utf-8') == newv:
+                return True
+        return False  # New inputs are a subset of existing inputs
 
 class AnsibleGetOrCreate:
     def __init__(self, clazz, **get_or_create_kwargs):

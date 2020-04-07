@@ -42,18 +42,3 @@
   when: openshift_namespace == "wwp"
   include: monitoring.yml
   tags: monitoring
-
-- name: "Ansible Tower"
-  import_tasks: awx.yml
-  tags: awx
-
-- name: "Ansible Tower database operations"
-  include_tasks: awx-ops.yml
-  # The tags do not *not* auto-applied down, since we use an
-  # include_tasks rather than an import_tasks or include directive.
-  # This means that every task in awx-ops.yml must have its own
-  # specific set of tags.
-  tags:
-    - awx.dump
-    - awx.restore
-

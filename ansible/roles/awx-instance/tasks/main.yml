@@ -1,4 +1,22 @@
+- name: "Ansible Tower OpenShift objects"
+  import_tasks: k8s.yml
+  tags:
+    - awx
+    - awx.k8s
+    - awx.openshift
+
+- name: "Ansible Tower database operations"
+  include_tasks: ops.yml
+  # These tags are *not* auto-applied down, since we use an
+  # include_tasks rather than an import_tasks or include directive.
+  # This means that every task in awx-ops.yml must have its own
+  # specific set of tags.
+  tags:
+    - awx.dump
+    - awx.restore
+
 - name: "Set up `{{ awx_project_name }}` project"
+  tags: awx
   awx_script:
     supports_check_mode: yes
     script: |
@@ -14,7 +32,7 @@
             prj.scm_branch = "{{ git_current_branch }}"
 
 - import_tasks: container-group.yml
+  tags: awx
 
 - import_tasks: inventories.yml
-
-- import_tasks: job-templates.yml
+  tags: awx

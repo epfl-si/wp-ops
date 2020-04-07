@@ -1,0 +1,3 @@
+eyaml_keys:
+  priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
+  pub: "{{ playbook_dir }}/../eyaml/epfl_wp_test.pem"
