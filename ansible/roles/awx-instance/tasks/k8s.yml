@@ -220,6 +220,7 @@
             emptyDir: {}
           - name: awx-memcached-socket
             emptyDir: {}
+  notify: Restart AWX container
 
 - meta: flush_handlers
 
