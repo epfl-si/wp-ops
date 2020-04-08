@@ -1,5 +1,6 @@
 - name: "Ansible Tower OpenShift objects"
   import_tasks: k8s.yml
+  delegate_to: localhost
   tags:
     - awx
     - awx.k8s

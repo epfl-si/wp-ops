@@ -4,7 +4,6 @@
 - include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
 - name: Ansible Tower Rabbit MQ service
-  connection: local
   openshift:
     state: latest
     apiVersion: v1
@@ -295,6 +294,6 @@
 
 - when: "ansible_oc_namespace == awx_mgmt_build_namespace"
   include_tasks:
-    file: awx-runner.yml
+    file: runner.yml
     apply:
       tags: [ "awx" ]

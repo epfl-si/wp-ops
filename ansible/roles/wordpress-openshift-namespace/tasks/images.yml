@@ -5,7 +5,7 @@
 #
 # See also continuous-integration.yml (which has its own set of images)
 
-- include_vars: image-vars.yml
+- include_vars: ../../../vars/image-vars.yml
 
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
