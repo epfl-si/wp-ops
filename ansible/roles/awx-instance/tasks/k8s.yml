@@ -57,6 +57,7 @@
     data:
       awx_settings: "{{ lookup('template', 'awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
+  notify: Restart AWX container
 
 - name: RabbitMQ ConfigMap
   openshift:
@@ -73,6 +74,7 @@
         {# the empty line under this comment is a necessity (otherwise Ansible will parse the JSON as JSON) #}
 
         {{ lookup('template', 'rabbitmq/rabbitmq_definitions.json.j2') }}
+  notify: Restart AWX container
 
 - name: Ansible Tower secret (awx-secrets)
   openshift:
@@ -91,6 +93,7 @@
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
       rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | b64encode }}"
       rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | b64encode }}"
+  notify: Restart AWX container
 
 - name: awx service account
   openshift:
@@ -273,6 +276,8 @@
               items:
                 - key: nginx_conf
                   path: nginx.conf
+
+- meta: flush_handlers
 
 - name: Ansible Tower route for the Web front-end
   openshift:
