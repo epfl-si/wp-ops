@@ -1,5 +1,4 @@
-awx_version: 9.2.0
-awx_rabbitmq_version: 3.7.21
+awx_version: 10.0.0
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch

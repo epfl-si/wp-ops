@@ -3,26 +3,6 @@
 - include_vars: k8s-vars.yml
 - include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
-- name: Ansible Tower Rabbit MQ service
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: awx-rmq-mgmt
-      namespace: "{{ ansible_oc_namespace }}"
-      labels:
-        app: awx
-        name: awx-rmq-mgmt
-    spec:
-      ports:
-        - name: rmqmgmt
-          port: 15672
-          protocol: TCP
-          targetPort: 15672
-      selector:
-        name: awx-web-deploy
-
 - name: Ansible Tower HTTP service
   openshift:
     state: latest
@@ -46,7 +26,7 @@
       sessionAffinity: None
       type: NodePort
 
-- name: Ansible Tower ConfigMap
+- name: ConfigMap for AWX and sidekicks
   openshift:
     state: latest
     apiVersion: v1
@@ -57,23 +37,7 @@
     data:
       awx_settings: "{{ lookup('template', 'awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
-  notify: Restart AWX container
-
-- name: RabbitMQ ConfigMap
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: awx-rabbitmq-config
-      namespace: "{{ ansible_oc_namespace }}"
-    data:
-      enabled_plugins: "[rabbitmq_management,rabbitmq_peer_discovery_k8s]."
-      rabbitmq.conf: "{{ lookup('template', 'rabbitmq/conf.j2') }}"
-      rabbitmq_definitions.json: |
-        {# the empty line under this comment is a necessity (otherwise Ansible will parse the JSON as JSON) #}
-
-        {{ lookup('template', 'rabbitmq/rabbitmq_definitions.json.j2') }}
+      redis_conf: "{{ lookup('template', 'redis.conf') }}"
   notify: Restart AWX container
 
 - name: Ansible Tower secret (awx-secrets)
@@ -91,8 +55,6 @@
       environment_sh: "{{ lookup('template', 'environment.sh.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
-      rabbitmq_erlang_cookie: "{{ awx_erlang_cookie | eyaml(eyaml_keys) | b64encode }}"
-      rabbitmq_password: "{{ awx_rabbitmq_password | eyaml(eyaml_keys) | b64encode }}"
   notify: Restart AWX container
 
 - name: awx service account
@@ -104,14 +66,11 @@
       name: awx
       namespace: "{{ ansible_oc_namespace }}"
 
-# For awx-rabbitmq containers to discover each other using rabbit_peer_discovery_k8s,
-# it is necessary to run the pods as part of a StatefulSet; see
-# https://www.rabbitmq.com/cluster-formation.html#peer-discovery-k8s
 - name: Ansible Tower StatefulSet
   openshift:
     state: latest
     apiVersion: apps/v1
-    kind: StatefulSet
+    kind: StatefulSet   # Makes it easier to predict the pod name
     metadata:
       name: awx
       namespace: "{{ ansible_oc_namespace }}"
@@ -120,14 +79,12 @@
         matchLabels:
           app: awx
           name: awx-web-deploy
-          service: django
       serviceName: awx
       template:
         metadata:
           labels:
             app: awx
             name: awx-web-deploy
-            service: django
         spec:
           containers:
           #####################################################
@@ -149,16 +106,19 @@
               readOnly: true
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
+              subPath: nginx.conf   # Just this file, Vasili
+                                    # (nginx gets anxious if it is missing a
+                                    # /etc/nginx/mime.types)
               readOnly: true
-            env:
-              - name: WPVERITAS_INVENTORIES
-                value: "{{ awx_wpveritas_inventory }}"
+            - name: awx-redis-socket
+              mountPath: "/var/run/redis"
+            - name: awx-memcached-socket
+              mountPath: "/var/run/memcached"
           #####################################################
-          - name: awx-celery
+          - name: awx-task
+            image: "ansible/awx_task:{{ awx_version }}"
             command:
             - /usr/bin/launch_awx_task.sh
-            image: "ansible/awx_task:{{ awx_version }}"
             resources:
               requests:
                 cpu: 250m
@@ -170,60 +130,35 @@
             - name: awx-application-credentials
               mountPath: /etc/tower/conf.d/
               readOnly: true
-          #####################################################
-          - name: awx-rabbit
+            - name: awx-redis-socket
+              mountPath: "/var/run/redis"
+            - name: awx-memcached-socket
+              mountPath: "/var/run/memcached"
             env:
-            - name: MY_POD_IP
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.podIP
-            - name: RABBITMQ_USE_LONGNAME
-              value: "true"
-            - name: RABBITMQ_NODENAME
-              value: rabbit@$(MY_POD_IP)
-            - name: RABBITMQ_ERLANG_COOKIE
-              valueFrom:
-                secretKeyRef:
-                  key: rabbitmq_erlang_cookie
-                  name: awx-secrets
-            - name: K8S_SERVICE_NAME
-              value: awx-rmq-mgmt
-            image: "ansible/awx_rabbitmq:{{ awx_rabbitmq_version }}"
-            livenessProbe:
-              exec:
-                command:
-                - rabbitmqctl
-                - status
-              failureThreshold: 3
-              initialDelaySeconds: 30
-              periodSeconds: 10
-              successThreshold: 1
-              timeoutSeconds: 10
+              - name: MY_POD_UID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.uid
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+          #####################################################
+          - name: awx-redis
+            image: redis:latest
+            imagePullPolicy: Always
+            args: ["redis-server", "/etc/redis/redis.conf"]
             ports:
-            - containerPort: 15672
-              name: http
-              protocol: TCP
-            - containerPort: 5672
-              name: amqp
-              protocol: TCP
-            readinessProbe:
-              exec:
-                command:
-                - rabbitmqctl
-                - status
-              failureThreshold: 3
-              initialDelaySeconds: 10
-              periodSeconds: 10
-              successThreshold: 1
-              timeoutSeconds: 10
-            resources:
-              requests:
-                cpu: 250m
-                memory: 2Gi
+              - name: redis
+                protocol: TCP
+                containerPort: 6379
             volumeMounts:
-            - name: awx-rabbitmq-config
-              mountPath: /etc/rabbitmq
+              - name: awx-redis-config
+                mountPath: "/etc/redis"
+                readOnly: true
+
+              - name: awx-redis-socket
+                mountPath: "/var/run/redis"
           #####################################################
           - name: awx-memcached
             image: memcached:latest
@@ -232,6 +167,15 @@
               requests:
                 cpu: 250m
                 memory: 1Gi
+            command:
+              - 'memcached'
+              - '-s'
+              - '/var/run/memcached/memcached.sock'
+              - '-a'
+              - '0666'
+            volumeMounts:
+              - name: awx-memcached-socket
+                mountPath: "/var/run/memcached"
           #####################################################
 
 
@@ -248,6 +192,13 @@
               items:
               - key: awx_settings
                 path: settings.py
+          - name: awx-redis-config
+            configMap:
+              name: awx-config
+              defaultMode: 420
+              items:
+              - key: redis_conf
+                path: redis.conf
           - name: awx-application-credentials
             secret:
               defaultMode: 420
@@ -259,23 +210,16 @@
               - key: django_secret_key
                 path: django_secret_key
               secretName: awx-secrets
-          - name: awx-rabbitmq-config
-            configMap:
-              name: awx-rabbitmq-config
-              defaultMode: 420
-              items:
-              - key: rabbitmq.conf
-                path: rabbitmq.conf
-              - key: enabled_plugins
-                path: enabled_plugins
-              - key: rabbitmq_definitions.json
-                path: rabbitmq_definitions.json
           - name: nginx-config
             configMap:
               name: awx-config
               items:
                 - key: nginx_conf
                   path: nginx.conf
+          - name: awx-redis-socket
+            emptyDir: {}
+          - name: awx-memcached-socket
+            emptyDir: {}
 
 - meta: flush_handlers
 
