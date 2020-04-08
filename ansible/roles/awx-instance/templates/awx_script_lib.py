@@ -1,7 +1,7 @@
 import sys
 import six
 from django.db import transaction
-from awx.main.utils import decrypt_field
+from awx.main.utils import decrypt_value, get_encryption_key
 from cryptography.fernet import InvalidToken
 
 class AnsibleDjangoObserver:
@@ -35,7 +35,8 @@ class AnsibleDjangoObserver:
                 return True
         else:
             oldvalue = getattr(self.__obj, field, None)
-            return (oldvalue == newvalue or oldvalue is newvalue)
+            return _is_same_value(oldvalue, newvalue,
+                                  get_encryption_key(field, self.__obj.pk))
 
     def __is_unchanged_input (self, k, newvalue):
         # Some fields of 'inputs' are encrypted; retrieve the
@@ -47,15 +48,33 @@ class AnsibleDjangoObserver:
         except AttributeError:  # Field doesn't exist (yet)
             return False
 
-        newv = newvalue[k]
-        if oldv == newv:
-            return True
-        elif isinstance(oldv, six.string_types):
-            if isinstance(newv, six.string_types) and str(oldv) == str(newvv):
-                return True
-            elif bytes(oldv, 'utf-8') == newv:
-                return True
-        return False  # New inputs are a subset of existing inputs
+        return _is_same_value(oldv, newvalue[k])
+
+
+def _is_same_value(a, b, decryption_key=None):
+    if a is b:
+        return True
+    if a == b:
+        return True
+
+    if isinstance(b, six.string_types):
+        if isinstance(a, bytes):
+            return _is_same_value(bytes(a, 'utf-8'), b)
+        if not isinstance(a, six.string_types):
+            return False
+
+        if decryption_key:
+            did_decrypt = False
+            if a.startswith('$encrypted$'):
+                did_decrypt = True
+                a = decrypt_value(decryption_key, a)
+            if b.startswith('$encrypted$'):
+                did_decrypt = True
+                b = decrypt_value(decryption_key, b)
+            if did_decrypt:
+                return _is_same_value(a, b)
+
+    return False
 
 class AnsibleGetOrCreate:
     def __init__(self, clazz, **get_or_create_kwargs):
