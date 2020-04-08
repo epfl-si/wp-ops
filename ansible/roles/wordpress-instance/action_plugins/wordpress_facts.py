@@ -61,7 +61,7 @@ class ActionModule(WordPressActionModule):
 
     def _is_wp_symlinked (self):
         stat = self._stat('wp-admin')
-        return stat['stat']['islnk']
+        return ('stat' in stat) and (stat['stat']['islnk'])
 
     def _stat (self, relpath):
         return self._run_action('stat', {
