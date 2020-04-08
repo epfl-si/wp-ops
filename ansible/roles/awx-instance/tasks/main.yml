@@ -9,6 +9,7 @@
 - name: "Ansible Tower runner image and build config"
   when: "ansible_oc_namespace == awx_mgmt_build_namespace"
   import_tasks: runner.yml
+  delegate_to: localhost
   tags:
     - awx
     - awx.runner
