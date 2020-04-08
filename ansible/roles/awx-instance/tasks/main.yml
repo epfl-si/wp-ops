@@ -15,6 +15,12 @@
     - awx.dump
     - awx.restore
 
+- name: "Ansible Tower front-end authentication"
+  import_tasks: auth.yml
+  tags:
+    - awx
+    - awx.auth
+
 - name: "Set up `{{ awx_project_name }}` project"
   tags: awx
   awx_script:
