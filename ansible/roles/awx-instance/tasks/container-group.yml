@@ -56,8 +56,7 @@
         namespace: {{ ansible_oc_namespace }}
       spec:
         containers:
-          # TODO: use variables in next line.
-          - image: docker-registry.default.svc:5000/wwp-test/wp-ansible-runner:latest
+          - image: {{ awx_runner_image_name_and_tag }}
             tty: true
             stdin: true
             imagePullPolicy: Always
