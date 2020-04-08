@@ -4,7 +4,6 @@
 - include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
 - name: Ansible Tower Rabbit MQ service
-  connection: local
   openshift:
     state: latest
     apiVersion: v1
