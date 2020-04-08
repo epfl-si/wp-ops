@@ -1,6 +1,6 @@
 - include_vars: mgmt-vars.yml
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
-- include_vars: image-vars.yml              # For mgmt_image_name
+- include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
 
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
   openshift:

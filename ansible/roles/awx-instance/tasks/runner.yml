@@ -1,5 +1,5 @@
 # Custom runner image with the `wp` command-line tool and a WordPress layout in /wp
-- include_vars: image-vars.yml
+- include_vars: ../../../vars/image-vars.yml
 
 - name: "Pull {{ awx_runner_base_image_name }} from Docker Hub"
   openshift:
