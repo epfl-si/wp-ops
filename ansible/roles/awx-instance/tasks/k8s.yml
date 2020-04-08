@@ -296,9 +296,3 @@
       to:
         kind: Service
         name: awx-web-svc
-
-- when: "ansible_oc_namespace == awx_mgmt_build_namespace"
-  include_tasks:
-    file: runner.yml
-    apply:
-      tags: [ "awx" ]
