@@ -115,7 +115,7 @@
               mountPath: "/var/run/memcached"
           #####################################################
           - name: awx-task
-            image: "ansible/awx_task:{{ awx_version }}"
+            image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_task_image_name }}:{{ awx_version }}
             command:
             - /usr/bin/launch_awx_task.sh
             resources:

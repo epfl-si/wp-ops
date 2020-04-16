@@ -30,3 +30,23 @@
   when: _awx_runner_buildconfig is changed
   shell: "oc -n {{ awx_mgmt_build_namespace }} start-build {{ awx_runner_image_name }}"
   delegate_to: localhost
+
+- name: "Patch {{ awx_task_base_image_fullname }} into {{ awx_task_image_name }}"
+  register: _awx_task_buildconfig
+  openshift_imagestream:
+    tag: "{{ awx_version }}"
+    metadata:
+      name: "{{ awx_task_image_name }}"
+      namespace: "{{ ansible_oc_namespace }}"
+    dockerfile: |
+       FROM {{ awx_task_base_image_fullname }}
+
+       # https://github.com/ansible/awx/issues/6692#issuecomment-613451838
+       USER 0
+       RUN set -e -x; for playbook in /var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/playbooks/*_isolated.yml; do sed -i '/rsync_opts:/a \ \ \ \ \ \ \ \ \ \ -\ "--blocking-io"' $playbook; done
+       USER 1000
+
+- name: "Rebuild {{ awx_task_image_name }} now"
+  when: _awx_task_buildconfig is changed
+  shell: "oc -n {{ awx_mgmt_build_namespace }} start-build {{ awx_task_image_name }}"
+  delegate_to: localhost
