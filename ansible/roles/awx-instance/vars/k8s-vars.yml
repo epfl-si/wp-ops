@@ -4,16 +4,9 @@ awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch
 
-awx_runner_image_name: "wp-ansible-runner"
-awx_runner_image_name_and_tag: "{{ awx_runner_image_name }}:latest"
-awx_runner_image_fullname: "docker-registry.default.svc:5000/{{ awx_mgmt_build_namespace}}/{{ awx_runner_image_name_and_tag }}"
-
 awx_runner_base_image_name: ansible-runner
-awx_runner_base_image_name_and_tag: "{{ awx_runner_base_image_name }}:latest"
-awx_runner_base_image_fullname: "docker.io/ansible/{{ awx_runner_base_image_name_and_tag }}"
-
-awx_runner_wp_mixin_image_name_and_tag: "{{ mgmt_image_name }}:latest"
-awx_runner_wp_mixin_image_fullname: "docker-registry.default.svc:5000/{{ awx_mgmt_build_namespace}}/{{ awx_runner_wp_mixin_image_name_and_tag }}"
+awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
+awx_runner_image_name: "wp-ansible-runner"
 
 awx_wpveritas_inventory: "{{ awx_wpveritas_inventories[ansible_oc_namespace] }}"
 awx_wpveritas_inventories:

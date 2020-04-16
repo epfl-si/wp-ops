@@ -6,13 +6,13 @@
     - awx.k8s
     - awx.openshift
 
-- name: "Ansible Tower runner image and build config"
+- name: "Ansible Tower images and build configs"
   when: "ansible_oc_namespace == awx_mgmt_build_namespace"
-  import_tasks: runner.yml
+  import_tasks: k8s-builds.yml
   delegate_to: localhost
   tags:
     - awx
-    - awx.runner
+    - awx.build
 
 - name: "Ansible Tower database operations"
   include_tasks: ops.yml
