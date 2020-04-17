@@ -1,7 +1,6 @@
 # Set up job templates available to AWX.
 
 - name: "Preconfigure templates job"
-  tags: awx.job-template
   awx_script:
     supports_check_mode: yes
     script: |
@@ -16,7 +15,6 @@
           update_json_status(changed=False)
 
 - name: "Set up templates job for theme selection"
-  tags: awx.job-template
   awx_script:
     supports_check_mode: yes
     script: |
@@ -34,7 +32,6 @@
       update_json_status(changed=get_or_create_job_template(**kwarg))
 
 - name: "Set up templates job for aligning sites"
-  tags: awx.job-template
   awx_script:
     supports_check_mode: yes
     script: |
