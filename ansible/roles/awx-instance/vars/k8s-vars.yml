@@ -1,23 +1,15 @@
-awx_version: 9.2.0
-awx_rabbitmq_version: 3.7.21
+awx_version: 10.0.0
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch
 
-awx_runner_image_name: "wp-ansible-runner"
-awx_runner_image_name_and_tag: "{{ awx_runner_image_name }}:latest"
-
 awx_runner_base_image_name: ansible-runner
-awx_runner_base_image_name_and_tag: "{{ awx_runner_base_image_name }}:latest"
-awx_runner_base_image_fullname: "docker.io/ansible/{{ awx_runner_base_image_name_and_tag }}"
+awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
+awx_runner_image_name: "wp-ansible-runner"
 
-awx_runner_wp_mixin_image_name_and_tag: "{{ mgmt_image_name }}:latest"
-awx_runner_wp_mixin_image_fullname: "docker-registry.default.svc:5000/{{ awx_mgmt_build_namespace}}/{{ awx_runner_wp_mixin_image_name_and_tag }}"
-
-# The namespace we build in (and consume build images from).
-# awx-runner.yml is inoperative, except in this namespace.
-awx_mgmt_build_namespace: wwp-test
+awx_task_base_image_fullname: "docker.io/ansible/awx_task:{{ awx_version }}"
+awx_task_image_name: "wp-awx-task"
 
 awx_wpveritas_inventory: "{{ awx_wpveritas_inventories[ansible_oc_namespace] }}"
 awx_wpveritas_inventories:

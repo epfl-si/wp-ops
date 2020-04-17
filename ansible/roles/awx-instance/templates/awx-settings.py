@@ -36,6 +36,9 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+# Maximum ?page_size= value in API queries
+MAX_PAGE_SIZE = 1000
+
 LOGGING['handlers']['console'] = {
     '()': 'logging.StreamHandler',
     'level': 'DEBUG',

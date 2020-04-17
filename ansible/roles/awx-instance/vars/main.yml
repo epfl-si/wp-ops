@@ -12,3 +12,11 @@ awx_elastic_container_group_name: "tower-elastic"
 
 k8s_apiserver_address: "https://pub-os-exopge.epfl.ch:443"
 k8s_service_ca_crt_file: "/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+
+awx_template_jobs_slice_count: 10
+awx_template_jobs_playbook: "ansible/playbooks/wordpress-main.yml"
+awx_template_jobs_verbosity: 0
+
+# The namespace we build in (and consume build images from).
+# ../tasks/runner.yml is only applied in this namespace.
+awx_mgmt_build_namespace: wwp-test

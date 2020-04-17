@@ -1,0 +1,3 @@
+- name: Restart AWX container
+  delegate_to: localhost
+  shell: "oc -n {{ ansible_oc_namespace }} delete pod awx-0"

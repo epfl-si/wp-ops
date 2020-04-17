@@ -325,7 +325,9 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
         if not file_exists:
-                return 'absent'
+            return 'absent'
+        if not plugin_stat['stat']:
+            return 'absent'
         elif plugin_stat['stat']['islnk']:
             if (plugin_stat['stat']['lnk_target'] ==
                 self._get_symlink_target(basename)):
