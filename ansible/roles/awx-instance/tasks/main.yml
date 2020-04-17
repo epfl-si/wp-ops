@@ -7,7 +7,7 @@
     - awx.openshift
 
 - name: "Ansible Tower images and build configs"
-  when: "ansible_oc_namespace == awx_mgmt_build_namespace"
+  when: "ansible_oc_namespace == awx_build_namespace"
   import_tasks: k8s-builds.yml
   delegate_to: localhost
   tags:
