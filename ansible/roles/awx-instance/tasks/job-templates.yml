@@ -8,8 +8,7 @@
       from awx.main.models.jobs import JobTemplate
       try:
           jt = JobTemplate.objects.get(name="Demo Job Template")
-          if not jt.project and not jt.inventory:
-            jt.delete()
+          jt.delete()
           update_json_status(changed=True)
       except JobTemplate.DoesNotExist:
           update_json_status(changed=False)
