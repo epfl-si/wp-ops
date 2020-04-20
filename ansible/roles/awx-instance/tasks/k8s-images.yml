@@ -1,0 +1,25 @@
+# Sync Docker images built in test into production
+
+- include_vars: k8s-vars.yml
+
+- name: "Get current version of {{ awx_task_image_name }} in {{ ansible_oc_namespace }}"
+  delegate_to: localhost
+  changed_when: false
+  shell:
+    cmd: |
+      oc get -o json -n {{ ansible_oc_namespace }} imagestream {{ awx_task_image_name }}
+  register: _awx_task_imagestream
+
+- set_fact:
+    _awx_task_current_tag: |-
+      {{ (_awx_task_imagestream.stdout | imagestream_tag_map).get(awx_version, "__NONE__") }}
+
+- name: "Promote {{ awx_task_image_name }} to {{ ansible_oc_namespace }}"
+  delegate_to: localhost
+  shell:
+    cmd: |
+      oc tag  {{ awx_build_namespace }}/{{ awx_task_image_name }}:{{ awx_version }} \
+             {{ ansible_oc_namespace }}/{{ awx_task_image_name }}:{{ awx_version }}
+  register: _awx_oc_tag
+  changed_when: _awx_task_current_tag not in _awx_oc_tag.stdout
+  notify: Restart AWX container
