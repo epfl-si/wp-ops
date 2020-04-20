@@ -38,7 +38,7 @@
       awx_settings: "{{ lookup('template', 'awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
       redis_conf: "{{ lookup('template', 'redis.conf') }}"
-  notify: Restart AWX container
+  notify: Restart AWX pod
 
 - name: Ansible Tower secret (awx-secrets)
   openshift:
@@ -54,7 +54,7 @@
       credentials_py: "{{ lookup('template', 'credentials.py.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
-  notify: Restart AWX container
+  notify: Restart AWX pod
 
 - name: awx service account
   openshift:
@@ -217,7 +217,7 @@
             emptyDir: {}
           - name: awx-memcached-socket
             emptyDir: {}
-  notify: Restart AWX container
+  notify: Restart AWX pod
 
 - meta: flush_handlers
 

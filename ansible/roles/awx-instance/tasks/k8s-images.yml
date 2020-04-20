@@ -22,4 +22,4 @@
              {{ ansible_oc_namespace }}/{{ awx_task_image_name }}:{{ awx_version }}
   register: _awx_oc_tag
   changed_when: _awx_task_current_tag not in _awx_oc_tag.stdout
-  notify: Restart AWX container
+  notify: Restart AWX pod
