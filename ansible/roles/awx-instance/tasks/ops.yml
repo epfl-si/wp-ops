@@ -1,30 +1,50 @@
 # The tasks in this directory are *not* loaded or run, unless their specific
 # tag is mentioned on the command line.
 
-- name: Dump Ansible Tower database
-  tags: awx.dump
-  connection: local
-  shell: |
-    set -e -x
-    cd ..   # Out of .interactive-playbooks
-    [ -d state/awx ] || mkdir -p state/awx 2>/dev/null
-    oc exec -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
-         awx-manage dumpdata --indent=4 --natural-primary --natural-foreign \
-         > state/awx/awx-{{ansible_oc_namespace}}.djangodump
-    # belt *and* suspenders:
-    oc exec -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
-        bash -c '. /etc/tower/conf.d/environment.sh; PGPASSWORD="$DATABASE_PASSWORD" pg_dump -c -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"' \
-        > state/awx/awx-{{ansible_oc_namespace}}.sql
+- include_vars: ops-vars.yml
+  tags:
+    - awx.dump
+    - awx.restore
 
-- name: Restore Ansible Tower database
+- name: "Create {{ ops_state_dir }}"
+  delegate_to: localhost
+  tags: awx.dump
+  file:
+    path: "{{ ops_state_dir }}"
+    state: directory
+
+- name: Dump Ansible Tower database (SQL dump)
+  tags: awx.dump
+  delegate_to: localhost
+  shell:
+    cmd: |
+      oc exec {{ ops_oc_exec_args }} -- bash -c '
+        eval $({{ lookup('template', 'pg_env.sh') }})
+        export PGPASSWORD="$DATABASE_PASSWORD"
+        pg_dump -c -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"
+      ' > {{ ops_sql_backup }}
+
+# Belt *and* suspenders:
+- name: Dump Ansible Tower database (Django dump)
+  tags: awx.dump
+  delegate_to: localhost
+  shell:
+    cmd: |
+      oc exec {{ ops_oc_exec_args }} -- \
+         awx-manage dumpdata --indent=4 --natural-primary --natural-foreign \
+         > {{ ops_django_backup }}
+
+- name: Restore Ansible Tower database from the SQL dump
   tags: awx.restore
-  connection: local
-  shell: |
-    set -e -x
-    cd ..   # Out of .interactive-playbooks
-    [ -d state/awx ] || mkdir -p state/awx 2>/dev/null
-    # TODO: we would like to restore from the .djangodump instead; unfortunately it raises django.db.utils.IntegrityError
-    # (presumably because the model-level integrity constraints were not applied timely).
-    oc exec -i -c awx-web -n {{ ansible_oc_namespace }} awx-0 -- \
-        bash -c '. /etc/tower/conf.d/environment.sh; PGPASSWORD="$DATABASE_PASSWORD" psql -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"' \
-        < state/awx/awx-{{ ansible_oc_namespace }}.sql
+  delegate_to: localhost
+  # TODO: we would like to be able to restore from the Django dump
+  # instead (or in addition); unfortunately the current data set
+  # causes django.db.utils.IntegrityError (presumably because the
+  # model-level integrity constraints were not applied timely).
+  shell:
+    cmd: |
+      oc exec -i {{ ops_oc_exec_args }} -- bash -c '
+        eval $({{ lookup('template', 'pg_env.sh') }})
+        export PGPASSWORD="$DATABASE_PASSWORD"
+        psql -U "$DATABASE_USER" -d "$DATABASE_NAME" -h "$DATABASE_HOST" -p "$DATABASE_PORT"
+      ' < {{ ops_sql_backup }}
