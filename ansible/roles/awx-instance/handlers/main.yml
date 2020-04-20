@@ -1,3 +1,13 @@
-- name: Restart AWX container
+- name: Restart AWX pod
   delegate_to: localhost
-  shell: "oc -n {{ ansible_oc_namespace }} delete pod awx-0"
+  shell:
+    cmd: |
+      set -e -x
+      oc -n {{ ansible_oc_namespace }} delete pod awx-0
+      for wait in $(seq 1 60); do
+        if oc -n {{ ansible_oc_namespace }} describe pod awx-0 |grep 'Status: *Running'; then
+          break
+        else
+          sleep 2
+        fi
+      done

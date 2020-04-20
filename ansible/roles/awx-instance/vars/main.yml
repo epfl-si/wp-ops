@@ -18,5 +18,5 @@ awx_template_jobs_playbook: "ansible/playbooks/wordpress-main.yml"
 awx_template_jobs_verbosity: 0
 
 # The namespace we build in (and consume build images from).
-# ../tasks/runner.yml is only applied in this namespace.
-awx_mgmt_build_namespace: wwp-test
+# ../tasks/k8s-build.yml is only applied in this namespace.
+awx_build_namespace: wwp-test

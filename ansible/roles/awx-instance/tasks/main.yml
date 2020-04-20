@@ -1,3 +1,19 @@
+- name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
+  when: "ansible_oc_namespace == awx_build_namespace"
+  import_tasks: k8s-builds.yml
+  delegate_to: localhost
+  tags:
+    - awx
+    - awx.build
+
+- name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
+  when: "ansible_oc_namespace != awx_build_namespace"
+  import_tasks: k8s-images.yml
+  delegate_to: localhost
+  tags:
+    - awx
+    - awx.images
+
 - name: "Ansible Tower OpenShift objects"
   import_tasks: k8s.yml
   delegate_to: localhost
@@ -5,14 +21,6 @@
     - awx
     - awx.k8s
     - awx.openshift
-
-- name: "Ansible Tower images and build configs"
-  when: "ansible_oc_namespace == awx_mgmt_build_namespace"
-  import_tasks: k8s-builds.yml
-  delegate_to: localhost
-  tags:
-    - awx
-    - awx.build
 
 - name: "Ansible Tower database operations"
   include_tasks: ops.yml
