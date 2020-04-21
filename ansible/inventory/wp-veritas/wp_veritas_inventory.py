@@ -41,8 +41,7 @@ class WpVeritasSite:
            site_data['url'] == '' or \
            site_data['openshiftEnv'] == '' or \
            site_data['openshiftEnv'].startswith('unm-') or \
-           site_data['openshiftEnv'] == 'manager' or \
-           site_data['openshiftEnv'] == 'subdomains':
+           site_data['openshiftEnv'] == 'manager':
             return False
         else:
             return True
