@@ -18,6 +18,7 @@
               with AnsibleGetOrCreate(InventorySource,
                                       name="{{ awx_inventory_source_name }}"
                                      ) as src:
+                  src.source = 'custom'
                   src.source_script = script
     supports_check_mode: yes
     vars:
