@@ -29,6 +29,8 @@
   with_items:
     - name: "{{ awx_task_image_name }}"
       version: "{{ awx_version }}"
+    - name: "{{ awx_runner_image_name }}"
+      version: latest
 
 - name: "Ansible Tower OpenShift objects"
   import_tasks: k8s.yml
