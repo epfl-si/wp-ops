@@ -120,6 +120,12 @@ class WpVeritasSite(_Site):
             logging.debug("Error: Missing field in provided data: %s" % site_data)
             raise e
 
+    @property
+    def hostvars(self):
+        hostvars = _Site.hostvars.fget(self)
+        hostvars['wpveritas_url'] = self.url
+        return hostvars
+
 
 class WpVeritasTestSite(WpVeritasSite):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
@@ -135,11 +141,8 @@ class _LiveSite(_Site):
     @classmethod
     def all(cls):
         logging.debug('Fetching live sites from the %s namespace' % cls.k8s_namespace)
-        for p in cls._find_wp_configs():
-            parsed = re.match(r'/srv/([^/]*)/([^/]*)/htdocs/?(.*?)$', os.path.dirname(p))
-            site = cls(wwp_env=parsed.group(1),
-                       wp_hostname=parsed.group(2),
-                       wp_path=parsed.group(3))
+        for path in cls._find_wp_configs():
+            site = cls(os.path.dirname(path))
             if site._keep():
                 yield site
 
@@ -173,6 +176,19 @@ class _LiveSite(_Site):
         return reduce(lambda a,b: a + ['-o'] + b,
                       [['-name', excl] for excl in cls._excluded_patterns] +
                       [['-path', excl] for excl in cls._excluded_paths])
+
+    def __init__(self, path):
+        parsed = re.match(r'/srv/([^/]*)/([^/]*)/htdocs/?(.*?)$', path)
+        super(_LiveSite, self).__init__(wwp_env=parsed.group(1),
+                                        wp_hostname=parsed.group(2),
+                                        wp_path=parsed.group(3))
+        self.nfs_path = path
+
+    @property
+    def hostvars(self):
+        hostvars = _Site.hostvars.fget(self)
+        hostvars['nfs_path'] = self.nfs_path
+        return hostvars
 
 
 class LiveTestSite(_LiveSite):
