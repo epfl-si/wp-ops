@@ -1,6 +1,5 @@
 # Variables related to EPFL accred system and access control
 wp_administrator_group: WP-SuperAdmin
 
-# This should come from WP-Veritas inventory. If Ansible is run with an "existing sites" inventory,
 wp_unit_name: '{{ lookup("wpveritas", "unitName") }}'
 wp_unit_id: '{{ lookup("wpveritas", "unitId") }}'
