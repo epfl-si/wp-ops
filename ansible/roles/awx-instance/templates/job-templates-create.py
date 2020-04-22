@@ -5,6 +5,7 @@ from awx.main.models.ha import InstanceGroup
 from awx.main.models.jobs import JobTemplate
 from awx.main.models.schedules import Schedule
 
+{{ lookup("template", "awx_script_lib.py") }}
 
 def get_or_create_job_template(
     job_name,
@@ -19,38 +20,21 @@ def get_or_create_job_template(
       project = Project.objects.get(name="{{ awx_project_name }}")
       container_group = InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")
 
-      changed = False
 
-      try:
-          jt = JobTemplate.objects.get(name=job_name)
-      except JobTemplate.DoesNotExist:
-          jt = JobTemplate.objects.create(
-                  name=job_name,
-                  description = job_description,
-                  job_tags = job_tags,
-                  job_type = job_type,
-                  project = project,
-                  playbook = '{{ awx_template_jobs_playbook }}',
-                  inventory = inventory,
-                  job_slice_count = {{ awx_template_jobs_slice_count }},
-                  verbosity = {{ awx_template_jobs_verbosity }}
-              )
-          changed=True
+      with AnsibleGetOrCreate(JobTemplate, name=job_name) as jt:
+            jt.description = job_description
+            jt.job_tags = job_tags
+            jt.job_type = job_type
+            jt.project = project
+            jt.playbook = '{{ awx_template_jobs_playbook }}'
+            jt.inventory = inventory
+            jt.job_slice_count = {{ awx_template_jobs_slice_count }}
+            jt.verbosity = {{ awx_template_jobs_verbosity }}
 
-      # Set instance group
-      if not jt.instance_groups.filter(name=container_group.name):
-          jt.instance_groups.add(container_group)
-          changed=True
+            if not jt.instance_groups.filter(name=container_group.name):
+                  jt.instance_groups.add(container_group)
 
-      # Set schedule for the job
-      try:
-          schedule = Schedule.objects.get(unified_job_template=jt, name=job_schedule_name)
-      except Schedule.DoesNotExist:
-          schedule = Schedule.objects.create(
-              unified_job_template=jt,
-              name=job_schedule_name,
-              rrule=job_schedule_rrule
-              )
-          changed=True
-
-      return changed
+            with AnsibleGetOrCreate(Schedule, name=job_schedule_name) as schedule:
+                  schedule.unified_job_template=jt
+                  schedule.name=job_schedule_name
+                  schedule.rrule=job_schedule_rrule
