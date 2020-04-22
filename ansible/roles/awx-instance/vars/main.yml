@@ -3,7 +3,7 @@ awx_project_name: "WWP"
 awx_project_github_url: "https://github.com/epfl-si/wp-ops"
 
 awx_inventory_script_name: "WordPress instances"
-awx_inventory_script_path: "../../../inventory/wp-veritas/wp_veritas_inventory.py"
+awx_inventory_script_path: "../../../inventory/wordpress-instances.py"
 awx_inventory_source_name: "WordPress instances"
 awx_inventory_name: "WordPress instances"
 

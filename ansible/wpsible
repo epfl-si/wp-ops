@@ -56,16 +56,16 @@ NO_EYAML
 
 inventory_mode="test"
 inventories () {
+    echo "-i inventory/wordpress-instances.py"
     case "$inventory_mode" in
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
-        wp_veritas) echo "-i inventory/wp-veritas" ;;
     esac
 }
 
 ###########################################################################
 
-export WPVERITAS_INVENTORIES=test
+export WWP_NAMESPACES=wwp-test
 
 mode=ansible-playbook
 
@@ -74,10 +74,10 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
         --prod)
             inventory_mode="test_and_prod"
-            WPVERITAS_INVENTORIES="test,prod"
+            WWP_NAMESPACES="wwp-test,wwp"
             shift ;;
         --wp-veritas)
-            inventory_mode="wp_veritas"
+            # Ignored for backward compatibility
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
