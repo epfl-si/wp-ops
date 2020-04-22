@@ -77,15 +77,17 @@ class WordPressActionModule(ActionBase):
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
-    def _run_wp_cli_action (self, args, update_result=True):
+    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
+
         return self._run_shell_action(
-            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result)
+            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result,
+            also_in_check_mode=also_in_check_mode)
 
 
     def _run_php_code(self, code, update_result=True):
@@ -100,18 +102,18 @@ class WordPressActionModule(ActionBase):
         return result['stdout_lines']
 
 
-    def _run_shell_action (self, cmd, update_result=True):
+    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result,
+                                also_in_check_mode=also_in_check_mode)
 
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result)
 
-
-    def _run_action (self, action_name, args, update_result=True):
+    def _run_action (self, action_name, args, update_result=True, also_in_check_mode=False):
         """
         Executes an action, using an Ansible module.
 
@@ -119,10 +121,25 @@ class WordPressActionModule(ActionBase):
         :param args: dict with arguments to give to module
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
+
+        self._display.vvv('_run_action(%s, %s, update_result=%s, also_in_check_mode=%s)' %
+                          (action_name, args, update_result, also_in_check_mode))
+
+        result = None
+        if self._is_check_mode():
+            if also_in_check_mode:
+                # Get Ansible to run the task regardless
+                args = deepcopy(args)
+                args['check_mode'] = False  # Meaning that yes, it supports check mode
+            else:
+                # Simulate "orange" condition
+                result = dict(changed=True)
+
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
-        result = self._execute_module(module_name=action_name,
-                                      module_args=args, tmp=self._tmp,
-                                      task_vars=self._task_vars)
+        if result is None:
+            result = self._execute_module(module_name=action_name,
+                                          module_args=args, tmp=self._tmp,
+                                          task_vars=self._task_vars)
 
         if update_result:
             self._update_result(result)
@@ -162,6 +179,10 @@ class WordPressActionModule(ActionBase):
                 # check if match a github repo
                 and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
                 and not from_piece.endswith(".zip"))
+
+
+    def _is_check_mode (self):
+        return self._task_vars.get('ansible_check_mode', False)
 
 
     def _update_result (self, result):
@@ -387,7 +408,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
-        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), update_result=False)
+        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True, update_result=False)
 
         if 'failed' in result: return
 

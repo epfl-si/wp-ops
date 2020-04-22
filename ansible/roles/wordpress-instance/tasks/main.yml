@@ -77,7 +77,7 @@
       tags: ["config"]
 
 - name: Set up plugins
-  when: wp_can.configure
+  when: wp_can.configure or ansible_check_mode
   tags:
     - plugins
   include_tasks:
@@ -86,7 +86,7 @@
       tags: ["plugins"]
 
 - name: Set up themes
-  when: wp_can.configure
+  when: wp_can.configure or ansible_check_mode
   tags:
     - themes
   include_tasks:
