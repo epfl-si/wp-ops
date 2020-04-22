@@ -57,7 +57,7 @@ class ActionModule(WordPressActionModule):
 
     def _is_wp_installed (self):
         stat = self._stat('wp-config.php')
-        return stat['stat']['exists']
+        return ('stat' in stat) and (stat['stat']['exists'])
 
     def _is_wp_symlinked (self):
         stat = self._stat('wp-admin')
