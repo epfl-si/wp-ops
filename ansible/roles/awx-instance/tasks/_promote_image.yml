@@ -10,12 +10,14 @@
 - name: "Get current version of {{ promote_image_name }} in {{ ansible_oc_namespace }}"
   delegate_to: localhost
   changed_when: false
+  ignore_errors: yes
   shell:
     cmd: |
       oc get -o json -n {{ ansible_oc_namespace }} imagestream {{ promote_image_name }}
   register: _promote_get_imagestream
 
-- set_fact:
+- when: _promote_get_imagestream is success
+  set_fact:
     _promote_current_tag: |-
       {{ (_promote_get_imagestream.stdout | imagestream_tag_map).get(promote_image_tag, "__NONE__") }}
 
@@ -26,5 +28,5 @@
       oc tag  {{ promote_from_namespace }}/{{ promote_image_name }}:{{ promote_image_tag }} \
              {{ ansible_oc_namespace }}/{{ promote_image_name }}:{{ promote_image_tag }}
   register: _promote_oc_tag
-  changed_when: _promote_current_tag not in _promote_oc_tag.stdout
+  changed_when: (_promote_current_tag is not defined) or (_promote_current_tag not in _promote_oc_tag.stdout)
   notify: Restart AWX pod
