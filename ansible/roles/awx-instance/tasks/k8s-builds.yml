@@ -26,6 +26,14 @@
       RUN mkdir /runner/.wp-cli
       COPY --from=0 /var/www/.wp-cli /runner/.wp-cli
 
+      # We will be running as UID 33, GID 33 (the credentials we have
+      # been using historically, e.g. in the mgmt image, and are
+      # therefore in use for file ownership on NFS).
+      RUN groupdel $(getent group 33 |cut -d: -f1)
+      RUN groupadd -g 33 www-data
+      RUN useradd -u 33 -g 33 -d /runner www-data
+      RUN chgrp -R www-data /runner
+
       # Work around https://github.com/ansible/awx/issues/2893
       RUN yum -y install patch curl; curl https://github.com/domq/ansible-runner/commit/06f38faffd546d0d25c7708fa77a97d6e882a1bd.patch | patch -p1 /usr/lib/python2.7/site-packages/ansible_runner/runner.py
 

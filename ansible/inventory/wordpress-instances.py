@@ -31,9 +31,8 @@ class _Site:
         }
         if Environment.is_awx():
             hostvars.update({
-                'ansible_connection': 'local',
-                        "ansible_become": True,
-                "ansible_become_user": "www-data"
+                'ansible_connection': 'local'
+                # No need for become; see runAsUser in the container spec
             })
         else:
             # TODO: at some point we will be forced to use oc instead of ssh.

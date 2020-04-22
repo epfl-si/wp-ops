@@ -55,6 +55,15 @@
       metadata:
         namespace: {{ ansible_oc_namespace }}
       spec:
+        # Run as this user for historical compatibility reasons; see
+        # comments in the inline Dockerfile in k8s-builds.yml
+        securityContext:
+          runAsUser: 33
+        # The wwp serviceAccount just happens to have permission to run as any user.
+        # TODO: we should have same permission granted to the `awx` serviceAccount,
+        # and get rid of the next two lines.
+        serviceAccount: wwp
+        serviceAccountName: wwp
         containers:
           - image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest
             tty: true
