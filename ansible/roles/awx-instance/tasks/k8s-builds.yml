@@ -31,7 +31,7 @@
 
 - name: "Rebuild {{ awx_runner_image_name }} now"
   when: _awx_runner_buildconfig is changed
-  shell: "oc -n {{ awx_build_namespace }} start-build {{ awx_runner_image_name }}"
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
 
 - name: "Patch {{ awx_task_base_image_fullname }} into {{ awx_task_image_name }}"
@@ -51,5 +51,5 @@
 
 - name: "Rebuild {{ awx_task_image_name }} now"
   when: _awx_task_buildconfig is changed
-  shell: "oc -n {{ awx_build_namespace }} start-build {{ awx_task_image_name }}"
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_task_image_name }}"
   delegate_to: localhost
