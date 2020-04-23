@@ -26,7 +26,7 @@
           cred.organization = org
           cred.description = "The K8S credentials of the service account awx itself is running under"
           cred.inputs = dict(
-              host="{{ k8s_apiserver_address }}",
+              host="https://kubernetes.default.svc/",
               verify_ssl=True,
               ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
               bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
