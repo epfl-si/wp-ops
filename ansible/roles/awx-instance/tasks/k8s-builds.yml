@@ -17,10 +17,13 @@
       name: "{{ awx_runner_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
     dockerfile: |
-      FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ mgmt_image_name }}:latest
+      FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ wp_base_image_name }}:latest
       FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_base_image_name }}:latest
 
-      RUN yum -y install php-cli python3
+      RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+      RUN yum-config-manager --disable remi-php54 && \
+          yum-config-manager --enable remi-php73
+      RUN yum -y install php-cli php-mysql python3
 
       COPY --from=0 /usr/local/bin/wp /usr/local/bin/
       RUN mkdir /runner/.wp-cli
