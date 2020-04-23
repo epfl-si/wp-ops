@@ -28,17 +28,21 @@ class _Site:
             "wp_hostname": self.wp_hostname,
             "wp_path": self.wp_path,
             "openshift_namespace": self.k8s_namespace,
-            "ansible_become": True,
-            "ansible_become_user": "www-data"
         }
         if Environment.is_awx():
-            hostvars.update({ 'ansible_connection': 'local' })
-        else:
             hostvars.update({
-                'ansible_connection': 'oc',
-                'ansible_oc_namespace': self.k8s_namespace,
-                'ansible_oc_pod': K8sNamespace(self.k8s_namespace).get_mgmt_pod_name(),
-                'ansible_python_interpreter': '/usr/bin/python3',
+                'ansible_connection': 'local',
+                        "ansible_become": True,
+                "ansible_become_user": "www-data"
+            })
+        else:
+            # TODO: at some point we will be forced to use oc instead of ssh.
+            hostvars.update({
+                'ansible_connection': 'ssh',
+                'ansible_ssh_host': self._get_wwp_ssh_host(),
+                'ansible_ssh_port': 32222,
+                'ansible_ssh_user': 'www-data',
+                'ansible_python_interpreter': '/usr/bin/python3'
             })
         return hostvars
 
@@ -76,6 +80,11 @@ class _Site:
             path = re.sub(r'\/', '__', path)
             path = re.sub(r'\W', '_', path)
             return "{}__{}".format(hostname, path)
+
+    def _get_wwp_ssh_host(self):
+        ssh_hosts = {'wwp': 'ssh-wwp.epfl.ch',
+                      'wwp-test': 'test-ssh-wwp.epfl.ch'}
+        return ssh_hosts[self.k8s_namespace]
 
 
 class WpVeritasSite(_Site):
