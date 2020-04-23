@@ -196,6 +196,10 @@ class LiveTestSite(_LiveSite):
     _find_in_dirs = '/srv'
     _excluded_paths = ['/srv/lvenries', '/srv/jenkins', '/srv/int/jahia2wp/data/backups']
 
+    @property
+    def instance_name(self):
+        return 'test_' + super().instance_name
+
 
 class LiveProductionSite(_LiveSite):
     k8s_namespace = "wwp"
