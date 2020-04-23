@@ -28,6 +28,7 @@ class _Site:
             "wp_hostname": self.wp_hostname,
             "wp_path": self.wp_path,
             "openshift_namespace": self.k8s_namespace,
+            "ansible_python_interpreter": '/usr/bin/python3'
         }
         if Environment.is_awx():
             hostvars.update({
@@ -40,8 +41,7 @@ class _Site:
                 'ansible_connection': 'ssh',
                 'ansible_ssh_host': self._get_wwp_ssh_host(),
                 'ansible_ssh_port': 32222,
-                'ansible_ssh_user': 'www-data',
-                'ansible_python_interpreter': '/usr/bin/python3'
+                'ansible_ssh_user': 'www-data'
             })
         return hostvars
 
