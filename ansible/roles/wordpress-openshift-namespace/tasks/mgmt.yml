@@ -1,6 +1,7 @@
 - include_vars: mgmt-vars.yml
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
 - include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
+- include_vars: "secrets-{{ openshift_namespace }}.yml"
 
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
   openshift:
@@ -15,6 +16,33 @@
           app: mgmt
       data:
         {{ mgmt_secret_contents | to_yaml | indent(width=2) }}
+
+- name: jahia2wp-env ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: jahia2wp-env
+      namespace: "{{ openshift_namespace }}"
+    data:
+      WP_ADMIN_USER: admin
+      WP_ADMIN_EMAIL: test@example.com
+      WP_VERSION: unused
+
+- name: mysql-super-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysql-super-credentials
+      namespace: "{{ openshift_namespace }}"
+    type: Opaque
+    data:
+      MYSQL_DB_HOST: "{{ mysql_super_credentials.host | b64encode }}"
+      MYSQL_SUPER_USER: "{{ mysql_super_credentials.user | b64encode }}"
+      MYSQL_SUPER_PASSWORD: "{{ mysql_super_credentials.password | eyaml(eyaml_keys) | b64encode }}"
 
 - name: mgmt DeploymentConfig
   openshift:
@@ -53,6 +81,11 @@
               - name: backups
                 mountPath: /backups
       {% endif %}
+              envFrom:
+                - configMapRef:
+                    name: jahia2wp-env
+                - secretRef:
+                    name: mysql-super-credentials
             serviceAccount: {{ mgmt_service_account }}
             serviceAccountName: {{ mgmt_service_account }}
             volumes:
