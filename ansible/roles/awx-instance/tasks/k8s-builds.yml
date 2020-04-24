@@ -28,6 +28,7 @@
       COPY --from=0 /usr/local/bin/wp /usr/local/bin/
       RUN mkdir /runner/.wp-cli
       COPY --from=0 /var/www/.wp-cli /runner/.wp-cli
+      COPY --from=0 /wp /wp
 
       # We want to run as the credentials we have been using
       # historically in the mgmt image, and are therefore still in use
