@@ -210,12 +210,11 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def __init__(self, name, urls, jahia2wp=None):
+    def __init__(self, name, urls):
         super(ZipPlugin, self).__init__(name, urls)
         assert len(self.urls) == 1
         self.url = self.urls[0]
         assert self.url.startswith("http")
-        self.jahia2wp = jahia2wp
 
     def install(self, target_dir, rename_like_self=True):
         """Unzip into `target_dir`.
