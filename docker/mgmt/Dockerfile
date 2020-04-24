@@ -35,7 +35,7 @@ RUN mkdir /var/run/sshd && \
     rm -rf /tmp/openshift && \
     mkdir /root/.ssh
 
-COPY jahia2wp.sh /etc/profile.d/
+COPY nfs-bashrc.sh /etc/profile.d/
 COPY new-wp-site.sh /usr/local/bin/new-wp-site
 RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
