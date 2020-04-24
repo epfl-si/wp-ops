@@ -130,7 +130,8 @@ class WordPressActionModule(ActionBase):
             if also_in_check_mode:
                 # Get Ansible to run the task regardless
                 args = deepcopy(args)
-                args['check_mode'] = False  # Meaning that yes, it supports check mode
+                if action_name == 'command':
+                    args['check_mode'] = False  # Meaning that yes, it supports check mode
             else:
                 # Simulate "orange" condition
                 result = dict(changed=True)
@@ -341,7 +342,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         :param basename: name of element to check (can be a file or folder)
         """
         path = self._get_symlink_path(basename)
-        plugin_stat = self._run_action('stat', { 'path': path })
+        plugin_stat = self._run_action('stat', { 'path': path }, update_result=False, also_in_check_mode=True)
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])

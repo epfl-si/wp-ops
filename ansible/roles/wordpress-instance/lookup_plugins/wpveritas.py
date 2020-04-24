@@ -16,13 +16,22 @@ Configuration is done through Ansible variables:
 : The URL of the WordPress site to look up
 """
 
+# Important: this script requires Python 2.7 compatibility, as the
+# ansible-runner Docker image that we currently use doesn't have
+# Python 3.
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-from urllib.request import urlopen    # Python 2? Naah.
-from ssl import SSLContext
+try:
+    from urllib2 import urlopen
+except ModuleNotFoundError:
+    # Python 3.x
+    from urllib.request import urlopen
+
+import ssl
 import json
 
 class LookupModule(LookupBase):
@@ -72,9 +81,15 @@ class WpVeritas(object):
     def _do_fetch(cls, wpveritas_api_url):
 
         if "nip.io" in wpveritas_api_url:
-            context = SSLContext(verify=False)
+            try:
+                context = ssl.SSLContext(verify=False)
+            except TypeError:
+                # Python 2.7, see https://stackoverflow.com/a/28048260/435004
+                context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
         else:
             context = None
 
-        with urlopen(wpveritas_api_url + '/v1/sites', context=context) as url:
-            return json.loads(url.read().decode())
+        handle = urlopen(wpveritas_api_url + '/v1/sites', context=context)
+        return json.loads(handle.read().decode('utf-8'))

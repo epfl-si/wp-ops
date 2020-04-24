@@ -6,6 +6,8 @@
 # This requires a so-called AWX credential, so that AWX may talk to
 # the Kubernetes API server and start and stop pods.
 
+- include_vars: k8s-vars.yml
+
 - name: "Set up K8S bearer token credential"
   tags: awx.credential
   awx_script:
@@ -26,7 +28,7 @@
           cred.organization = org
           cred.description = "The K8S credentials of the service account awx itself is running under"
           cred.inputs = dict(
-              host="{{ k8s_apiserver_address }}",
+              host="https://kubernetes.default.svc/",
               verify_ssl=True,
               ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
               bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
@@ -55,11 +57,22 @@
       metadata:
         namespace: {{ ansible_oc_namespace }}
       spec:
+        # Run as this user for historical compatibility reasons; see
+        # comments in the inline Dockerfile in k8s-builds.yml
+        securityContext:
+          runAsUser: {{ awx_unix_credentials.uid }}
+        serviceAccount: {{ awx_runner_service_account }}
+        serviceAccountName: {{ awx_runner_service_account }}
         containers:
           - image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest
             tty: true
             stdin: true
             imagePullPolicy: Always
+            env:
+              # Just to mute a stray error in /bin/entrypoint
+              - name: CURRENT_UID
+                value: "{{ awx_unix_credentials.uid }}"   # Value must be a string (not an int),
+                                                          # hence the double quotes
             args:
               - sleep
               - infinity

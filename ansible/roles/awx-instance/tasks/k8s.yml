@@ -62,7 +62,7 @@
     apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: awx
+      name: "{{ awx_service_account }}"
       namespace: "{{ ansible_oc_namespace }}"
 
 - name: Ansible Tower StatefulSet
@@ -133,6 +133,9 @@
               mountPath: "/var/run/redis"
             - name: awx-memcached-socket
               mountPath: "/var/run/memcached"
+            - name: wp-nfs
+              mountPath: "/srv"
+              readOnly: true
             env:
               - name: MY_POD_UID
                 valueFrom:
@@ -155,7 +158,6 @@
               - name: awx-redis-config
                 mountPath: "/etc/redis"
                 readOnly: true
-
               - name: awx-redis-socket
                 mountPath: "/var/run/redis"
           #####################################################
@@ -180,10 +182,13 @@
 
           dnsPolicy: ClusterFirst
           restartPolicy: Always
-          serviceAccount: awx
-          serviceAccountName: awx
+          serviceAccount: "{{ awx_service_account }}"
+          serviceAccountName: "{{ awx_service_account }}"
           terminationGracePeriodSeconds: 10
           volumes:
+          - name: wp-nfs
+            persistentVolumeClaim:
+              claimName: wordpress-0
           - name: awx-application-config
             configMap:
               name: awx-config
