@@ -69,6 +69,11 @@
             tty: true
             stdin: true
             imagePullPolicy: Always
+            env:
+              # Just to mute a stray error in /bin/entrypoint
+              - name: CURRENT_UID
+                value: "{{ awx_unix_credentials.uid }}"   # Value must be a string (not an int),
+                                                          # hence the double quotes
             args:
               - sleep
               - infinity
