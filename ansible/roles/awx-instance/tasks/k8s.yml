@@ -62,7 +62,7 @@
     apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: awx
+      name: "{{ awx_service_account }}"
       namespace: "{{ ansible_oc_namespace }}"
 
 - name: Ansible Tower StatefulSet
@@ -182,8 +182,8 @@
 
           dnsPolicy: ClusterFirst
           restartPolicy: Always
-          serviceAccount: awx
-          serviceAccountName: awx
+          serviceAccount: "{{ awx_service_account }}"
+          serviceAccountName: "{{ awx_service_account }}"
           terminationGracePeriodSeconds: 10
           volumes:
           - name: wp-nfs

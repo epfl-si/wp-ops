@@ -6,6 +6,8 @@
 # This requires a so-called AWX credential, so that AWX may talk to
 # the Kubernetes API server and start and stop pods.
 
+- include_vars: k8s-vars.yml
+
 - name: "Set up K8S bearer token credential"
   tags: awx.credential
   awx_script:
@@ -59,11 +61,8 @@
         # comments in the inline Dockerfile in k8s-builds.yml
         securityContext:
           runAsUser: {{ awx_unix_credentials.uid }}
-        # The wwp serviceAccount just happens to have permission to run as any user.
-        # TODO: we should have same permission granted to the `awx` serviceAccount,
-        # and get rid of the next two lines.
-        serviceAccount: {{ ansible_oc_namespace }}
-        serviceAccountName: {{ ansible_oc_namespace }}
+        serviceAccount: {{ awx_runner_service_account }}
+        serviceAccountName: {{ awx_runner_service_account }}
         containers:
           - image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest
             tty: true
