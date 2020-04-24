@@ -52,7 +52,7 @@ class ActionModule(WordPressActionModule):
         return self.result
 
     def _get_wp_json (self, suffix):
-        result = self._run_wp_cli_action(suffix, update_result=False)
+        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
         return json.loads(result['stdout'])
 
     def _is_wp_installed (self):
@@ -66,4 +66,4 @@ class ActionModule(WordPressActionModule):
     def _stat (self, relpath):
         return self._run_action('stat', {
             'path': os.path.join(self._get_wp_dir(), relpath)
-        }, update_result=False)
+        }, update_result=False, also_in_check_mode=True)
