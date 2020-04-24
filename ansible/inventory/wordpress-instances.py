@@ -174,7 +174,7 @@ class _LiveSite(_Site):
 
         retcode = find.wait()
         if retcode:
-            raise suprocess.CalledProcessError(retcode, cmd)
+            raise subprocess.CalledProcessError(retcode, cmd)
 
     _excluded_patterns = ['wp-*', '.git', '*packages', 'jahia-data', 'ansible-backup-*']
     _excluded_paths = []
