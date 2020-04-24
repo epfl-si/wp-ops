@@ -75,5 +75,15 @@
 - import_tasks: container-group.yml
   tags: awx
 
-- import_tasks: inventories.yml
-  tags: awx
+- name: Configure inventories
+  import_tasks: inventories.yml
+  tags:
+    - awx
+    - awx.inventory
+
+- name: Configure job templates
+  import_tasks: job-templates.yml
+  tags:
+    - awx
+    - awx.job-template
+
