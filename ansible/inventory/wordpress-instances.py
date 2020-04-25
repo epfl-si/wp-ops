@@ -59,6 +59,10 @@ class _Site:
             return True
 
     @property
+    def group(self):
+        return 'prod_{}'.format(self.wwp_env)
+
+    @property
     def instance_name(self):
         """
         Generates an unique nickname for a WP instance.
@@ -235,9 +239,8 @@ class Inventory:
         self._add_site_to_group(site, site.wwp_env)
 
     def _add_site_to_group(self, site, wwp_env):
-        group = 'prod_{}'.format(wwp_env)
-        self._add_group(group)
-        self.inventory[group]['hosts'].append(site.instance_name)
+        self._add_group(site.group)
+        self.inventory[site.group]['hosts'].append(site.instance_name)
 
     def _add_group(self, group):
         if group in self.groups:
