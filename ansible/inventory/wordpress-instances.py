@@ -16,7 +16,6 @@ from functools import reduce
 
 import re
 import json
-from urllib.parse import urlparse
 import requests
 from six.moves.urllib.parse import urlparse, quote
 
