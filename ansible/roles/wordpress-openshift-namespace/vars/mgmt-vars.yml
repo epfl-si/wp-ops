@@ -1,5 +1,5 @@
 # See also ssh keys and more in
-# ../../../hosts-{dev,prod}/group_vars/openshift-namespaces-*
+# ../../../hosts-{dev,prod}/group_vars/openshift_namespaces_*
 
 mgmt_service_account: "{{ openshift_namespace }}"
 

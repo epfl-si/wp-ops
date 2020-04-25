@@ -6,4 +6,3 @@ ansible_port: 32222
 ansible_user: www-data
 ansible_python_interpreter: /usr/bin/python3
 wp_hostname: migration-wp.epfl.ch
-wp_env: int

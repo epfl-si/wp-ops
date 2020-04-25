@@ -11,7 +11,7 @@
 # ../inventory/prod/wordpress-instances (executable scripts, that lists
 # them on standard output)
 - name: WordPress instances
-  hosts: all-wordpresses
   gather_facts: no   # But see ../roles/wordpress-instance/tasks/facts.yml
+  hosts: all_wordpresses
   roles:
     - role: ../roles/wordpress-instance

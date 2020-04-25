@@ -234,7 +234,7 @@ class Inventory:
         self._add_site_to_group(site, site.wwp_env)
 
     def _add_site_to_group(self, site, wwp_env):
-        group = 'prod-{}'.format(wwp_env)
+        group = 'prod_{}'.format(wwp_env)
         self._add_group(group)
         self.inventory[group]['hosts'].append(site.instance_name)
 
@@ -242,7 +242,7 @@ class Inventory:
         if group in self.groups:
             return
         self.groups.add(group)
-        self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
+        self.inventory.setdefault('all_wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
 

@@ -1,6 +1,6 @@
 # -*- mode: yaml; -*-
 #
-# Variables that only apply to members of group "openshift-namespaces-dev"
+# Variables that only apply to members of group "openshift_namespaces_dev"
 ansible_user: www-data
 ansible_host: test-ssh-wwp.epfl.ch
 ansible_port: 32222
@@ -28,7 +28,7 @@ eyaml_keys:
 #
 #   eyaml edit -d \
 #     --pkcs7-public-key ansible/eyaml/epfl_wp_test.pem \
-#     ansible/inventory/test/group_vars/openshift-namespaces-dev
+#     ansible/inventory/test/group_vars/openshift_namespaces_dev
 #
 # 💡 This *will not* decrypt anything for you because chances are, you
 # don't need to decrypt secrets (YA RLY). For those cases where you

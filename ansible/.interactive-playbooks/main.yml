@@ -16,13 +16,13 @@
 # Likewise, members of all-openshift-namespaces are OpenShift
 # namespaces, not hosts
 - name: OpenShift namespaces
-  hosts: all-openshift-namespaces
+  hosts: all_openshift_namespaces
   gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/wordpress-openshift-namespace
 
 - name: Ansible Tower (AWX) instances
-  hosts: awx-instances
+  hosts: awx_instances
   gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/awx-instance
