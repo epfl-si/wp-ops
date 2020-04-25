@@ -19,6 +19,9 @@ import json
 import requests
 from six.moves.urllib.parse import urlparse, quote
 
+import warnings
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
+
 class _Site:
     @property
     def hostvars(self):
