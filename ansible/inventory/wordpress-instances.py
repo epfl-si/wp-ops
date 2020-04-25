@@ -86,10 +86,21 @@ class _Site:
         return ssh_hosts[self.k8s_namespace]
 
 
-class WpVeritasSite(_Site):
+class ProdSiteTrait:
+    k8s_namespace = 'wwp'
+
+
+class TestSiteTrait:
+    k8s_namespace = 'wwp-test'
+
+    @property
+    def instance_name(self):
+        return 'test_' + _Site.instance_name.fget(self)
+
+
+class WpVeritasSite(ProdSiteTrait, _Site):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
     VERIFY_SSL = True
-    k8s_namespace = 'wwp'
 
     @classmethod
     def all(cls):
@@ -135,14 +146,9 @@ class WpVeritasSite(_Site):
         return hostvars
 
 
-class WpVeritasTestSite(WpVeritasSite):
+class WpVeritasTestSite(TestSiteTrait, WpVeritasSite):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
     VERIFY_SSL = False
-    k8s_namespace = 'wwp-test'
-
-    @property
-    def instance_name(self):
-        return 'test_' + super().instance_name
 
 
 class _LiveSite(_Site):
@@ -199,19 +205,14 @@ class _LiveSite(_Site):
         return hostvars
 
 
-class LiveTestSite(_LiveSite):
-    k8s_namespace = "wwp-test"
+class LiveTestSite(TestSiteTrait, _LiveSite):
     _find_in_dirs = '/srv'
     _excluded_paths = ['/srv/lvenries', '/srv/jenkins', '/srv/int/jahia2wp/data/backups']
 
-    @property
-    def instance_name(self):
-        return 'test_' + super().instance_name
 
-
-class LiveProductionSite(_LiveSite):
-    k8s_namespace = "wwp"
+class LiveProductionSite(ProdSiteTrait, _LiveSite):
     _find_in_dirs = '/srv/*/*/htdocs'
+
 
 class Inventory:
     """Model the entire wp-veritas inventory."""
