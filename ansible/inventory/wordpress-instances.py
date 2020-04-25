@@ -60,7 +60,7 @@ class _Site:
 
     @property
     def group(self):
-        return 'prod_{}'.format(self.wwp_env)
+        return '%s_%s' % (self.group_prefix, re.sub('-', '_', self.wwp_env))
 
     @property
     def instance_name(self):
@@ -92,10 +92,12 @@ class _Site:
 
 class ProdSiteTrait:
     k8s_namespace = 'wwp'
+    group_prefix = 'prod'
 
 
 class TestSiteTrait:
     k8s_namespace = 'wwp-test'
+    group_prefix = 'test'
 
     @property
     def instance_name(self):
