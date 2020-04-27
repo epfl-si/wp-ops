@@ -1,25 +1,16 @@
-# Ansible playbook for the EPFL WordPress stack
-
-- name: Initial checks
-  hosts: all
-  gather_facts: no    # Ansible facts are useless for this play
-  tasks:
-    - name: Check Ansible version
-      run_once: true
-      assert:
-        that: "ansible_version.full is version_compare('2.6', '>=')"
-        msg: |
-          You must update Ansible to at least 2.6 to use this playbook.
-
+# AWX-compatible playbook for the EPFL WordPress stack
+#
+# Other operations, that deal with the "superstructure" (e.g.
+# OpenShift jobs, secrets) are handled from ../interactive-playbooks/
+# since it makes no sense to run them from AWX. (Also, AWX finds
+# playbooks only in the `playbooks` subdirectories)
 
 - name: Minishift checks
   hosts: openshift-namespaces-blue
   gather_facts: no
   roles:
     - role : ../roles/minishift-checks
-
-
-
+    
 # In this play, "hosts" are not really hosts; rather, they are
 # OpenShift namespaces. See the list in ../inventory/*/openshift-namespaces
 - name: OpenShift namespaces
@@ -35,19 +26,11 @@
   roles:
     - role : ../roles/wordpress-deployment
 
-
-# Likewise, members of all-wordpress-instances are WordPress instances, not hosts. See the list in
-# ../inventory/test/wordpress-instances (a plain file) and
-# ../inventory/prod/wordpress-instances (an executable script, that lists
-# them on standard output)
+# In this play, "hosts" are not really hosts; rather, they are
+# WordPress instances. The script ../inventory/wordpress-instances.py
+# creates a list of them on standard output.
 - name: WordPress instances
-  hosts: all-wordpresses
-  gather_facts: no   # But see ../roles/wordpress-instance/tasks/facts.yml
+  hosts: all_wordpresses
+  gather_facts: no   # But see ../roles/wordpress-instance/action_plugins/wordpress_facts.py
   roles:
     - role: ../roles/wordpress-instance
-
-- name: Ansible Tower (AWX) configuration
-  hosts: awx-poc-vpsi
-  gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/awx-poc-vpsi

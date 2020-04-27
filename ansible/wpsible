@@ -4,7 +4,7 @@
 #
 # Usage ("ansible" mode):
 #
-#   ansible/wpsible -m raw www-wordpresses -a 'echo {{ wp_dir }}'
+#   ansible/wpsible -m raw all_wordpresses -a 'echo {{ wp_dir }}'
 #
 # Usage ("ansible-playbook" mode):
 #
@@ -41,17 +41,12 @@ fatal () {
 }
 
 platform_check () {
-    test -d /keybase/team || warn <<NO_KEYBASE
-
-WARNING: keybase is not installed, cannot decipher and push secrets.
-
-NO_KEYBASE
-
-    which eyaml >/dev/null || warn <<NO_EYAML
-
-WARNING: eyaml is not installed, cannot decipher and push secrets.
-
-NO_EYAML
+    if ! test -f ansible-deps-cache/.versions 2>/dev/null; then
+        curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/install.sh | \
+            SUITCASE_DIR=$PWD/ansible-deps-cache SUITCASE_ANSIBLE_REQUIREMENTS=requirements.yml sh -x
+    fi
+    export PATH="$PWD/ansible-deps-cache/bin:$PATH"
+    export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
 }
 
 
@@ -71,9 +66,12 @@ inventories () {
 	    wp_veritas) echo "-i inventory/wp-veritas" ;;
 	esac
     fi
+
 }
 
 ###########################################################################
+
+export WWP_NAMESPACES=wwp-test
 
 mode=ansible-playbook
 
@@ -82,9 +80,10 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
         --prod)
             inventory_mode="test_and_prod"
+            WWP_NAMESPACES="wwp-test,wwp"
             shift ;;
         --wp-veritas)
-            inventory_mode="wp_veritas"
+            # Ignored for backward compatibility
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
@@ -105,6 +104,11 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+# https://github.com/ansible/ansible/issues/32499, https://bugs.python.org/issue35219
+case "$(uname -s)" in
+    Darwin) export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ;;
+esac
+
 set -e
 
 case "$mode" in
@@ -113,7 +117,7 @@ case "$mode" in
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
-                         playbooks/wordpress-main.yml
+                         .interactive-playbooks/main.yml
         ;;
     ansible)
         ansible $(inventories) $ansible_flags "${ansible_args[@]}"

@@ -5,19 +5,14 @@ deepcopy = __import__('copy').deepcopy
 import sys
 import os.path
 
-# To be able to include package wp_inventory in parent directory
+# To be able to import wordpress_action_module
 sys.path.append(os.path.dirname(__file__))
 
-from wordpress_action_module import WordPressActionModule
+from wordpress_action_module import WordPressPluginOrThemeActionModule
 
-class ActionModule(WordPressActionModule):
+class ActionModule(WordPressPluginOrThemeActionModule):
     def run(self, tmp=None, task_vars=None):
         self.result = super(ActionModule, self).run(tmp, task_vars)
-
-        # Handling --check execution mode
-        if task_vars['ansible_check_mode']:
-            self.result['skipped'] = True
-            return self.result
 
         self._name = self._task.args.get('name')
         self._type = 'theme'

@@ -1,7 +1,7 @@
 # Set up (a cautious subset of) one DeploymentConfig/httpd-* object,
 # described by the {{ dc }} variable.
 
-- include_vars: image-vars.yml              # For httpd_image_name
+- include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
 
 - name: "dc/{{ dc.name }}"
   openshift:

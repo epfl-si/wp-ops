@@ -2,7 +2,7 @@ import sys
 import os.path
 import re
 
-# To be able to include package wp_inventory in parent directory
+# To be able to import wordpress_action_module
 sys.path.append(os.path.dirname(__file__))
 
 from wordpress_action_module import WordPressActionModule
@@ -49,8 +49,9 @@ class ActionModule(WordPressActionModule):
             if option_value != '':
                 json_format = '--format=json'
 
+        changed_status_orig = self.result['changed']
         cmd = "option update {} {} '{}' --skip-themes --skip-plugins".format(json_format, self._task.args.get('name'), option_value)
+        result = self._run_wp_cli_action(cmd)
 
-        return self._run_wp_cli_action(cmd)
-
-    
+        if 'option is unchanged.' in result.stdout:
+            self.result['changed'] = changed_status_orig

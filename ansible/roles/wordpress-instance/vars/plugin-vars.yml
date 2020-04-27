@@ -15,7 +15,7 @@ plugins_use_gutenberg: "{{ wp_use_gutenberg }}"
 # managing their active / inactive state.
 # We use information recovered by inventory to determine site category
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
-wp_site_category: '{{ hostvars[inventory_hostname]["wp_details"]["options"]["epfl:site_category"] }}'
+wp_site_category: '{{ lookup("wpveritas", "category") }}'
 
 # Defining plugin state for each category
 plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if wp_site_category == "CDHSHS" else "absent" }}'

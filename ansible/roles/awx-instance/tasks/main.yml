@@ -1,0 +1,89 @@
+- include_vars: k8s-vars.yml
+  tags:
+    - awx
+    - awx.promote
+
+- name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
+  when: "ansible_oc_namespace == awx_build_namespace"
+  import_tasks: k8s-builds.yml
+  connection: local
+  tags:
+    - awx
+    - awx.build
+
+- name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
+  when: "ansible_oc_namespace != awx_build_namespace"
+  include_tasks:
+    file: _promote_image.yml
+    apply:
+      tags:
+        - awx
+        - awx.promote
+  tags:
+    - awx
+    - awx.promote
+  vars:
+    promote_image_name: "{{ item.name }}"
+    promote_image_tag: "{{ item.version }}"
+    promote_from_namespace: "{{ awx_build_namespace }}"
+  with_items:
+    - name: "{{ awx_task_image_name }}"
+      version: "{{ awx_version }}"
+    - name: "{{ awx_runner_image_name }}"
+      version: latest
+
+- name: "Ansible Tower OpenShift objects"
+  import_tasks: k8s.yml
+  delegate_to: localhost
+  tags:
+    - awx
+    - awx.k8s
+    - awx.openshift
+
+- name: "Ansible Tower database operations"
+  include_tasks: ops.yml
+  # These tags are *not* auto-applied down, since we use an
+  # include_tasks rather than an import_tasks or include directive.
+  # This means that every task in awx-ops.yml must have its own
+  # specific set of tags.
+  tags:
+    - awx.dump
+    - awx.restore
+
+- name: "Ansible Tower front-end authentication"
+  import_tasks: auth.yml
+  tags:
+    - awx
+    - awx.auth
+
+- name: "Set up `{{ awx_project_name }}` project"
+  tags: awx
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.projects import Project
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+          with AnsibleGetOrCreate(Project, name="{{ awx_project_name }}") as prj:
+            prj.organization = org
+            prj.scm_type = "git"
+            prj.scm_url = "{{ awx_project_github_url }}"
+            prj.scm_branch = "{{ git_current_branch }}"
+
+- import_tasks: container-group.yml
+  tags: awx
+
+- name: Configure inventories
+  import_tasks: inventories.yml
+  tags:
+    - awx
+    - awx.inventory
+
+- name: Configure job templates
+  import_tasks: job-templates.yml
+  tags:
+    - awx
+    - awx.job-template
+

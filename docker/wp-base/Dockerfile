@@ -11,7 +11,7 @@ RUN apt-get -qy update && \
     apt-get -qy autoremove && \
     apt-get clean
 
-RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 # “The main PPA for supported PHP versions[...]”, see
 # https://launchpad.net/~ondrej/+archive/ubuntu/php
@@ -65,7 +65,6 @@ RUN chmod 755 /usr/local/bin/wp
 
 # Add Polylang-related extension packages to wp-cli
 COPY ./config.yml /var/www/.wp-cli/config.yml
-COPY ./cortneyray/* /tmp/cortneyray/
 RUN mkdir /var/www/.composer; \
     chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
 RUN su -s /bin/sh www-data -c " \
@@ -74,7 +73,7 @@ RUN su -s /bin/sh www-data -c " \
         composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
     fi;                                                                   \
     wp package install https://github.com/diggy/polylang-cli.git ;        \
-    wp package install /tmp/cortneyray/; \
+    wp package install https://github.com/epfl-si/wp-cli-polylang.git;    \
     wp package install https://github.com/epfl-si/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
 
@@ -142,13 +141,6 @@ RUN set -e -x; for wp in /wp/*; do                                         \
   rm tinymce-advanced.zip;                                                 \
   done
 
-# Manually add the wordpress-importer plugin, used in "ventilation"
-# operations. Patch it to nuke the stat() cache inbetween downloading
-# things
-# If don't want to see stat() results
-# fix the patch format clearstatcache-wp-import.patch and add this two lines
-#        cd wordpress-importer ;                                          \
-#        git apply < /tmp/clearstatcache-wp-import.patch ;                \
 RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \

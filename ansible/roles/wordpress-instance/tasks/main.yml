@@ -5,19 +5,41 @@
 # Variables:: (in addition to those defined or documented in
 #              ../vars/*.yml)
 
+- meta: end_play
+  when: |
+    not ( ansible_run_tags | any_known_tag(role_path) )
 
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
-- name: WordPress facts
-  import_tasks: facts.yml
+
+- name: Backup
+  # We include_tasks (not import_tasks) here, because we do *not* want
+  # to propagate tags - Within backup.yml, tasks shall be individually
+  # marked with the appropriate subset of the `backup.code`,
+  # `backup.data` and `backup.uploads` tags.
+  include_tasks: "backup.yml"
   tags:
-    - facts
-    # TODO: configure.yml uses wp_is_symlinked, which requires facts.yml to have run.
-    # Can we use a handler instead?
-    - config
+    - never  # That is, skip unless "-t wipe", "-t backup", "-t backup.code" etc. is
+             # passed on the command line
+    - wipe
+    - backup
+    - backup.code
+    - backup.data
+    - backup.uploads
 
+- name: Wipe
+  import_tasks: "wipe.yml"
+  tags:
+    - never
+    - wipe
 
+- wordpress_facts:
+  tags: always
+
+- name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
+  include_tasks: "create.yml"
+  when: "'wipe' in ansible_run_tags or not wp_is_installed"
 
 
 
@@ -72,7 +94,7 @@
 
 
 - name: Set up plugins
-  when: wp_can.configure
+  when: wp_can.configure or ansible_check_mode
   tags:
     - plugins
   include_tasks:
@@ -81,7 +103,7 @@
       tags: ["plugins"]
 
 - name: Set up themes
-  when: wp_can.configure
+  when: wp_can.configure or ansible_check_mode
   tags:
     - themes
   include_tasks:
@@ -98,49 +120,3 @@
   tags:
     - convert-shortcode-to-block
 
-################################
-# Special-purpose tasks
-################################
-
-# "Ventilation"-related
-- name: "Dump to WXR for ventilation"
-  import_tasks: "dump.yml"
-  when: not is_minishift_instance
-  tags:
-    - never
-    - dump
-- name: "Undump from WXR for ventilation"
-  import_tasks: "undump.yml"
-  when: not is_minishift_instance
-  tags:
-    - never
-    - undump
-
-- name: CSV plug-in versions report
-  when: not is_minishift_instance
-  tags:
-    - never
-    - reportcsv
-  run_once: true
-  local_action:
-    module: copy
-    dest: '{{ plugin_report_csv_out }}'
-    content: '{{ hostvars | wp_plugin_versions_csv_report }}'
-
-# We could do a with_items but then we would get the entire content
-# dumped into the terminal as part of the "items" structure. Oh well
-- name: CSV must-use plug-in versions report
-  when: not is_minishift_instance
-  tags:
-    - never
-    - reportcsv
-  run_once: true
-  local_action:
-    module: copy
-    dest: '{{ muplugin_report_csv_out }}'
-    content: '{{ hostvars | wp_muplugin_versions_csv_report }}'
-
-
-
-
-##########################################################################

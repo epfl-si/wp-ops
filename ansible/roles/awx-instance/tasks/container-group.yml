@@ -1,0 +1,91 @@
+# Set up a container group for systolic Ansible execution.
+#
+# As AWX runs tasks in the `tower-elastic` container group, additional containers will be started
+# to handle the load; they will be stopped after the Ansible operation completes.
+#
+# This requires a so-called AWX credential, so that AWX may talk to
+# the Kubernetes API server and start and stop pods.
+
+- include_vars: k8s-vars.yml
+
+- name: "Set up K8S bearer token credential"
+  tags: awx.credential
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.credential import Credential, CredentialType
+
+      import subprocess
+
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+        with AnsibleGetOrCreate(Credential,
+                  name="{{ awx_selfk8s_credential_name }}",
+                  credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
+        ) as cred:
+          cred.organization = org
+          cred.description = "The K8S credentials of the service account awx itself is running under"
+          cred.inputs = dict(
+              host="https://kubernetes.default.svc/",
+              verify_ssl=True,
+              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
+              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
+          )
+
+- name: "Set up {{ awx_elastic_container_group_name }} container group"
+  tags: awx.container-group
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.credential import Credential
+      from awx.main.models.ha import InstanceGroup
+
+      org = Organization.objects.get(name="{{ awx_organization_name }}")
+      cred = Credential.objects.get(name="{{ awx_selfk8s_credential_name }}")
+
+      with AnsibleGetOrCreate(InstanceGroup,
+                  name="{{ awx_elastic_container_group_name }}") as instance_group:
+          instance_group.credential = cred
+          instance_group.pod_spec_override = """
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: {{ ansible_oc_namespace }}
+      spec:
+        # Run as this user for historical compatibility reasons; see
+        # comments in the inline Dockerfile in k8s-builds.yml
+        securityContext:
+          runAsUser: {{ awx_unix_credentials.uid }}
+        serviceAccount: {{ awx_runner_service_account }}
+        serviceAccountName: {{ awx_runner_service_account }}
+        containers:
+          - image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest
+            tty: true
+            stdin: true
+            imagePullPolicy: Always
+            envFrom:
+              - configMapRef:
+                  name: jahia2wp-env
+              - secretRef:
+                  name: mysql-super-credentials
+            env:
+              # Just to mute a stray error in /bin/entrypoint
+              - name: CURRENT_UID
+                value: "{{ awx_unix_credentials.uid }}"   # Value must be a string (not an int),
+                                                          # hence the double quotes
+            args:
+              - sleep
+              - infinity
+            volumeMounts:
+              - name: srv
+                mountPath: /srv
+        volumes:
+          - name: srv
+            persistentVolumeClaim:
+              claimName: wordpress-0
+      """

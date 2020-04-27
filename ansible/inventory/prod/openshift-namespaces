@@ -1,5 +1,0 @@
-[all-openshift-namespaces:children]
-openshift-namespaces-prod
-
-[openshift-namespaces-prod]
-wwp     nfs_path=nas-app-ma-nfs1:/si_test_openshift_wp_jahia_app/wordpress

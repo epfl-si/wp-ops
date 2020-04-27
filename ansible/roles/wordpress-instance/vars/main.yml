@@ -22,6 +22,8 @@ wp_path_config_php: "{{ wp_dir }}/wp-config.php"
 # The path to the wp-admin directory - we stat(2) this to determine
 # whether a given site is "symlinked"
 wp_path_wpadmin: "{{ wp_dir }}/wp-admin"
+# The .htaccess commanding over this WordPress instance
+wp_htaccess_path: "{{ wp_dir }}/.htaccess"
 
 # The prefix to invoke the WP-CLI for this WordPress instance
 wp_cli_command: "wp --path={{ wp_dir }}"
@@ -32,7 +34,7 @@ wp_base_url: "https://{{ wp_hostname }}/{{ wp_path }}"
 wp_themes_dir:  "{{ wp_dir }}/wp-content/themes"
 wp_plugins_dir: "{{ wp_dir }}/wp-content/plugins"
 
-# Shortcuts to facts collected by ../tasks/facts.yml
+# Shortcuts to facts collected by the wordpress_facts task
 wp_is_installed: "{{ ansible_facts.ansible_local.wp_is_installed }}"
 wp_is_symlinked: "{{ ansible_facts.ansible_local.wp_is_symlinked }}"
 wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
@@ -41,4 +43,12 @@ wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
 # particular, to Tequila)
 wp_ops_rpcclient_ipv4_range: 10.180.21.0/24
 
+# What version of WordPress we install.
+wp_ensure_symlink_version: "5.2"
+
 wp_use_gutenberg: '{{ wp_ensure_symlink_version is defined and (wp_ensure_symlink_version | float) >= 5.0 }}'
+
+wpveritas_api_url: '{{ _wpveritas_servers[openshift_namespace] }}'
+_wpveritas_servers:
+  wwp: https://wp-veritas.epfl.ch/api
+  wwp-test: https://wp-veritas.128.178.222.83.nip.io/api

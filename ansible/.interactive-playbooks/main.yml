@@ -1,0 +1,28 @@
+# Ansible playbook for the EPFL WordPress stack
+
+- name: Initial checks
+  hosts: all
+  gather_facts: no    # Ansible facts are useless for this play
+  tasks:
+    - name: Check Ansible version
+      run_once: true
+      assert:
+        that: "ansible_version.full is version_compare('2.6', '>=')"
+        msg: |
+          You must update Ansible to at least 2.6 to use this playbook.
+
+- import_playbook: ../playbooks/wordpress-main.yml
+
+# Likewise, members of all-openshift-namespaces are OpenShift
+# namespaces, not hosts
+- name: OpenShift namespaces
+  hosts: all_openshift_namespaces
+  gather_facts: no    # Ansible facts are useless for this play
+  roles:
+    - role: ../roles/wordpress-openshift-namespace
+
+- name: Ansible Tower (AWX) instances
+  hosts: awx_instances
+  gather_facts: no    # Ansible facts are useless for this play
+  roles:
+    - role: ../roles/awx-instance
