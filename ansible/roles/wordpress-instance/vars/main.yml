@@ -46,17 +46,3 @@ wpveritas_api_url: '{{ _wpveritas_servers[openshift_namespace] }}'
 _wpveritas_servers:
   wwp: https://wp-veritas.epfl.ch/api
   wwp-test: https://wp-veritas.128.178.222.83.nip.io/api
-
-all_wordpress_instance_tags:
-    - wipe
-    - backup
-    - backup.code
-    - backup.data
-    - backup.uploads
-    - restore
-    - symlink
-    - unsymlink
-    - config
-    - plugins
-    - themes
-    - convert-shortcode-to-block
