@@ -26,4 +26,4 @@ jahia2wp_url: "{{ wp_base_url }}"
 # jahia2wp command. Use like so:
 #
 # shell: {{ jahia2wp_shell }} generate --foo=bar ...
-jahia2wp_shell: set -e; . {{ jahia2wp_dir }}/.env; export MYSQL_DB_HOST MYSQL_SUPER_USER MYSQL_SUPER_PASSWORD WP_ADMIN_USER WP_ADMIN_EMAIL; export WP_ENV='{{ wp_env }}'; export WP_VERSION=unused; cd {{ jahia2wp_dir }}/src; /srv/{{ wp_env }}/venv/bin/python ./jahia2wp.py
+jahia2wp_shell: set -e; cd {{ jahia2wp_dir }}/src; . /etc/profile.d/k8s-env.sh; env WP_ENV='{{ wp_env }}' /srv/{{ wp_env }}/venv/bin/python ./jahia2wp.py

@@ -68,6 +68,11 @@
             tty: true
             stdin: true
             imagePullPolicy: Always
+            envFrom:
+              - configMapRef:
+                  name: jahia2wp-env
+              - secretRef:
+                  name: mysql-super-credentials
             env:
               # Just to mute a stray error in /bin/entrypoint
               - name: CURRENT_UID
