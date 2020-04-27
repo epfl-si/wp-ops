@@ -7,7 +7,9 @@ RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
 
 RUN dnf module enable php:remi-7.4 -y
 
-RUN yum -y install php-cli php-mysql python3
+RUN yum -y install yum-plugin-copr && yum -y copr enable copart/restic
+
+RUN yum -y install php-cli php-mysql python3 restic
 
 ARG RUNNER_PATCH_URLS=""
 ARG ANSIBLE_PATCH_URLS=""
