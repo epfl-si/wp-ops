@@ -16,9 +16,11 @@ from functools import reduce
 
 import re
 import json
-from urllib.parse import urlparse
 import requests
 from six.moves.urllib.parse import urlparse, quote
+
+import warnings
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 class _Site:
     @property
@@ -59,6 +61,10 @@ class _Site:
             return True
 
     @property
+    def group(self):
+        return '%s_%s' % (self.group_prefix, re.sub('-', '_', self.wwp_env))
+
+    @property
     def instance_name(self):
         """
         Generates an unique nickname for a WP instance.
@@ -86,10 +92,23 @@ class _Site:
         return ssh_hosts[self.k8s_namespace]
 
 
-class WpVeritasSite(_Site):
+class ProdSiteTrait:
+    k8s_namespace = 'wwp'
+    group_prefix = 'prod'
+
+
+class TestSiteTrait:
+    k8s_namespace = 'wwp-test'
+    group_prefix = 'test'
+
+    @property
+    def instance_name(self):
+        return 'test_' + _Site.instance_name.fget(self)
+
+
+class WpVeritasSite(ProdSiteTrait, _Site):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.epfl.ch/api/v1/sites/'
     VERIFY_SSL = True
-    k8s_namespace = 'wwp'
 
     @classmethod
     def all(cls):
@@ -135,14 +154,9 @@ class WpVeritasSite(_Site):
         return hostvars
 
 
-class WpVeritasTestSite(WpVeritasSite):
+class WpVeritasTestSite(TestSiteTrait, WpVeritasSite):
     WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
     VERIFY_SSL = False
-    k8s_namespace = 'wwp-test'
-
-    @property
-    def instance_name(self):
-        return 'test_' + super().instance_name
 
 
 class _LiveSite(_Site):
@@ -199,19 +213,14 @@ class _LiveSite(_Site):
         return hostvars
 
 
-class LiveTestSite(_LiveSite):
-    k8s_namespace = "wwp-test"
+class LiveTestSite(TestSiteTrait, _LiveSite):
     _find_in_dirs = '/srv'
     _excluded_paths = ['/srv/lvenries', '/srv/jenkins', '/srv/int/jahia2wp/data/backups']
 
-    @property
-    def instance_name(self):
-        return 'test_' + super().instance_name
 
-
-class LiveProductionSite(_LiveSite):
-    k8s_namespace = "wwp"
+class LiveProductionSite(ProdSiteTrait, _LiveSite):
     _find_in_dirs = '/srv/*/*/htdocs'
+
 
 class Inventory:
     """Model the entire wp-veritas inventory."""
@@ -234,15 +243,14 @@ class Inventory:
         self._add_site_to_group(site, site.wwp_env)
 
     def _add_site_to_group(self, site, wwp_env):
-        group = 'prod-{}'.format(wwp_env)
-        self._add_group(group)
-        self.inventory[group]['hosts'].append(site.instance_name)
+        self._add_group(site.group)
+        self.inventory[site.group]['hosts'].append(site.instance_name)
 
     def _add_group(self, group):
         if group in self.groups:
             return
         self.groups.add(group)
-        self.inventory.setdefault('all-wordpresses', {}).setdefault('children', []).append(group)
+        self.inventory.setdefault('all_wordpresses', {}).setdefault('children', []).append(group)
         self.inventory.setdefault(group, {}).setdefault('hosts', [])
 
 

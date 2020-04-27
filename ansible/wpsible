@@ -4,7 +4,7 @@
 #
 # Usage ("ansible" mode):
 #
-#   ansible/wpsible -m raw www-wordpresses -a 'echo {{ wp_dir }}'
+#   ansible/wpsible -m raw all_wordpresses -a 'echo {{ wp_dir }}'
 #
 # Usage ("ansible-playbook" mode):
 #
