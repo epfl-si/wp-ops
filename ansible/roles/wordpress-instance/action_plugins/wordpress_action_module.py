@@ -126,21 +126,25 @@ class WordPressActionModule(ActionBase):
                           (action_name, args, update_result, also_in_check_mode))
 
         result = None
+        check_mode_orig = self._play_context.check_mode
         if self._is_check_mode():
             if also_in_check_mode:
                 # Get Ansible to run the task regardless
                 args = deepcopy(args)
                 if action_name == 'command':
-                    args['check_mode'] = False  # Meaning that yes, it supports check mode
+                    self._play_context.check_mode = False  # Meaning that yes, it supports check mode
             else:
                 # Simulate "orange" condition
                 result = dict(changed=True)
 
         # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         if result is None:
-            result = self._execute_module(module_name=action_name,
-                                          module_args=args, tmp=self._tmp,
-                                          task_vars=self._task_vars)
+            try:
+                result = self._execute_module(module_name=action_name,
+                                              module_args=args, tmp=self._tmp,
+                                              task_vars=self._task_vars)
+            finally:
+                self._play_context.check_mode = check_mode_orig
 
         if update_result:
             self._update_result(result)
