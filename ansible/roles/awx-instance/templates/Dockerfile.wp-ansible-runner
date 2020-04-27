@@ -1,0 +1,36 @@
+FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ wp_base_image_name }}:latest
+FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_base_image_name }}:latest
+
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+
+RUN dnf module enable php:remi-7.4 -y
+
+RUN yum -y install php-cli php-mysql python3
+
+ARG RUNNER_PATCH_URLS=""
+ARG ANSIBLE_PATCH_URLS=""
+RUN set -e -x; yum -y install patch;                                        \
+    for url in $RUNNER_PATCH_URLS; do                                       \
+        curl $url |                                                         \
+            patch -d /usr/lib/python3.6/site-packages/ansible_runner;       \
+    done;                                                                   \
+    for url in $ANSIBLE_PATCH_URLS; do                                      \
+        curl $url |                                                         \
+            patch -d /usr/local/lib/python3.6/site-packages/ansible -p3 ;   \
+    done;                                                                   \
+    yum -y history undo patch
+
+COPY --from=0 /usr/local/bin/wp /usr/local/bin/
+RUN mkdir /runner/.wp-cli
+COPY --from=0 /var/www/.wp-cli /runner/.wp-cli
+COPY --from=0 /wp /wp
+
+# We want to run as the credentials we have been using
+# historically in the mgmt image, and are therefore still in use
+# e.g. for file ownership on NFS.
+RUN groupdel $(getent group {{ awx_unix_credentials.uid }} |cut -d: -f1)
+RUN groupadd -g {{ awx_unix_credentials.gid }} {{ awx_unix_credentials.group }}
+RUN useradd -u {{ awx_unix_credentials.uid }} -g {{ awx_unix_credentials.gid }} -d /runner {{ awx_unix_credentials.user }}
+RUN chgrp -R {{ awx_unix_credentials.group }} /runner
