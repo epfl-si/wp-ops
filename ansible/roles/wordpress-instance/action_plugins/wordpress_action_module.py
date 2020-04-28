@@ -137,12 +137,9 @@ class WordPressActionModule(ActionBase):
                 # Simulate "orange" condition
                 result = dict(changed=True)
 
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         if result is None:
             try:
-                result = self._execute_module(module_name=action_name,
-                                              module_args=args, tmp=self._tmp,
-                                              task_vars=self._task_vars)
+                result = self._do_run_action(action_name, args)
             finally:
                 self._play_context.check_mode = check_mode_orig
 
@@ -152,6 +149,13 @@ class WordPressActionModule(ActionBase):
 
         else:
             return result
+
+
+    def _do_run_action(self, action_name, args):
+        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
+        return self._execute_module(module_name=action_name,
+                                    module_args=args, tmp=self._tmp,
+                                    task_vars=self._task_vars)
 
 
     def _get_wp_dir (self):
