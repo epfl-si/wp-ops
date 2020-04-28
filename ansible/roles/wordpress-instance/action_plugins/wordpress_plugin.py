@@ -10,7 +10,6 @@ import json
 # To be able to import wordpress_action_module
 sys.path.append(os.path.dirname(__file__))
 
-from ansible.errors import AnsibleActionFail
 from ansible.module_utils import six
 from wordpress_action_module import WordPressPluginOrThemeActionModule
 
