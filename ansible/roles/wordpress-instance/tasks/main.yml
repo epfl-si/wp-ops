@@ -85,6 +85,7 @@
   tags:
     - plugins
     - plugins.wp_media_folder_options
+    - plugins.unknown
   include_tasks:
     file: "plugins.yml"
     apply:

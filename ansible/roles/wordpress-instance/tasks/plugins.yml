@@ -513,3 +513,9 @@
     name: mainwp
     state: "{{ plugins_for_admin_category }}"
     from: wordpress.org/plugins
+
+- name: Uninstall all unknown plug-ins
+  tags: plugins.unknown
+  wordpress_unknown_plugins:
+    state: absent
+    known_plugins_in: "{{ role_path }}/tasks/plugins.yml"  # i.e. this here file
