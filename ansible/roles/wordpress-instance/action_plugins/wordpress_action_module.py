@@ -203,15 +203,15 @@ class WordPressActionModule(ActionBase):
         oldresult = deepcopy(self.result)
         self.result.update(result)
 
-        def _keep_flag(flag_name):
+        def _keep_flag_truthy(flag_name):
             if (flag_name in oldresult and
                 oldresult[flag_name] and
                 flag_name in self.result and
-                not result[flag_name]
+                not self.result[flag_name]
             ):
                 self.result[flag_name] = oldresult[flag_name]
 
-        _keep_flag('changed')
+        _keep_flag_truthy('changed')
 
         return self.result
 
