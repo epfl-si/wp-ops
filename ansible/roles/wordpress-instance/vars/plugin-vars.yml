@@ -51,8 +51,6 @@ plugin_cache_control_options:
 plugin_wpmf_options:
   - name: wpmf_use_taxonomy
     value: '1'
-  - name: wpmf_version
-    value: 4.7.0
   - name: wpmf_gallery_image_size_value
     value: '["thumbnail","medium","large","full"]'
   - name: wpmf_padding_masonry
