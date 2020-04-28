@@ -84,6 +84,7 @@
   when: wp_can.configure or ansible_check_mode
   tags:
     - plugins
+    - plugins.wp_media_folder_options
   include_tasks:
     file: "plugins.yml"
     apply:

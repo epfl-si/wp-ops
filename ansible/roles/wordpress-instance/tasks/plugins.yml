@@ -12,6 +12,7 @@
 
 
 - include_vars: "{{ item }}"
+  tags: always
   with_items:
     - plugin-vars.yml
     - accred-vars.yml
@@ -293,6 +294,7 @@
     from: https://wp-manager.epfl.ch/resources/plugin-zip/wp-media-folder.zip
 
 - name: wp-media-folder options
+  tags: plugins.wp_media_folder_options
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_wpmf_options }}"
 
