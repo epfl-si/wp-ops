@@ -25,20 +25,24 @@ class ActionModule(WordPressActionModule):
 
         if 'wordpress_unknown_plugins' not in self.result:
             self.result['wordpress_unknown_plugins'] = []
-        for name in self.get_installed_or_symlinked_plugins(task_vars):
+        for plugin in self.get_installed_or_symlinked_plugins_and_muplugins(task_vars):
+            name = plugin['name']
             if name not in self.known_plugins:
-                self._run_action('wordpress_plugin', dict(name=name, state=state))
-                self.result['wordpress_unknown_plugins'].append(name)
+                task_args = dict(name=name, state=state)
+                task_args['is_mu'] = plugin.get('status') == 'must-use'
+                self._run_action('wordpress_plugin', task_args)
+                self.result['wordpress_unknown_plugins'].append(dict(
+                    name=name,
+                    is_mu=task_args['is_mu']))
 
         return self.result
 
-    def get_installed_or_symlinked_plugins(self, task_vars):
+    def get_installed_or_symlinked_plugins_and_muplugins(self, task_vars):
         unexpanded = task_vars.get('wp_plugin_list', None)
         if unexpanded is None:
             return set()
-
-        wp_plugin_list = self._templar.template(unexpanded)
-        return set(p['name'] for p in wp_plugin_list if p['status'] != 'must-use')
+        else:
+            return self._templar.template(unexpanded)
 
     @property
     def known_plugins(self):
