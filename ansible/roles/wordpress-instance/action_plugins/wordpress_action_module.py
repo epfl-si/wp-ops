@@ -3,7 +3,7 @@
 deepcopy = __import__('copy').deepcopy
 
 from ansible.plugins.action import ActionBase
-from ansible.errors import AnsibleActionFail
+from ansible.errors import AnsibleError, AnsibleActionFail
 from ansible.module_utils import six
 
 import re
@@ -152,10 +152,29 @@ class WordPressActionModule(ActionBase):
 
 
     def _do_run_action(self, action_name, args):
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
-        return self._execute_module(module_name=action_name,
-                                    module_args=args, tmp=self._tmp,
-                                    task_vars=self._task_vars)
+        try:
+            # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
+            return self._execute_module(module_name=action_name,
+                                        module_args=args, tmp=self._tmp,
+                                        task_vars=self._task_vars)
+        except AnsibleError as e:
+            if not e.message.endswith('was not found in configured module paths'):
+                raise e
+
+        # Maybe action_name designates a "user-defined" action module
+        # Retry through self._shared_loader_obj
+        new_task = self._task.copy()
+        new_task.args = args
+
+        action = self._shared_loader_obj.action_loader.get(
+            action_name,
+            task=new_task,
+            connection=self._connection,
+            play_context=self._play_context,
+            loader=self._loader,
+            templar=self._templar,
+            shared_loader_obj=self._shared_loader_obj)
+        return action.run(task_vars=self._task_vars)
 
 
     def _get_wp_dir (self):
