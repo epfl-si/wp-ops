@@ -214,8 +214,8 @@ class _LiveSite(_Site):
 
 
 class LiveTestSite(TestSiteTrait, _LiveSite):
-    _find_in_dirs = '/srv'
-    _excluded_paths = ['/srv/lvenries', '/srv/jenkins', '/srv/int/jahia2wp/data/backups']
+    _find_in_dirs = '/srv/dev /srv/int'
+    _excluded_paths = ['/srv/int/jahia2wp/data/backups']
 
 
 class LiveProductionSite(ProdSiteTrait, _LiveSite):
