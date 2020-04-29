@@ -12,6 +12,7 @@ from ansible.plugins.action import ActionBase
 sys.path.append(os.path.dirname(__file__))
 from wordpress_action_module import WordPressActionModule
 from wordpress_plugin import ActionModule as WordPressPluginActionModule
+from ansible.errors import AnsibleError
 
 class ActionModule(WordPressActionModule):
     def run(self, tmp=None, task_vars=None):
@@ -48,6 +49,8 @@ class ActionModule(WordPressActionModule):
     def known_plugins(self):
         if not hasattr(self, '_known_plugins'):
             self._known_plugins = set(self._scrape_known_plugins(self._task.args['known_plugins_in']))
+            if not self._known_plugins:
+                raise AnsibleError("No known plugins?! Refusing to proceed.")
         return self._known_plugins
 
 
