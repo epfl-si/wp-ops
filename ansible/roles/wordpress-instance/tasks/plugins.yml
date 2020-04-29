@@ -31,7 +31,7 @@
 
 - name: Custom editor menu (must-use plugin)
   wordpress_plugin:
-    name: EPFL_custom_editor_menu
+    name: EPFL_custom_editor_menu_loader
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from:
