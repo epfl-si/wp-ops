@@ -43,12 +43,21 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
-            
-            
             self._do_activate_element()
             if 'failed' in self.result: return self.result
 
         return self.result
+
+    def _ensure_all_files_state (self, desired_state):
+        """Overridden to try with `wp plugin delete` first."""
+        # First try to use wp-cli to uninstall:
+        if desired_state == 'absent' and not self._is_check_mode():
+            result = self._run_wp_cli_action('plugin delete {}'.format(self._task.args.get('name')),
+                                             update_result=False)
+            if "could not be found" not in result["stdout"]:
+                self.result.update(result)
+
+        super(ActionModule, self)._ensure_all_files_state(desired_state)
 
 
     def _do_deactivate_plugin (self):
