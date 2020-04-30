@@ -31,7 +31,7 @@
 
 - name: Custom editor menu (must-use plugin)
   wordpress_plugin:
-    name: EPFL_custom_editor_menu
+    name: EPFL_custom_editor_menu_loader
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from:
@@ -513,3 +513,9 @@
     name: mainwp
     state: "{{ plugins_for_admin_category }}"
     from: wordpress.org/plugins
+
+- name: Uninstall all unknown plug-ins
+  tags: plugins.unknown
+  wordpress_unknown_plugins:
+    state: absent
+    known_plugins_in: "{{ role_path }}/tasks/plugins.yml"  # i.e. this here file

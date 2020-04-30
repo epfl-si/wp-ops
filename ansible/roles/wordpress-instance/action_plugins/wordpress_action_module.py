@@ -3,7 +3,7 @@
 deepcopy = __import__('copy').deepcopy
 
 from ansible.plugins.action import ActionBase
-from ansible.errors import AnsibleActionFail
+from ansible.errors import AnsibleError, AnsibleActionFail
 from ansible.module_utils import six
 
 import re
@@ -137,12 +137,9 @@ class WordPressActionModule(ActionBase):
                 # Simulate "orange" condition
                 result = dict(changed=True)
 
-        # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
         if result is None:
             try:
-                result = self._execute_module(module_name=action_name,
-                                              module_args=args, tmp=self._tmp,
-                                              task_vars=self._task_vars)
+                result = self._do_run_action(action_name, args)
             finally:
                 self._play_context.check_mode = check_mode_orig
 
@@ -152,6 +149,32 @@ class WordPressActionModule(ActionBase):
 
         else:
             return result
+
+
+    def _do_run_action(self, action_name, args):
+        try:
+            # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
+            return self._execute_module(module_name=action_name,
+                                        module_args=args, tmp=self._tmp,
+                                        task_vars=self._task_vars)
+        except AnsibleError as e:
+            if not e.message.endswith('was not found in configured module paths'):
+                raise e
+
+        # Maybe action_name designates a "user-defined" action module
+        # Retry through self._shared_loader_obj
+        new_task = self._task.copy()
+        new_task.args = args
+
+        action = self._shared_loader_obj.action_loader.get(
+            action_name,
+            task=new_task,
+            connection=self._connection,
+            play_context=self._play_context,
+            loader=self._loader,
+            templar=self._templar,
+            shared_loader_obj=self._shared_loader_obj)
+        return action.run(task_vars=self._task_vars)
 
 
     def _get_wp_dir (self):
@@ -199,15 +222,15 @@ class WordPressActionModule(ActionBase):
         oldresult = deepcopy(self.result)
         self.result.update(result)
 
-        def _keep_flag(flag_name):
+        def _keep_flag_truthy(flag_name):
             if (flag_name in oldresult and
                 oldresult[flag_name] and
                 flag_name in self.result and
-                not result[flag_name]
+                not self.result[flag_name]
             ):
                 self.result[flag_name] = oldresult[flag_name]
 
-        _keep_flag('changed')
+        _keep_flag_truthy('changed')
 
         return self.result
 
