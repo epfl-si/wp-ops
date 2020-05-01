@@ -1,0 +1,5 @@
+- name: Sync menus
+  shell:
+    cmd: "{{ wp_cli_command }} epfl menus refresh"
+  tags:
+    - wp.menus.refresh

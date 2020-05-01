@@ -109,3 +109,12 @@
   tags:
     - convert-shortcode-to-block
 
+- name: Set up menus
+  include_tasks:
+    file: "menus.yml"
+    apply:
+      tags: ["wp.menus"]
+  tags:
+    - never
+    - wp.menus
+    - wp.menus.refresh
