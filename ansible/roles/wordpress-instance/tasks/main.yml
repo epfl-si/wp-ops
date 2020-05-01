@@ -108,7 +108,7 @@
   tags:
     - convert-shortcode-to-block
 
-- name: Sync menus
+- name: Set up menus
   include_tasks:
     file: "menus.yml"
     apply:
