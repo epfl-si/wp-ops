@@ -202,7 +202,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/rename-copied-plugins/data/wp/wp-content/plugins/epfl-cache-control
+    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-cache-control
 
 - name: Cache-Control options
   wordpress_option: "{{ item }}"
@@ -246,7 +246,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/rename-copied-plugins/data/wp/wp-content/plugins/epfl-remote-content-shortcode
+    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-remote-content-shortcode
 
 - name: shortcode-ui plugin
   wordpress_plugin:
