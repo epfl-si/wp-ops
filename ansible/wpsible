@@ -15,7 +15,7 @@
 # - https://www.ansible.com/overview/how-ansible-works
 # - https://github.com/jdauphant/awesome-ansible
 
-cd "$(dirname "$(realpath "$0")")"
+cd "$(dirname "$0")"; cd "$(/bin/pwd)"
 
 # One can override these on the command line
 playbook_flags="-e play_update=yes -e play_backup=yes -e play_create_or_restore=yes"
