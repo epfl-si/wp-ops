@@ -198,11 +198,11 @@
 
 - name: Cache-Control plugin
   wordpress_plugin:
-    name: cache-control
+    name: epfl-cache-control
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/cache-control
+    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-cache-control
 
 - name: Cache-Control options
   wordpress_option: "{{ item }}"
@@ -242,11 +242,11 @@
 
 - name: remote-content-shortcode plugin
   wordpress_plugin:
-    name: remote-content-shortcode
+    name: epfl-remote-content-shortcode
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/remote-content-shortcode
+    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-remote-content-shortcode
 
 - name: shortcode-ui plugin
   wordpress_plugin:
