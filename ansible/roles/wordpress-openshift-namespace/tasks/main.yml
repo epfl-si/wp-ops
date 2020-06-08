@@ -32,6 +32,7 @@
   # Jenkinsfile inside
   tags:
     - ci
+    - ci.services
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"

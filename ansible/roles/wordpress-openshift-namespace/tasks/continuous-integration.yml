@@ -173,6 +173,8 @@
             kind: ImageStreamTag
             name: "{{ ci_jenkins_master_image_name }}:latest"
             namespace: "{{ openshift_namespace }}"
+  tags:
+    - ci.services
 
 
 - name: Jenkins pipeline (BuildConfig)
