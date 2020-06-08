@@ -1,7 +1,7 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 # Version pins are defined here:
-ENV PHP_VERSION=7.3
+ENV PHP_VERSION=7.4
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -11,11 +11,7 @@ RUN apt-get -qy update && \
     apt-get -qy autoremove && \
     apt-get clean
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-
-# “The main PPA for supported PHP versions[...]”, see
-# https://launchpad.net/~ondrej/+archive/ubuntu/php
-RUN add-apt-repository ppa:ondrej/php; rm -rf /tmp/tmp*
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 
 RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     composer \
