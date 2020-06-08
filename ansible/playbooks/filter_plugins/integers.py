@@ -8,12 +8,14 @@ class FilterModule(object):
             'int': self.int
         }
 
-    def int(self, string, radix = None):
-        if radix is not None:
-            return int(string, radix)
-        elif string.startswith("0"):
-            return int(string, 8)
-        elif string.startswith("0x"):
-            return int(string[2:], 16)
+    def int(self, input, radix = None):
+        if isinstance(input, int):
+            return input
+        elif radix is not None:
+            return int(input, radix)
+        elif input.startswith("0"):
+            return int(input, 8)
+        elif input.startswith("0x"):
+            return int(input[2:], 16)
         else:
-            raise Error("Unable to guess radix of " + string)
+            raise Error("Unable to guess radix of " + input)
