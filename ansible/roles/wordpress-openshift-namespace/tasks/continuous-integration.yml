@@ -181,21 +181,17 @@
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: BuildConfig
-      metadata:
-        labels:
-          app: jenkins
-        name: "{{ ci_buildconfig_name }}"
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        strategy:
-          jenkinsPipelineStrategy:
-            jenkinsfile: |
-              {{ lookup("template", "Jenkinsfile") | indent(width=8) }}
-              {# Indent width is relative to the outermost ": |" construct,
-               # i.e. the "a" of "apiVersion" #}
+    apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: jenkins
+      name: "{{ ci_buildconfig_name }}"
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      strategy:
+        jenkinsPipelineStrategy:
+          jenkinsfile: '{{ lookup("template", "Jenkinsfile") }}'
   tags:
     - ci.jenkinsfile
 
