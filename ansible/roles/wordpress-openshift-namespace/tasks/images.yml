@@ -7,6 +7,9 @@
 
 - include_vars: ../../../vars/image-vars.yml
 
+- include_vars: secrets-wwp-test.yml
+  when: openshift_namespace == 'wwp-test'
+
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
   openshift_imagestream:
@@ -17,9 +20,17 @@
     git:
         repository: "{{ wp_ops_git_uri }}"
         path: "{{ item.git_path }}"
+    strategy: "{{ item.strategy | default({}) }}"
   with_items:
     - name: "{{ wp_base_image_name }}"
       git_path: docker/wp-base
+      strategy:
+        dockerStrategy:
+          buildArgs:
+            - name: GITHUB_API_USER
+              value: "{{ github_api_token.user }}"
+            - name: GITHUB_API_TOKEN
+              value: "{{ github_api_token.token | eyaml(eyaml_keys) }}"
     - name: "{{ httpd_image_name }}"
       git_path: docker/httpd
       from: "{{ wp_base_image_name }}"
