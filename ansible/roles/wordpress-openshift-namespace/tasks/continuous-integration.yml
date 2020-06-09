@@ -50,152 +50,147 @@
       targetPort: 5000
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: {{ item.name }}
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: jenkins
-      spec:
-        type: ClusterIP
-        ports:
-          - name: {{ item.portName }}
-            port: {{ item.servicePort }}
-            protocol: TCP
-            targetPort: {{ item.targetPort }}
-        selector:
-          app: jenkins
-          deploymentconfig: jenkins
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: "{{ item.name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: jenkins
+    spec:
+      type: ClusterIP
+      ports:
+        - name: "{{ item.portName }}"
+          port: "{{ item.servicePort }}"
+          protocol: TCP
+          targetPort: "{{ item.targetPort }}"
+      selector:
+        app: jenkins
+        deploymentconfig: jenkins
 
 
-- name: PersistentVolumeClaim/"{{ ci_jenkins_persistent_volume_claim_name }}"
+- name: "PersistentVolumeClaim/{{ ci_jenkins_persistent_volume_claim_name }}"
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        labels:
-          app: jenkins
-        name: "{{ ci_jenkins_persistent_volume_claim_name }}"
-        namespace: wwp-test
-      spec:
-        volumeName: "{{ ci_jenkins_persistent_volume_name }}"
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 100Gi
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: jenkins
+      name: "{{ ci_jenkins_persistent_volume_claim_name }}"
+      namespace: wwp-test
+    spec:
+      volumeName: "{{ ci_jenkins_persistent_volume_name }}"
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
 
 
 - name: Jenkins master (DeploymentConfig)
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: DeploymentConfig
-      metadata:
-        labels:
-          app: jenkins
-        name: jenkins
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        replicas: 1
-        selector:
-          app: jenkins
-          deploymentconfig: jenkins
-        template:
-          metadata:
-            labels:
-              app: jenkins
-              deploymentconfig: jenkins
-              jenkins: master
-          spec:
-            containers:
-              - name: jenkins
-                env:
-                - name: OPENSHIFT_ENABLE_OAUTH
-                  value: "true"
-                - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
-                  value: "true"
-                - name: DISABLE_ADMINISTRATIVE_MONITORS
-                  value: "false"
-                - name: KUBERNETES_MASTER
-                  value: https://kubernetes.default:443
-                - name: KUBERNETES_TRUST_CERTIFICATES
-                  value: "true"
-                - name: JENKINS_SERVICE_NAME
-                  value: jenkins
-                - name: JNLP_SERVICE_NAME
-                  value: jenkins-jnlp
-                # "image" gets set thanks to triggers → ImageChange, below
-                imagePullPolicy: IfNotPresent
-                readinessProbe:
-                  failureThreshold: 3
-                  httpGet:
-                    path: /login
-                    port: 8080
-                    scheme: HTTP
-                  initialDelaySeconds: 3
-                  periodSeconds: 10
-                  successThreshold: 1
-                  timeoutSeconds: 240
-                livenessProbe:
-                  failureThreshold: 2
-                  httpGet:
-                    path: /login
-                    port: 8080
-                    scheme: HTTP
-                  initialDelaySeconds: 420
-                  periodSeconds: 360
-                  successThreshold: 1
-                  timeoutSeconds: 240
-                resources:
-                  limits:
-                    memory: 2Gi
-                volumeMounts:
-                - mountPath: /var/lib/jenkins
-                  name: jenkins-data
-            securityContext: {}
-            serviceAccount: jenkins
-            serviceAccountName: jenkins
-            volumes:
-            - name: jenkins-data
-              persistentVolumeClaim:
-                claimName: "{{ ci_jenkins_persistent_volume_claim_name }}"
-        triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-            - jenkins
-            from:
-              kind: ImageStreamTag
-              name: "{{ ci_jenkins_master_image_name }}:latest"
-              namespace: "{{ openshift_namespace }}"
+    apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: jenkins
+      name: jenkins
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      replicas: 1
+      selector:
+        app: jenkins
+        deploymentconfig: jenkins
+      template:
+        metadata:
+          labels:
+            app: jenkins
+            deploymentconfig: jenkins
+            jenkins: master
+        spec:
+          containers:
+            - name: jenkins
+              env:
+              - name: OPENSHIFT_ENABLE_OAUTH
+                value: "true"
+              - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+                value: "true"
+              - name: DISABLE_ADMINISTRATIVE_MONITORS
+                value: "false"
+              - name: KUBERNETES_MASTER
+                value: https://kubernetes.default:443
+              - name: KUBERNETES_TRUST_CERTIFICATES
+                value: "true"
+              - name: JENKINS_SERVICE_NAME
+                value: jenkins
+              - name: JNLP_SERVICE_NAME
+                value: jenkins-jnlp
+              # "image" gets set thanks to triggers → ImageChange, below
+              imagePullPolicy: IfNotPresent
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /login
+                  port: 8080
+                  scheme: HTTP
+                initialDelaySeconds: 3
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 240
+              livenessProbe:
+                failureThreshold: 2
+                httpGet:
+                  path: /login
+                  port: 8080
+                  scheme: HTTP
+                initialDelaySeconds: 420
+                periodSeconds: 360
+                successThreshold: 1
+                timeoutSeconds: 240
+              resources:
+                limits:
+                  memory: 2Gi
+              volumeMounts:
+              - mountPath: /var/lib/jenkins
+                name: jenkins-data
+          securityContext: {}
+          serviceAccount: jenkins
+          serviceAccountName: jenkins
+          volumes:
+          - name: jenkins-data
+            persistentVolumeClaim:
+              claimName: "{{ ci_jenkins_persistent_volume_claim_name }}"
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - jenkins
+          from:
+            kind: ImageStreamTag
+            name: "{{ ci_jenkins_master_image_name }}:latest"
+            namespace: "{{ openshift_namespace }}"
+  tags:
+    - ci.services
 
 
 - name: Jenkins pipeline (BuildConfig)
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: BuildConfig
-      metadata:
-        labels:
-          app: jenkins
-        name: "{{ ci_buildconfig_name }}"
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        strategy:
-          jenkinsPipelineStrategy:
-            jenkinsfile: |
-              {{ lookup("template", "Jenkinsfile") | indent(width=8) }}
-              {# Indent width is relative to the outermost ": |" construct,
-               # i.e. the "a" of "apiVersion" #}
+    apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: jenkins
+      name: "{{ ci_buildconfig_name }}"
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      strategy:
+        jenkinsPipelineStrategy:
+          jenkinsfile: '{{ lookup("template", "Jenkinsfile") }}'
   tags:
     - ci.jenkinsfile
 
@@ -203,20 +198,19 @@
 - name: Jenkins route
   openshift:
     state: latest
-    content: |
-      apiVersion: route.openshift.io/v1
-      kind: Route
-      metadata:
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: jenkins
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: jenkins
+    spec:
+      host: "{{ ci_jenkins_public_hostname }}"
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
         name: jenkins
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: jenkins
-      spec:
-        host: "{{ ci_jenkins_public_hostname }}"
-        tls:
-          insecureEdgeTerminationPolicy: Redirect
-          termination: edge
-        to:
-          kind: Service
-          name: jenkins
 

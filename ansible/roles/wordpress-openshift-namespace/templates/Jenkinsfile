@@ -84,13 +84,23 @@ spec:
           openshift.withCluster() {
             openshift.withProject() {
               def wpBaseBuild = buildImage('bc/wp-base')
-              watchBuild(wpBaseBuild)
-              watchBuild(awaitTriggeredBuildsStarted(wpBaseBuild, 2))
+              watchBuilds(wpBaseBuild)
+
+              def wpHttpdBuilds = []
+              timeout(time: 2, units: 'MINUTES') {
+                waitUntil {
+                  wpHttpdBuilds = getTriggeredBuilds(wpBaseBuild).findAll {
+                    it.metadata.name.startsWith('httpd') }
+                  return wpHttpdBuilds.size() == 1  // waitUntil condition
+                }  // waitUntil
+              } // timeout
+
+              watchBuilds(wpHttpdBuilds)
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
       }  // steps
-    }  // stage('Compilation')
+    }  // stage('Assemblage de l\'image')
 
     stage('Déploiement') {
       steps {
@@ -151,7 +161,14 @@ def buildImage (bcSpec) {
   return buildSelector
 }
 
-void watchBuild(buildSelector) {
+void watchBuilds(buildSelector) {
+  // Coerce to selector
+  if (buildSelector instanceof List<?>) {
+    buildSelector = openshift.selector(buildSelector.collect {
+      (it instanceof Map<?,?>) ? "build/${it.metadata.name}" : it
+    })
+  }
+
   def buildUrls = []
   buildSelector.withEach {
     buildUrls.push "{{ ci_jenkins_openshift_console_base_url }}/project/${openshift.project()}/browse/builds/${it.object().metadata.annotations['openshift.io/build-config.name']}/${it.object().metadata.name}?tab=logs"
@@ -203,7 +220,7 @@ void banner (msg) {
   echo msg
 }
 
-void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
+void getTriggeredBuilds(buildSelector) {
   Set imageIDs = []
   buildSelector.withEach {
     def status = it.object().status
@@ -214,26 +231,20 @@ void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
   }
 
   def triggeredBuilds = []
-
-  timeout(time: 2, units: 'MINUTES') {
-    for (build in openshift.selector("build").objects()) {
-      if (build.spec && build.spec.triggeredBy) {
-        for (triggered in build.spec.triggeredBy) {
-          if (triggered.imageChangeBuild &&
-              triggered.imageChangeBuild.imageID &&
-              imageIDs.contains(
+  for (build in openshift.selector("build").objects()) {
+    if (build.spec && build.spec.triggeredBy) {
+      for (triggered in build.spec.triggeredBy) {
+        if (triggered.imageChangeBuild &&
+            triggered.imageChangeBuild.imageID &&
+            imageIDs.contains(
               triggered.imageChangeBuild.imageID.replaceFirst('.*@', '')))
-          {
-            triggeredBuilds.add("build/${build.metadata.name}")
-          }
-        }  // for
-      }  // if
-    }  // for
+        {
+          triggeredBuilds.add(build)
+        }
+      }  // for
+    }  // if
+  }  // for
 
-    def size = triggeredBuilds.size()
-    echo "Found ${size} build(s) triggered by ${buildSelector}: ${triggeredBuilds}"
-    return size == expectedSize  // timeout() exit condition
-  }  // timeout
-
-  return openshift.selector(triggeredBuilds)
-}  // void awaitTriggeredBuildsStarted()
+  def size = triggeredBuilds.size()
+  return triggeredBuilds
+}
