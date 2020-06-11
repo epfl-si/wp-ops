@@ -24,6 +24,7 @@ _mgmt_access_list_wwp_test_and_wwp:
   - christian.zufferey@epfl.ch
   - s.dubuis@epfl.ch
   - giovanni.cangiani@epfl.ch
+  - nicolas.borboen@epfl.ch
 
 _mgmt_access_list_wwp_test_only:
   - mohamed.khadri@epfl.ch
