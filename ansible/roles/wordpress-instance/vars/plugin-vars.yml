@@ -15,19 +15,19 @@ plugins_use_gutenberg: "{{ wp_use_gutenberg }}"
 # managing their active / inactive state.
 # We use information recovered by inventory to determine site category
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
-wp_site_category: '{{ lookup("wpveritas", "category") }}'
+wp_site_categories: '{{ lookup("wpveritas", "categories") }}'
 
 # Defining plugin state for each category
-plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if wp_site_category == "CDHSHS" else "absent" }}'
-plugins_for_emploi_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Emploi" else "absent" }}'
-plugins_for_library_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
-plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if wp_site_category == "Library" else "absent" }}'
-plugins_for_inside_category: '{{ ["symlinked", "active"] if wp_site_category == "Inside" else "absent" }}'
-plugins_for_admin_category: '{{ [ "symlinked", "active" ] if wp_site_category == "admin" else "absent" }}'
+plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if "CDHSHS" in wp_site_categories else "absent" }}'
+plugins_for_emploi_category: '{{ [ "symlinked", "active" ] if "Emploi" in wp_site_categories else "absent" }}'
+plugins_for_library_category: '{{ [ "symlinked", "active" ] if "Library" in wp_site_categories else "absent" }}'
+plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if "Library" in wp_site_categories else "absent" }}'
+plugins_for_inside_category: '{{ ["symlinked", "active"] if "Inside" in wp_site_categories else "absent" }}'
+plugins_for_admin_category: '{{ [ "symlinked", "active" ] if "admin" in wp_site_categories else "absent" }}'
 
 
 # Defining if WP is managed or not
-wp_is_managed: "{{ wp_site_category != 'Unmanaged' }}"
+wp_is_managed: '{{ "Unmanaged" not in wp_site_categories }}'
 
 
 #### Plugins Configuration

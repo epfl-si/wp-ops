@@ -481,7 +481,7 @@
 
 - name: epfl-intranet status
   wordpress_plugin_epfl_intranet: 
-    protection_enabled: '{{ "yes" if wp_site_category == "Inside" else "no" }}'
+    protection_enabled: '{{ "yes" if "Inside" in wp_site_categories else "no" }}'
     restrict_to_groups: ''
     
 - name: epfl-emploi plugin
