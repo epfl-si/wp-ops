@@ -148,6 +148,12 @@
       - active
     from: wordpress.org/plugins
 
+- name: Polylang translations (taglines, date formats etc)
+  wordpress_polylang_language:
+    state: present
+    language: "{{ item }}"
+  with_items: "{{ lookup('wpveritas', 'languages') }}"
+
 - name: Coming Soon plugin
   wordpress_plugin:
     name: coming-soon
