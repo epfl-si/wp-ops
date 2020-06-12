@@ -45,22 +45,12 @@ RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
 ARG GITHUB_API_USER
 ARG GITHUB_API_TOKEN
 
-# Download latest WP-CLI in the 1.5.x branch (otherwise diggy/polylang-cli
-# won't install):
-RUN set -x;                                                              \
-   curl -o /usr/local/bin/wp -L                                          \
-        $(curl $(if [ -n "${GITHUB_API_TOKEN}" ]; then                   \
-                echo -u "${GITHUB_API_USER}":"${GITHUB_API_TOKEN}";      \
-              fi)                                                        \
-        https://api.github.com/repos/wp-cli/wp-cli/releases              \
-       | jq -r 'if type == "object" then error                           \
-                else [.[] | select (.tag_name | startswith("v1.5"))][0]  \
-                          | .assets[0].browser_download_url              \
-                end')
+# Download latest WP-CLI:
+RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod 755 /usr/local/bin/wp
 
 # Add Polylang-related extension packages to wp-cli
-COPY ./config.yml /var/www/.wp-cli/config.yml
+COPY ./wp-cli-config.yml /var/www/.wp-cli/config.yml
 RUN mkdir /var/www/.composer; \
     chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
 RUN su -s /bin/sh www-data -c " \
@@ -68,7 +58,7 @@ RUN su -s /bin/sh www-data -c " \
     if [ -n '${GITHUB_API_TOKEN}' ]; then                                 \
         composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
     fi;                                                                   \
-    wp package install https://github.com/diggy/polylang-cli.git ;        \
+    wp package install https://github.com/epfl-si/polylang-cli.git ;      \
     wp package install https://github.com/epfl-si/wp-cli-polylang.git;    \
     wp package install https://github.com/epfl-si/wp-cli.git;       \
     rm -f ~/.composer/auth.json"
