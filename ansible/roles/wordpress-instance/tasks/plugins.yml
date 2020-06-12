@@ -151,8 +151,9 @@
 - name: Polylang translations (taglines, date formats etc)
   wordpress_polylang_language:
     state: present
-    language: "{{ item }}"
-  with_items: "{{ lookup('wpveritas', 'languages') }}"
+    languages: "{{ lookup('wpveritas', 'languages') }}"
+  tags:
+    - plugins.polylang
 
 - name: Coming Soon plugin
   wordpress_plugin:

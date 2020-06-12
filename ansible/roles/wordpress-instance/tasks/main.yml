@@ -89,6 +89,7 @@
     - plugins
     - plugins.wp_media_folder_options
     - plugins.unknown
+    - plugins.polylang
   include_tasks:
     file: "plugins.yml"
     apply:
