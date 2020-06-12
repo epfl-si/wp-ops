@@ -17,7 +17,6 @@ Configuration is done through Ansible variables:
 
 import sys
 import os.path
-import json
 
 sys.path.append(os.path.dirname(__file__))
 from wordpress_action_module import WordPressActionModule
@@ -50,10 +49,6 @@ class ActionModule(WordPressActionModule):
                     pass
 
         return self.result
-
-    def _get_wp_json (self, suffix):
-        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
-        return json.loads(result['stdout'])
 
     def _is_wp_installed (self):
         stat = self._stat('wp-config.php')

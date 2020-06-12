@@ -8,6 +8,7 @@ from ansible.module_utils import six
 
 import re
 import os
+import json
 
 class WordPressActionModule(ActionBase):
 
@@ -21,7 +22,6 @@ class WordPressActionModule(ActionBase):
         self._task_vars = task_vars
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
-
 
     def _do_symlink_file (self, basename):
         """
@@ -88,6 +88,10 @@ class WordPressActionModule(ActionBase):
         return self._run_shell_action(
             '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result,
             also_in_check_mode=also_in_check_mode)
+
+    def _get_wp_json (self, suffix):
+        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
+        return json.loads(result['stdout'])
 
 
     def _run_php_code(self, code, update_result=True):
