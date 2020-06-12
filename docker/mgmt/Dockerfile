@@ -35,7 +35,7 @@ RUN mkdir /var/run/sshd && \
     rm -rf /tmp/openshift && \
     mkdir /root/.ssh
 
-COPY nfs-bashrc.sh /etc/profile.d/
+COPY nfs-bashrc.sh jahia2wp.sh /etc/profile.d/
 COPY new-wp-site.sh /usr/local/bin/new-wp-site
 RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
@@ -50,7 +50,13 @@ RUN sed -ir 's#www-data.*:/usr/sbin/nologin#www-data:x:33:33:www-data:/var/www:/
     chown -R www-data: /var/www && \
     chmod 700 /var/www/.ssh
 
-RUN ln -s /srv/bin/vjahia2wp /usr/local/bin/
+# Install jahia2wp and its dependencies
+RUN set -e -x; cd /; git clone --single-branch --branch release2018 https://github.com/epfl-si/jahia2wp
+RUN set -e -x; \
+    apt -qy install build-essential libxml2-dev python3-dev ; \
+    pip3 install -r /jahia2wp/requirements/local.txt; \
+    apt -qy remove --purge build-essential libxml2-dev python3-dev ; \
+    apt -qy autoremove --purge
 
 EXPOSE 22
 ENTRYPOINT ["/docker-entrypoint.sh"]
