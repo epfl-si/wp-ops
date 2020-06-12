@@ -10,7 +10,7 @@ jahia2wp_dir: "/srv/{{ wp_env }}/jahia2wp"
 jahia2wp_env:
   WP_ENV: "{{wp_env}}"
   WP_VERSION: latest
-  PYTHONPATH: "/srv/{{ wp_env }}/jahia2wp/src"
+  PYTHONPATH: "/jahia2wp/src"
   # Required by jahia2wp generate and generate-many (lest we get
   # the wrong set of plugins)
   PLUGINS_CONFIG_BASE_PATH: ../data/plugins
