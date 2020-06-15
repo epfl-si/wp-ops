@@ -18,17 +18,17 @@ class ActionModule(WordPressActionModule):
     def run(self, tmp=None, task_vars=None):
         self.result = super(ActionModule, self).run(tmp, task_vars)
 
-        languages = self._task.args.get('languages')
+        wp_veritas_languages = self._task.args.get('languages')
         desired_state = self._task.args.get('state', 'absent')
 
         if desired_state == "present":
-            self.ensure_polylang_lang(languages)
-            # self.ensure_polylang_mo_translations(language)
+            self.ensure_polylang_lang(wp_veritas_languages)
+            self.ensure_polylang_mo_translations(wp_veritas_languages)
         return self.result
 
     def ensure_polylang_lang(self, wp_veritas_languages):
 
-        # import sys; sys.path.append("/home/greg/.local/share/JetBrains/IntelliJIdea2020.1/python/helpers/pydev/"); import pydevd_pycharm; pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+        #import sys; sys.path.append("/home/greg/.local/share/JetBrains/IntelliJIdea2020.1/python/helpers/pydev/"); import pydevd_pycharm; pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
         result = None
 
         # get all actual languages of WP site
@@ -50,19 +50,49 @@ class ActionModule(WordPressActionModule):
             if wp_veritas_lang not in actual_languages:
                 # create lang because this lang is present in wp-veritas and absent in actual site
                 # wp pll lang create <name> <language-code> <locale> [--rtl=<bool>] [--order=<int>] [--flag=<string>] [--no_default_cat=<bool>]
-                self._update_result(self._run_wp_cli_action('pll lang create {name} {slug} {locale} --flag={flag}'.format(**self.locales[wp_veritas_lang])))
+                result = self._run_wp_cli_action('pll lang create {name} {slug} {locale} --flag={flag}'.format(**self.locales[wp_veritas_lang]))
+                self._run_wp_cli_action("pll option update media_support 0")
+                self._run_wp_cli_action("pll option sync taxonomies")
+                self._update_result(result)
 
-    def ensure_polylang_mo_translations(self, wp_veritas_language):
+    def ensure_polylang_mo_translations(self, wp_veritas_languages):
+
         # TODO: examine `wp pll lang list
         # --format=json --fields=mo_id,slug` to figure out language's mo_id
-        result = self._run_wp_cli_action('pll lang list --format=json --fields=mo_id,slug')
+        actual_mo_languages = json.loads(self._run_wp_cli_action('pll lang list --format=json --fields=mo_id,slug')['stdout'])
 
         # TODO: mo_id should exist since we already went through
         # self.ensure_polylang_lang(). If that is not the case, fail with red.
-        #
+        for site_lang in actual_mo_languages:
+            if not site_lang['mo_id']:
+                # fail with red.
+                return self._update_result(False)
+
         # TODO: obtain current translations with `wp post meta get $mo_id
         # _pll_strings_translations --format=json`
-        #
+
+
+
+        tagline_key = json.loads(self._run_wp_cli_action("option get blogdescription --format=json")['stdout'])
+        site_title_key = json.loads(self._run_wp_cli_action("option get blogname --format=json")['stdout'])
+        date_format_key = json.loads(self._run_wp_cli_action("option get date_format --format=json")['stdout'])
+        time_format_key = json.loads(self._run_wp_cli_action("option get time_format --format=json")['stdout'])
+        list_of_key_values_pairs = [[site_title_key, site_title_key],
+                                    [tagline_key, tagline_key],
+                                    [date_format_key, date_format_key],
+                                    [time_format_key, time_format_key]]
+        import sys; sys.path.append("/home/greg/.local/share/JetBrains/IntelliJIdea2020.1/python/helpers/pydev/"); import pydevd_pycharm; pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+        for site_lang in actual_mo_languages:
+            strings_translations = json.loads(self._run_wp_cli_action('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))['stdout'])
+            if len(strings_translations) < 4:
+                # echo '[["CSQI", "CSQI"], ["scientific computing and uncertainty quantification", "scientific computing and uncertainty quantification"], ["d.m.Y", "d.m.Y"], ["H:i", "H:i"]]' |
+                # wp post meta update 4 _pll_strings_translations --format=json
+                self._run_wp_cli_action("post meta update {} _pll_strings_translations {} --format=json".format(site_lang['mo_id'], json.dumps(list_of_key_values_pairs)))
+
+
+
+
+
         # The structure is a translation associative array in list-of-kv-pairs
         # format. Fill out any missing entries according to the following
         # model,
