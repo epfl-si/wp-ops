@@ -10,9 +10,9 @@ import json
 class ActionModule(WordPressActionModule):
 
     locales = {
-        "fr": {"name": "Français", "locale": "fr_FR", "slug":"fr", "flag": "fr"},
-        "en": {"name": "English", "locale": "en_GB", "slug":"en", "flag": "gb"},
-        "de": {"name": "Deutsch", "locale": "de_DE", "slug":"de", "flag": "de"},
+        "fr": {"name": "Français", "locale": "fr_FR", "slug": "fr", "flag": "fr"},
+        "en": {"name": "English", "locale": "en_GB", "slug": "en", "flag": "gb"},
+        "de": {"name": "Deutsch", "locale": "de_DE", "slug": "de", "flag": "de"},
     }
 
     def run(self, tmp=None, task_vars=None):
@@ -28,7 +28,6 @@ class ActionModule(WordPressActionModule):
 
     def ensure_polylang_lang(self, wp_veritas_languages):
 
-        #import sys; sys.path.append("/home/greg/.local/share/JetBrains/IntelliJIdea2020.1/python/helpers/pydev/"); import pydevd_pycharm; pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
         result = None
 
         # get all actual languages of WP site
@@ -81,7 +80,7 @@ class ActionModule(WordPressActionModule):
                                     [tagline_key, tagline_key],
                                     [date_format_key, date_format_key],
                                     [time_format_key, time_format_key]]
-        import sys; sys.path.append("/home/greg/.local/share/JetBrains/IntelliJIdea2020.1/python/helpers/pydev/"); import pydevd_pycharm; pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+
         for site_lang in actual_mo_languages:
             strings_translations = json.loads(self._run_wp_cli_action('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))['stdout'])
             if len(strings_translations) < 4:
