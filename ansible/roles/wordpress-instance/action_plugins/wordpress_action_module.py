@@ -77,16 +77,27 @@ class WordPressActionModule(ActionBase):
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
-    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False):
+    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
+        cmd = ""
+        if pipe_input:
+            cmd += " sh -c 'echo '\"'\"'"
+            cmd += pipe_input
+            cmd += "'\"'\"' |"
+
+        # wp_cli_command: "wp --path={{ wp_dir }}"
+        cmd += '{} {}'.format(self._get_ansible_var('wp_cli_command'), args)
+
+        if pipe_input:
+            cmd += "'"
 
         return self._run_shell_action(
-            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result,
+            cmd, update_result=update_result,
             also_in_check_mode=also_in_check_mode)
 
     def _get_wp_json (self, suffix):
