@@ -136,7 +136,7 @@ check_env_prereqs() {
 }
 
 do_mysql() {
-    tee /dev/stderr | (set -x; mysql -h db -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
+    tee /dev/stderr | (set -x; mysql -h "${db_host}" -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
 }
 
 contents_of_symlinked_index_php() {
