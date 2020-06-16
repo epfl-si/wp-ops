@@ -27,10 +27,11 @@ main() {
         db_name="wp_$(mkid 29)"
         db_user="$(mkid 16)"
         db_password="$(mkpass 20)"
+        db_host="${MYSQL_DB_HOST:-db}"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
           wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
-             --dbhost=db --skip-check
+             --dbhost="$db_host" --skip-check
         )
     fi
 
@@ -135,7 +136,7 @@ check_env_prereqs() {
 }
 
 do_mysql() {
-    tee /dev/stderr | (set -x; mysql -h db -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
+    tee /dev/stderr | (set -x; mysql -h "${db_host}" -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
 }
 
 contents_of_symlinked_index_php() {
