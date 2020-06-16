@@ -18,35 +18,35 @@ class ActionModule(WordPressActionModule):
     def run(self, tmp=None, task_vars=None):
         self.result = super(ActionModule, self).run(tmp, task_vars)
 
-        wp_veritas_languages = self._task.args.get('languages')
+        expected_languages = self._task.args.get('languages')
         desired_state = self._task.args.get('state', 'absent')
 
         if desired_state == "present":
-            self.ensure_polylang_lang(wp_veritas_languages)
             self.ensure_polylang_mo_translations(wp_veritas_languages)
+            self.ensure_polylang_lang(expected_languages)
         return self.result
 
-    def ensure_polylang_lang(self, wp_veritas_languages):
+    def ensure_polylang_lang(self, expected_languages):
 
         result = None
 
         # get all actual languages of WP site
         actual_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
 
-        # checks if parameter wp_veritas_language needs to be deleted
+        # checks if parameter lang needs to be deleted
         for lang in actual_languages:
             found_lang_to_delete = True
-            for wp_veritas_lang in wp_veritas_languages:
-                if wp_veritas_lang == lang:
+            for expected_lang in expected_languages:
+                if expected_lang == lang:
                     found_lang_to_delete = False
                     break
             if found_lang_to_delete:
                 # delete lang present in wp-veritas but absent in actual site
                 self._update_result(self._run_wp_cli_action('pll lang delete {}'.format(lang)))
 
-        # checks if parameter wp_veritas_language needs to be created
-        for wp_veritas_lang in wp_veritas_languages:
-            if wp_veritas_lang not in actual_languages:
+        # checks if parameter expected_lang needs to be created
+        for expected_lang in expected_languages:
+            if expected_lang not in actual_languages:
                 # create lang because this lang is present in wp-veritas and absent in actual site
                 # wp pll lang create <name> <language-code> <locale> [--rtl=<bool>] [--order=<int>] [--flag=<string>] [--no_default_cat=<bool>]
                 result = self._run_wp_cli_action('pll lang create {name} {slug} {locale} --flag={flag}'.format(**self.locales[wp_veritas_lang]))
