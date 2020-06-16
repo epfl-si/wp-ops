@@ -21,7 +21,7 @@ wp_site_categories: '{{ lookup("wpveritas", "categories") }}'
 plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if "CDHSHS" in wp_site_categories else "absent" }}'
 plugins_for_emploi_category: '{{ [ "symlinked", "active" ] if "Emploi" in wp_site_categories else "absent" }}'
 plugins_for_library_category: '{{ [ "symlinked", "active" ] if "Library" in wp_site_categories else "absent" }}'
-plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if "Library" in wp_site_categories else "absent" }}'
+plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if "Restauration" in wp_site_categories else "absent" }}'
 plugins_for_inside_category: '{{ ["symlinked", "active"] if "Inside" in wp_site_categories else "absent" }}'
 plugins_for_admin_category: '{{ [ "symlinked", "active" ] if "admin" in wp_site_categories else "absent" }}'
 
