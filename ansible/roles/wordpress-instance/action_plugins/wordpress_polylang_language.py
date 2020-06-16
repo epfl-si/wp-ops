@@ -3,9 +3,11 @@
 # To be able to import wordpress_action_module
 import sys
 import os
+import json
+from ansible.errors import AnsibleActionFail
+
 sys.path.append(os.path.dirname(__file__))
 from wordpress_action_module import WordPressActionModule
-import json
 
 class ActionModule(WordPressActionModule):
 
@@ -22,8 +24,8 @@ class ActionModule(WordPressActionModule):
         desired_state = self._task.args.get('state', 'absent')
 
         if desired_state == "present":
-            self.ensure_polylang_mo_translations(wp_veritas_languages)
             self.ensure_polylang_lang(expected_languages)
+            self.ensure_polylang_mo_translations()
         return self.result
 
     def ensure_polylang_lang(self, expected_languages):
@@ -42,76 +44,43 @@ class ActionModule(WordPressActionModule):
                     break
             if found_lang_to_delete:
                 # delete lang present in wp-veritas but absent in actual site
-                self._update_result(self._run_wp_cli_action('pll lang delete {}'.format(lang)))
+                self._run_wp_cli_action("pll lang delete {}".format(lang))
 
         # checks if parameter expected_lang needs to be created
         for expected_lang in expected_languages:
             if expected_lang not in actual_languages:
                 # create lang because this lang is present in wp-veritas and absent in actual site
-                # wp pll lang create <name> <language-code> <locale> [--rtl=<bool>] [--order=<int>] [--flag=<string>] [--no_default_cat=<bool>]
-                result = self._run_wp_cli_action('pll lang create {name} {slug} {locale} --flag={flag}'.format(**self.locales[wp_veritas_lang]))
-                self._run_wp_cli_action("pll option update media_support 0")
-                self._run_wp_cli_action("pll option sync taxonomies")
-                self._update_result(result)
+                self._run_wp_cli_action("pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[expected_lang]))
 
-    def ensure_polylang_mo_translations(self, wp_veritas_languages):
+        media_support_before = self._run_wp_cli_action("pll option get media_support", update_result=False)['stdout']
+        if int(media_support_before) != 0:
+            self._update_result(self._run_wp_cli_action("pll option update media_support 0"))
 
-        # TODO: examine `wp pll lang list
-        # --format=json --fields=mo_id,slug` to figure out language's mo_id
-        actual_mo_languages = json.loads(self._run_wp_cli_action('pll lang list --format=json --fields=mo_id,slug')['stdout'])
+        # command "pll option sync taxonomies" generate the mo id of new lang and may be doing something else...
+        self._run_wp_cli_action("pll option sync taxonomies", update_result=False)
 
-        # TODO: mo_id should exist since we already went through
-        # self.ensure_polylang_lang(). If that is not the case, fail with red.
+    def ensure_polylang_mo_translations(self):
+
+        actual_mo_languages = json.loads(self._run_wp_cli_action('pll lang list --format=json --fields=mo_id,slug', update_result=False)['stdout'])
+
+        # Check if mo_id exist since we already went through self.ensure_polylang_lang()
         for site_lang in actual_mo_languages:
             if not site_lang['mo_id']:
-                # fail with red.
-                return self._update_result(False)
+                raise AnsibleActionFail("Cannot find the mo_id of lang '{}' - Error: method 'ensure_polylang_mo_translations()' ".format(site_lang["slug"]))
 
-        # TODO: obtain current translations with `wp post meta get $mo_id
-        # _pll_strings_translations --format=json`
+        tagline_key = json.loads(self._run_wp_cli_action("option get blogdescription --format=json", update_result=False)['stdout'])
+        site_title_key = json.loads(self._run_wp_cli_action("option get blogname --format=json", update_result=False)['stdout'])
+        date_format_key = json.loads(self._run_wp_cli_action("option get date_format --format=json", update_result=False)['stdout'])
+        time_format_key = json.loads(self._run_wp_cli_action("option get time_format --format=json", update_result=False)['stdout'])
 
-
-
-        tagline_key = json.loads(self._run_wp_cli_action("option get blogdescription --format=json")['stdout'])
-        site_title_key = json.loads(self._run_wp_cli_action("option get blogname --format=json")['stdout'])
-        date_format_key = json.loads(self._run_wp_cli_action("option get date_format --format=json")['stdout'])
-        time_format_key = json.loads(self._run_wp_cli_action("option get time_format --format=json")['stdout'])
+        # The structure is a translation associative array in list-of-kv-pairs format.
+        # Fill out any missing entries according to the following model
         list_of_key_values_pairs = [[site_title_key, site_title_key],
                                     [tagline_key, tagline_key],
                                     [date_format_key, date_format_key],
                                     [time_format_key, time_format_key]]
 
         for site_lang in actual_mo_languages:
-            strings_translations = json.loads(self._run_wp_cli_action('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))['stdout'])
+            strings_translations = json.loads(self._run_wp_cli_action('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']), update_result=False)['stdout'])
             if len(strings_translations) < 4:
-                # echo '[["CSQI", "CSQI"], ["scientific computing and uncertainty quantification", "scientific computing and uncertainty quantification"], ["d.m.Y", "d.m.Y"], ["H:i", "H:i"]]' |
-                # wp post meta update 4 _pll_strings_translations --format=json
-                self._run_wp_cli_action("post meta update {} _pll_strings_translations {} --format=json".format(site_lang['mo_id'], json.dumps(list_of_key_values_pairs)))
-
-
-
-
-
-        # The structure is a translation associative array in list-of-kv-pairs
-        # format. Fill out any missing entries according to the following
-        # model,
-        #
-        # [[site_title_key, site_title_key],
-        #  [tagline_key, tagline_key],
-        #  [date_format_key, date_format_key],
-        #  [time_format_key, time_format_key]]
-        #
-        # where
-        #
-        # tagline_key = self.run_wp_cli("option get blogdescription")
-        # site_title_key = self.run_wp_cli("option get blogname")
-        # date_format_key = self.run_wp_cli("option get date_format")
-        # time_format_key = self.run_wp_cli("option get time_format")
-        #
-        # TODO: if unchanged, return green to Ansible; otherwise, save the
-        # new _pll_strings_translations with
-        #
-        #   self.run_wp_cli("post meta update {} _pll_strings_translations --format=json".format(mo_id), pipe_input=json.dumps(list_of_kv_pairs))
-        #
-        # and return yellow.
-        pass
+                self._run_wp_cli_action("post meta update {} _pll_strings_translations --format=json".format(site_lang['mo_id']), pipe_input=json.dumps(list_of_key_values_pairs))
