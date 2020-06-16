@@ -148,12 +148,20 @@
       - active
     from: wordpress.org/plugins
 
+- name: Count Polylang languages
+  shell: |
+    {{ wp_cli_command }} pll lang list --field=term_id --format=csv
+  changed_when: false
+  register: _polylang_languages_csv
+  tags: plugins.polylang
+
 - name: Polylang translations (taglines, date formats etc)
   wordpress_polylang_language:
     state: present
     languages: "{{ lookup('wpveritas', 'languages') }}"
-  tags:
-    - plugins.polylang
+  tags: plugins.polylang
+  when: |-
+    _polylang_languages_csv.stdout == ""
 
 - name: Coming Soon plugin
   wordpress_plugin:
