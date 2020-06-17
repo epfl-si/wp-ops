@@ -61,17 +61,17 @@ class ActionModule(WordPressActionModule):
 
     def ensure_polylang_mo_translations(self):
 
-        actual_mo_languages = json.loads(self._run_wp_cli_action('pll lang list --format=json --fields=mo_id,slug', update_result=False)['stdout'])
+        actual_mo_languages = self._get_wp_json('pll lang list --format=json --fields=mo_id,slug')
 
         # Check if mo_id exist since we already went through self.ensure_polylang_lang()
         for site_lang in actual_mo_languages:
             if not site_lang['mo_id']:
-                raise AnsibleActionFail("Cannot find the mo_id of lang '{}' - Error: method 'ensure_polylang_mo_translations()' ".format(site_lang["slug"]))
+                raise AnsibleActionFail("Cannot find the mo_id of lang '{}' - Error: method 'ensure_polylang_mo_translations()'".format(site_lang["slug"]))
 
-        tagline_key = json.loads(self._run_wp_cli_action("option get blogdescription --format=json", update_result=False)['stdout'])
-        site_title_key = json.loads(self._run_wp_cli_action("option get blogname --format=json", update_result=False)['stdout'])
-        date_format_key = json.loads(self._run_wp_cli_action("option get date_format --format=json", update_result=False)['stdout'])
-        time_format_key = json.loads(self._run_wp_cli_action("option get time_format --format=json", update_result=False)['stdout'])
+        tagline_key = self._get_wp_json("option get blogdescription --format=json")
+        site_title_key = self._get_wp_json("option get blogname --format=json")
+        date_format_key = self._get_wp_json("option get date_format --format=json")
+        time_format_key = self._get_wp_json("option get time_format --format=json")
 
         # The structure is a translation associative array in list-of-kv-pairs format.
         # Fill out any missing entries according to the following model
@@ -81,6 +81,6 @@ class ActionModule(WordPressActionModule):
                                     [time_format_key, time_format_key]]
 
         for site_lang in actual_mo_languages:
-            strings_translations = json.loads(self._run_wp_cli_action('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']), update_result=False)['stdout'])
+            strings_translations = self._get_wp_json('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))
             if len(strings_translations) < 4:
                 self._run_wp_cli_action("post meta update {} _pll_strings_translations --format=json".format(site_lang['mo_id']), pipe_input=json.dumps(list_of_key_values_pairs))
