@@ -19,6 +19,7 @@
     - wipe
     - backup
     - backup.code
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up data to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   command: "{{ wp_cli_command }} db export {{ _backup_tmpdir }}/backup.sql"
@@ -26,6 +27,7 @@
     - wipe
     - backup
     - backup.data
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up uploads to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   shell: |
@@ -37,3 +39,4 @@
     - wipe
     - backup
     - backup.uploads
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
