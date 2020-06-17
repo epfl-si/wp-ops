@@ -1,6 +1,7 @@
 - include_vars: mgmt-vars.yml
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
 - include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
+- include_vars: ../../../vars/wordpress-vars.yml          # For wp_ensure_symlink_version
 - include_vars: "secrets-{{ openshift_namespace }}.yml"
 
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
@@ -28,7 +29,7 @@
     data:
       WP_ADMIN_USER: admin
       WP_ADMIN_EMAIL: test@example.com
-      WP_VERSION: unused
+      WP_VERSION: "{{ wp_ensure_symlink_version }}"
 
 - name: mysql-super-credentials Secret
   openshift:
