@@ -117,3 +117,4 @@
     - never
     - wp.menus
     - wp.menus.refresh
+    - wp.menus.polylang
