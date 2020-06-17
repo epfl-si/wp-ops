@@ -41,11 +41,11 @@
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
   tags:
-    - site.create
+    - wp.create
   include_tasks:
     file: "create.yml"
     apply:
-      tags: ["site.create"]
+      tags: ["wp.create"]
 
 - name: Restore
   import_tasks: "restore.yml"
