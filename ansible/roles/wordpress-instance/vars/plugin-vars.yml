@@ -7,7 +7,7 @@ plugins_use_wp2010_plugins: '{{ wp_env == "subdomains" }}'   # TODO: the accurac
                                                              # tasks on our side)
 
 plugins_symlinked_and_active_in_2010_only: '{{ ["symlinked", "active"] if plugins_use_wp2010_plugins else "absent" }}'
-plugins_use_gutenberg: "{{ wp_use_gutenberg }}"
+plugins_use_gutenberg: true
 
 
 # TODO: Likewise, these should be computed from wp-veritas state. We
