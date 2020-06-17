@@ -30,8 +30,9 @@ main() {
         db_host="${MYSQL_DB_HOST:-db}"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
-          wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
-             --dbhost="$db_host" --skip-check
+          extra_php_for_wp_config | wp --path=. config create \
+             --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
+             --dbhost="$db_host" --extra-php --skip-check
         )
     fi
 
@@ -47,37 +48,7 @@ SQL_CREATE_USER
     contents_of_symlinked_index_php > index.php
 
     if wp eval '1;' 2>&1 |grep "wp core install"; then
-        wp_hostname="$(pwd | cut -d/ -f4)"
-        wp_path="$(pwd | cut -d/ -f6-)"
-        ( set -e -x
-          wp core install --url="http://$wp_hostname/$wp_path" \
-             --title="$(basename "$(pwd)")" \
-             --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
-             --wpversion="$WORDPRESS_VERSION"
-
-          # Configure permalinks
-          wp rewrite structure '/%postname%/' --hard
-
-          # Configure TimeZone
-          wp option update timezone_string Europe/Zurich
-          # Configure Time Format 24H
-          wp option update time_format H:i
-          # Configure Date Format d.m.Y
-          wp option update date_format d.m.Y
-
-          # Add french for the admin interface
-          wp language core install fr_FR
-
-          # remove unfiltered_upload capability. Will be reactivated during
-          # export if needed.
-          wp cap remove administrator unfiltered_upload
-
-          # Disable avatars for security reason. Because a call to gravatar.com is done when user is logged and
-          # hash with email address associated to account is given
-          wp option update show_avatars ''
-
-        )
-        echo "http://$wp_hostname/$wp_path"
+        do_wp_core_install
     fi
 
     ( set -x; wp eval '1;' )
@@ -139,6 +110,52 @@ do_mysql() {
     tee /dev/stderr | (set -x; mysql -h "${db_host}" -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
 }
 
+do_wp_core_install () {
+    wp_hostname="$(pwd | cut -d/ -f4)"
+    wp_path="$(pwd | cut -d/ -f6-)"
+
+    local url
+    if is_kubernetes; then
+        url=https://$wp_hostname/$wp_path
+    else
+        url=http://$wp_hostname/$wp_path
+    fi
+    
+    ( set -e -x
+      wp core install --url="$url" \
+         --title="$(basename "$(pwd)")" \
+         --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
+         --wpversion="$WORDPRESS_VERSION"
+
+          # Configure permalinks
+          wp rewrite structure '/%postname%/' --hard
+
+          # Configure TimeZone
+          wp option update timezone_string Europe/Zurich
+          # Configure Time Format 24H
+          wp option update time_format H:i
+          # Configure Date Format d.m.Y
+          wp option update date_format d.m.Y
+
+          # Add french for the admin interface
+          wp language core install fr_FR
+
+          # remove unfiltered_upload capability. Will be reactivated during
+          # export if needed.
+          wp cap remove administrator unfiltered_upload
+
+          # Disable avatars for security reason. Because a call to gravatar.com is done when user is logged and
+          # hash with email address associated to account is given
+          wp option update show_avatars ''
+
+    )
+    echo "$url"
+}
+
+is_kubernetes() {
+    test -d /run/secrets/kubernetes.io/serviceaccount 2>/dev/null
+}
+
 contents_of_symlinked_index_php() {
     cat <<INDEX_PHP
 <?php
@@ -160,6 +177,18 @@ define('WP_USE_THEMES', true);
 require_once('wp/wp-blog-header.php');
 
 INDEX_PHP
+}
+
+extra_php_for_wp_config () {
+    cat <<"PHP"
+if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+    $_SERVER['HTTPS']='on';
+} 
+
+define('ALLOW_UNFILTERED_UPLOADS', true);
+
+PHP
 }
 
 main
