@@ -1,11 +1,5 @@
 # Create a WordPress site out of thin air
 
-- include_vars: wp-destructive.yml
-
-- assert:
-    that:
-      - (wp_can.wipe) or (_wp_config_php_stat is not defined) or (not _wp_config_php_stat) or (not _wp_config_php_stat.stat) or (not _wp_config_php_stat.stat.exists)
-
 - name: Create site directory
   file:
     path: "{{ wp_dir }}"
@@ -14,8 +8,16 @@
     group: www-data
     mode: 0775
     recurse: no
+  register: _wp_dir_created
 
 - name: Run new-wp-site script
   shell:
     chdir: "{{ wp_dir }}"
-    cmd: . /etc/profile.d/k8s-env.sh && new-wp-site
+    cmd: |
+      if wp eval '1;'; then echo SITE_ALREADY_EXISTS; exit 0; fi
+
+      . /etc/profile.d/k8s-env.sh
+      new-wp-site
+  register: _new_wp_site
+  changed_when: >-
+    "SITE_ALREADY_EXISTS" not in _new_wp_site.stdout
