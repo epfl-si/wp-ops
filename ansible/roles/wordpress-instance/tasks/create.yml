@@ -17,7 +17,7 @@
     mode: 0775
     recurse: no
 
-- name: New wp site
+- name: Run new-wp-site script
   shell:
     chdir: "{{ wp_dir }}"
     cmd: . /etc/profile.d/k8s-env.sh && new-wp-site
