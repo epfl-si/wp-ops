@@ -1,6 +1,7 @@
 # Delete a WordPress site
 
 - include_vars: wp-destructive.yml
+- include_vars: wipe-vars.yml
 
 - assert:
     that:
@@ -32,4 +33,5 @@
 - name: Delete files
   file:
     state: absent
-    path: "{{ wp_dir }}"
+    path: "{{ wp_dir }}/{{ item }}"
+  with_items: "{{ wipe_paths }}"
