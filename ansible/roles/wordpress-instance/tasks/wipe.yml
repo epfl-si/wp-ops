@@ -1,12 +1,22 @@
 # Delete a WordPress site
 
 - include_vars: wp-destructive.yml
-- include_vars: jahia2wp-vars.yml
 
 - assert:
     that:
       - wp_can.wipe
 
-- name: jahia2wp.py clean
-  shell: "{{ jahia2wp_shell }} clean {{ wp_env }} {{ jahia2wp_url }}"
-  environment: "{{ jahia2wp_env }}"
+- name: Delete database
+  shell: >-
+    set -e
+    . /etc/profile.d/k8s-env.sh
+    DB_NAME=$(php -r 'include_once("wp-config.php"); echo DB_NAME;')
+    DB_HOST=$(php -r 'include_once("wp-config.php"); echo DB_HOST;')
+    DB_USER=$(php -r 'include_once("wp-config.php"); echo DB_USER;')
+    mysql -h $DB_HOST -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD" -e "DROP DATABASE IF EXISTS $DB_NAME;"
+    mysql -h $DB_HOST -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD" -e "DROP USER IF EXISTS $DB_USER;"
+
+- name: Delete files
+  file:
+    state: absent
+    path: "{{ wp_dir }}"
