@@ -7,14 +7,27 @@
       - wp_can.wipe
 
 - name: Delete database and user
-  shell: >-
-    set -e
-    . /etc/profile.d/k8s-env.sh
-    DB_NAME=$(php -r 'include_once("wp-config.php"); echo DB_NAME;')
-    DB_HOST=$(php -r 'include_once("wp-config.php"); echo DB_HOST;')
-    DB_USER=$(php -r 'include_once("wp-config.php"); echo DB_USER;')
-    mysql -h $DB_HOST -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD" -e "DROP DATABASE IF EXISTS $DB_NAME;"
-    mysql -h $DB_HOST -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD" -e "DROP USER IF EXISTS $DB_USER;"
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: |-
+      . /etc/profile.d/k8s-env.sh
+
+      mysql_super() {
+         mysql -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD" -h "$DB_HOST" -e "$@"
+       }
+
+      php -r 'include_once("wp-config.php"); echo DB_NAME; echo "\n"; echo DB_HOST; echo "\n"; echo DB_USER; echo "\n";' | (
+        read DB_NAME
+        read DB_HOST
+        if ! read DB_USER; then exit 2; fi
+
+        mysql_super "DROP DATABASE $DB_NAME;"
+        mysql_super "DROP USER '$DB_USER';"
+      )
+  register: _myqsl_drop
+  changed_when: >-
+    "stdout" in _myqsl_drop and "Success" in _myqsl_drop.stdout
+  ignore_errors: true
 
 - name: Delete files
   file:
