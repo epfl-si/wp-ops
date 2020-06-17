@@ -30,8 +30,9 @@ main() {
         db_host="${MYSQL_DB_HOST:-db}"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
-          wp --path=. config create --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
-             --dbhost="$db_host" --skip-check
+          extra_php_for_wp_config | wp --path=. config create \
+             --dbname="$db_name" --dbuser="$db_user" --dbpass="$db_password" \
+             --dbhost="$db_host" --extra-php --skip-check
         )
     fi
 
@@ -176,6 +177,18 @@ define('WP_USE_THEMES', true);
 require_once('wp/wp-blog-header.php');
 
 INDEX_PHP
+}
+
+extra_php_for_wp_config () {
+    cat <<"PHP"
+if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+    $_SERVER['HTTPS']='on';
+} 
+
+define('ALLOW_UNFILTERED_UPLOADS', true);
+
+PHP
 }
 
 main
