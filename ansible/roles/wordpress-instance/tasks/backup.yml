@@ -5,6 +5,7 @@
   changed_when: false
   register: _backup_tmpdir_cmd
   tags: always
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - set_fact:
     _backup_tmpdir: "{{ _backup_tmpdir_cmd.stdout }}"
