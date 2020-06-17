@@ -37,8 +37,16 @@
 - name: Coming Soon plugin (only at creation time)
   wordpress_plugin:
     name: coming-soon
-    state: symlinked
+    state:
+      - symlinked
+      - active
     from: wordpress.org/plugins
+  when: >-
+    _active_plugins.stdout == ""
+
+- name: Coming Soon options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_coming_soon_options }}"
   when: >-
     _active_plugins.stdout == ""
 
