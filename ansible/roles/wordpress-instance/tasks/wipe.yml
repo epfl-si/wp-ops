@@ -6,7 +6,7 @@
     that:
       - wp_can.wipe
 
-- name: Delete database
+- name: Delete database and user
   shell: >-
     set -e
     . /etc/profile.d/k8s-env.sh
