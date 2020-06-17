@@ -27,6 +27,21 @@
     - akismet
     - hello
 
+- name: Enumerate active plugins
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: "wp plugin list --status=active --field=name"
+  register: _active_plugins
+  changed_when: false
+
+- name: Coming Soon plugin (only at creation time)
+  wordpress_plugin:
+    name: coming-soon
+    state: symlinked
+    from: wordpress.org/plugins
+  when: >-
+    _active_plugins.stdout == ""
+
 ##################### Must-use plugins ###########################
 
 - name: Custom editor menu (must-use plugin)
@@ -162,12 +177,6 @@
   tags: plugins.polylang
   when: |-
     _polylang_languages_csv.stdout == ""
-
-- name: Coming Soon plugin
-  wordpress_plugin:
-    name: coming-soon
-    state: symlinked
-    from: wordpress.org/plugins
 
 - name: mainwp-child plugin
   wordpress_plugin:
