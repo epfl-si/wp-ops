@@ -52,35 +52,45 @@ class ActionModule(WordPressActionModule):
                 # create lang because this lang is present in wp-veritas and absent in actual site
                 self._run_wp_cli_action("pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[expected_lang]))
 
-        media_support_before = self._run_wp_cli_action("pll option get media_support", update_result=False)['stdout']
-        if int(media_support_before) != 0:
-            self._update_result(self._run_wp_cli_action("pll option update media_support 0"))
-
-        # command "pll option sync taxonomies" generate the mo id of new lang and may be doing something else...
-        self._run_wp_cli_action("pll option sync taxonomies", update_result=False)
-
     def ensure_polylang_mo_translations(self):
+        """Ensure that every language has a so-called "polylang_mo" translation table.
 
-        actual_mo_languages = self._get_wp_json('pll lang list --format=json --fields=mo_id,slug')
-
-        # Check if mo_id exist since we already went through self.ensure_polylang_lang()
-        for site_lang in actual_mo_languages:
-            if not site_lang['mo_id']:
-                raise AnsibleActionFail("Cannot find the mo_id of lang '{}' - Error: method 'ensure_polylang_mo_translations()'".format(site_lang["slug"]))
-
-        tagline_key = self._get_wp_json("option get blogdescription --format=json")
-        site_title_key = self._get_wp_json("option get blogname --format=json")
-        date_format_key = self._get_wp_json("option get date_format --format=json")
-        time_format_key = self._get_wp_json("option get time_format --format=json")
-
-        # The structure is a translation associative array in list-of-kv-pairs format.
-        # Fill out any missing entries according to the following model
-        list_of_key_values_pairs = [[site_title_key, site_title_key],
-                                    [tagline_key, tagline_key],
-                                    [date_format_key, date_format_key],
-                                    [time_format_key, time_format_key]]
-
-        for site_lang in actual_mo_languages:
+        If that is not the case, create a dummy one.
+        """
+        for site_lang in self._get_polylang_languages():
             strings_translations = self._get_wp_json('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))
             if len(strings_translations) < 4:
-                self._run_wp_cli_action("post meta update {} _pll_strings_translations --format=json".format(site_lang['mo_id']), pipe_input=json.dumps(list_of_key_values_pairs))
+                self._run_wp_cli_action("post meta update {} _pll_strings_translations --format=json".format(site_lang['mo_id']), pipe_input=json.dumps(self._get_dummy_translation_table()))
+
+    def _get_polylang_languages (self):
+        """Returns: A list of dicts with fields `slug` and `mo_id`"""
+        get_cmd = 'pll lang list --format=json --fields=mo_id,slug'
+        retval = self._get_wp_json(get_cmd)
+
+        # mo_id's are created lazily:
+        if [lang for lang in retval if not lang.get('mo_id')]:
+            # `wp pll option sync taxonomies` generates the mo id of
+            # newly-created languages, and may or may not be doing something
+            # else... Oh well
+            self._run_wp_cli_action("pll option sync taxonomies", update_result=False)
+            retval = self._get_wp_json(get_cmd)
+
+            # Failing again is fatal.
+            for lang in retval:
+                if not site_lang.get('mo_id'):
+                    raise AnsibleActionFail("Cannot find the mo_id of lang '{}'".format(lang["slug"]))
+
+        return retval
+
+    def _get_dummy_translation_table (self):
+        if not hasattr(self, '_cached_dummy_translation_table'):
+            tagline_key = self._get_wp_json("option get blogdescription --format=json")
+            site_title_key = self._get_wp_json("option get blogname --format=json")
+            date_format_key = self._get_wp_json("option get date_format --format=json")
+            time_format_key = self._get_wp_json("option get time_format --format=json")
+
+            self._cached_dummy_translation_table = [[site_title_key, site_title_key],
+                                        [tagline_key, tagline_key],
+                                        [date_format_key, date_format_key],
+                                        [time_format_key, time_format_key]]
+        return self._cached_dummy_translation_table
