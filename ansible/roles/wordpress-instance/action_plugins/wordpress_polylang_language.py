@@ -30,8 +30,6 @@ class ActionModule(WordPressActionModule):
 
     def ensure_polylang_lang(self, expected_languages):
 
-        result = None
-
         # get all actual languages of WP site
         actual_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
 
