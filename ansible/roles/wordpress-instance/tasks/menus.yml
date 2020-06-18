@@ -10,3 +10,4 @@
     state: present
   tags:
     - wp.menus.polylang
+  ignore_errors: "{{ wp_ignore_menu_errors | default(false) }}"
