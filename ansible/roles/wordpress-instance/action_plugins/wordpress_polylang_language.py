@@ -21,10 +21,30 @@ class ActionModule(WordPressActionModule):
         "grec": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
     }
 
+    def languages_in_order(self):
+        """
+        :return: 'en' first, 'fr' second
+        """
+        def partition(pred, iterable):
+            """
+            https://stackoverflow.com/a/4578605/435004
+            """
+            trues = []
+            falses = []
+            for item in iterable:
+                if pred(item):
+                    trues.append(item)
+                else:
+                    falses.append(item)
+            return trues, falses
+
+        english, other = partition(lambda lang: lang == 'en', self._task.args.get('languages'))
+        french, other = partition(lambda lang: lang == 'fr', other)
+        return english + french + other
+
     def run(self, tmp=None, task_vars=None):
         self.result = super(ActionModule, self).run(tmp, task_vars)
-
-        expected_languages = self._task.args.get('languages')
+        expected_languages = self.languages_in_order()
         desired_state = self._task.args.get('state', 'absent')
 
         if desired_state == "present":
