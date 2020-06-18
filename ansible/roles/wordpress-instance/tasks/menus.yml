@@ -2,11 +2,11 @@
   shell:
     cmd: "{{ wp_cli_command }} epfl menus refresh"
   tags:
+    - never
     - wp.menus.refresh
 
 - name: Polylang menus
   wordpress_polylang_menu:
     state: present
   tags:
-    - wp.menus
     - wp.menus.polylang
