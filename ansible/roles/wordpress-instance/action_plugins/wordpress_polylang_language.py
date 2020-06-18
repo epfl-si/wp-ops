@@ -77,7 +77,7 @@ class ActionModule(WordPressActionModule):
 
             # Failing again is fatal.
             for lang in retval:
-                if not site_lang.get('mo_id'):
+                if not lang.get('mo_id'):
                     raise AnsibleActionFail("Cannot find the mo_id of lang '{}'".format(lang["slug"]))
 
         return retval
