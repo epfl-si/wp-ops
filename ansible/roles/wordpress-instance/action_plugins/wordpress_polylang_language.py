@@ -15,6 +15,10 @@ class ActionModule(WordPressActionModule):
         "fr": {"name": "Français", "locale": "fr_FR", "slug": "fr", "flag": "fr"},
         "en": {"name": "English", "locale": "en_GB", "slug": "en", "flag": "gb"},
         "de": {"name": "Deutsch", "locale": "de_DE", "slug": "de", "flag": "de"},
+        "it": {"name": "Italiano", "locale": "it_IT", "slug": "it", "flag": "it"},
+        "es": {"name": "Español", "locale": "es_ES", "slug": "es", "flag": "es"},
+        "ro": {"name": "Română", "locale": "ro_RO", "slug": "ro", "flag": "ro"},
+        "grec": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
     }
 
     def run(self, tmp=None, task_vars=None):
