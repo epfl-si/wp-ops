@@ -141,6 +141,7 @@
     - wp.pages
 
 - name: Set up menus
+  when: wp_can.configure
   include_tasks:
     file: "menus.yml"
     apply:
