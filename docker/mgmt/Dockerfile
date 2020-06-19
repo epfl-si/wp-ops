@@ -16,6 +16,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     python3-setuptools \
     virtualenv \
     screen \
+    tmux \
     software-properties-common \
   && \
     apt-get -qy autoremove && \
