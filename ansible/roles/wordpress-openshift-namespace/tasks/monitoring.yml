@@ -3,107 +3,110 @@
 - name: Prometheus service
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: prometheus
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: prometheus
-      spec:
-        ports:
-          - name: prometheus
-            port: 9090
-        selector:
-          app: prometheus
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: prometheus
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: prometheus
+    spec:
+      ports:
+        - name: prometheus
+          port: 9090
+      selector:
+        app: prometheus
 
 - name: Prometheus route (https://prometheus-wwp.epfl.ch/)
   openshift:
     state: latest
-    content: |
-      apiVersion: route.openshift.io/v1
-      kind: Route
-      metadata:
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: prometheus
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      host: prometheus-wwp.epfl.ch
+      port:
+        targetPort: prometheus
+      tls:
+        termination: edge
+      to:
+        kind: Service
         name: prometheus
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        host: prometheus-wwp.epfl.ch
-        port:
-          targetPort: prometheus
-        tls:
-          termination: edge
-        to:
-          kind: Service
-          name: prometheus
 
 - name: Prometheus StatefulSet
   openshift:
     state: latest
-    content: |
-      apiVersion: apps/v1
-      kind: StatefulSet
-      metadata:
-        name: prometheus
-        namespace: "{{ openshift_namespace }}"
-        annotations:
-          # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
-          image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"{{ monitoring_prober_image_name }}:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"prober\")].image"}]'
-      spec:
-        serviceName: prometheus  # Refs the service above, so that the pods get
-                                 # a predictable KubeDNS name
-        selector:
-          matchLabels:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: prometheus
+      namespace: "{{ openshift_namespace }}"
+      annotations:
+        # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
+        image.openshift.io/triggers: >-
+          {{ [dict(from=
+                     dict(kind="ImageStreamTag",
+                          name=monitoring_prober_image_name + ":latest",
+                          fieldPath='spec.template.spec.'
+                                    'containers[?(@.name=="prober")].image')
+                  )] | to_json }}
+    spec:
+      serviceName: prometheus  # Refs the service above, so that the pods get
+                               # a predictable KubeDNS name
+      selector:
+        matchLabels:
+          app: prometheus
+      template:
+        metadata:
+          labels:
             app: prometheus
-        template:
-          metadata:
-            labels:
-              app: prometheus
-          spec:
-            terminationGracePeriodSeconds: 10
-            containers:
-              - name: prometheus
-                image: prom/prometheus
-                ports:
-                - containerPort: 9090
-                  name: prometheus
-                volumeMounts:
-                  - name: storage
-                    mountPath: /prometheus
-                  - name: dynamic-config
-                    mountPath: /prometheus-config/dynamic
-                  - name: static-config
-                    mountPath: /prometheus-config/static
-                command:
-                  - /bin/prometheus
-                  - --config.file=/prometheus-config/static/prometheus.yml
-                  - --storage.tsdb.path=/prometheus
-                  - --query.lookback-delta=15m     # Menu values change slowly
-                  - --web.console.libraries=/usr/share/prometheus/console_libraries
-                  - --web.console.templates=/usr/share/prometheus/consoles/prometheus
-              - name: configurator
-                image: python:3.7-alpine
-                volumeMounts:
-                  - name: dynamic-config
-                    mountPath: /prometheus-config/dynamic
-                  - name: static-config
-                    mountPath: /prometheus-config/static
-                command:
-                      - /usr/bin/env
-                      - python3
-                      - /prometheus-config/static/prometheus-menu-service-discovery.py
-              - name: prober
-                # image for this one is obtained by trigger (see
-                # above) from the ImageStreamTag
-                # This container is otherwise stateless
-            volumes:
-              - name: storage
-                emptyDir: {}  # TODO We probably want some persistence here
-              - name: dynamic-config
-                emptyDir: {}
-              - name: static-config
-                configMap:
-                  name: prometheus
+        spec:
+          terminationGracePeriodSeconds: 10
+          containers:
+            - name: prometheus
+              image: prom/prometheus
+              ports:
+              - containerPort: 9090
+                name: prometheus
+              volumeMounts:
+                - name: storage
+                  mountPath: /prometheus
+                - name: dynamic-config
+                  mountPath: /prometheus-config/dynamic
+                - name: static-config
+                  mountPath: /prometheus-config/static
+              command:
+                - /bin/prometheus
+                - --config.file=/prometheus-config/static/prometheus.yml
+                - --storage.tsdb.path=/prometheus
+                - --query.lookback-delta=15m     # Menu values change slowly
+                - --web.console.libraries=/usr/share/prometheus/console_libraries
+                - --web.console.templates=/usr/share/prometheus/consoles/prometheus
+            - name: configurator
+              image: python:3.7-alpine
+              volumeMounts:
+                - name: dynamic-config
+                  mountPath: /prometheus-config/dynamic
+                - name: static-config
+                  mountPath: /prometheus-config/static
+              command:
+                    - /usr/bin/env
+                    - python3
+                    - /prometheus-config/static/prometheus-menu-service-discovery.py
+            - name: prober
+              # image for this one is obtained by trigger (see
+              # above) from the ImageStreamTag
+              # This container is otherwise stateless
+          volumes:
+            - name: storage
+              emptyDir: {}  # TODO We probably want some persistence here
+            - name: dynamic-config
+              emptyDir: {}
+            - name: static-config
+              configMap:
+                name: prometheus
 
 - name: Prometheus ConfigMap (configuration and sync scripts)
   openshift:

@@ -7,16 +7,14 @@
 - name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: "{{ mgmt_secret_name }}"
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: mgmt
-      data:
-        {{ mgmt_secret_contents | to_yaml | indent(width=2) }}
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: "{{ mgmt_secret_name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: mgmt
+    data: "{{ mgmt_secret_contents }}"
 
 - name: jahia2wp-env ConfigMap
   openshift:
@@ -48,67 +46,65 @@
 - name: mgmt DeploymentConfig
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: DeploymentConfig
-      metadata:
-        name: mgmt
-        namespace: "{{ openshift_namespace }}"
-        labels:
-          app: mgmt
-      spec:
-        replicas: 1
-        selector:
-          app: mgmt
-          deploymentconfig: mgmt
-        template:
-          metadata:
-            labels:
-              app: mgmt
-              deploymentconfig: mgmt
-          spec:
-            containers:
-            - name: mgmt
-              imagePullPolicy: Always
-              ports:
-              - containerPort: 22
-                protocol: TCP
-              volumeMounts:
-              - name: srv
-                mountPath: /srv
-              - name: ssh
-                mountPath: /var/lib/secrets/ssh
-      {% if openshift_is_production %}
-              - name: backups
-                mountPath: /backups
-      {% endif %}
-              envFrom:
-                - configMapRef:
-                    name: jahia2wp-env
-                - secretRef:
-                    name: mysql-super-credentials
-            serviceAccount: {{ mgmt_service_account }}
-            serviceAccountName: {{ mgmt_service_account }}
-            volumes:
+    apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: mgmt
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: mgmt
+    spec:
+      replicas: 1
+      selector:
+        app: mgmt
+        deploymentconfig: mgmt
+      template:
+        metadata:
+          labels:
+            app: mgmt
+            deploymentconfig: mgmt
+        spec:
+          containers:
+          - name: mgmt
+            imagePullPolicy: Always
+            ports:
+            - containerPort: 22
+              protocol: TCP
+            volumeMounts:
             - name: srv
-              persistentVolumeClaim:
-                claimName: wordpress-0
+              mountPath: /srv
             - name: ssh
-              secret:
-                secretName: "{{ mgmt_secret_name }}"
-      {% if openshift_is_production %}
+              mountPath: /var/lib/secrets/ssh
             - name: backups
-              persistentVolumeClaim:
-                claimName: backups-0
-      {% endif %}
-        triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-            - mgmt
-            from:
-              kind: ImageStreamTag
-              name: "{{ mgmt_image_name }}:{{ openshift_registry_tag }}"
-              namespace: "{{ openshift_namespace }}"
+              mountPath: /backups
+            envFrom:
+              - configMapRef:
+                  name: jahia2wp-env
+              - secretRef:
+                  name: mysql-super-credentials
+          serviceAccount: "{{ mgmt_service_account }}"
+          serviceAccountName: "{{ mgmt_service_account }}"
+          volumes:
+          - name: srv
+            persistentVolumeClaim:
+              claimName: wordpress-0
+          - name: ssh
+            secret:
+              secretName: "{{ mgmt_secret_name }}"
+          - >-
+            {{ { "name": "backups",
+                 "persistentVolumeClaim": {"claimName": "backups-0"} }
+               if openshift_is_production
+               else { "name": "backups", "emptydir": {} }
+            }}
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - mgmt
+          from:
+            kind: ImageStreamTag
+            name: "{{ mgmt_image_name }}:{{ openshift_registry_tag }}"
+            namespace: "{{ openshift_namespace }}"

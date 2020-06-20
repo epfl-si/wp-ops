@@ -3,98 +3,89 @@
 - name: BuildConfig for the customized Perl Docker image
   openshift:
     state: latest
-    content: |
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
-      metadata:
-        name: perl-disk-usage-report
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        output:
-          to:
-            kind: "DockerImage"
-            name: "docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest"
-        source:
-          type: Dockerfile
-          dockerfile: |
-            FROM perl
-            RUN cpan URI::Escape
-        runPolicy: Serial
-        strategy:
-          dockerStrategy:
-            noCache: true
-          type: Docker
-        successfulBuildsHistoryLimit: 5
+    apiVersion: build.openshift.io/v1
+    kind: BuildConfig
+    metadata:
+      name: perl-disk-usage-report
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      output:
+        to:
+          kind: "DockerImage"
+          name: "docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest"
+      source:
+        type: Dockerfile
+        dockerfile: |
+          FROM perl
+          RUN cpan URI::Escape
+      runPolicy: Serial
+      strategy:
+        dockerStrategy:
+          noCache: true
+        type: Docker
+      successfulBuildsHistoryLimit: 5
 
 - name: Perl script as a ConfigMap
   openshift:
     state: latest
-    content: |
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: srv-disk-usage-report-scripts
-        namespace: "{{ openshift_namespace }}"
-      data:
-        qdirstat-cache-writer: |
-          {# A Jinja "include" doesn't work here, because the include
-           # directory is random and Jinja forbids leaving it with ../
-           # or / (think path traversal attacks). The Ansible "lookup"
-           # function comes to the rescue: -#}
-          {{ lookup("file", "templates/qdirstat-cache-writer") | indent(width=4) }}
-          {# Indent width is relative to the outermost ": |" construct,
-           # i.e. the "a" of "apiVersion" (on the other hand,
-           # too much indent would hardly matter in a Perl script) #}
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: srv-disk-usage-report-scripts
+      namespace: "{{ openshift_namespace }}"
+    data:
+      # A Jinja "include" doesn't work here, because the include
+      # directory is random and Jinja forbids leaving it with ../
+      # or / (think path traversal attacks). The Ansible "lookup"
+      # function comes to the rescue:
+      qdirstat-cache-writer: '{{ lookup("file", "templates/qdirstat-cache-writer") }}'
 
 - name: Cron job
   openshift:
     state: latest
-    content: |
-      apiVersion: batch/v1beta1
-      kind: CronJob
-      metadata:
-        name: srv-disk-usage-report
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        # If you want state: latest (above) to do what you want, you
-        # need to explicitly set everything (even if the value is the
-        # same as the default)
-        concurrencyPolicy: Forbid
-        schedule: "5 03 * * *"
-        jobTemplate:
-          spec:
-            template:
-              spec:
-                restartPolicy: Never
-                containers:
-                  - name: qdirstat-cache-writer
-                    image: docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest
-                    imagePullPolicy: Always
-                    command:
-                      - /bin/sh
-                      - -c
-                      - |
-                        OUTDIR=/srv/batch/disk-usage-report
-                        TARGET=/srv
-                        exec >> $OUTDIR/log.txt 2>&1; set -e -x; date; id
-                        /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.NEW
-                        gzip -c $OUTDIR/qdirstat.NEW > $OUTDIR/qdirstat.gz
-                        rm $OUTDIR/qdirstat.NEW
-                    volumeMounts:
-                      - name: scripts
-                        mountPath: /scripts
-                      - name: srv
-                        mountPath: /srv
-                volumes:
-                - name: scripts
-                  configMap:
-                    name: srv-disk-usage-report-scripts
-                    items:
-                      - key: qdirstat-cache-writer
-                        path: qdirstat-cache-writer
-                        {# "Owing to JSON limitations, you must specify the
-                         # mode in decimal notation." -#}
-                        mode: {{ "0755" | int }}
-                - name: srv
-                  persistentVolumeClaim:
-                    claimName: wordpress-0
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: srv-disk-usage-report
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      # If you want state: latest (above) to do what you want, you
+      # need to explicitly set everything (even if the value is the
+      # same as the default)
+      concurrencyPolicy: Forbid
+      schedule: "5 03 * * *"
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              restartPolicy: Never
+              containers:
+                - name: qdirstat-cache-writer
+                  image: "docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest"
+                  imagePullPolicy: Always
+                  command:
+                    - /bin/sh
+                    - -c
+                    - |
+                      OUTDIR=/srv/batch/disk-usage-report
+                      TARGET=/srv
+                      exec >> $OUTDIR/log.txt 2>&1; set -e -x; date; id
+                      /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.NEW
+                      gzip -c $OUTDIR/qdirstat.NEW > $OUTDIR/qdirstat.gz
+                      rm $OUTDIR/qdirstat.NEW
+                  volumeMounts:
+                    - name: scripts
+                      mountPath: /scripts
+                    - name: srv
+                      mountPath: /srv
+              volumes:
+              - name: scripts
+                configMap:
+                  name: srv-disk-usage-report-scripts
+                  items:
+                    - key: qdirstat-cache-writer
+                      path: qdirstat-cache-writer
+                      mode: 0755
+              - name: srv
+                persistentVolumeClaim:
+                  claimName: wordpress-0
