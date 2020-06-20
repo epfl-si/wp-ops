@@ -3,3 +3,5 @@
 
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
 openshift_registry_tag: "{{ 'prod' if openshift_is_production else 'latest' }}"
+
+wwp_build_namespace: wwp-test

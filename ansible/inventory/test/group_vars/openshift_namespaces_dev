@@ -8,14 +8,17 @@ ansible_connection: local  # Unless stipulated otherwise in a task
 openshift_namespace: wwp-test
 
 DeploymentConfigs:
+  defaults:
+    replicaCount:
+      httpd: 1
   httpd:
-    - name: httpd-cburki
-    - name: httpd-dev
-    - name: httpd-gcharmier
-    - name: httpd-int
+    - name: cburki
+    - name: dev
+    - name: gcharmier
+    - name: int
       autopush: true
-    - name: httpd-lchaboudez
-    - name: httpd-lvenries
+    - name: lchaboudez
+    - name: lvenries
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"

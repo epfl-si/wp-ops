@@ -1,27 +1,125 @@
-# Set up (a cautious subset of) one DeploymentConfig/httpd-* object,
-# described by the {{ dc }} variable.
+# Set up one DeploymentConfig/httpd-* object, described by the
+# {{ dc }} variable.
 
 - include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
 
-- name: "dc/{{ dc.name }}"
+- name: "dc/httpd-{{ dc.name }}"
   openshift:
-   state: latest
-   content: |
-     apiVersion: apps.openshift.io/v1
-     kind: DeploymentConfig
-     metadata:
-       name: "{{ dc.name }}"
-       namespace: "{{ openshift_namespace }}"
-       labels:
-         serving_role: httpd
-     spec:
-       triggers:
-       - type: ImageChange
-         imageChangeParams:
-           {{ 'automatic: true' if (dc.autopush | default(None)) else '' }}
+    state: latest
+    apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      name: "httpd-{{ dc.name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "httpd-{{ dc.name }}"
+        serving_role: httpd
+    spec:
+      replicas: "{{ dc.replicaCount | default(DeploymentConfigs.defaults.replicaCount.httpd) }}"
+      selector:
+        app: "httpd-{{ dc.name }}"
+        deploymentconfig: "httpd-{{ dc.name }}"
+      template:
+        metadata:
+          labels:
+            app: "httpd-{{ dc.name }}"
+            deploymentconfig: "httpd-{{ dc.name }}"
+        spec:
+          affinity:
+            podAntiAffinity:
+              # This pod doesn't like running on a VM that has another
+              # copy of itself (obviously for HA purposes)
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: deploymentconfig
+                    operator: In
+                    values:
+                    - "httpd-{{ dc.name }}"
+                topologyKey: kubernetes.io/hostname
+
+          containers:
+          - env:
+            - name: WP_ENV
+              value: "{{ dc.name }}"
+            # image will be set from the imageStream
+            imagePullPolicy: Always
+            name: "httpd-{{ dc.name }}"
+            ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - containerPort: 9980
+              protocol: TCP
+            readinessProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /ready
+                port: 8080
+                scheme: HTTP
+              initialDelaySeconds: 5
+              periodSeconds: 15
+              successThreshold: 1
+              timeoutSeconds: 1
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: "/srv/{{ dc.name }}"
+              name: "volume-wordpress-{{ dc.name }}"
+            - mountPath: /webservices/logs
+              name: "webservices-logs-{{ dc.name }}"
+            - mountPath: /call_logs
+              name: "call-logs-{{ dc.name }}"
+          - image: docker-registry.default.svc:5000/wwp-test/collectd:latest
+            imagePullPolicy: Always
+            name: "collectd-{{ dc.name }}"
+            ports:
+            - containerPort: 9103
+              protocol: TCP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          - env:
+            - name: WP_ENV
+              value: "{{ dc.name }}"
+            - name: LINE
+              value: test
+            image: docker-registry.default.svc:5000/wwp-test/filebeat-call-logs:latest
+            imagePullPolicy: Always
+            name: "filebeat-{{ dc.name }}"
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /webservices/logs
+              name: "webservices-logs-{{ dc.name }}"
+            - mountPath: /call_logs
+              name: "call-logs-{{ dc.name }}"
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: wwp-test
+          serviceAccountName: wwp-test
+          terminationGracePeriodSeconds: 30
+          volumes:
+          - name: "volume-wordpress-{{ dc.name }}"
+            persistentVolumeClaim:
+              claimName: "wordpress-{{ dc.name }}"
+          - emptyDir: {}
+            name: "webservices-logs-{{ dc.name }}"
+          - emptyDir: {}
+            name: "call-logs-{{ dc.name }}"
+
+      triggers:
+      - type: ImageChange
+        imageChangeParams:
+           automatic: "{{ true if (dc.autopush | default(None)) else None }}"
            containerNames:
-           - "{{ dc.name }}"
+           - "httpd-{{ dc.name }}"
            from:
              kind: ImageStreamTag
-             name: {{ httpd_image_name }}:{{ openshift_registry_tag }}
-             namespace: "{{ openshift_namespace }}"
+             name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
+             namespace: "{{ wwp_build_namespace }}"
