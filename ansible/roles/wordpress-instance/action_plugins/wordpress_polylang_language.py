@@ -21,49 +21,27 @@ class ActionModule(WordPressActionModule):
         "el": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
     }
 
-    def languages_in_order(self):
-        """
-        :return: 'en' first, 'fr' second
-        """
-        def partition(pred, iterable):
-            """
-            https://stackoverflow.com/a/4578605/435004
-            """
-            trues = []
-            falses = []
-            for item in iterable:
-                if pred(item):
-                    trues.append(item)
-                else:
-                    falses.append(item)
-            return trues, falses
-
-        english, other = partition(lambda lang: lang == 'en', self._task.args.get('languages'))
-        french, other = partition(lambda lang: lang == 'fr', other)
-        return english + french + other
-
     def run(self, tmp=None, task_vars=None):
         self.result = super(ActionModule, self).run(tmp, task_vars)
-        expected_languages = self.languages_in_order()
-        desired_state = self._task.args.get('state', 'absent')
 
+        desired_state = self._task.args.get('state', 'absent')
+        language = self._task.args.get('language')
+
+        self.ensure_polylang_language(language, desired_state)
         if desired_state == "present":
-            self.ensure_polylang_languages(expected_languages)
-            self.ensure_polylang_mo_translations()
+            self.ensure_polylang_mo_translations_present()
         return self.result
 
-    def ensure_polylang_languages(self, expected_languages):
+    def ensure_polylang_language(self, language, expected_state):
+        current_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
 
-        actual_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
-        for lang in actual_languages:
-            if lang not in expected_languages:
-                self._run_wp_cli_action("pll lang delete {}".format(lang))
+        if expected_state == 'present' and language not in current_languages:
+            self._run_wp_cli_action("pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[language]))
 
-        for expected_lang in expected_languages:
-            if expected_lang not in actual_languages:
-                self._run_wp_cli_action("pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[expected_lang]))
+        if expected_state == 'absent' and language in current_languages:
+            self._run_wp_cli_action("pll lang delete {}".format(lang))
 
-    def ensure_polylang_mo_translations(self):
+    def ensure_polylang_mo_translations_present(self):
         """Ensure that every language has a so-called "polylang_mo" translation table.
 
         If that is not the case, create a dummy one.
