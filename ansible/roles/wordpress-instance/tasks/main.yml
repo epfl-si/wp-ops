@@ -108,7 +108,7 @@
     apply:
       tags: ["themes"]
 
-- name: Delete sample page and post installed by WordPress
+- name: Delete sample pages and posts installed by WordPress
   when: wp_can.configure
   include_tasks:
     file: "samples.yml"
