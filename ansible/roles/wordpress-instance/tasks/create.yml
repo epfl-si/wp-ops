@@ -8,7 +8,6 @@
     group: www-data
     mode: 0775
     recurse: no
-  register: _wp_dir_created
 
 - name: Run new-wp-site script
   shell:
