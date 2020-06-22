@@ -54,7 +54,7 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         if desired_state == 'absent' and not self._is_check_mode():
             result = self._run_wp_cli_action('plugin delete {}'.format(self._task.args.get('name')),
                                              update_result=False)
-            if "could not be found" not in result["stdout"]:
+            if "Plugin already deleted" not in result["stdout"] and "could not be found" not in result["stdout"]:
                 self.result.update(result)
 
         super(ActionModule, self)._ensure_all_files_state(desired_state)
