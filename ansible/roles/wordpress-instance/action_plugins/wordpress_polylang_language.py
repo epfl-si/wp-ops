@@ -57,7 +57,7 @@ class ActionModule(WordPressActionModule):
         # get all actual languages of WP site
         actual_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
 
-        # checks if parameter lang needs to be deleted
+        # check if parameter lang needs to be deleted
         for lang in actual_languages:
             found_lang_to_delete = True
             for expected_lang in expected_languages:
