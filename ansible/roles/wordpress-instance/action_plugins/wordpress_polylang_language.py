@@ -4,7 +4,7 @@
 import sys
 import os
 import json
-from ansible.errors import AnsibleActionFail
+from ansible.errors import AnsibleError, AnsibleActionFail
 
 sys.path.append(os.path.dirname(__file__))
 from wordpress_action_module import WordPressActionModule
@@ -18,7 +18,7 @@ class ActionModule(WordPressActionModule):
         "it": {"name": "Italiano", "locale": "it_IT", "slug": "it", "flag": "it"},
         "es": {"name": "Español", "locale": "es_ES", "slug": "es", "flag": "es"},
         "ro": {"name": "Română", "locale": "ro_RO", "slug": "ro", "flag": "ro"},
-        "el": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
+        "el": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "gr"},
     }
 
     def run(self, tmp=None, task_vars=None):
@@ -28,46 +28,49 @@ class ActionModule(WordPressActionModule):
         language = self._task.args.get('language')
 
         self.ensure_polylang_language(language, desired_state)
-        if desired_state == "present":
-            self.ensure_polylang_mo_translations_present()
         return self.result
 
     def ensure_polylang_language(self, language, expected_state):
+        if language not in self.locales:
+            raise AnsibleError('Unknown language {}'.format(language))
+
         current_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
 
         if expected_state == 'present' and language not in current_languages:
-            self._run_wp_cli_action("pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[language]))
+            self._ensure_language_exists(language)
 
         if expected_state == 'absent' and language in current_languages:
-            self._run_wp_cli_action("pll lang delete {}".format(lang))
+            self._ensure_language_deleted(language)
 
-    def ensure_polylang_mo_translations_present(self):
-        """Ensure that every language has a so-called "polylang_mo" translation table.
+    def _ensure_language_exists(self, language):
+        cmd = "pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[language])
+        self._run_wp_cli_action(cmd)
+        if language not in self._get_polylang_languages() and language != "en":
+            raise AnsibleError("FATAL: {} did not have the expected effect of creating the language - Perhaps the metadata (e.g. the flag) is wrong in wordpress_polylang_language.py ?".format(cmd))
 
-        If that is not the case, create a dummy one.
-        """
-        for site_lang in self._get_polylang_languages():
-            strings_translations = self._get_wp_json('post meta get {} _pll_strings_translations --format=json'.format(site_lang['mo_id']))
-            if len(strings_translations) < 4:
-                self._run_wp_cli_action("post meta update {} _pll_strings_translations --format=json".format(site_lang['mo_id']), pipe_input=json.dumps(self._get_dummy_translation_table()))
+    def _ensure_language_deleted(self, language):
+        self._run_wp_cli_action("pll lang delete {}".format(language))
 
     def _get_polylang_languages (self):
-        """Returns: A list of dicts with fields `slug` and `mo_id`"""
-        get_cmd = 'pll lang list --format=json --fields=mo_id,slug'
-        retval = self._get_wp_json(get_cmd)
+        """Returns: A dict of `mo_id`s keyed by language slug."""
 
+        def get_moids_by_slug():
+            get_cmd = 'pll lang list --format=json --fields=mo_id,slug'
+            return dict([(lang["slug"], lang["mo_id"])
+                         for lang in self._get_wp_json(get_cmd)])
+
+        retval = get_moids_by_slug()
         # mo_id's are created lazily:
-        if [lang for lang in retval if not lang.get('mo_id')]:
+        if None in retval.values():
             # `wp pll option sync taxonomies` generates the mo id of
             # newly-created languages, and may or may not be doing something
             # else... Oh well
             self._run_wp_cli_action("pll option sync taxonomies", update_result=False)
-            retval = self._get_wp_json(get_cmd)
+            retval = get_moids_by_slug()
 
             # Failing again is fatal.
-            for lang in retval:
-                if not lang.get('mo_id'):
-                    raise AnsibleActionFail("Cannot find the mo_id of lang '{}'".format(lang["slug"]))
+            if None in retval.values():
+                raise AnsibleActionFail("Cannot find the mo_id of lang '{}'".format(lang["slug"]))
 
         return retval
 
