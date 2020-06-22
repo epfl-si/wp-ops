@@ -181,8 +181,10 @@
 - name: Polylang translations (taglines, date formats etc)
   wordpress_polylang_language:
     state: present
-    languages: "{{ lookup('wpveritas', 'languages') }}"
+    language: "{{ item }}"
+  with_items: "{{ lookup('wpveritas', 'languages') | languages_in_order }}"
   tags: plugins.polylang
+  # We don't want to resurrect languages that the user deleted:
   when: |-
     _polylang_languages_csv.stdout == ""
 
