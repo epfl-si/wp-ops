@@ -125,5 +125,4 @@
       tags: ["wp.menus"]
   tags:
     - wp.menus
-    - wp.menus.refresh
-    - wp.menus.polylang
+    - wp.menus.refresh.force
