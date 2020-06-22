@@ -1,8 +1,6 @@
 # Ensure that a menu exists in the "Top" location for every language.
 # Note that the name of the menu *does not* matter, as some sites (e.g. www.epfl.ch/schools/ic)
 # already use one or more renamed menus in the "Top" location.
-#
-# Quick test: ./wpsible -t wp.menus.polylang -l test_migration_wp__labs__bbb -e '{ "wp_destructive": { "test_migration_wp__labs__bbb" : ["config", "code"] }}'
 
 import sys
 import os
