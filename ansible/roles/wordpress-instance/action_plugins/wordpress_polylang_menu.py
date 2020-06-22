@@ -1,4 +1,4 @@
-# Ensure that every languages has a menu located in "Top" location.
+# Ensure that a menu exists in the "Top" location for every language.
 #  - if yes, do not touch anything (e.g. ic)
 #  - if not, spread the jam in order that the site has a menu — it's most likely happening when creating a new site
 #
