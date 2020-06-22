@@ -1,6 +1,6 @@
 # Ensure that a menu exists in the "Top" location for every language.
-#  - if yes, do not touch anything (e.g. ic)
-#  - if not, spread the jam in order that the site has a menu — it's most likely happening when creating a new site
+# Note that the name of the menu *does not* matter, as some sites (e.g. www.epfl.ch/schools/ic)
+# already use one or more renamed menus in the "Top" location.
 #
 # Quick test: ./wpsible -t wp.menus.polylang -l test_migration_wp__labs__bbb -e '{ "wp_destructive": { "test_migration_wp__labs__bbb" : ["config", "code"] }}'
 
