@@ -84,21 +84,13 @@ class WordPressActionModule(ActionBase):
         :param args: WP-CLI command to execute
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        cmd = ""
-        if pipe_input:
-            cmd += " sh -c 'echo '\"'\"'"
-            cmd += pipe_input
-            cmd += "'\"'\"' |"
-
         # wp_cli_command: "wp --path={{ wp_dir }}"
-        cmd += '{} {}'.format(self._get_ansible_var('wp_cli_command'), args)
-
-        if pipe_input:
-            cmd += "'"
+        cmd = '{} {}'.format(self._get_ansible_var('wp_cli_command'), args)
 
         return self._run_shell_action(
             cmd, update_result=update_result,
-            also_in_check_mode=also_in_check_mode)
+            also_in_check_mode=also_in_check_mode,
+            pipe_input=pipe_input)
 
     def _get_wp_json (self, suffix):
         result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
@@ -117,14 +109,14 @@ class WordPressActionModule(ActionBase):
         return result['stdout_lines']
 
 
-    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False):
+    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False, pipe_input=None):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result,
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input }, update_result=update_result,
                                 also_in_check_mode=also_in_check_mode)
 
 
