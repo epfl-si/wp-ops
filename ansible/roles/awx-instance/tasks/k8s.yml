@@ -192,20 +192,20 @@
           - name: awx-application-config
             configMap:
               name: awx-config
-              defaultMode: 420
+              defaultMode: 0644
               items:
               - key: awx_settings
                 path: settings.py
           - name: awx-redis-config
             configMap:
               name: awx-config
-              defaultMode: 420
+              defaultMode: 0644
               items:
               - key: redis_conf
                 path: redis.conf
           - name: awx-application-credentials
             secret:
-              defaultMode: 420
+              defaultMode: 0644
               items:
               - key: credentials_py
                 path: credentials.py
