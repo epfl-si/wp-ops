@@ -268,10 +268,6 @@
       - active
     from: wordpress.org/plugins
 
-- name: SVG-support plugin options
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_svg_support_options }}"
-
 - name: remote-content-shortcode plugin
   wordpress_plugin:
     name: epfl-remote-content-shortcode
