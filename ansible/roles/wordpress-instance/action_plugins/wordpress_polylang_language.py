@@ -18,7 +18,7 @@ class ActionModule(WordPressActionModule):
         "it": {"name": "Italiano", "locale": "it_IT", "slug": "it", "flag": "it"},
         "es": {"name": "Español", "locale": "es_ES", "slug": "es", "flag": "es"},
         "ro": {"name": "Română", "locale": "ro_RO", "slug": "ro", "flag": "ro"},
-        "grec": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
+        "el": {"name": "Ελληνικά", "locale": "el", "slug": "el", "flag": "el"},
     }
 
     def languages_in_order(self):
