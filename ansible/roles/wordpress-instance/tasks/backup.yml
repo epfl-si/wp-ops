@@ -11,11 +11,24 @@
     _backup_tmpdir: "{{ _backup_tmpdir_cmd.stdout }}"
   tags: always
 
+- name: Backup directory protection
+  shell: |
+    set -e -x
+
+    mkdir -p "{{ _backup_tmpdir }}"/wp
+    cat <<HTACCESS > "{{ _backup_tmpdir }}"/.htaccess
+    Require all denied
+    HTACCESS
+  tags: always
+
 - name: Back up code to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   shell: |
-    set -e
-    (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads --exclude "ansible-backup-*" -clf - .) | \
+    set -e -x
+
+    (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads --exclude .htaccess \
+         --exclude "ansible-backup-*" -clf - .) | \
       (cd "{{ _backup_tmpdir }}"; tar xpvf -)
+    cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess"
   tags:
     - wipe
     - backup
