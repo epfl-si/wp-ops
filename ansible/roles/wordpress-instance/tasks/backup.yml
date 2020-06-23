@@ -28,7 +28,7 @@
     (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads --exclude .htaccess \
          --exclude "ansible-backup-*" -clf - .) | \
       (cd "{{ _backup_tmpdir }}"; tar xpvf -)
-    cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess"
+    cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess" || true
   tags:
     - wipe
     - backup
