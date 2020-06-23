@@ -21,3 +21,15 @@
   register: _post_delete
   changed_when: >-
     "stdout" in _post_delete and "Success" in _post_delete.stdout
+
+- name: Get Privacy Policy page id
+  command: "{{ wp_cli_command }} post list --post_type=page --name='privacy-policy' --format=ids"
+  register: _privacy_policy_page_id
+  changed_when: false
+
+- name: Delete Privacy Policy page
+  command: "{{ wp_cli_command }} post delete 3 --force"
+  when: _privacy_policy_page_id.stdout == "3"
+  register: _privacy_policy_page_delete
+  changed_when: >-
+    "stdout" in _privacy_policy_page_delete and "Success" in _privacy_policy_page_delete.stdout
