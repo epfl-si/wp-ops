@@ -13,7 +13,7 @@
   shell:
     chdir: "{{ wp_dir }}"
     cmd: |
-      if wp eval '1;'; then echo SITE_ALREADY_EXISTS; exit 0; fi
+      if wp --path="{{ wp_dir }}" eval '1;'; then echo SITE_ALREADY_EXISTS; exit 0; fi
 
       . /etc/profile.d/k8s-env.sh
       new-wp-site
