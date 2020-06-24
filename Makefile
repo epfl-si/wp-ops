@@ -27,7 +27,10 @@ gitbackup: $(_BACKUP_YAMLS)
 	set -e -x;                                                                         \
         for keybase_repo in $(_BACKUP_REPOS); do                                           \
 	  (cd $$keybase_repo;                                                              \
+	   git pull --rebase --autostash;                                                  \
 	   oc get -o yaml -n "`basename "$$keybase_repo"`" configmaps > configmaps.yaml;   \
+	   oc get -o yaml -n "`basename "$$keybase_repo"`" routes > routes.yaml;           \
+	   oc get -o yaml -n "`basename "$$keybase_repo"`" dc > deploymentconfigs.yaml;    \
 	   git add *.yaml;                                                                 \
 	   git commit -m "`echo "$(COMMIT_MSG)\n\nmade with $(MAKE)"`" *.yaml || true;     \
 	   git push);                                                                      \
