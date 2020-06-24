@@ -27,7 +27,7 @@ gitbackup: $(_BACKUP_YAMLS)
 	set -e -x;                                                                         \
         for keybase_repo in $(_BACKUP_REPOS); do                                           \
 	  (cd $$keybase_repo;                                                              \
-	   git pull --rebase --autostash;                                                  \
+	   git fetch; git reset --hard origin/master;                                      \
 	   oc get -o yaml -n "`basename "$$keybase_repo"`" configmaps > configmaps.yaml;   \
 	   oc get -o yaml -n "`basename "$$keybase_repo"`" routes > routes.yaml;           \
 	   oc get -o yaml -n "`basename "$$keybase_repo"`" dc > deploymentconfigs.yaml;    \
