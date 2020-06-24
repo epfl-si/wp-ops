@@ -46,7 +46,7 @@ class ActionModule(WordPressActionModule):
         cmd = "pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[language])
         self._run_wp_cli_action(cmd)
         if language not in self._get_polylang_languages() and language != "en":
-            raise AnsibleError("FATAL: {} did not have the expected effect of creating the language - Perhaps the metadata (e.g. the flag) is wrong in wordpress_polylang_language.py ?".format(cmd))
+            raise AnsibleError("FATAL: {} did not have the expected effect of creating the language - Perhaps the metadata (e.g. the flag) is wrong in wordpress_polylang_language.py?".format(cmd))
 
     def _ensure_language_deleted(self, language):
         self._run_wp_cli_action("pll lang delete {}".format(language))
