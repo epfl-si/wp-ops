@@ -7,7 +7,7 @@
 - name: Set site title
   command: "{{ wp_cli_command }} option update blogname {{ lookup('wpveritas', 'title') }}"
   when: |
-    _site_title.stdout == "{{ wp_dir | basename }}"
+    _site_title.stdout == (wp_dir | basename)
   register: _site_title_changed
   changed_when: |
     "option is unchanged" not in _site_title_changed.stdout
