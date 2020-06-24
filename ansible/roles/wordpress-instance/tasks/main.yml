@@ -87,6 +87,15 @@
     apply:
       tags: ["config"]
 
+- name: Set up metadata
+  when: wp_can.configure
+  tags:
+    - wp.metadata
+  include_tasks:
+    file: "site-metadata.yml"
+    apply:
+      tags: ["wp.metadata"]
+
 - name: Set up plugins
   when: wp_can.configure or ansible_check_mode
   tags:
