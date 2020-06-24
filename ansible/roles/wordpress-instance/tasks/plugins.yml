@@ -27,6 +27,29 @@
     - akismet
     - hello
 
+- name: Enumerate active plugins
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: "wp plugin list --status=active --field=name"
+  register: _active_plugins
+  changed_when: false
+
+- name: Coming Soon plugin (only at creation time)
+  wordpress_plugin:
+    name: coming-soon
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+  when: >-
+    _active_plugins.stdout == ""
+
+- name: Coming Soon options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_coming_soon_options }}"
+  when: >-
+    _active_plugins.stdout == ""
+
 ##################### Must-use plugins ###########################
 
 - name: Custom editor menu (must-use plugin)
@@ -148,11 +171,22 @@
       - active
     from: wordpress.org/plugins
 
-- name: Coming Soon plugin
-  wordpress_plugin:
-    name: coming-soon
-    state: symlinked
-    from: wordpress.org/plugins
+- name: Count Polylang languages
+  shell: |
+    {{ wp_cli_command }} pll lang list --field=term_id --format=csv
+  changed_when: false
+  register: _polylang_languages_csv
+  tags: plugins.polylang
+
+- name: Polylang translations (taglines, date formats etc)
+  wordpress_polylang_language:
+    state: present
+    language: "{{ item }}"
+  with_items: "{{ lookup('wpveritas', 'languages') | languages_in_order }}"
+  tags: plugins.polylang
+  # We don't want to resurrect languages that the user deleted:
+  when: |-
+    _polylang_languages_csv.stdout == ""
 
 - name: mainwp-child plugin
   wordpress_plugin:
@@ -235,10 +269,6 @@
       - symlinked
       - active
     from: wordpress.org/plugins
-
-- name: SVG-support plugin options
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_svg_support_options }}"
 
 - name: remote-content-shortcode plugin
   wordpress_plugin:

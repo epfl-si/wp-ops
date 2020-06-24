@@ -8,6 +8,7 @@ from ansible.module_utils import six
 
 import re
 import os
+import json
 
 class WordPressActionModule(ActionBase):
 
@@ -21,7 +22,6 @@ class WordPressActionModule(ActionBase):
         self._task_vars = task_vars
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
-
 
     def _do_symlink_file (self, basename):
         """
@@ -77,17 +77,24 @@ class WordPressActionModule(ActionBase):
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
-    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False):
+    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
+        # wp_cli_command: "wp --path={{ wp_dir }}"
+        cmd = '{} {}'.format(self._get_ansible_var('wp_cli_command'), args)
 
         return self._run_shell_action(
-            '{} {}'.format(self._get_ansible_var('wp_cli_command'), args), update_result=update_result,
-            also_in_check_mode=also_in_check_mode)
+            cmd, update_result=update_result,
+            also_in_check_mode=also_in_check_mode,
+            pipe_input=pipe_input)
+
+    def _get_wp_json (self, suffix):
+        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
+        return json.loads(result['stdout'])
 
 
     def _run_php_code(self, code, update_result=True):
@@ -102,14 +109,14 @@ class WordPressActionModule(ActionBase):
         return result['stdout_lines']
 
 
-    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False):
+    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False, pipe_input=None):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True }, update_result=update_result,
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input }, update_result=update_result,
                                 also_in_check_mode=also_in_check_mode)
 
 

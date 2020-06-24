@@ -40,8 +40,12 @@
   tags: always
 
 - name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
-  include_tasks: "create.yml"
-  when: "'wipe' in ansible_run_tags or not wp_is_installed"
+  tags:
+    - wp.create
+  include_tasks:
+    file: "create.yml"
+    apply:
+      tags: ["wp.create"]
 
 - name: Restore
   import_tasks: "restore.yml"
@@ -83,12 +87,22 @@
     apply:
       tags: ["config"]
 
+- name: Set up metadata
+  when: wp_can.configure
+  tags:
+    - wp.metadata
+  include_tasks:
+    file: "site-metadata.yml"
+    apply:
+      tags: ["wp.metadata"]
+
 - name: Set up plugins
   when: wp_can.configure or ansible_check_mode
   tags:
     - plugins
     - plugins.wp_media_folder_options
     - plugins.unknown
+    - plugins.polylang
   include_tasks:
     file: "plugins.yml"
     apply:
@@ -103,21 +117,21 @@
     apply:
       tags: ["themes"]
 
-- name: Convert shortcodes to Gutenberg blocks
-  when: wp_use_gutenberg
+- name: Delete sample pages and posts installed by WordPress
+  when: wp_can.configure
   include_tasks:
-    file: "shortcode-to-block.yml"
+    file: "samples.yml"
     apply:
-      tags: ["convert-shortcode-to-block"]
+      tags: ["wp.samples"]
   tags:
-    - convert-shortcode-to-block
+    - wp.samples
 
 - name: Set up menus
+  when: wp_can.configure
   include_tasks:
     file: "menus.yml"
     apply:
       tags: ["wp.menus"]
   tags:
-    - never
     - wp.menus
-    - wp.menus.refresh
+    - wp.menus.refresh.force

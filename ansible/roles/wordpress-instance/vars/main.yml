@@ -31,7 +31,7 @@ wp_plugins_dir: "{{ wp_dir }}/wp-content/plugins"
 # Shortcuts to facts collected by the wordpress_facts task
 wp_is_installed: "{{ ansible_facts.ansible_local.wp_is_installed }}"
 wp_is_symlinked: "{{ ansible_facts.ansible_local.wp_is_symlinked }}"
-wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list }}"
+wp_plugin_list: "{{ ansible_facts.ansible_local.wp_plugin_list | default([]) }}"
 
 # Range of IPv4 addresses that we could be making RPCs from (in
 # particular, to Tequila)

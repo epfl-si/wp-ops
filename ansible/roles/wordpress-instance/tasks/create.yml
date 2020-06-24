@@ -1,28 +1,22 @@
 # Create a WordPress site out of thin air
-#
-# TODO: This uses jahia2wp and we don't want to do things this way anymore.
 
-- include_vars: jahia2wp-vars.yml
-- include_vars: wp-destructive.yml
+- name: Create site directory
+  file:
+    path: "{{ wp_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775
+    recurse: no
 
-- assert:
-    that:
-      - (wp_can.wipe) or (not _wp_config_php_stat.stat.exists)
+- name: Run new-wp-site script
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: |
+      if wp --path="{{ wp_dir }}" eval '1;'; then echo SITE_ALREADY_EXISTS; exit 0; fi
 
-- name: Create auxiliary YAML file for "jahia2wp.py generate"
-  when: wp_restore_from == 'generate'
-  copy:
-    content: |
-      langs: en,fr
-      unit_name: {{wp_unit_name}}
-      unit_id: {{wp_unit_id}}
-    dest: "{{ ansible_remote_tmp }}/{{ inventory_hostname }}-generate.yaml"
-  register: jahia2wp_generate_yaml_tmp
-
-- name: jahia2wp.py generate
-  when: wp_restore_from == 'generate'
-  shell: "{{ jahia2wp_shell }} generate {{ wp_env }} {{ jahia2wp_url }} --extra-config={{ jahia2wp_generate_yaml_tmp.dest }}"
-  environment: "{{ jahia2wp_env }}"
-
-- include_tasks: generate-quick.yml
-  when: wp_restore_from != 'generate'
+      . /etc/profile.d/k8s-env.sh
+      new-wp-site
+  register: _new_wp_site
+  changed_when: >-
+    "SITE_ALREADY_EXISTS" not in _new_wp_site.stdout

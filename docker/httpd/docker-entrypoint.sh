@@ -11,11 +11,9 @@ then
 fi
 
 /bin/mkdir -p /srv/${WP_ENV}/logs
-/bin/mkdir -p /srv/${WP_ENV}/jahia2wp
 
 /bin/chown www-data: /srv/${WP_ENV}
 /bin/chown www-data: /srv/${WP_ENV}/logs
-/bin/chown www-data: /srv/${WP_ENV}/jahia2wp
 
 /bin/mkdir -p /etc/apache2/ssl
 if ! [ -f /etc/apache2/ssl/server.key -a -f /etc/apache2/ssl/server.cert ]; then

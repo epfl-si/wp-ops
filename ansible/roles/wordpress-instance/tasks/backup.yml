@@ -5,20 +5,35 @@
   changed_when: false
   register: _backup_tmpdir_cmd
   tags: always
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - set_fact:
     _backup_tmpdir: "{{ _backup_tmpdir_cmd.stdout }}"
   tags: always
 
+- name: Backup directory protection
+  shell: |
+    set -e -x
+
+    mkdir -p "{{ _backup_tmpdir }}"/wp
+    cat <<HTACCESS > "{{ _backup_tmpdir }}"/.htaccess
+    Require all denied
+    HTACCESS
+  tags: always
+
 - name: Back up code to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   shell: |
-    set -e
-    (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads -clf - .) | \
+    set -e -x
+
+    (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads --exclude .htaccess \
+         --exclude "ansible-backup-*" -clf - .) | \
       (cd "{{ _backup_tmpdir }}"; tar xpvf -)
+    cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess" || true
   tags:
     - wipe
     - backup
     - backup.code
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up data to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   command: "{{ wp_cli_command }} db export {{ _backup_tmpdir }}/backup.sql"
@@ -26,6 +41,7 @@
     - wipe
     - backup
     - backup.data
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up uploads to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   shell: |
@@ -37,3 +53,4 @@
     - wipe
     - backup
     - backup.uploads
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"

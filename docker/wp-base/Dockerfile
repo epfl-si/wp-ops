@@ -102,7 +102,8 @@ RUN set -e -x;                                                           \
 ######################################################################
 
 ADD install-plugins-and-themes.py clearstatcache-wp-import.patch /tmp/
-# Get all plugins and themes ("auto" mode) from the jahia2wp manifest;
+# Get all plugins and themes (in "auto" mode) out of the Ansible
+# `plugins.yml` file:
 ARG INSTALL_AUTO_FLAGS
 RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
         /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS};   \

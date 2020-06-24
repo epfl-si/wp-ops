@@ -1,5 +1,15 @@
+- name: Number of EPFL External Menus
+  shell: |
+    {{ wp_cli_command }} post list --post_type=epfl-external-menu --fields=ID --format=count
+  changed_when: false
+  register: _external_menu_entry_count
+
 - name: Sync menus
   shell:
     cmd: "{{ wp_cli_command }} epfl menus refresh"
-  tags:
-    - wp.menus.refresh
+  when: inventory_hostname.startswith('www') and ("wp.menus.refresh.force" in ansible_run_tags or _external_menu_entry_count.stdout == "0")
+
+- name: Polylang menus
+  wordpress_polylang_menu:
+    state: present
+  ignore_errors: "{{ wp_ignore_menu_errors | default(false) }}"

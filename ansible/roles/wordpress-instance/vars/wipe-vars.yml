@@ -1,0 +1,25 @@
+# Things we don't mind losing in `-t wipe`
+
+wipe_paths:
+  - wp
+  - wp-admin
+  - wp-includes
+  - .htaccess
+  - index.php
+  - license.txt
+  - readme.html
+  - wp-activate.php
+  - wp-blog-header.php
+  - wp-comments-post.php
+  - wp-content
+  - wp-links-opml.php
+  - wp-load.php
+  - wp-login.php
+  - wp-mail.php
+  - wp-trackback.php
+  - wp-config.php
+  - wp-config-sample.php
+  - wp-cron.php
+  - wp-settings.php
+  - wp-signup.php
+  - xmlrpc.php

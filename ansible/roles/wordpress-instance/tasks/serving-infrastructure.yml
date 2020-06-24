@@ -9,6 +9,20 @@
     that:
       - wp_can.configure or ansible_check_mode
 
+- name: wp-content subdirectories
+  file:
+    path: "{{ wp_dir }}/wp-content/{{ item }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775
+    recurse: no
+  with_items:
+    - uploads
+    - plugins
+    - mu-plugins
+    - themes
+
 - name: "“Main” symlink to /wp"
   check_mode: no   # Does The Right Thing under ansible-playbook --check
   when: wp_ensure_symlink_version is defined
