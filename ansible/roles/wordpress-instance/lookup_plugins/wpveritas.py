@@ -43,6 +43,10 @@ class LookupModule(LookupBase):
         wp_site_base_url  = self.get_var(variables, 'wp_base_url')
 
         wpveritas_state = WpVeritas(wpveritas_api_url).get_site(url=wp_site_base_url)
+        if not wpveritas_state and wp_site_base_url.endswith("/"):
+            wpveritas_state = WpVeritas(wpveritas_api_url).get_site(url=wp_site_base_url[:-1])
+        if not wpveritas_state:
+            raise AnsibleError("Site {} not found in wp-veritas".format(wp_site_base_url))
 
         if terms:
             return [wpveritas_state[terms[0]]]
