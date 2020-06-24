@@ -12,8 +12,8 @@ from wordpress_action_module import WordPressActionModule
 class ActionModule(WordPressActionModule):
 
     locales = {
-        "fr": {"name": "Français", "locale": "fr_FR", "slug": "fr", "flag": "fr"},
-        "en": {"name": "English", "locale": "en_GB", "slug": "en", "flag": "gb"},
+        "fr": {"name": "Français", "locale": "fr_FR", "slug": "fr", "flag": "fr"}, # ← you can use 'ch' here to get the Swiss flag
+        "en": {"name": "English", "locale": "en_US", "slug": "en", "flag": "gb"},
         "de": {"name": "Deutsch", "locale": "de_DE", "slug": "de", "flag": "de"},
         "it": {"name": "Italiano", "locale": "it_IT", "slug": "it", "flag": "it"},
         "es": {"name": "Español", "locale": "es_ES", "slug": "es", "flag": "es"},
