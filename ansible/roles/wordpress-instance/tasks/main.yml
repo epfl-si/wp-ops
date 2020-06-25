@@ -103,6 +103,8 @@
     - plugins.wp_media_folder_options
     - plugins.unknown
     - plugins.polylang
+    - plugins.intranet
+    - plugins.intranet.htaccess
   include_tasks:
     file: "plugins.yml"
     apply:
