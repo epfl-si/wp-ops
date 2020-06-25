@@ -526,6 +526,7 @@
     state: '{{ "present" if wp_site_category == "Inside" else "absent" }}'
   tags:
     - plugins.intranet
+    - plugins.intranet.htaccess
 
 - name: epfl-emploi plugin
   wordpress_plugin:
