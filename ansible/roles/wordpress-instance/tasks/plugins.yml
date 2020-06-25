@@ -508,11 +508,15 @@
     name: epfl-intranet
     state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-intranet
+  tags:
+    - plugins.intranet
 
 - name: epfl-intranet status
   wordpress_plugin_epfl_intranet: 
     protection_enabled: '{{ "yes" if "Inside" in wp_site_categories else "no" }}'
     restrict_to_groups: ''
+  tags:
+    - plugins.intranet
 
 - name: epfl-intranet status
   blockinfile:
@@ -523,6 +527,8 @@
       RewriteCond %{REQUEST_URI} wp-content/uploads/
       RewriteRule wp-content/uploads/(.*)$ wp-content/plugins/epfl-intranet/inc/protect-medias.php?file=$1 [QSA,L]
     state: '{{ "present" if wp_site_category == "Inside" else "absent" }}'
+  tags:
+    - plugins.intranet
 
 - name: epfl-emploi plugin
   wordpress_plugin:
