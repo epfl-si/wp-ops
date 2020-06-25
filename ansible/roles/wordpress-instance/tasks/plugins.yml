@@ -519,7 +519,7 @@
   blockinfile:
     path: "{{ wp_htaccess_path }}"
     insertbefore: "</IfModule>"
-    marker: "# {mark} EPFL-Intranet"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR EPFL-Intranet"
     block: |
       RewriteCond %{REQUEST_URI} wp-content/uploads/
       RewriteRule wp-content/uploads/(.*)$ wp-content/plugins/epfl-intranet/inc/protect-medias.php?file=$1 [QSA,L]
