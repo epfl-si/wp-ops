@@ -103,7 +103,7 @@
     - plugins.wp_media_folder_options
     - plugins.unknown
     - plugins.polylang
-    - plugins.coming-soon
+    - wp.plugins.coming-soon
     - plugins.intranet
     - plugins.intranet.htaccess
   include_tasks:
