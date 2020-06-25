@@ -518,7 +518,6 @@
 - name: epfl-intranet htaccess
   blockinfile:
     path: "{{ wp_htaccess_path }}"
-    insertbefore: "</IfModule>"
     marker: "# {mark} ANSIBLE MANAGED BLOCK FOR EPFL-Intranet"
     block: |
       RewriteCond %{REQUEST_URI} wp-content/uploads/
