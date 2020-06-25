@@ -2,8 +2,6 @@
 #
 # What to do to install and configure a WordPress instance
 #
-# Variables:: (in addition to those defined or documented in
-#              ../vars/*.yml)
 
 - meta: end_play
   when: |
