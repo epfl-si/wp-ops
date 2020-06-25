@@ -7,9 +7,15 @@
 # Example invocation:
 #    env WWP_INVENTORY_SOURCES=wpveritas,nfs WWP_NAMESPACES=wwp-test,wwp wordpress-instances.py
 
-import os
-import subprocess
 import sys
+import os
+
+suitcase_interpreter = os.path.join(os.path.dirname(__file__), os.path.pardir,
+                                    "ansible-deps-cache", "bin", "python3")
+if os.path.realpath(suitcase_interpreter) != os.path.realpath(sys.executable):
+    os.execl(suitcase_interpreter, suitcase_interpreter, *sys.argv)
+
+import subprocess
 import logging
 import re
 from functools import reduce
