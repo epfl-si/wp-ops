@@ -69,7 +69,6 @@
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
 
-
 - name: Disable comments (must-use plugin)
   wordpress_plugin:
     name: EPFL_disable_comments
@@ -299,7 +298,6 @@
       {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ]  }}
     from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
 
-
 - name: EPFL Gutenberg plugin
   wordpress_plugin:
     name: wp-gutenberg-epfl
@@ -513,7 +511,7 @@
 
 - name: epfl-intranet status
   wordpress_plugin_epfl_intranet: 
-    protection_enabled: '{{ "yes" if "Inside" in wp_site_categories else "no" }}'
+    protection_enabled: '{{ "yes" if wp_site_category == "Inside" else "no" }}'
     restrict_to_groups: ''
   tags:
     - plugins.intranet
