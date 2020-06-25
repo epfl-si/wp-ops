@@ -48,6 +48,8 @@ platform_check () {
     fi
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
+
+    oc_check
 }
 
 oc_check () {
@@ -101,7 +103,6 @@ set -e
 platform_check
 case "$mode" in
     ansible-playbook)
-        oc_check
         ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
