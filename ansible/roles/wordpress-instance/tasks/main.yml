@@ -30,6 +30,14 @@
 #   is the meaning of the `when:` clause);
 #
 # - etc.
+#
+# Once the procedure is complete, every targeted site should be in a
+# nominal, ready-to-serve state.
+#
+# Note that some Ansible tasks (in particular in `plugins.yml`) may
+# interfere with user-supplied configuration; in which case, they will
+# be guarded by a suitable `when:` clause, which ensures that we do
+# nothing if the user already took the matters in their own hands.
 
 - meta: end_play
   when: |
