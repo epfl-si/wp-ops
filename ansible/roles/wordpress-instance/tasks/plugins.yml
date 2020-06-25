@@ -33,6 +33,7 @@
     cmd: "wp plugin list --status=active --field=name"
   register: _active_plugins
   changed_when: false
+  check_mode: no
 
 - name: Coming Soon plugin (only at creation time)
   wordpress_plugin:
@@ -176,6 +177,7 @@
   changed_when: false
   register: _polylang_languages_csv
   tags: plugins.polylang
+  check_mode: no
 
 - name: Polylang translations (taglines, date formats etc)
   wordpress_polylang_language:
