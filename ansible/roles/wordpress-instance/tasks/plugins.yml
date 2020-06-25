@@ -34,46 +34,39 @@
   register: _active_plugins
   changed_when: false
   check_mode: no
+  tags: always
 
-- name: Coming Soon plugin (only at creation time)
-  wordpress_plugin:
-    name: coming-soon
-    state:
-      - symlinked
-      - active
-    from: wordpress.org/plugins
-  when: >-
-    _active_plugins.stdout == ""
+- name: Was “coming soon” plug-in active?
+  check_mode: no   # That means yes
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: wp plugin list --name=coming-soon --status=active --format=count
+  changed_when: false
+  tags: wp.plugins.coming-soon
+  register: _coming_soon_plugin_was_active
 
 - name: Coming Soon options
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_coming_soon_options }}"
+  vars:
+    plugin_coming_soon_shall_be_enabled: _coming_soon_plugin_was_active.stdout != "0"
   when: >-
     _active_plugins.stdout == ""
+    or
+    _coming_soon_plugin_was_active.stdout == "0"
+  # i.e. site is new, or plugin was already active.
+  # In all other cases, we leave whatever configuration was
+  # already in place (whether by user or Ansible) alone.
+  tags: wp.plugins.coming-soon
 
-- name: Get Coming Soon plugin status
-  shell:
-    chdir: "{{ wp_dir }}"
-    cmd: "wp plugin list --name=coming-soon --status=inactive --format=count"
-  register: _inactive_cs_plugin
-  changed_when: false
-  tags: plugins.coming-soon
-
-- name: Disable Coming Soon options
-  wordpress_option: "{{ item }}"
-  with_items: "{{ disable_plugin_coming_soon_options }}"
-  when: _inactive_cs_plugin.stdout == "1"
-  tags: plugins.coming-soon
-
-- name: Coming Soon plugin (only if inactive)
+- name: Coming Soon plugin (always installed)
   wordpress_plugin:
     name: coming-soon
     state:
       - symlinked
       - active
     from: wordpress.org/plugins
-  when: _inactive_cs_plugin.stdout == "1"
-  tags: plugins.coming-soon
+  tags: wp.plugins.coming-soon
 
 ##################### Must-use plugins ###########################
 
