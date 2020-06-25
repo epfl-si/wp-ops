@@ -515,7 +515,7 @@
   tags:
     - plugins.intranet
 
-- name: epfl-intranet status
+- name: epfl-intranet htaccess
   blockinfile:
     path: "{{ wp_htaccess_path }}"
     insertbefore: "</IfModule>"
