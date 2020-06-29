@@ -49,12 +49,12 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_coming_soon_options }}"
   vars:
-    plugin_coming_soon_shall_be_enabled: _coming_soon_plugin_was_active.stdout != "0"
+    - plugin_coming_soon_shall_be_disabled: '{{ (_coming_soon_plugin_was_active.stdout == "0") and (_active_plugins.stdout != "") }}'
   when: >-
     _active_plugins.stdout == ""
     or
     _coming_soon_plugin_was_active.stdout == "0"
-  # i.e. site is new, or plugin was already active.
+  # i.e. site is new, or plugin was already inactive.
   # In all other cases, we leave whatever configuration was
   # already in place (whether by user or Ansible) alone.
   tags: wp.plugins.coming-soon
