@@ -52,6 +52,7 @@
     plugin_coming_soon_shall_be_enabled: true
   when: >-
     _active_plugins.stdout == ""
+  tags: wp.plugins.coming-soon
 
 # We changed the standard operating procedure around mid-2020
 # regarding Coming Soon's configuration management. Turning it off
