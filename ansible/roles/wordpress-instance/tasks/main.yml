@@ -2,8 +2,42 @@
 #
 # What to do to install and configure a WordPress instance
 #
-# Variables:: (in addition to those defined or documented in
-#              ../vars/*.yml)
+# **This is the “main“ file that tells Ansible what to do to set
+# up a WordPress site.** (Or, in Ansible lingo: this is the
+# main tasks list for the `wordpress-instance` role).
+#
+# Operations in this file will be executed in the sequence they are
+# written in, for each site stipulated by the `-l` command-line flag
+# (or absent that flag, all sites in the inventory) - Subject to their
+# `when:` clauses and command-line-specified tags (`-t`), and with
+# parallel execution at the level of one task. That is (skipping the
+# tasks that have the `never` tag, which as the name implies, can
+# only be triggered manually):
+#
+# - first, the `wordpress_facts` will be assessed on all targeted sites;
+#
+# - then (and only after the previous step has completed for all
+#   targeted sites), Ansible will make sure that all targeted sites
+#   exist (by calling `create.yml`);
+#
+# - then, Ansible will create the `wp` symlink and the wp-content
+#   subdirectories, again only if said symlinks and directories don't
+#   already exist (`serving-infrastructure.yml`);
+#
+# - then Ansible will update the database and do some mundane
+#   configuration work (`configure.yml`), unless the operator
+#   forgot to set `wp_destructive` to include "config" (this
+#   is the meaning of the `when:` clause);
+#
+# - etc.
+#
+# Once the procedure is complete, every targeted site should be in a
+# nominal, ready-to-serve state.
+#
+# Note that some Ansible tasks (in particular in `plugins.yml`) may
+# interfere with user-supplied configuration; in which case, they will
+# be guarded by a suitable `when:` clause, which ensures that we do
+# nothing if the user already took the matters in their own hands.
 
 - meta: end_play
   when: |
