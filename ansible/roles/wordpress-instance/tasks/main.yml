@@ -5,10 +5,6 @@
 # Variables:: (in addition to those defined or documented in
 #              ../vars/*.yml)
 
-- meta: end_play
-  when: |
-    not ( ansible_run_tags | any_known_tag(role_path) )
-
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
