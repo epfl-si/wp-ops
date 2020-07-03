@@ -12,7 +12,10 @@
           You must update Ansible to at least 2.6 to use this playbook.
 
 - name: WordPress instances
-  hosts: all
+  # Note: we are twisting the Ansible concept of “hosts” in this role.
+  # An inventory entry in the all_wordpresses group is a WordPress
+  # instance, rather than a host in the “traditional” sysadmin sense.
+  hosts: all_wordpresses
   gather_facts: no    # Ansible facts are useless for this play
   tasks:
     # Do a conditional include_role, guarded by all the tags that the
@@ -26,9 +29,9 @@
       tags: >-
         {{ ( (playbook_dir | dirname) + "/roles/wordpress-instance" ) | find_all_tags }}
 
-# Likewise, members of all-openshift-namespaces are OpenShift
-# namespaces, not hosts
 - name: OpenShift namespaces
+  # Like above, members of the all_openshift_namespaces are OpenShift
+  # namespaces, rather than hosts
   hosts: all_openshift_namespaces
   gather_facts: no    # Ansible facts are useless for this play
   roles:
