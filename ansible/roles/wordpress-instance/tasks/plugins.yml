@@ -553,7 +553,7 @@
     block: |
       RewriteCond %{REQUEST_URI} wp-content/uploads/
       RewriteRule wp-content/uploads/(.*)$ wp-content/plugins/epfl-intranet/inc/protect-medias.php?file=$1 [QSA,L]
-    state: '{{ "present" if wp_site_category == "Inside" else "absent" }}'
+    state: '{{ "present" if "Inside" in wp_site_categories else "absent" }}'
   tags:
     - plugins.intranet
     - plugins.intranet.htaccess
