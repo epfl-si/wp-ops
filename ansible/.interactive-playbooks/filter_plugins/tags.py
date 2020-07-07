@@ -12,15 +12,20 @@ from ansible.module_utils import six
 class FilterModule(object):
     def filters(self):
         return {
-            'any_known_tag': self.any_known_tag
+            'any_known_tag': self.any_known_tag,
+            'find_all_tags': self.find_all_tags
         }
 
     def any_known_tag(self, tags, role_path):
         tags = set(tags)
         if 'all' in tags:  # i.e., no tags
             return True
-        return bool(tags.intersection(
-            _TagShaker.of(os.path.join(role_path, 'tasks')).get_role_tags_set()))
+        else:
+            return bool(
+                tags.intersection(set(self.find_role_tags(role_path))))
+
+    def find_all_tags(self, role_path):
+        return list(_TagShaker.of(os.path.join(role_path, 'tasks')).get_role_tags())
 
 class _TagShaker(object):
     _instances = {}
@@ -33,9 +38,9 @@ class _TagShaker(object):
     def __init__(self, templates_path):
         self._tasks_path = templates_path
 
-    def get_role_tags_set(self):
+    def get_role_tags(self):
         if not hasattr(self, '_role_tags_cached'):
-            self._role_tags_cached = set(self._walk_all_role_tags())
+            self._role_tags_cached = self._walk_all_role_tags()
         return self._role_tags_cached
 
     def _walk_all_role_tags(self):

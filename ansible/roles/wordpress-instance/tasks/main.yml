@@ -39,10 +39,6 @@
 # be guarded by a suitable `when:` clause, which ensures that we do
 # nothing if the user already took the matters in their own hands.
 
-- meta: end_play
-  when: |
-    not ( ansible_run_tags | any_known_tag(role_path) )
-
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 

@@ -10,7 +10,6 @@
 - assert:
     that: wp_can.configure or ansible_check_mode
 
-
 - include_vars: "{{ item }}"
   tags: always
   with_items:
