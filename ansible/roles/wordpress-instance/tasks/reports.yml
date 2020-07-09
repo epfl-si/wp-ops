@@ -1,0 +1,18 @@
+# Build report from sites and write it to local disk
+- name: Get Wordpress options from site
+  command: "{{ wp_cli_command }} option get {{ item.option_name }}"
+  with_items:
+    - { option_name: blogname }
+    - { option_name: blogdescription }
+  register: fetched_options
+  changed_when: false
+  check_mode: no
+
+- name: Append report to /tmp/sites-titles.csv
+  lineinfile:
+    dest: /tmp/sites-titles.csv
+    create: yes
+    insertafter: EOF
+    line: "{{inventory_hostname}},{{ wp_base_url}},{{ fetched_options.results[0].stdout }},{{ fetched_options.results[1].stdout }}"
+  delegate_to: 127.0.0.1
+  check_mode: no
