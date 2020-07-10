@@ -1,18 +1,37 @@
 # Build report from sites and write it to local disk
-- name: Get Wordpress options from site
-  command: "{{ wp_cli_command }} option get {{ item.option_name }}"
-  with_items:
-    - { option_name: blogname }
-    - { option_name: blogdescription }
-  register: fetched_options
-  changed_when: false
+- name: Prepare report /tmp/sites-titles.csv
+  copy:
+    content: ""
+    dest: /tmp/sites-titles.csv
+  delegate_to: 127.0.0.1
   check_mode: no
+  run_once: true
 
-- name: Append report to /tmp/sites-titles.csv
+- name: Create report header in /tmp/sites-titles.csv
   lineinfile:
     dest: /tmp/sites-titles.csv
     create: yes
     insertafter: EOF
-    line: "{{inventory_hostname}},{{ wp_base_url}},{{ fetched_options.results[0].stdout }},{{ fetched_options.results[1].stdout }}"
+    line: "name,base_url,title,tagline,languages"
+  delegate_to: 127.0.0.1
+  check_mode: no
+  run_once: true
+
+- name: Get Wordpress options from site
+  command: "{{ wp_cli_command }} {{ item.command_name }}"
+  with_items:
+    - { command_name: option get blogname }
+    - { command_name: option get blogdescription }
+    - { command_name: pll lang list --field=name --format=csv }
+  register: fetched_options
+  changed_when: false
+  check_mode: no
+
+- name: Append collected data to /tmp/sites-titles.csv
+  lineinfile:
+    dest: /tmp/sites-titles.csv
+    insertafter: EOF
+    line: >
+      {{inventory_hostname}},{{ wp_base_url}},{{ fetched_options.results[0].stdout }},{{ fetched_options.results[1].stdout }},"{{ fetched_options.results[2].stdout_lines | join(', ') }}"
   delegate_to: 127.0.0.1
   check_mode: no
