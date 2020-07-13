@@ -1,19 +1,9 @@
 # Build report from sites and write it to local disk
-- name: Prepare report /tmp/sites-titles.csv
+- name: Create report in /tmp/sites-titles.csv
   copy:
-    content: ""
+    content: "name,base_url,title,tagline,languages"
     dest: /tmp/sites-titles.csv
-  delegate_to: 127.0.0.1
-  check_mode: no
-  run_once: true
-
-- name: Create report header in /tmp/sites-titles.csv
-  lineinfile:
-    dest: /tmp/sites-titles.csv
-    create: yes
-    insertafter: EOF
-    line: "name,base_url,title,tagline,languages"
-  delegate_to: 127.0.0.1
+  delegate_to: localhost
   check_mode: no
   run_once: true
 
@@ -33,5 +23,5 @@
     insertafter: EOF
     line: >
       {{inventory_hostname}},{{ wp_base_url}},{{ fetched_options.results[0].stdout }},{{ fetched_options.results[1].stdout }},"{{ fetched_options.results[2].stdout_lines | join(', ') }}"
-  delegate_to: 127.0.0.1
+  delegate_to: localhost
   check_mode: no
