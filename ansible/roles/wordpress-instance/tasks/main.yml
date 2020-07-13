@@ -168,3 +168,12 @@
   tags:
     - wp.menus
     - wp.menus.refresh.force
+
+- name: Generate reports locally
+  include_tasks:
+    file: "reports.yml"
+    apply:
+      tags: ["wp.reports"]
+  tags:
+    - never
+    - wp.reports
