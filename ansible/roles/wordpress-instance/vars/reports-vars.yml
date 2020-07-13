@@ -1,0 +1,2 @@
+report_site_titles_csv: /tmp/sites-titles.csv
+report_site_titles_csv_relpath: "{{ report_site_titles_csv | joinpath(wpsible_cwd) }}"

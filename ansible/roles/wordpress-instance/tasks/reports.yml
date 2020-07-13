@@ -1,4 +1,5 @@
 # Build report from sites and write it to local disk
+- include_vars: reports-vars.yml
 
 - name: Get Wordpress options from site
   command: "{{ wp_cli_command }} {{ item.command_name }}"
@@ -13,11 +14,11 @@
 - set_fact:
     _wp_base_url_for_report: "{{ wp_base_url }}"
 
-- name: Write collected data to /tmp/sites-titles.csv
+- name: Write collected data to "{{ report_site_titles_csv_relpath }}"
   run_once: true
   local_action:
     module: copy
-    dest: /tmp/sites-titles.csv
+    dest: "{{ report_site_titles_csv_relpath }}"
     # ansible_play_hosts is the loop variable, so that we only have
     # lines for WordPresses that succeeded on the previous task. In a
     # different template (e.g. JSON) we could also use
