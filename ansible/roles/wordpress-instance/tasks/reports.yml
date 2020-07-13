@@ -1,4 +1,5 @@
 # Build report from sites and write it to local disk
+- include_vars: reports-vars.yml
 
 - name: Get Wordpress options from site
   command: "{{ wp_cli_command }} {{ item.command_name }}"
