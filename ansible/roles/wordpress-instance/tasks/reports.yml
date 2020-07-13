@@ -1,11 +1,4 @@
 # Build report from sites and write it to local disk
-- name: Create report in /tmp/sites-titles.csv
-  copy:
-    content: "name,base_url,title,tagline,languages"
-    dest: /tmp/sites-titles.csv
-  delegate_to: localhost
-  check_mode: no
-  run_once: true
 
 - name: Get Wordpress options from site
   command: "{{ wp_cli_command }} {{ item.command_name }}"
@@ -17,11 +10,21 @@
   changed_when: false
   check_mode: no
 
-- name: Append collected data to /tmp/sites-titles.csv
-  lineinfile:
+- set_fact:
+    _wp_base_url_for_report: "{{ wp_base_url }}"
+
+- name: Write collected data to /tmp/sites-titles.csv
+  run_once: true
+  local_action:
+    module: copy
     dest: /tmp/sites-titles.csv
-    insertafter: EOF
-    line: >
-      {{inventory_hostname}},{{ wp_base_url}},{{ fetched_options.results[0].stdout }},{{ fetched_options.results[1].stdout }},"{{ fetched_options.results[2].stdout_lines | join(', ') }}"
-  delegate_to: localhost
-  check_mode: no
+    # ansible_play_hosts is the loop variable, so that we only have
+    # lines for WordPresses that succeeded on the previous task. In a
+    # different template (e.g. JSON) we could also use
+    # `ansible_play_hosts_all` to also report on WordPress instances
+    # that had an error (e.g. due to unavailable DB)
+    content: |
+      name,base_url,title,tagline,languages
+      {% for host in ansible_play_hosts %}
+      {{ host }},{{ hostvars[host]['_wp_base_url_for_report'] }},{{ hostvars[host]['fetched_options'].results[0].stdout }},{{ hostvars[host]['fetched_options'].results[1].stdout }},"{{ hostvars[host]['fetched_options'].results[2].stdout_lines | join(', ') }}"
+      {% endfor %}
