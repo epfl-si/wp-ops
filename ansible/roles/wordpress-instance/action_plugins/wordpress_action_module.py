@@ -77,23 +77,25 @@ class WordPressActionModule(ActionBase):
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
-    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None):
+    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None, skip_loading_wp=False):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        :param skip-loading-wp: if you don't want to load all the WP
         """
         # wp_cli_command: "wp --path={{ wp_dir }}"
-        cmd = '{} {}'.format(self._get_ansible_var('wp_cli_command'), args)
+        wp_cli_var_name = 'wp_cli_command_with_skip' if skip_loading_wp else 'wp_cli_command'
+        cmd = '{} {}'.format(self._get_ansible_var(wp_cli_var_name), args)
 
         return self._run_shell_action(
             cmd, update_result=update_result,
             also_in_check_mode=also_in_check_mode,
             pipe_input=pipe_input)
 
-    def _get_wp_json (self, suffix):
-        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True)
+    def _get_wp_json (self, suffix, skip_loading_wp=False):
+        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
         return json.loads(result['stdout'])
 
 

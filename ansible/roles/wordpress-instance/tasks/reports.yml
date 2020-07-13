@@ -2,7 +2,7 @@
 - include_vars: reports-vars.yml
 
 - name: Get Wordpress options from site
-  command: "{{ wp_cli_command }} {{ item.command_name }}"
+  command: "{{ wp_cli_command_with_skip }} {{ item.command_name }}"
   with_items:
     - { command_name: option get blogname }
     - { command_name: option get blogdescription }
