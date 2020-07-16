@@ -3,6 +3,16 @@
 
 - include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
 
+# Unfortunately, production DeploymentConfig's cannot safely be updated
+# using this configuration - The PersistentVolumeClaims don't match up,
+# and even if they did, the already-existing DeploymentConfig's use different
+# names for it. This is not something that can be fixed with `oc apply`;
+# one needs to tear down the whole DeploymentConfig and recreate it
+# (which would obviously cause an outage).
+- assert:
+    that: |
+      openshift_namespace == "wwp-test"
+
 - name: "dc/httpd-{{ dc.name }}"
   openshift:
     state: latest
