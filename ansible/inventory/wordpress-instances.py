@@ -12,7 +12,8 @@ import os
 
 suitcase_interpreter = os.path.join(os.path.dirname(__file__), os.path.pardir,
                                     "ansible-deps-cache", "bin", "python3")
-if os.path.realpath(suitcase_interpreter) != os.path.realpath(sys.executable):
+if (os.path.exists(suitcase_interpreter) and
+    os.path.realpath(suitcase_interpreter) != os.path.realpath(sys.executable)):
     os.execl(suitcase_interpreter, suitcase_interpreter, *sys.argv)
 
 import subprocess
