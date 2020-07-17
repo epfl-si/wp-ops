@@ -42,6 +42,9 @@ COPY new-wp-site.sh /usr/local/bin/new-wp-site
 RUN chmod a+x /usr/local/bin/new-wp-site
 COPY ./docker-entrypoint.sh /
 
+# lnav custom file formats
+COPY lnav /var/www/.lnav/formats/epfl
+
 ARG WP_OPS_BRANCH=master
 RUN set -e -x; cd /wp; git clone https://github.com/epfl-si/wp-ops; \
     cd wp-ops; git checkout ${WP_OPS_BRANCH}
