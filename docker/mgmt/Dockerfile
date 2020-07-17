@@ -5,6 +5,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     htop \
     inotify-tools \
     less \
+    lnav \
     make \
     mysql-client \
     openssh-server \
