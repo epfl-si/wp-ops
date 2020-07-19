@@ -25,7 +25,7 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "graphlib": "^2.1.8",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "node-fetch": "^2.6.0",
     "p-queue": "^6.2.1",
     "prom-client": "^11.5.3"
