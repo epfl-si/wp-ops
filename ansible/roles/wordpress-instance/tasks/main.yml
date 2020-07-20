@@ -109,6 +109,8 @@
     - wp.plugins.coming-soon
     - plugins.intranet
     - plugins.intranet.htaccess
+    - wp.plugins.wpforms
+    - wp.plugins.payonline
   include_tasks:
     file: "plugins.yml"
     apply:

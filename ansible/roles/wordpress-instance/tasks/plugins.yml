@@ -596,6 +596,23 @@
     state: "{{ plugins_for_admin_category }}"
     from: wordpress.org/plugins
 
+- name: WPForms plugin
+  wordpress_plugin:
+    name: wpforms
+    state: "{{ plugins_for_wpforms_category }}"
+    from: XXX
+  tags:
+    - wp.plugins.wpforms
+
+# wp --allow-root plugin install https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip --activate --force
+- name: WPForms-EPFL-Payonline plugin
+  wordpress_plugin:
+    name: wpforms-epfl-payonline
+    state: "{{ plugins_for_payonline_category }}"
+    from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+  tags:
+    - wp.plugins.payonline
+
 - name: Uninstall all unknown plug-ins
   tags: plugins.unknown
   wordpress_unknown_plugins:
