@@ -93,20 +93,6 @@
   command: "{{ wp_cli_command }} eval '1;'"
   changed_when: false
 
-- name: "Set up “symlink” serving discipline"
-  when:
-    - wp_ensure_symlink_version is defined
-    - (wp_can.configure and wp_can.write_code) or ansible_check_mode
-  tags:
-    - never
-    - symlink
-    - unsymlink
-  # Like for backup.yml above, we include_tasks (not import_tasks)
-  # here, so as *not* to auto-propagate tags. Tasks within symlink.yml
-  # must pay close attention to their tag set (and thus properly
-  # segregate the `-t symlink` and `-t unsymlink` use cases)
-  include_tasks: "symlink.yml"
-
 - name: Configure
   when: wp_can.configure
   tags:
