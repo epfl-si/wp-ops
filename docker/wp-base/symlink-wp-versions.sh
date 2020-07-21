@@ -6,18 +6,14 @@ cd /wp
 
 for version in *;   # Sorted by version since the 1970s
 do
-    major="$(echo "$version" |cut -d. -f1)"
-    majorminor="$(echo "$version" |cut -d. -f1-2)"
+    major="$(echo "$version" |cut -d. -f1)"         # e.g. 5
+    majorminor="$(echo "$version" |cut -d. -f1-2)"  # e.g. 5.2
 
-    # e.g. 5 -> 5.2.4 (except for 5.3 which is not ready for prime time)
-    case "$majorminor" in
-        4*|5.2)
-            rm -f "$major"                # best version wins, thanks to sorting order
-            ln -s "$version" "$major"
-            ;;
-    esac
+    rm -f "$major"
+    ln -s "$version" "$major"     # e.g. 5 -> 5.4  - Best version wins (i.e. runs last),
+                                  # thanks to sorting order
 
-    # e.g. 5.2 -> 5.2.4 (again except for the "real" 5.3, which doesn't have a patch level yet)
+    # e.g. 5.2 -> 5.2.4
     case "$version" in
         *.*.*)
             rm -f "$majorminor"
