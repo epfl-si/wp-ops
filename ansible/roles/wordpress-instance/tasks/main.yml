@@ -83,20 +83,10 @@
     - never
     - restore
 
-- name: Serving infrastructure
-  when: wp_can.configure
-  tags:
-    - wp.serving
-  import_tasks: "serving-infrastructure.yml"
-
-- name: Check that WordPress is working
-  command: "{{ wp_cli_command }} eval '1;'"
-  changed_when: false
-
 - name: Configure
   when: wp_can.configure
   tags:
-    - config
+    - wp.configure
   include_tasks:    # Required because of the "when" clause
     file: "configure.yml"
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
