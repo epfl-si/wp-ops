@@ -26,8 +26,10 @@
     - name: WordPress instances
       include_role:
         name: ../roles/wordpress-instance
-      tags: >-
-        {{ ( (playbook_dir | dirname) + "/roles/wordpress-instance" ) | find_all_tags }}
+      when: >-
+        ansible_run_tags |
+        any_known_tag((playbook_dir | dirname) + "/roles/wordpress-instance")
+      tags: always  # That is, let the `when` clause above make the decision
 
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift
