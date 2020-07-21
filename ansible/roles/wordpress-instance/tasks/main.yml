@@ -42,9 +42,6 @@
 - include_vars: wp-destructive.yml   # For wp_can
   tags: always
 
-- include_vars: ../../../vars/wordpress-vars.yml
-  tags: always
-
 - name: Backup
   # We include_tasks (not import_tasks) here, because we do *not* want
   # to propagate tags - Within backup.yml, tasks shall be individually
