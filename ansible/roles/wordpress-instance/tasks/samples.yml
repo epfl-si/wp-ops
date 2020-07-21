@@ -6,8 +6,10 @@
 - name: Delete sample page
   command: "{{ wp_cli_command }} post delete 2 --force"
   when:
-    - not _sample_page_id.skipped
-    - _sample_page_id.stdout == "2"
+    - |
+      not _sample_page_id.skipped
+    - |
+      _sample_page_id.stdout == "2"
   register: _page_delete
   changed_when: >-
     "stdout" in _page_delete and "Success" in _page_delete.stdout
@@ -20,8 +22,10 @@
 - name: Delete sample post
   command: "{{ wp_cli_command }} post delete 1 --force"
   when:
-    - not _sample_post_id.skipped
-    - _sample_post_id.stdout == "1"
+    - |
+      not _sample_post_id.skipped
+    - |
+      _sample_post_id.stdout == "1"
   register: _post_delete
   changed_when: >-
     "stdout" in _post_delete and "Success" in _post_delete.stdout
@@ -33,7 +37,11 @@
 
 - name: Delete Privacy Policy page
   command: "{{ wp_cli_command }} post delete 3 --force"
-  when: _privacy_policy_page_id.stdout == "3"
+  when:
+    - |
+      not _privacy_policy_page_id.skipped
+    - |
+      _privacy_policy_page_id.stdout == "3"
   register: _privacy_policy_page_delete
   changed_when: >-
     "stdout" in _privacy_policy_page_delete and "Success" in _privacy_policy_page_delete.stdout
