@@ -1,10 +1,72 @@
-# Set a sane configuration for this WordPress instance
+# Set a sane serving infrastructure and configuration for this WordPress instance
 
 - include_vars: wp-destructive.yml
+- include_vars: openshift-vars.yml
+- include_vars: ../../../vars/wordpress-vars.yml
 
 - assert:
     that:
       - wp_can.configure or ansible_check_mode
+
+- name: wp-content subdirectories
+  file:
+    path: "{{ wp_dir }}/wp-content/{{ item }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775
+    recurse: no
+  with_items:
+    - uploads
+    - plugins
+    - mu-plugins
+    - themes
+
+- name: "“Main” symlink to /wp"
+  file:
+    state: link
+    src: "/wp/{{ wp_version_lineage }}"
+    dest: "{{ wp_dir }}/wp"
+  register: _main_symlink_script
+
+- name: "Invalidate serving pods' NFS cache entries for the main symlink"
+  when: >
+    _main_symlink_script is changed
+  local_action:
+    module: shell
+    executable: bash
+    cmd: |
+      set -o pipefail
+      set -e -x
+      for pod in $(oc get pods -n "{{ openshift_namespace }}" -o json \
+                   | jq -r \
+                       '.items
+                        | map(select(
+                            "'"{{ openshift_dc }}"'" ==
+                            .metadata.annotations["openshift.io/deployment-config.name"]
+                             ))
+                        | map(.metadata.name) | .[]')
+      do
+        oc exec -n "{{ openshift_namespace }}" -c "{{ openshift_container_name }}" -it $pod -- ls -l "{{ wp_dir }}"
+      done
+
+- name: WP_CONTENT_DIR line in wp-config.php
+  lineinfile:
+    state: "present"
+    path: "{{ wp_dir }}/wp-config.php"
+    insertafter: table_prefix
+    regexp: WP_CONTENT_DIR
+    line: |
+      define('WP_CONTENT_DIR', '{{ wp_dir }}/wp-content');
+
+- name: "Set up index.php"
+  copy:
+    dest: "{{ wp_dir }}/index.php"
+    content: "{{ lookup('template', 'wordpress-index.php') }}"
+
+- name: Check that WordPress is working
+  command: "{{ wp_cli_command }} eval '1;'"
+  changed_when: false
 
 - name: Detect whether a WordPress database update is needed
   shell: '{{ wp_cli_command }} core update-db --dry-run'
