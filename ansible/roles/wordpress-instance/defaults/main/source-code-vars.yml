@@ -1,8 +1,0 @@
-## The path where to find the plugins/ and mu-plugins/ directories
-wp_dev_path: '{{ playbook_dir }}/../../..'
-
-## The path where the new wp-dev directory is defined
-## ** Mutually exclusive with wp_dev_path ** - Only one of the two
-## should be defined.
-## This corresponds to the old (pre-wp-dev) layout:
-# wp_data_path: '{{ playbook_dir }}/../../../volumes/wp/jahia2wp/data/wp/wp-content'
