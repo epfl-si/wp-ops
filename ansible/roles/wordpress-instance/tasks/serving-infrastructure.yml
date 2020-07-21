@@ -24,27 +24,11 @@
     - themes
 
 - name: "“Main” symlink to /wp"
-  check_mode: no   # Does The Right Thing under ansible-playbook --check
-  when: wp_ensure_symlink_version is defined
-  shell:
-    cmd: |
-      set -e -x
-      cd "{{ wp_dir }}"
-      target="/wp/{{ wp_ensure_symlink_version }}"
-      [ "$(readlink "wp" 2>/dev/null || true)" = "$target" ] && return 0
-
-      echo SYMLINK_CHANGED
-      {% if ansible_check_mode %}
-      echo >&2 "$PWD/wp points to $(readlink "wp"); $target expected"
-      {% else %}
-      tmpdir="$(mktemp -d ./tmpnewsymlink-XXXXXX)"
-      (cd "$tmpdir"; ln -s "$target" wp)
-      mv "$tmpdir"/wp .
-      rmdir "$tmpdir"
-      {% endif %}
+  file:
+    state: link
+    src: "/wp/{{ wp_version_lineage }}"
+    dest: "{{ wp_dir }}/wp"
   register: _main_symlink_script
-  changed_when: >
-    "SYMLINK_CHANGED" in _main_symlink_script.stdout
 
 - name: "Invalidate serving pods' NFS cache entries for the main symlink"
   when: >

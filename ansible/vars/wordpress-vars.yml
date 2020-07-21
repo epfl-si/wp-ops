@@ -1,3 +1,1 @@
-# What version of WordPress we install.
-wp_ensure_symlink_version: "5.2"
-
+wp_version_lineage: 5.2

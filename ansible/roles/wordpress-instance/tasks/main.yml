@@ -86,7 +86,7 @@
 - name: Serving infrastructure
   when: wp_can.configure
   tags:
-    - config
+    - wp.serving
   import_tasks: "serving-infrastructure.yml"
 
 - name: Check that WordPress is working
