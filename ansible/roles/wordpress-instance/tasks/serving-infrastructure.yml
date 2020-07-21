@@ -1,5 +1,3 @@
-# It never hurts to have a working "wp" symlink at the top level of
-# the WordPress site, so do this first:
 - include_vars: wp-destructive.yml
 - include_vars: symlink-vars.yml
 - include_vars: openshift-vars.yml
