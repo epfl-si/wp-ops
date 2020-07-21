@@ -22,7 +22,7 @@ class FilterModule(object):
             return True
         else:
             return bool(
-                tags.intersection(set(self.find_role_tags(role_path))))
+                tags.intersection(set(self.find_all_tags(role_path))))
 
     def find_all_tags(self, role_path):
         return list(_TagShaker.of(os.path.join(role_path, 'tasks')).get_role_tags())
