@@ -25,9 +25,3 @@ do
             ;;
     esac
 done
-
-# As a backward compatibility measure / temporary hack, we support
-# sites that symlink to /wp instead of /wp/4 or /wp/5:
-for file_or_dir in 4/*; do
-    ln -s $file_or_dir .
-done
