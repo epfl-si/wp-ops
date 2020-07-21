@@ -1,1 +1,3 @@
+# This variable is usually set by the `wpsible` wrapper script
+# (except on e.g. AWX)
 wpsible_cwd: "."
