@@ -188,6 +188,14 @@
       - active
     from: wordpress.org/plugins
 
+- name: Gutenberg PDF Flipbook
+  wordpress_plugin:
+    name: flowpaper-lite-pdf-flipbook
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+
 # TODO: recapture intent of jahia2wp's
 # src/wordpress/plugins/custom/polylang.py
 # (perhaps not in this file)
