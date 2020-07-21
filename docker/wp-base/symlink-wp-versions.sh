@@ -6,28 +6,18 @@ cd /wp
 
 for version in *;   # Sorted by version since the 1970s
 do
-    major="$(echo "$version" |cut -d. -f1)"
-    majorminor="$(echo "$version" |cut -d. -f1-2)"
+    major="$(echo "$version" |cut -d. -f1)"         # e.g. 5
+    majorminor="$(echo "$version" |cut -d. -f1-2)"  # e.g. 5.2
 
-    # e.g. 5 -> 5.2.4 (except for 5.3 which is not ready for prime time)
-    case "$majorminor" in
-        4*|5.2)
-            rm -f "$major"                # best version wins, thanks to sorting order
-            ln -s "$version" "$major"
-            ;;
-    esac
+    rm -f "$major"
+    ln -s "$version" "$major"     # e.g. 5 -> 5.4  - Best version wins (i.e. runs last),
+                                  # thanks to sorting order
 
-    # e.g. 5.2 -> 5.2.4 (again except for the "real" 5.3, which doesn't have a patch level yet)
+    # e.g. 5.2 -> 5.2.4
     case "$version" in
         *.*.*)
             rm -f "$majorminor"
             ln -s "$version" "$majorminor"
             ;;
     esac
-done
-
-# As a backward compatibility measure / temporary hack, we support
-# sites that symlink to /wp instead of /wp/4 or /wp/5:
-for file_or_dir in 4/*; do
-    ln -s $file_or_dir .
 done
