@@ -1,4 +1,4 @@
-# Set a sane configuration for this WordPress instance
+# Set a sane serving infrastructure and configuration for this WordPress instance
 
 - include_vars: wp-destructive.yml
 - include_vars: openshift-vars.yml
