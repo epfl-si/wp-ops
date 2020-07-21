@@ -6,8 +6,11 @@
 # Set the site's title to whatever is defined in wp-veritas if it was not changed since the WordPress installation
 - name: Set site title
   command: "{{ wp_cli_command }} option update blogname '{{ lookup('wpveritas', 'title') }}'"
-  when: |
-    _site_title.stdout == (wp_dir | basename)
+  when:
+    - |
+      not _site_title.skipped
+    - |
+      _site_title.stdout == (wp_dir | basename)
   register: _site_title_changed
   changed_when: |
     "option is unchanged" not in _site_title_changed.stdout
@@ -20,8 +23,11 @@
 # Set the tagline to whatever is defined in wp-veritas if it was not changed since the WordPress installation
 - name: Set tagline
   command: "{{ wp_cli_command }} option update blogdescription '{{ lookup('wpveritas', 'tagline') }}'"
-  when: |
-    _site_tagline.stdout == 'Just another WordPress site'
+  when:
+    - |
+      not _site_tagline.skipped
+    - |
+      _site_tagline.stdout == 'Just another WordPress site'
   register: _site_tagline_changed
   changed_when: |
     "option is unchanged" not in _site_tagline_changed.stdout

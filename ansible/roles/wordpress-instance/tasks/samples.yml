@@ -5,7 +5,9 @@
 
 - name: Delete sample page
   command: "{{ wp_cli_command }} post delete 2 --force"
-  when: _sample_page_id.stdout == "2"
+  when:
+    - not _sample_page_id.skipped
+    - _sample_page_id.stdout == "2"
   register: _page_delete
   changed_when: >-
     "stdout" in _page_delete and "Success" in _page_delete.stdout
@@ -17,7 +19,9 @@
 
 - name: Delete sample post
   command: "{{ wp_cli_command }} post delete 1 --force"
-  when: _sample_post_id.stdout == "1"
+  when:
+    - not _sample_post_id.skipped
+    - _sample_post_id.stdout == "1"
   register: _post_delete
   changed_when: >-
     "stdout" in _post_delete and "Success" in _post_delete.stdout
