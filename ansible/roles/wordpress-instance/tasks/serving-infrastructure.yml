@@ -1,5 +1,4 @@
 - include_vars: wp-destructive.yml
-- include_vars: symlink-vars.yml
 - include_vars: openshift-vars.yml
 - include_vars: ../../../vars/wordpress-vars.yml
 
