@@ -88,7 +88,7 @@
     file: "configure.yml"
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
-      tags: ["config"]
+      tags: ["wp.configure"]
 
 - name: Set up metadata
   when: wp_can.configure
