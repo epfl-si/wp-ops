@@ -45,7 +45,8 @@
                             "'"{{ openshift_dc }}"'" ==
                             .metadata.annotations["openshift.io/deployment-config.name"]
                              ))
-                        | map(.metadata.name) | .[]')
+                        | map(.metadata.name) | .[]' \
+                   | grep -vw deploy)
       do
         oc exec -n "{{ openshift_namespace }}" -c "{{ openshift_container_name }}" -it $pod -- ls -l "{{ wp_dir }}"
       done
