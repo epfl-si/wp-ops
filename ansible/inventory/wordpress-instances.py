@@ -145,7 +145,7 @@ class WpVeritasSite(ProdSiteTrait, _Site):
             super(WpVeritasSite, self).__init__(wwp_env=site_data['openshiftEnv'],
                                                 wp_hostname=self.parsed_url.netloc,
                                                 wp_path=re.sub(r'^/', '', self.parsed_url.path))
-            self.category = site_data['category']
+            self.categories = site_data['categories']
             self.theme = site_data['theme']
             self.languages = site_data['languages']
             self.unit_id = site_data['unitId']
