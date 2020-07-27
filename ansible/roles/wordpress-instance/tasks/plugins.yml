@@ -14,6 +14,7 @@
   tags: always
   with_items:
     - plugin-vars.yml
+    - "{{ 'plugin-secrets-' + openshift_namespace + '.yml' }}"
     - accred-vars.yml
 
 ##################### Plugins to clean ###########################
@@ -610,6 +611,24 @@
   with_items: "{{ plugin_wpforms_options }}"
   tags:
     - wp.plugins.wpforms
+
+- debug:
+    msg: "{{ wpforms.license_key }}"
+  tags:
+    - wp.plugins.wpforms
+    - wp.plugins.payonline
+
+- debug:
+    msg: "plugin-secrets-{{ openshift_namespace }}.yml"
+  tags:
+    - wp.plugins.wpforms
+    - wp.plugins.payonline
+
+- debug:
+    msg: "{{ wpforms.password | eyaml(eyaml_keys) | trim_lines }}"
+  tags:
+    - wp.plugins.wpforms
+    - wp.plugins.payonline
 
 # wp --allow-root plugin install https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip --activate --force
 - name: WPForms-EPFL-Payonline plugin

@@ -43,3 +43,7 @@ wpveritas_api_url: '{{ _wpveritas_servers[openshift_namespace] }}'
 _wpveritas_servers:
   wwp: https://wp-veritas.epfl.ch/api
   wwp-test: https://wp-veritas.128.178.222.83.nip.io/api
+
+eyaml_keys:
+  priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
+  pub: "{{ playbook_dir }}/../eyaml/epfl_wp_test.pem"
