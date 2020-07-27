@@ -8,7 +8,7 @@
   command: "{{ wp_cli_command }} option update blogname '{{ lookup('wpveritas', 'title') }}'"
   when:
     - |
-      not _site_title.skipped
+      not "skipped" in _site_title or ("skipped" in _site_title and not _site_title.skipped)
     - |
       _site_title.stdout == (wp_dir | basename)
   register: _site_title_changed
@@ -25,7 +25,7 @@
   command: "{{ wp_cli_command }} option update blogdescription '{{ lookup('wpveritas', 'tagline') }}'"
   when:
     - |
-      not _site_tagline.skipped
+      not "skipped" in _site_tagline or ("skipped" in _site_tagline and not _site_tagline.skipped)
     - |
       _site_tagline.stdout == 'Just another WordPress site'
   register: _site_tagline_changed
