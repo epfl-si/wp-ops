@@ -597,7 +597,6 @@
     state: "{{ plugins_for_admin_category }}"
     from: wordpress.org/plugins
 
- # wp --allow-root plugin install https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip --activate --force
 - name: WPForms plugin
   wordpress_plugin:
     name: wpforms
@@ -612,30 +611,12 @@
   tags:
     - wp.plugins.wpforms
 
-- debug:
-    msg: "{{ wpforms.license_key }}"
-  tags:
-    - wp.plugins.wpforms
-    - wp.plugins.payonline
-
-- debug:
-    msg: "plugin-secrets-{{ openshift_namespace }}.yml"
-  tags:
-    - wp.plugins.wpforms
-    - wp.plugins.payonline
-
-- debug:
-    msg: "{{ wpforms.password | eyaml(eyaml_keys) | trim_lines }}"
-  tags:
-    - wp.plugins.wpforms
-    - wp.plugins.payonline
-
-# wp --allow-root plugin install https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip --activate --force
 - name: WPForms-EPFL-Payonline plugin
   wordpress_plugin:
     name: wpforms-epfl-payonline
     state: "{{ plugins_for_payonline_category }}"
     from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+    # Specific release: https://github.com/epfl-si/wpforms-epfl-payonline/releases/download/v1.0.2/wpforms-epfl-payonline.zip
   tags:
     - wp.plugins.wpforms
     - wp.plugins.payonline
