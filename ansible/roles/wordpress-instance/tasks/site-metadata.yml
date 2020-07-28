@@ -10,7 +10,7 @@
     - |
       not "skipped" in _site_title or ("skipped" in _site_title and not _site_title.skipped)
     - |
-      _site_title.stdout == (wp_dir | basename)
+      "stdout" in _site_title and _site_title.stdout == (wp_dir | basename)
   register: _site_title_changed
   changed_when: |
     "option is unchanged" not in _site_title_changed.stdout
@@ -27,7 +27,7 @@
     - |
       not "skipped" in _site_tagline or ("skipped" in _site_tagline and not _site_tagline.skipped)
     - |
-      _site_tagline.stdout == 'Just another WordPress site'
+      "stdout" in _site_tagline and _site_tagline.stdout == 'Just another WordPress site'
   register: _site_tagline_changed
   changed_when: |
     "option is unchanged" not in _site_tagline_changed.stdout
