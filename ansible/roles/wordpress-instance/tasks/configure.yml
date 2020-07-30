@@ -80,7 +80,7 @@
       {{ wp_cli_command }} core update-db
   when:
     - |
-      not _wp_core_db_update_dry_run.skipped
+      not "skipped" in _wp_core_db_update_dry_run or ("skipped" in _wp_core_db_update_dry_run and not _wp_core_db_update_dry_run.skipped)
     - |
       "already" not in _wp_core_db_update_dry_run.stdout
 
