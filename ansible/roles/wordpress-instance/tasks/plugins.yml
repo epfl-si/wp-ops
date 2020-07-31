@@ -178,7 +178,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/raw/release2018/data/plugins/generic/tinymce-advanced/tinymce-advanced.5.2.1.zip
+    from: wordpress.org/plugins
 
 - name: Gutenberg PDF Viewer Block
   wordpress_plugin:
