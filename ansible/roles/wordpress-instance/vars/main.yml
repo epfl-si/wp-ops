@@ -21,6 +21,8 @@ wp_htaccess_path: "{{ wp_dir }}/.htaccess"
 
 # The prefix to invoke the WP-CLI for this WordPress instance
 wp_cli_command: "wp --path={{ wp_dir }}"
+# For faster command, it may be nice to not load all Wordpress stack
+wp_cli_command_with_skip: "{{ wp_cli_command }} --skip-packages --skip-themes --skip-plugins"
 
 # The public-facing URL of this instance
 wp_base_url: "https://{{ wp_hostname }}/{{ wp_path }}"
