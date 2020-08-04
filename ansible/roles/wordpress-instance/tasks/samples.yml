@@ -39,6 +39,8 @@
   command: "{{ wp_cli_command }} post delete 3 --force"
   when:
     - |
+      not "skipped" in _privacy_policy_page_id or ("skipped" in _privacy_policy_page_id and not _privacy_policy_page_id.skipped)
+    - |
       "stdout" in _privacy_policy_page_id and _privacy_policy_page_id.stdout == "3"
   register: _privacy_policy_page_delete
   changed_when: >-

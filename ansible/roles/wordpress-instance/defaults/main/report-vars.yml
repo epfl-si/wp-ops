@@ -1,4 +1,3 @@
-# Where to output the report made by `wpsible -t reportcsv`
+# This variable is usually set by the `wpsible` wrapper script
+# (except on e.g. AWX)
 wpsible_cwd: "."
-plugin_report_csv_out: "{{ wpsible_cwd }}/plugin-report.csv"
-muplugin_report_csv_out: "{{ wpsible_cwd }}/muplugin-report.csv"
