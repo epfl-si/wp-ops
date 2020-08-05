@@ -106,8 +106,7 @@ ADD install-plugins-and-themes.py clearstatcache-wp-import.patch /tmp/
 # `plugins.yml` file:
 ARG INSTALL_AUTO_FLAGS
 RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
-        /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS}    \
-            --exclude=wpforms --exclude=wpforms-epfl-payonline;          \
+        /tmp/install-plugins-and-themes.py auto ${INSTALL_AUTO_FLAGS};   \
     done
 
 # Special treatment for tinymce-advanced, whose version scheme follows
