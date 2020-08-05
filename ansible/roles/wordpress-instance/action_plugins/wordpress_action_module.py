@@ -336,8 +336,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             return
 
         if 'installed' in to_do:
-            raise NotImplementedError('Installing "regular" (non-symlinked) {} {} '
-                                      'not supported (yet)'.format(self._get_type(), basename))
+            self._update_result(self._run_wp_cli_action('plugin install {}'.format(self._task.args.get('from'))))
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
             self._update_result(self._do_rimraf_file(basename))
@@ -429,7 +428,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
 
         :param desired_state: Plugin desired installation state
         """
-        installation_state = desired_state.intersection(['present', 'absent', 'symlinked'])
+        installation_state = desired_state.intersection(['present', 'absent', 'symlinked', 'installed'])
         if len(installation_state) == 0:
             return None
         elif len(installation_state) == 1:

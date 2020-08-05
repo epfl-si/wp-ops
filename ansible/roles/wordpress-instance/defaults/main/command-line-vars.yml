@@ -1,4 +1,4 @@
-# file: roles/wordpress-instance/defaults/main/hostvars.yml
+# file: roles/wordpress-instance/defaults/main/command-line-vars.yml
 #
 # The variables that the role relies on, and that the user is supposed
 # to pass on the command line

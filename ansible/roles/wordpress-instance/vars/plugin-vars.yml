@@ -23,6 +23,8 @@ plugins_for_library_category: '{{ [ "symlinked", "active" ] if "Library" in wp_s
 plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if "Restauration" in wp_site_categories else "absent" }}'
 plugins_for_inside_category: '{{ ["symlinked", "active"] if "Inside" in wp_site_categories else "absent" }}'
 plugins_for_admin_category: '{{ [ "symlinked", "active" ] if "Admin" in wp_site_categories else "absent" }}'
+plugins_for_wpforms_category: '{{ [ "installed", "active" ] if "WPForms" in wp_site_categories else "absent" }}'
+plugins_for_payonline_category: '{{ [ "installed", "active" ] if "Payonline" in wp_site_categories else "absent" }}'
 
 # Defining if WP is managed or not
 wp_is_managed: '{{ "Unmanaged" not in wp_site_categories }}'
@@ -279,3 +281,15 @@ plugin_accred_options:
     value: "{{ wp_unit_name }}"
   - name: plugin:epfl_accred:unit_id
     value: "{{ wp_unit_id }}"
+
+# WPForms and WPForms-EPFL-Payonline
+plugin_wpforms_options:
+  # Desactivate the WPForms challenge
+  - name: wpforms_challenge
+    value: 'a:11:{s:6:"status";s:7:"skipped";s:4:"step";i:0;s:7:"user_id";i:1;s:7:"form_id";i:0;s:10:"embed_page";i:0;s:16:"started_date_gmt";s:19:"2020-07-08 07:47:17";s:17:"finished_date_gmt";s:19:"2020-07-08 07:47:17";s:13:"seconds_spent";i:0;s:12:"seconds_left";i:300;s:13:"feedback_sent";b:0;s:19:"feedback_contact_me";b:0;}'
+  # Use the global CSS and enable GDPR options (GDPR Enhancements, Disable User Cookies, Disable User Details)
+  - name: wpforms_settings
+    value: 'a:15:{s:8:"currency";s:3:"CHF";s:18:"hide-announcements";b:1;s:14:"hide-admin-bar";b:1;s:14:"uninstall-data";b:0;s:23:"email-summaries-disable";b:0;s:11:"disable-css";s:1:"1";s:13:"global-assets";b:0;s:4:"gdpr";b:1;s:17:"gdpr-disable-uuid";b:1;s:20:"gdpr-disable-details";b:1;s:11:"email-async";b:0;s:14:"email-template";s:7:"default";s:18:"email-header-image";s:76:"https://www.epfl.ch/wp-content/themes/wp-theme-2018/assets/svg/epfl-logo.svg";s:22:"email-background-color";s:7:"#e9eaec";s:17:"email-carbon-copy";b:0;}'
+  # Set the WPForms license
+  - name: wpforms_license
+    value: 'a:6:{i:0;s:0:"";s:3:"key";s:32:"{{ wpforms.license_key | eyaml(eyaml_keys) | trim }}";s:4:"type";s:5:"elite";s:10:"is_expired";b:0;s:11:"is_disabled";b:0;s:10:"is_invalid";b:0;}'
