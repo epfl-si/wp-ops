@@ -6,8 +6,3 @@ theme_name: '{{ lookup("wpveritas", "theme") }}'
 ### 2018 Themes
 theme_wp_theme_2018_active: '{{ theme_name == "wp-theme-2018" }}'
 theme_wp_theme_light_active: '{{ theme_name == "wp-theme-light" }}'
-
-
-### 2010 Themes
-theme_epfl_blank_active: '{{ theme_name == "epfl-blank" }}'
-theme_epfl_master_active: '{{ theme_name == "epfl-master" }}'

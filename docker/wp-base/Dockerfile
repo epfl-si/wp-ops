@@ -69,7 +69,7 @@ RUN su -s /bin/sh www-data -c " \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="4.9 5.2 5.3 5.4"
+ARG WORDPRESS_VERSION_LINEAGES="5.4"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl https://api.wordpress.org/core/version-check/1.7/ \

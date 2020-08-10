@@ -2,12 +2,6 @@
 
 # TODO: These should be computed from wp-veritas state
 plugins_locked: true                # TODO: should be false for unmanaged sites
-plugins_use_wp2010_plugins: '{{ wp_env == "subdomains" }}'   # TODO: the accuracy (and innocuity!) of this
-                                                             # is pending camptocamp's INF-4475 (and the follow-up
-                                                             # tasks on our side)
-
-plugins_symlinked_and_active_in_2010_only: '{{ ["symlinked", "active"] if plugins_use_wp2010_plugins else "absent" }}'
-plugins_use_gutenberg: true
 
 # TODO: Likewise, these should be computed from wp-veritas state. We
 # set them to true out of an abundance of caution, and refrain from
