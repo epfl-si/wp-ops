@@ -317,7 +317,7 @@ class WpOpsPlugins:
         self.plugins_yaml = req.content
 
     def _plugins_and_is_mu(self):
-        for thing in yaml.load(self.plugins_yaml):
+        for thing in yaml.load(self.plugins_yaml, yaml.FullLoader):
             try:
                 if 'wordpress_plugin' not in thing:
                     continue
