@@ -132,6 +132,8 @@ RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \
             wordpress-importer wordpress.org/plugins ;                   \
+        cd wordpress-importer ;                                          \
+        git apply < /tmp/clearstatcache-wp-import.patch ;                \
     done;                                                                \
     rm /tmp/clearstatcache-wp-import.patch
 
