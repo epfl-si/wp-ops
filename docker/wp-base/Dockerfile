@@ -101,7 +101,7 @@ RUN set -e -x;                                                           \
 # Install and patch plugins and themes
 ######################################################################
 
-ADD install-plugins-and-themes.py /tmp/
+ADD install-plugins-and-themes.py clearstatcache-wp-import.patch /tmp/
 # Get all plugins and themes (in "auto" mode) out of the Ansible
 # `plugins.yml` file:
 ARG INSTALL_AUTO_FLAGS
@@ -132,7 +132,8 @@ RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \
             wordpress-importer wordpress.org/plugins ;                   \
-    done;
+    done;                                                                \
+    rm /tmp/clearstatcache-wp-import.patch
 
 RUN rm /tmp/install-plugins-and-themes.py
 

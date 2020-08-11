@@ -1,0 +1,10 @@
+--- wordpress-importer.php.ORIG	2019-07-16 09:51:44.386308000 +0000
++++ wordpress-importer.php	2019-07-16 09:52:01.816308000 +0000
+@@ -1011,6 +1011,7 @@
+ 			return new WP_Error( 'import_file_error', sprintf( __('Remote server returned error response %1$d %2$s', 'wordpress-importer'), esc_html($remote_response_code), get_status_header_desc($remote_response_code) ) );
+ 		}
+ 
++		clearstatcache();
+ 		$filesize = filesize( $upload['file'] );
+ 
+ 		if ( isset( $headers['content-length'] ) && $filesize != $headers['content-length'] ) {
