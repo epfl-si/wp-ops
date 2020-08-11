@@ -2,7 +2,7 @@
 
 set -e
 
-: ${WORDPRESS_VERSION:=5.2}
+: ${WORDPRESS_VERSION:=5.4}
 
 usage() {
     die <<USAGE
