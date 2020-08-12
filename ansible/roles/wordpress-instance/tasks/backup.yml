@@ -1,5 +1,3 @@
-- include_vars: wp-destructive.yml
-
 - name: Create directory to revert backup in case of trouble
   command: mktemp -d -p {{ wp_dir }} -t ansible-backup-XXXXXX
   changed_when: false
