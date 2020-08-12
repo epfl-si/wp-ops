@@ -4,17 +4,17 @@
 - include_vars: ../../../vars/wordpress-vars.yml          # For wp_version_lineage
 - include_vars: "secrets-{{ openshift_namespace }}.yml"
 
-- name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
+- name: "{{ mgmt_ssh_secret_name }} secret (ssh host and user keys)"
   openshift:
     state: latest
     apiVersion: v1
     kind: Secret
     metadata:
-      name: "{{ mgmt_secret_name }}"
+      name: "{{ mgmt_ssh_secret_name }}"
       namespace: "{{ openshift_namespace }}"
       labels:
         app: mgmt
-    data: "{{ mgmt_secret_contents }}"
+    data: "{{ mgmt_ssh_secret_contents }}"
 
 - name: jahia2wp-env ConfigMap
   openshift:
@@ -90,7 +90,7 @@
               claimName: wordpress-0
           - name: ssh
             secret:
-              secretName: "{{ mgmt_secret_name }}"
+              secretName: "{{ mgmt_ssh_secret_name }}"
           - >-
             {{ { "name": "backups",
                  "persistentVolumeClaim": {"claimName": "backups-0"} }
