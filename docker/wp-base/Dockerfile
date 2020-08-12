@@ -59,7 +59,6 @@ RUN su -s /bin/sh www-data -c " \
         composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
     fi;                                                                   \
     wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
-    wp package install https://github.com/epfl-si/wp-cli-polylang/archive/master.zip;   \
     wp package install https://github.com/epfl-si/wp-cli/archive/master.zip;            \
     rm -f ~/.composer/auth.json"
 
@@ -69,7 +68,7 @@ RUN su -s /bin/sh www-data -c " \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="5.4"
+ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
