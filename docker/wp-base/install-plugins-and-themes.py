@@ -294,11 +294,7 @@ class Themes:
             Plugin('wp-theme-2018',
                    ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
-                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light']),
-            Plugin('epfl-blank',
-                   ['https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-blank']),
-            Plugin('epfl-master',
-                   ['https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/themes/epfl-master'])
+                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light'])
         )
 
 

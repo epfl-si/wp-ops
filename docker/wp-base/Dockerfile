@@ -68,7 +68,7 @@ RUN su -s /bin/sh www-data -c " \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="4.9 5.2 5.3 5.4 5.5"
+ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
@@ -113,13 +113,9 @@ RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
 RUN set -e -x; for wp in /wp/*; do                                         \
   cd $wp;                                                                  \
   wpmajorminor="$(basename $wp | cut -d. -f1-2)";                          \
-  case "$wpmajorminor" in                                                  \
-      4.*) tinymcemajorminor="4.8" ;;                                      \
-      *)   tinymcemajorminor="$wpmajorminor" ;;                            \
-  esac ;                                                                   \
   curl -q https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json \
   | jq -r ".versions | to_entries                                          \
-         | map(select (.key | startswith(\"$tinymcemajorminor\")))         \
+         | map(select (.key | startswith(\"$wpmajorminor\")))              \
          | map(.value) | last"                                             \
      | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
   rm -rf wp-content/plugins/tinymce-advanced;                              \
@@ -131,6 +127,8 @@ RUN set -e -x; for wp in /wp/*; do                                       \
         cd $wp/wp-content/plugins ;                                      \
         /tmp/install-plugins-and-themes.py                               \
             wordpress-importer wordpress.org/plugins ;                   \
+        cd wordpress-importer ;                                          \
+        git apply < /tmp/clearstatcache-wp-import.patch ;                \
     done;                                                                \
     rm /tmp/clearstatcache-wp-import.patch
 

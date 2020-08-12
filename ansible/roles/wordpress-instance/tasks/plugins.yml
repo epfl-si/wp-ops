@@ -197,10 +197,6 @@
       - active
     from: wordpress.org/plugins
 
-# TODO: recapture intent of jahia2wp's
-# src/wordpress/plugins/custom/polylang.py
-# (perhaps not in this file)
-
 - name: Polylang plugin
   wordpress_plugin:
     name: polylang
@@ -317,34 +313,12 @@
       - active
     from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-remote-content-shortcode
 
-- name: shortcode-ui plugin
-  wordpress_plugin:
-    name: shortcode-ui
-    state: >-
-        {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ] }}
-    from: wordpress.org/plugins
-
-- name: shortcode-ui-richtext plugin
-  wordpress_plugin:
-    name: shortcode-ui-richtext
-    state: >-
-        {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ] }}
-    from: wordpress.org/plugins
-
-- name: EPFL plugin
-  wordpress_plugin:
-    name: epfl
-    state: >-
-      {{ "absent" if plugins_use_gutenberg else [ "symlinked", "active" ]  }}
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl
-
 - name: EPFL Gutenberg plugin
   wordpress_plugin:
     name: wp-gutenberg-epfl
     state:
       - symlinked
-      - >-
-        {{ "active" if plugins_use_gutenberg else "inactive" }}
+      - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
 
 - name: EPFL Menus plugin
@@ -405,138 +379,6 @@
 - name: enlighter configuration
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_enlighter_options }}"
-
-##################### 2010-only plugins ###########################
-
-# These plugins only exist in obsolescent DeploymentConfig's ("unm-*"
-# and "subdomains"). Holding off using Ansible on these is an
-# acceptable medium-term workaround measure.
-
-- name: feedzy-rss-feeds plugin
-  wordpress_plugin:
-    name: feedzy-rss-feeds
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: wordpress.org/plugins
-
-- name: simple-sitemap plugin
-  wordpress_plugin:
-    name: simple-sitemap
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: wordpress.org/plugins
-
-- name: EPFL-Share plugin
-  wordpress_plugin:
-    name: EPFL-Share
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/EPFL-Share
-
-- name: Shortcodes Ultimate plugin
-  wordpress_plugin:
-    name: shortcodes-ultimate
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: wordpress.org/plugins
-
-- name: epfl-scheduler plugin
-  wordpress_plugin:
-    name: epfl-scheduler
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-scheduler
-
-- name: epfl-news plugin
-  wordpress_plugin:
-    name: epfl-news
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-news
-
-- name: epfl-memento plugin
-  wordpress_plugin:
-    name: epfl-memento
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-memento
-
-- name: epfl-faq plugin
-  wordpress_plugin:
-    name: epfl-faq
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-faq
-
-- name: epfl-map plugin
-  wordpress_plugin:
-    name: epfl-map
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-map
-
-- name: epfl-buttons plugin
-  wordpress_plugin:
-    name: epfl-buttons
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-buttons
-
-- name: epfl-snippet plugin
-  wordpress_plugin:
-    name: epfl-snippet
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-snippet
-
-- name: epfl-toggle plugin
-  wordpress_plugin:
-    name: epfl-toggle
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-toggle
-
-- name: epfl-grid plugin
-  wordpress_plugin:
-    name: epfl-grid
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-grid
-
-- name: epfl-infoscience plugin
-  wordpress_plugin:
-    name: epfl-infoscience
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience
-
-- name: epfl-infoscience-search plugin
-  wordpress_plugin:
-    name: epfl-infoscience-search
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-infoscience-search
-
-- name: epfl-xml plugin
-  wordpress_plugin:
-    name: epfl-xml
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-xml
-
-- name: epfl-people plugin
-  wordpress_plugin:
-    name: epfl-people
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-people
-
-- name: epfl-twitter plugin
-  wordpress_plugin:
-    name: epfl-twitter
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-twitter
-
-- name: epfl-video plugin
-  wordpress_plugin:
-    name: epfl-video
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-video
-
-- name: epfl-tableau plugin
-  wordpress_plugin:
-    name: epfl-tableau
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-tableau
-
-- name: epfl-google-forms plugin
-  wordpress_plugin:
-    name: epfl-google-forms
-    state: "{{ plugins_symlinked_and_active_in_2010_only }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release/data/wp/wp-content/plugins/epfl-google-forms
 
 ##################### Category-specific plugins ###########################
 
