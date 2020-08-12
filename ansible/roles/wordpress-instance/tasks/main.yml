@@ -22,7 +22,7 @@
 #
 # - then, Ansible will create the `wp` symlink and the wp-content
 #   subdirectories, again only if said symlinks and directories don't
-#   already exist (`serving-infrastructure.yml`);
+#   already exist (`configure.yml`);
 #
 # - then Ansible will update the database and do some mundane
 #   configuration work (`configure.yml`), unless the operator
