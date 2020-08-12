@@ -12,24 +12,24 @@
           You must update Ansible to at least 2.6 to use this playbook.
 
 - name: WordPress instances
-  # Note: we are twisting the Ansible concept of “hosts” in this role.
-  # An inventory entry in the all_wordpresses group is a WordPress
-  # instance, rather than a host in the “traditional” sysadmin sense.
-  hosts: all_wordpresses
+  hosts: |
+    {%- if (ansible_run_tags |
+                          any_known_tag((playbook_dir | dirname) +
+                                        "/roles/wordpress-instance")) -%}
+    {# Note: we are twisting the Ansible concept of “hosts” in this play.
+     # An inventory entry in the all_wordpresses group is a WordPress
+     # instance, rather than a host in the “traditional” sysadmin sense.
+     #}
+    all_wordpresses
+    {%- else -%}
+    {# If no relevant tags are in use (including the implicit "all" tag when -t is not
+     # present on the command line), skip the whole role and save a big chunk of time:
+     #}
+    !all
+    {%- endif -%}
   gather_facts: no    # Ansible facts are useless for this play
-  tasks:
-    # Do a conditional include_role, guarded by all the tags that the
-    # role uses. That way, when the operator sets a tag on the command
-    # line that is not in use in the role (e.g. `-t awx`), we save I *
-    # N units of useless work where I ≈ 900 is the number of WordPress
-    # instances, and N ≈ 100 is the number of tasks per instance.
-    - name: WordPress instances
-      include_role:
-        name: ../roles/wordpress-instance
-      when: >-
-        ansible_run_tags |
-        any_known_tag((playbook_dir | dirname) + "/roles/wordpress-instance")
-      tags: always  # That is, let the `when` clause above make the decision
+  roles:
+    - role: ../roles/wordpress-instance
 
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift
