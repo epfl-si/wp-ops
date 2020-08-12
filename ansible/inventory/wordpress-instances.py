@@ -247,9 +247,9 @@ class Inventory:
 
     def _add(self, site):
         self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
-        self._add_site_to_group(site, site.wwp_env)
+        self._add_site_to_group(site)
 
-    def _add_site_to_group(self, site, wwp_env):
+    def _add_site_to_group(self, site):
         self._add_group(site.group)
         self.inventory[site.group]['hosts'].append(site.instance_name)
 
