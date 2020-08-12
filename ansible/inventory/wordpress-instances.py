@@ -24,6 +24,7 @@ from functools import reduce
 import re
 import json
 import requests
+import itertools
 from six.moves.urllib.parse import urlparse, quote
 
 import warnings
@@ -68,8 +69,8 @@ class _Site:
             return True
 
     @property
-    def group(self):
-        return '%s_%s' % (self.group_prefix, re.sub('-', '_', self.wwp_env))
+    def group_hierarchy(self):
+        return ['%s_%s' % (self.group_prefix, re.sub('-', '_', self.wwp_env))]
 
     @property
     def instance_name(self):
@@ -247,18 +248,23 @@ class Inventory:
 
     def _add(self, site):
         self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
-        self._add_site_to_group(site)
+        self._add_site_to_groups(site)
 
-    def _add_site_to_group(self, site):
-        self._add_group(site.group)
-        self.inventory[site.group]['hosts'].append(site.instance_name)
+    def _add_site_to_groups(self, site):
+        groups = site.group_hierarchy
+        if groups[-1] != 'all_wordpresses':
+            groups.append('all_wordpresses')
+        for parent, child in pairwise(reversed(groups)):
+            self._add_group_to_group(parent, child)
+        self._get_group_struct(groups[0]).setdefault('hosts', []).append(site.instance_name)
 
-    def _add_group(self, group):
-        if group in self.groups:
-            return
-        self.groups.add(group)
-        self.inventory.setdefault('all_wordpresses', {}).setdefault('children', []).append(group)
-        self.inventory.setdefault(group, {}).setdefault('hosts', [])
+    def _get_group_struct(self, group_name):
+        return self.inventory.setdefault(group_name, {})
+
+    def _add_group_to_group(self, container_name, containee_name):
+        children = self._get_group_struct(container_name).setdefault('children', [])
+        if containee_name not in children:
+            children.append(containee_name)
 
 
 def cached(fn):
@@ -322,6 +328,16 @@ class Environment:
                 raise ValueError('Unknown service account %s' % whoami)
         else:
             return os.environ.get('WWP_NAMESPACES', 'wwp-test').split(',')
+
+
+def pairwise(iterable):
+    """s -> (s0,s1), (s1,s2), (s2, s3), ...
+
+    As seen on https://stackoverflow.com/a/5434936/435004
+    """
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 
 if __name__ == '__main__':
