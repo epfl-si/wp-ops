@@ -17,13 +17,13 @@
         app: mgmt
     data: "{{ mgmt_ssh_secret_contents }}"
 
-- name: jahia2wp-env ConfigMap
+- name: new-wp-site-env ConfigMap
   openshift:
     state: latest
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: jahia2wp-env
+      name: new-wp-site-env
       namespace: "{{ openshift_namespace }}"
     data:
       WP_ADMIN_USER: admin
@@ -79,7 +79,7 @@
               mountPath: /backups
             envFrom:
               - configMapRef:
-                  name: jahia2wp-env
+                  name: new-wp-site-env
               - secretRef:
                   name: mysql-super-credentials
           serviceAccount: "{{ mgmt_service_account }}"
