@@ -70,7 +70,13 @@ class _Site:
 
     @property
     def group_hierarchy(self):
-        return ['%s_%s' % (self.group_prefix, re.sub('-', '_', self.wwp_env))]
+        return [
+            '%s_%s' % (self.group_prefix, suffix)
+            for suffix in (
+                re.sub('-', '_', self.wwp_env),
+                'wordpresses'
+                )
+            ]
 
     @property
     def instance_name(self):
