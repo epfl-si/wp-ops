@@ -27,7 +27,7 @@
     data:
       WP_ADMIN_USER: admin
       WP_ADMIN_EMAIL: test@example.com
-      WP_VERSION: "{{ wp_version_lineage }}"
+      WP_VERSION: "{{ wp_version_lineage | string }}"
 
 - name: mysql-super-credentials Secret
   openshift:
