@@ -230,7 +230,7 @@ class LiveProductionSite(ProdSiteTrait, _LiveSite):
 
 
 class Inventory:
-    """Model the entire wp-veritas inventory."""
+    """Models the entire inventory."""
 
     def __init__(self, sites):
 
