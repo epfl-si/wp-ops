@@ -59,7 +59,6 @@ RUN su -s /bin/sh www-data -c " \
         composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
     fi;                                                                   \
     wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
-    wp package install https://github.com/epfl-si/wp-cli-polylang/archive/master.zip;   \
     wp package install https://github.com/epfl-si/wp-cli/archive/master.zip;            \
     rm -f ~/.composer/auth.json"
 
