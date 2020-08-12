@@ -2,7 +2,7 @@
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
 - include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
 - include_vars: ../../../vars/wordpress-vars.yml          # For wp_version_lineage
-- include_vars: "secrets-{{ openshift_namespace }}.yml"
+- include_vars: "../../../vars/secrets-{{ openshift_namespace }}.yml"
 - include_vars: ../../../vars/env-secrets.yml             # For env_secrets
 
 - name: "{{ mgmt_ssh_secret_name }} secret (ssh host and user keys)"
