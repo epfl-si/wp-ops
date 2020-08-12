@@ -30,17 +30,15 @@
       (cd "{{ _backup_tmpdir }}"; tar xpvf -)
     cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess" || true
   tags:
-    - wipe
-    - backup
-    - backup.code
+    - wp.wipe
+    - wp.backup
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up data to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
   command: "{{ wp_cli_command }} db export {{ _backup_tmpdir }}/backup.sql"
   tags:
-    - wipe
-    - backup
-    - backup.data
+    - wp.wipe
+    - wp.backup
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
 
 - name: Back up uploads to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
@@ -50,7 +48,6 @@
     mkdir -p "{{ _backup_tmpdir }}"/wp-content || true
     cp -a wp-content/uploads {{ _backup_tmpdir }}/wp-content
   tags:
-    - wipe
-    - backup
-    - backup.uploads
+    - wp.wipe
+    - wp.backup
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"

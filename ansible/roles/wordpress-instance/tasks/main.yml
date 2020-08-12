@@ -49,24 +49,21 @@
   # `backup.data` and `backup.uploads` tags.
   include_tasks: "backup.yml"
   tags:
-    - never  # That is, skip unless "-t wipe", "-t backup", "-t backup.code" etc. is
+    - never  # That is, skip unless "-t wp.wipe", "-t wp.backup", "-t backup.code" etc. is
              # passed on the command line
-    - wipe
-    - backup
-    - backup.code
-    - backup.data
-    - backup.uploads
+    - wp.wipe
+    - wp.backup
 
 - name: Wipe
   import_tasks: "wipe.yml"
   tags:
     - never
-    - wipe
+    - wp.wipe
 
 - wordpress_facts:
   tags: always
 
-- name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
+- name: "{{ 'Recreate' if 'wp.wipe' in ansible_run_tags else 'Create' }}"
   tags:
     - wp.create
   include_tasks:
@@ -78,7 +75,7 @@
   import_tasks: "restore.yml"
   tags:
     - never
-    - restore
+    - wp.restore
 
 - name: Configure
   when: wp_can.configure
