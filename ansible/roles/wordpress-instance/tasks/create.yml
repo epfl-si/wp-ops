@@ -1,4 +1,7 @@
 # Create a WordPress site out of thin air
+- include_vars: ../../../vars/wordpress-vars.yml          # For wp_version_lineage
+- include_vars: ../../../vars/env-secrets.yml             # For lookup("env_secrets", ...)
+- include_vars: "../../../vars/secrets-{{ openshift_namespace }}.yml"
 
 - name: Create site directory
   file:
@@ -15,7 +18,12 @@
     cmd: |
       if wp --path="{{ wp_dir }}" eval '1;'; then echo SITE_ALREADY_EXISTS; exit 0; fi
 
-      . /etc/profile.d/k8s-env.sh
+      export WORDPRESS_VERSION='{{ wp_version_lineage }}'
+      export MYSQL_DB_HOST='{{ mysql_super_credentials.host }}'
+      export MYSQL_SUPER_USER='{{ mysql_super_credentials.user }}'
+      export WP_ADMIN_USER=admin
+      export WP_ADMIN_EMAIL=test@example.com
+      export MYSQL_SUPER_PASSWORD='{{ lookup("env_secrets", "mysql_super_credentials", "MYSQL_SUPER_PASSWORD") }}'
       new-wp-site
   register: _new_wp_site
   changed_when: >-

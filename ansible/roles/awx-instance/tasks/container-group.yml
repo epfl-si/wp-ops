@@ -70,7 +70,7 @@
             imagePullPolicy: Always
             envFrom:
               - configMapRef:
-                  name: jahia2wp-env
+                  name: new-wp-site-env
               - secretRef:
                   name: mysql-super-credentials
             env:

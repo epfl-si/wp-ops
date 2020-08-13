@@ -7,7 +7,7 @@
 
 - include_vars: ../../../vars/image-vars.yml
 
-- include_vars: secrets-wwp-test.yml
+- include_vars: ../../../vars/secrets-wwp-test.yml
   when: openshift_namespace == 'wwp-test'
 
 - name: "Testing ImageStreams and their build information"

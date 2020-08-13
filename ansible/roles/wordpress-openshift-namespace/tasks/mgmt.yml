@@ -2,32 +2,35 @@
 - include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
 - include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
 - include_vars: ../../../vars/wordpress-vars.yml          # For wp_version_lineage
-- include_vars: "secrets-{{ openshift_namespace }}.yml"
+- include_vars: "../../../vars/secrets-{{ openshift_namespace }}.yml"
+- include_vars: ../../../vars/env-secrets.yml             # For env_secrets
 
-- name: "{{ mgmt_secret_name }} secret (ssh host and user keys)"
+- name: "{{ mgmt_ssh_secret_name }} secret (ssh host and user keys)"
   openshift:
     state: latest
     apiVersion: v1
     kind: Secret
     metadata:
-      name: "{{ mgmt_secret_name }}"
+      name: "{{ mgmt_ssh_secret_name }}"
       namespace: "{{ openshift_namespace }}"
       labels:
         app: mgmt
-    data: "{{ mgmt_secret_contents }}"
+    data: "{{ mgmt_ssh_secret_contents }}"
 
-- name: jahia2wp-env ConfigMap
+- name: new-wp-site-env ConfigMap
   openshift:
     state: latest
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: jahia2wp-env
+      name: new-wp-site-env
       namespace: "{{ openshift_namespace }}"
     data:
       WP_ADMIN_USER: admin
       WP_ADMIN_EMAIL: test@example.com
-      WP_VERSION: "{{ wp_version_lineage }}"
+      MYSQL_DB_HOST: "{{ mysql_super_credentials.host }}"
+      MYSQL_SUPER_USER: "{{ mysql_super_credentials.user }}"
+      WP_VERSION: "{{ wp_version_lineage | string }}"
 
 - name: mysql-super-credentials Secret
   openshift:
@@ -38,10 +41,7 @@
       name: mysql-super-credentials
       namespace: "{{ openshift_namespace }}"
     type: Opaque
-    data:
-      MYSQL_DB_HOST: "{{ mysql_super_credentials.host | b64encode }}"
-      MYSQL_SUPER_USER: "{{ mysql_super_credentials.user | b64encode }}"
-      MYSQL_SUPER_PASSWORD: "{{ mysql_super_credentials.password | eyaml(eyaml_keys) | b64encode }}"
+    data: "{{ env_secrets.mysql_super_credentials | base64_values }}"
 
 - name: mgmt DeploymentConfig
   openshift:
@@ -79,7 +79,7 @@
               mountPath: /backups
             envFrom:
               - configMapRef:
-                  name: jahia2wp-env
+                  name: new-wp-site-env
               - secretRef:
                   name: mysql-super-credentials
           serviceAccount: "{{ mgmt_service_account }}"
@@ -90,7 +90,7 @@
               claimName: wordpress-0
           - name: ssh
             secret:
-              secretName: "{{ mgmt_secret_name }}"
+              secretName: "{{ mgmt_ssh_secret_name }}"
           - >-
             {{ { "name": "backups",
                  "persistentVolumeClaim": {"claimName": "backups-0"} }

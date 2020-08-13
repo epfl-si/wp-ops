@@ -29,9 +29,9 @@ _mgmt_access_list_wwp_test_and_wwp:
 _mgmt_access_list_wwp_test_only:
   - mohamed.khadri@epfl.ch
 
-mgmt_secret_name: mgmt-ssh
+mgmt_ssh_secret_name: mgmt-ssh
 
-mgmt_secret_contents:
+mgmt_ssh_secret_contents:
   # These secrets are consumed by
   # ../../../../docker/mgmt/docker-entrypoint.sh
   authorized_keys: "{{ mgmt_access_list[openshift_namespace] | maplookup(ssh_public_keys) | join_lines | b64encode }}"
