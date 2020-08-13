@@ -324,15 +324,17 @@
 - name: EPFL Menus plugin
   wordpress_plugin:
     name: epfl-menus
-    state: >-
-        {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
+    state:
+      - symlinked
+      - active
     from: https://github.com/epfl-si/wp-plugin-epfl-menus
 
 - name: wp-media-folder plugin
   wordpress_plugin:
     name: wp-media-folder
-    state: >-
-      {{ "absent" if plugins_use_wp2010_plugins else [ "symlinked", "active" ] }}
+    state:
+      - symlinked
+      - active
     from: https://wp-manager.epfl.ch/resources/plugin-zip/wp-media-folder.zip
 
 - name: wp-media-folder options
