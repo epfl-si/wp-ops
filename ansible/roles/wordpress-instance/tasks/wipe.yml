@@ -7,6 +7,10 @@
     that:
       - wp_can.wipe
 
+- name: Deactivate mainwp-child
+  shell: "{{ wp_cli_command }} plugin deactivate mainwp-child"
+  ignore_errors: true
+
 - name: Delete database and user
   shell:
     chdir: "{{ wp_dir }}"
