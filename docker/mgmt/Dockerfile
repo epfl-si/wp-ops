@@ -19,6 +19,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     screen \
     tmux \
     software-properties-common \
+    restic \
   && \
     apt-get -qy autoremove && \
     apt-get clean
