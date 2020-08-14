@@ -44,7 +44,7 @@
       name: mysql-super-credentials
       namespace: "{{ openshift_namespace }}"
     type: Opaque
-    data: "{{ env_secrets.mysql_super_credentials | base64_values }}"
+    data: "{{ env_secret_mysql_super_credentials | base64_values }}"
   tags: mgmt.secrets
 
 - name: mgmt DeploymentConfig
