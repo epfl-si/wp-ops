@@ -36,8 +36,14 @@
     - ci.jenkinsfile
 
 - name: "Management container (ssh server, PHP CLI)"
-  import_tasks: mgmt.yml
-  tags: mgmt
+  include_tasks:
+    file: mgmt.yml
+    apply:
+      tags:
+        - mgmt
+  tags:
+    - mgmt
+    - mgmt.secrets
 
 - name: "Monitoring"
   when: openshift_namespace == "wwp"
