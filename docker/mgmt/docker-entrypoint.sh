@@ -26,7 +26,7 @@ iwait() {
 save_env_for_ssh_users() {
     env -0 | while IFS== read -d '' var val; do
         case "$var" in
-            WP_*|MYSQL_*|HTTPD_*|MGMT_*|KUBERNETES_*|JENKINS_*|POLYLEX_*|VARNISH_*|AWX_*)
+            WP_*|MYSQL_*|HTTPD_*|MGMT_*|KUBERNETES_*|JENKINS_*|POLYLEX_*|VARNISH_*|AWX_*|AWS_*|RESTIC_*)
                 printf "export %s=\"%q\"\n" "$var" "$val" ;;
             *) : ;;
         esac
@@ -52,4 +52,3 @@ else
     # Development mode
     sleep infinity
 fi
-
