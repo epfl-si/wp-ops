@@ -181,14 +181,6 @@
       - active
     from: wordpress.org/plugins
 
-- name: Gutenberg PDF Viewer Block
-  wordpress_plugin:
-    name: pdf-viewer-block
-    state:
-      - symlinked
-      - active
-    from: wordpress.org/plugins
-
 - name: Gutenberg PDF Flipbook
   wordpress_plugin:
     name: flowpaper-lite-pdf-flipbook
