@@ -78,10 +78,16 @@
         - wp.restore
 
 - name: Restore
-  import_tasks: "restore.yml"
+  include_tasks:
+    file: "restore.yml"
+    apply:
+      tags:
+        - wp.restore
   tags:
     - never
     - wp.restore
+    - wp.restore.files
+    - wp.restore.sql
 
 - name: Configure
   when: wp_can.configure
