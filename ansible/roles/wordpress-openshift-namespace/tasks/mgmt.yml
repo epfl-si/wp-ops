@@ -47,6 +47,18 @@
     data: "{{ env_secret_mysql_super_credentials | base64_values }}"
   tags: mgmt.secrets
 
+- name: backup-rw-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: backup-rw-credentials
+      namespace: "{{ openshift_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_restic_backup_credentials | base64_values }}"
+  tags: mgmt.secrets
+
 - name: mgmt DeploymentConfig
   openshift:
     state: latest
@@ -86,6 +98,8 @@
                   name: new-wp-site-env
               - secretRef:
                   name: mysql-super-credentials
+              - secretRef:
+                  name: backup-rw-credentials
           serviceAccount: "{{ mgmt_service_account }}"
           serviceAccountName: "{{ mgmt_service_account }}"
           volumes:
