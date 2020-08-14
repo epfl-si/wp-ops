@@ -29,7 +29,7 @@ eyaml_keys:
 # https://puppet.com/blog/encrypt-your-data-using-hiera-eyaml first.
 # The edit command goes like this,
 #
-#   eyaml edit -d \
+#   ansible/ansible-deps-cache/bin/eyaml edit -d \
 #     --pkcs7-public-key ansible/eyaml/epfl_wp_test.pem \
 #     ansible/inventory/test/group_vars/openshift_namespaces_dev
 #
