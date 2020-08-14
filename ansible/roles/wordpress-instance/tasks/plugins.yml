@@ -334,6 +334,19 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-plugin-epfl-menus
+  register: _plugin_epfl_menus
+
+- name: Refresh menus
+  shell: "{{ wp_cli_command }} epfl menu refresh"
+  tags: wp.plugins.epfl_menus.refresh
+  when: >-
+    inventory_hostname.startswith("www")
+    and
+    (
+      (_plugin_epfl_menus is changed)
+      or
+      ("wp.plugins.epfl_menus.refresh" in ansible_run_tags)
+    )
 
 - name: wp-media-folder plugin
   wordpress_plugin:
@@ -373,6 +386,15 @@
       - symlinked
       - active
     from: wordpress.org/plugins
+  register: _plugin_ewww
+
+- name: Rebuild ewww-image-optimizer cache
+  shell: "{{ wp_cli_command }} ewwwio optimize all --noprompt"
+  tags: wp.plugins.ewww.optimize
+  when: >-
+    (_plugin_ewww is changed)
+    or
+    ("wp.plugins.ewww.optimize" in ansible_run_tags)
 
 - name: ewww-image-optimizer configuration
   wordpress_option: "{{ item }}"
