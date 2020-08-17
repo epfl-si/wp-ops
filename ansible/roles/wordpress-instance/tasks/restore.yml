@@ -55,7 +55,7 @@
   environment: "{{ restore_restic_environment }}"
   shell:
     cmd: |
-      restic -r {{ restore_restic_repo_sql }} --no-lock dump latest db-backup.sql | \
+      restic -r {{ restore_restic_repo_sql }} --no-lock --quiet dump latest db-backup.sql | \
         {{ wp_cli_command }} db import -
   tags: wp.restore.sql
 
