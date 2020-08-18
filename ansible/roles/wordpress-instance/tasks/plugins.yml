@@ -188,6 +188,16 @@
       - symlinked
       - active
     from: wordpress.org/plugins
+  tags: wp.plugins.pdf
+
+- name: Remove obsolete PDF plug-ins (one-shot action)
+  wordpress_plugin:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - pdf-viewer-block
+    - pdfjs-viewer-shortcode
+  tags: wp.plugins.pdf
 
 - name: Polylang plugin
   wordpress_plugin:
