@@ -111,6 +111,7 @@
     - plugins.intranet.htaccess
     - wp.plugins.wpforms
     - wp.plugins.payonline
+    - wp.plugins.pdf
   include_tasks:
     file: "plugins.yml"
     apply:
