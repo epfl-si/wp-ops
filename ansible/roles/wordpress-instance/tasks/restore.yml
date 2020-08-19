@@ -59,7 +59,7 @@
         {{ wp_cli_command }} db import -
   tags: wp.restore.sql
 
-#### Cleanup tasks ####
+#### Post-restore tasks ####
 
 - name: Correct site URL (wp search-replace)
   shell:
