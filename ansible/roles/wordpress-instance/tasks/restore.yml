@@ -54,7 +54,9 @@
 - name: Restore database
   environment: "{{ restore_restic_environment }}"
   shell:
+    executable: /bin/bash
     cmd: |
+      set -o pipefail
       restic -r {{ restore_restic_repo_sql }} --no-lock --quiet dump latest db-backup.sql | \
         {{ wp_cli_command }} db import -
   tags: wp.restore.sql
