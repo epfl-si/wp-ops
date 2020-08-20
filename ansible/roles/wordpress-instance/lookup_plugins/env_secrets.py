@@ -9,7 +9,7 @@ available, for security reasons). For instance, the following piece of Jinja
     lookup("env_secrets", "mysql_super_credentials", "MYSQL_SUPER_PASSWORD")
 
 is the same as `lookup("env", "MYSQL_SUPER_PASSWORD")` on AWX, and the same as
-`env_secrets.mysql_super_credentials.MYSQL_SUPER_PASSWORD` on the operator's
+`env_secret_mysql_super_credentials.MYSQL_SUPER_PASSWORD` on the operator's
 workstation.
 
 Usage:
@@ -52,6 +52,6 @@ class LookupModule(LookupBase):
 
         if self._has_secrets():
             self._templar.available_variables = variables
-            return [self._templar.template(variables["env_secrets"])[section][key]]
+            return [self._templar.template(variables["env_secret_" + section])[key]]
         else:
             return [os.getenv(key)]

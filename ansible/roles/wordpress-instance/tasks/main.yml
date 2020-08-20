@@ -22,7 +22,7 @@
 #
 # - then, Ansible will create the `wp` symlink and the wp-content
 #   subdirectories, again only if said symlinks and directories don't
-#   already exist (`serving-infrastructure.yml`);
+#   already exist (`configure.yml`);
 #
 # - then Ansible will update the database and do some mundane
 #   configuration work (`configure.yml`), unless the operator
@@ -43,96 +43,132 @@
   tags: always
 
 - name: Backup
-  # We include_tasks (not import_tasks) here, because we do *not* want
-  # to propagate tags - Within backup.yml, tasks shall be individually
-  # marked with the appropriate subset of the `backup.code`,
-  # `backup.data` and `backup.uploads` tags.
-  include_tasks: "backup.yml"
   tags:
-    - never  # That is, skip unless "-t wipe", "-t backup", "-t backup.code" etc. is
+    - never  # That is, skip unless "-t wp.wipe" or "-t wp.backup" is
              # passed on the command line
-    - wipe
-    - backup
-    - backup.code
-    - backup.data
-    - backup.uploads
+    - wp.wipe
+    - wp.backup
+  include_tasks:
+    file: "backup.yml"
+    apply:
+      # Tags don't auto-inherit with `include_tasks`:
+      tags:
+        - wp.wipe
+        - wp.backup
 
 - name: Wipe
   import_tasks: "wipe.yml"
   tags:
     - never
-    - wipe
+    - wp.wipe
 
 - wordpress_facts:
   tags: always
 
-- name: "{{ 'Recreate' if 'wipe' in ansible_run_tags else 'Create' }}"
+- name: "{{ 'Recreate' if 'wp.wipe' in ansible_run_tags else 'Create' }}"
   tags:
+    - wp
+    - wp.restore
     - wp.create
   include_tasks:
     file: "create.yml"
     apply:
-      tags: ["wp.create"]
+      tags:
+        - wp.create
+        - wp.restore
 
 - name: Restore
-  import_tasks: "restore.yml"
+  include_tasks:
+    file: "restore.yml"
+    apply:
+      tags:
+        - wp.restore
   tags:
     - never
-    - restore
+    - wp.restore
+    - wp.restore.files
+    - wp.restore.sql
 
 - name: Configure
   when: wp_can.configure
   tags:
+    - wp
     - wp.configure
   include_tasks:    # Required because of the "when" clause
     file: "configure.yml"
     # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
-      tags: ["wp.configure"]
+      tags:
+        - wp
+        - wp.configure
 
 - name: Set up metadata
   when: wp_can.configure
   tags:
+    - wp
     - wp.metadata
   include_tasks:
     file: "site-metadata.yml"
     apply:
-      tags: ["wp.metadata"]
+      tags:
+        - wp
+        - wp.metadata
 
 - name: Set up plugins
   when: wp_can.configure or ansible_check_mode
   tags:
+    - wp
+    - wp.plugins
+    - wp.plugins.wp_media_folder_options
+    - wp.plugins.coming-soon
+    - wp.plugins.unknown
+    - wp.plugins.polylang
+    - wp.plugins.wpforms
+    - wp.plugins.payonline
+    - wp.plugins.ewww.optimize
+    - wp.plugins.intranet
+    - wp.plugins.intranet.htaccess
+    - wp.plugins.pdf
+    # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options
     - plugins.unknown
     - plugins.polylang
-    - wp.plugins.coming-soon
     - plugins.intranet
     - plugins.intranet.htaccess
-    - wp.plugins.wpforms
-    - wp.plugins.payonline
-    - wp.plugins.pdf
   include_tasks:
     file: "plugins.yml"
     apply:
-      tags: ["plugins"]
+      tags:
+        - wp
+        - wp.plugins
+        - plugins
 
 - name: Set up themes
   when: wp_can.configure or ansible_check_mode
   tags:
+    - wp
+    - wp.themes
+    # OBSOLETE alias:
     - themes
   include_tasks:
     file: "themes.yml"
     apply:
-      tags: ["themes"]
+      tags:
+        - wp
+        - wp.themes
+        - themes
 
 - name: Delete sample pages and posts installed by WordPress
   when: wp_can.configure
   include_tasks:
     file: "samples.yml"
     apply:
-      tags: ["wp.samples"]
+      tags:
+        - wp
+        - wp.samples
   tags:
+    - wp
     - wp.samples
 
 - name: Set up menus
@@ -140,8 +176,11 @@
   include_tasks:
     file: "menus.yml"
     apply:
-      tags: ["wp.menus"]
+      tags:
+        - wp
+        - wp.menus
   tags:
+    - wp
     - wp.menus
     - wp.menus.refresh.force
 

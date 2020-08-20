@@ -7,7 +7,16 @@
 - name: Sync menus
   shell:
     cmd: "{{ wp_cli_command }} epfl menus refresh"
-  when: inventory_hostname.startswith('www') and ("wp.menus.refresh.force" in ansible_run_tags or _external_menu_entry_count.stdout == "0")
+  when: >-
+    inventory_hostname.startswith('www')
+    and
+    (
+      ("wp.menus.refresh.force" in ansible_run_tags)
+      or
+      (_external_menu_entry_count.stdout == "0")
+      or
+      ( (_plugin_epfl_menus | default(false)) and _plugin_epfl_menus is changed )
+    )
 
 - name: Polylang menus
   wordpress_polylang_menu:

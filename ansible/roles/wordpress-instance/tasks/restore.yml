@@ -1,15 +1,106 @@
-# Restore a WordPress site from backup
+# Restore a WordPress instance from backup (created by backup.yml)
+#
+# Note: restoring is, by its very nature, a hands-on operation that
+# only the operator is supposed to perform. Restoring from AWX is
+# *not* supported.
+#
+# The following variables may be set (on the Ansible command line or
+# otherwise) to dictate where to restore from:
+#
+# wp_restore_from_name
+#
+#   The inventory name of the site to restore from
+#
+# wp_restore_from_namespace
+#
+#   One of "wwp" or "wwp-test". ⚠ when restoring across namespaces,
+#   only “downward” (from production to test) direction is supported.
 
-- include_vars: wp-destructive.yml
 
-- assert:
+- tags: always
+  assert:
+    that: >-
+      ansible_verbosity <= 2
+    msg: >-
+      Don't use -vvv or higher when backing up or restoring sites (risk
+      of disclosure of the Scality access credentials)
+
+- tags: always
+  assert:
     that:
-      - inventory_hostname in wp_destructive
       - wp_can.write_data
-      - wp_restore_from is defined
 
-- import_tasks: restore-over-ssh.yml
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - "../../../vars/secrets-{{ openshift_namespace }}.yml"
+    - restore-vars.yml
 
-# TODO: There should be a choice to restore from other sources, such as
-# local tarball, possibly in sti-test.epfl.ch format
+- name: Restore files
+  environment: "{{ restore_restic_environment }}"    # `-vv`-safe!
+  shell:
+    # We may assume that the site already exists, and has a database.
+    # We don't want to overwrite “system” files, and in particular we
+    # *don't* want to restore wp-config.php! We only restore “user“
+    # files i.e. .htaccess and wp-content (also wp-content/themes and
+    # wp-content/plugins, so that plug-ins are operational at once)
+    cmd: |
+      restic -r {{ restore_restic_repo_files }} --no-lock \
+          --tag "{{ backup_restic_tag | default('latest') }}" \
+          restore latest \
+          --target "{{ wp_dir }}" \
+          --include .htaccess \
+          --include wp-content
+  tags: wp.restore.files
 
+- name: Restore database
+  environment: "{{ restore_restic_environment }}"
+  shell:
+    executable: /bin/bash
+    cmd: |
+      set -o pipefail
+      restic -r {{ restore_restic_repo_sql }} --no-lock \
+          --tag "{{ backup_restic_tag | default('latest') }}" \
+          --quiet dump latest db-backup.sql \
+        | {{ wp_cli_command }} db import -
+  tags: wp.restore.sql
+
+#### Post-restore tasks ####
+
+- name: Correct site URL (wp search-replace)
+  shell:
+    cmd: |
+      set -e -x
+      restore_url_in_backup="$({{ wp_cli_command }} option get siteurl | sed 's|^https\?://||')"
+      restore_url_rewrite_to="{{ wp_hostname }}/{{ wp_path }}"
+      {{ wp_cli_command }} search-replace \
+          "$restore_url_in_backup" \
+          "$restore_url_rewrite_to" \
+          --skip-columns=guid
+      {{ wp_cli_command }} search-replace \
+          "$(echo "$restore_url_in_backup"  | sed 's|/|\\/|g')" \
+          "$(echo "$restore_url_rewrite_to" | sed 's|/|\\/|g')" \
+          --skip-columns=guid
+
+- name: Correct site URL in .htaccess
+  shell: "{{ wp_cli_command }} rewrite flush --hard"
+
+- name: Regenerate media
+  shell:
+    cmd: "{{ wp_cli_command }} media regenerate --only-missing --yes"
+
+# Cycle deactivation / activation on a few select plugins whose state,
+# cache or connections may depend on their URL:
+- name: Temporarily deactivate stateful plugins
+  shell:
+    cmd: |
+      set -x   # Not -e; let missing plugins slide
+      for plugin in             {# #}
+          epfl-menus            {# So that menus.yml will issue a "wp epfl menus refresh" #}
+          mainwp-child          {# Disconnect from wp-manager (plugins.yml will reconnect
+                                   at the new URL) #}
+          ewww-image-optimizer  {# So that plugins.yml will rebuild the cache #}
+      ; do
+        {{ wp_cli_command }} plugin deactivate $plugin
+      done
+      true

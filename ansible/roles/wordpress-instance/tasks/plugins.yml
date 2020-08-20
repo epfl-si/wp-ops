@@ -212,7 +212,9 @@
     {{ wp_cli_command }} pll lang list --field=term_id --format=csv
   changed_when: false
   register: _polylang_languages_csv
-  tags: plugins.polylang
+  tags:
+    - wp.plugins.polylang
+    - plugins.polylang
   check_mode: no
 
 - name: Polylang translations (taglines, date formats etc)
@@ -220,7 +222,9 @@
     state: present
     language: "{{ item }}"
   with_items: "{{ lookup('wpveritas', 'languages') | languages_in_order }}"
-  tags: plugins.polylang
+  tags:
+    - wp.plugins.polylang
+    - plugins.polylang
   # We don't want to resurrect languages that the user deleted:
   when: |-
     _polylang_languages_csv.stdout == ""
@@ -330,6 +334,7 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-plugin-epfl-menus
+  register: _plugin_epfl_menus
 
 - name: wp-media-folder plugin
   wordpress_plugin:
@@ -340,7 +345,9 @@
     from: https://wp-manager.epfl.ch/resources/plugin-zip/wp-media-folder.zip
 
 - name: wp-media-folder options
-  tags: plugins.wp_media_folder_options
+  tags:
+    - wp.plugins.wp_media_folder_options
+    - plugins.wp_media_folder_options
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_wpmf_options }}"
 
@@ -367,6 +374,15 @@
       - symlinked
       - active
     from: wordpress.org/plugins
+  register: _plugin_ewww
+
+- name: Rebuild ewww-image-optimizer cache
+  shell: "{{ wp_cli_command }} ewwwio optimize all --noprompt"
+  tags: wp.plugins.ewww.optimize
+  when: >-
+    (_plugin_ewww is changed)
+    or
+    ("wp.plugins.ewww.optimize" in ansible_run_tags)
 
 - name: ewww-image-optimizer configuration
   wordpress_option: "{{ item }}"
@@ -392,6 +408,7 @@
     state: "{{ plugins_for_inside_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-intranet
   tags:
+    - wp.plugins.intranet
     - plugins.intranet
 
 - name: epfl-intranet status
@@ -399,6 +416,7 @@
     protection_enabled: '{{ "yes" if "Inside" in wp_site_categories else "no" }}'
     restrict_to_groups: ''
   tags:
+    - wp.plugins.intranet
     - plugins.intranet
 
 - name: epfl-intranet htaccess
@@ -410,6 +428,8 @@
       RewriteRule wp-content/uploads/(.*)$ wp-content/plugins/epfl-intranet/inc/protect-medias.php?file=$1 [QSA,L]
     state: '{{ "present" if "Inside" in wp_site_categories else "absent" }}'
   tags:
+    - wp.plugins.intranet
+    - wp.plugins.intranet.htaccess
     - plugins.intranet
     - plugins.intranet.htaccess
 
@@ -467,7 +487,9 @@
     - wp.plugins.payonline
 
 - name: Uninstall all unknown plug-ins
-  tags: plugins.unknown
+  tags:
+    - wp.plugins.unknown
+    - plugins.unknown
   wordpress_unknown_plugins:
     state: absent
     known_plugins_in: "{{ role_path }}/tasks/plugins.yml"  # i.e. this here file

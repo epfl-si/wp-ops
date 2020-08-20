@@ -1,56 +1,82 @@
-- include_vars: wp-destructive.yml
+# Backup a WordPress instance to EPFL's Scality system through its S3-like API
 
-- name: Create directory to revert backup in case of trouble
-  command: mktemp -d -p {{ wp_dir }} -t ansible-backup-XXXXXX
-  changed_when: false
-  register: _backup_tmpdir_cmd
-  tags: always
+- assert:
+    that: >-
+      ansible_verbosity <= 2
+    msg: >-
+      Don't use -vvv or higher when backing up or restoring sites (risk
+      of disclosure of the Scality access credentials)
+
+- include_vars: "{{ item }}"
+  with_items:
+    - backup-vars.yml
+    - ../../../vars/env-secrets.yml                          # Used in backup-vars.yml
+    - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
+
+- name: restic init
+  environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
+  shell:
+    executable: /bin/bash
+    cmd: |
+      restic -r {{ item }} init
+  register: _restic_init
+  changed_when: >-
+    "created restic repository" in _restic_init.stdout
+  failed_when: >-
+    not (
+      (_restic_init.rc == 0)
+      or
+      ("already initialized" in _restic_init.stderr)
+    )
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
+  with_items:
+    - "{{ backup_restic_repo_files }}"
+    - "{{ backup_restic_repo_sql }}"
 
-- set_fact:
-    _backup_tmpdir: "{{ _backup_tmpdir_cmd.stdout }}"
-  tags: always
+- name: Back up files
+  environment: "{{ backup_restic_environment }}"
+  shell:
+    cmd: |
+      cd {{ wp_dir }}
+      restic -r {{ backup_restic_repo_files }} backup --json . | \
+        jq -s '.[] | select(.message_type == "summary")'
 
-- name: Backup directory protection
-  shell: |
-    set -e -x
-
-    mkdir -p "{{ _backup_tmpdir }}"/wp
-    cat <<HTACCESS > "{{ _backup_tmpdir }}"/.htaccess
-    Require all denied
-    HTACCESS
-  tags: always
-
-- name: Back up code to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
-  shell: |
-    set -e -x
-
-    (cd "{{ wp_dir }}"; tar --exclude wp-content/uploads --exclude .htaccess \
-         --exclude "ansible-backup-*" -clf - .) | \
-      (cd "{{ _backup_tmpdir }}"; tar xpvf -)
-    cp "{{ wp_dir }}/.htaccess" "{{ _backup_tmpdir }}/htaccess" || true
-  tags:
-    - wipe
-    - backup
-    - backup.code
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
+  register: _restic_backup_files
 
-- name: Back up data to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
-  command: "{{ wp_cli_command }} db export {{ _backup_tmpdir }}/backup.sql"
-  tags:
-    - wipe
-    - backup
-    - backup.data
+- name: Back up MySQL database
+  environment: "{{ backup_restic_environment }}"
+  shell:
+    executable: /bin/bash
+    cmd: |
+      set -o pipefail
+      {{ wp_cli_command }} db export - | \
+        restic -r {{ backup_restic_repo_sql }} backup \
+            --stdin --stdin-filename db-backup.sql \
+            --json | \
+          jq -s '.[] | select(.message_type == "summary")'
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
+  register: _restic_backup_sql
 
-- name: Back up uploads to {{ _backup_tmpdir }} — 💡 In case of a catastrophe, you will find your files there.
-  shell: |
-    set -e -x
-    cd "{{ wp_dir }}"
-    mkdir -p "{{ _backup_tmpdir }}"/wp-content || true
-    cp -a wp-content/uploads {{ _backup_tmpdir }}/wp-content
-  tags:
-    - wipe
-    - backup
-    - backup.uploads
-  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
+- name: Update tags
+  environment: "{{ backup_restic_environment }}"
+  when:
+    - _restic_backup_files is success
+    - _restic_backup_sql   is success
+  shell:
+    cmd: |
+      set -e -x
+      date_short="$(date +%Y%m%d)"
+      date_full="$(date +%Y%m%d-%H%M%S)"
+      restic -r {{ backup_restic_repo_files }} tag \
+        --remove latest --remove "$date_short" --remove "$date_full"
+      restic -r {{ backup_restic_repo_sql   }} tag \
+        --remove latest --remove "$date_short" --remove "$date_full"
+      restic -r {{ backup_restic_repo_files }} tag {{ snapshot_id.files }} \
+        --add latest --add "$date_short" --add "$date_full"
+      restic -r {{ backup_restic_repo_sql   }} tag {{ snapshot_id.sql }} \
+        --add latest --add "$date_short" --add "$date_full"
+  vars:
+    snapshot_id:
+      sql:   "{{ (_restic_backup_sql.stdout   | from_json).snapshot_id }}"
+      files: "{{ (_restic_backup_files.stdout | from_json).snapshot_id }}"

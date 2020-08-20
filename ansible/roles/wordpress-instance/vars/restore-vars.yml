@@ -1,0 +1,28 @@
+# User-provided variables (see ../tasks/restore.yml):
+#
+# wp_restore_from_name
+# wp_restore_from_namespace
+
+restore_from_name: "{{ wp_restore_from_name | default(inventory_hostname) }}"
+restore_from_namespace: "{{ wp_restore_from_namespace | default(openshift_namespace) }}"
+
+restore_s3_backup: >-
+  {{
+      s3_backup if restore_from_namespace == openshift_namespace
+      else (
+          s3_backup_prod if restore_from_namespace == "wwp"
+          else
+          error_____cannot_restore_across_namespaces_in_this_way
+      )
+  }}
+
+restore_restic_repo_base: >-
+  s3:{{ restore_s3_backup.endpoint_url }}/{{ restore_s3_backup.bucket_name }}/backup/wordpresses/{{ restore_from_name }}
+restore_restic_repo_files: "{{ restore_restic_repo_base }}/files"
+restore_restic_repo_sql:   "{{ restore_restic_repo_base }}/sql"
+
+# No lookup("env_secrets", ...) because we don't restore on AWX.
+restore_restic_environment:
+  AWS_ACCESS_KEY_ID:     '{{ restore_s3_backup.aws_access_keys.ro.id     | eyaml(eyaml_keys) }}'
+  AWS_SECRET_ACCESS_KEY: '{{ restore_s3_backup.aws_access_keys.ro.secret | eyaml(eyaml_keys) }}'
+  RESTIC_PASSWORD:       '{{ restore_s3_backup.restic_password           | eyaml(eyaml_keys) }}'

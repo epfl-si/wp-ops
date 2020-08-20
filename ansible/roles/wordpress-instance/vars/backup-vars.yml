@@ -1,19 +1,10 @@
-backup_prod_ssh_location: www-data@ssh-wwp.epfl.ch
-backup_prod_ssh_port: 32222
+backup_restic_repo_base: >-
+  s3:{{ s3_backup.endpoint_url }}/{{ s3_backup.bucket_name }}/backup/wordpresses/{{ inventory_hostname }}
+# restic's tagging system is just bananas. Segregate the two backup streams entirely
+backup_restic_repo_files: "{{ backup_restic_repo_base }}/files"
+backup_restic_repo_sql:   "{{ backup_restic_repo_base }}/sql"
 
-# For now, there are no backups except the production ones
-backup_ssh_cmdprefix: ssh -o PasswordAuthentication=no -n -x -T -p {{ backup_prod_ssh_port }} {{ backup_prod_ssh_location }}
-
-# Regarding -i, see https://superuser.com/a/941552/48763
-backup_prod_shell_untar: "{{ backup_ssh_cmdprefix }} cat {{ _backup_prod_tar_files.stdout_lines | join(' ') }} | tar --xform 's|.*/htdocs/||' -ix"
-
-backup_ssh_tar_file_glob: /backups/{{ backup_short_name }}/{{ backup_short_name }}_'*'.tar
-
-backup_ssh_sql_file_glob: /backups/{{ backup_short_name }}/{{ backup_short_name }}_'*'.sql
-
-# These two are more than a wee bit fuzzy, and there are probably a
-# number of cases to distinguish depending on where exactly the backup
-# and restore instances live.
-backup_short_name: "{{ wp_path }}"
-backup_base_url: "https://{{ backup_short_name }}.epfl.ch"
-
+backup_restic_environment:
+  AWS_ACCESS_KEY_ID:     '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_ACCESS_KEY_ID") }}'
+  AWS_SECRET_ACCESS_KEY: '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_SECRET_ACCESS_KEY") }}'
+  RESTIC_PASSWORD:       '{{ lookup("env_secrets", "restic_backup_credentials", "RESTIC_PASSWORD") }}'

@@ -1,9 +1,12 @@
-- include_vars: mgmt-vars.yml
-- include_vars: ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
-- include_vars: ../../../vars/image-vars.yml              # For mgmt_image_name
-- include_vars: ../../../vars/wordpress-vars.yml          # For wp_version_lineage
-- include_vars: "../../../vars/secrets-{{ openshift_namespace }}.yml"
-- include_vars: ../../../vars/env-secrets.yml             # For env_secrets
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+      - mgmt-vars.yml
+      - ../../../vars/ssh-keys.yml  # Required by mgmt-vars.yml
+      - ../../../vars/image-vars.yml              # For mgmt_image_name
+      - ../../../vars/wordpress-vars.yml          # For wp_version_lineage
+      - "../../../vars/secrets-{{ openshift_namespace }}.yml"
+      - ../../../vars/env-secrets.yml             # For env_secrets
 
 - name: "{{ mgmt_ssh_secret_name }} secret (ssh host and user keys)"
   openshift:
@@ -41,7 +44,20 @@
       name: mysql-super-credentials
       namespace: "{{ openshift_namespace }}"
     type: Opaque
-    data: "{{ env_secrets.mysql_super_credentials | base64_values }}"
+    data: "{{ env_secret_mysql_super_credentials | base64_values }}"
+  tags: mgmt.secrets
+
+- name: backup-rw-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: backup-rw-credentials
+      namespace: "{{ openshift_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_restic_backup_credentials | base64_values }}"
+  tags: mgmt.secrets
 
 - name: mgmt DeploymentConfig
   openshift:
@@ -82,6 +98,8 @@
                   name: new-wp-site-env
               - secretRef:
                   name: mysql-super-credentials
+              - secretRef:
+                  name: backup-rw-credentials
           serviceAccount: "{{ mgmt_service_account }}"
           serviceAccountName: "{{ mgmt_service_account }}"
           volumes:
