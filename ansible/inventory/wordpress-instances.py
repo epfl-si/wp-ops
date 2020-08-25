@@ -169,8 +169,8 @@ class WpVeritasSite(ProdSiteTrait, _Site):
 
 
 class WpVeritasTestSite(TestSiteTrait, WpVeritasSite):
-    WP_VERITAS_SITES_API_URL = 'https://wp-veritas.128.178.222.83.nip.io/api/v1/sites'
-    VERIFY_SSL = False
+    WP_VERITAS_SITES_API_URL = 'https://wp-veritas-test.epfl.ch/api/v1/sites'
+    VERIFY_SSL = True
 
 
 class _LiveSite(_Site):

@@ -42,7 +42,7 @@ wp_ops_rpcclient_ipv4_range: 10.180.21.0/24
 wpveritas_api_url: '{{ _wpveritas_servers[openshift_namespace] }}'
 _wpveritas_servers:
   wwp: https://wp-veritas.epfl.ch/api
-  wwp-test: https://wp-veritas.128.178.222.83.nip.io/api
+  wwp-test: https://wp-veritas-test.epfl.ch/api
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_{{ 'prod' if openshift_namespace == 'wwp' else 'test' }}/eyaml-privkey.pem"
