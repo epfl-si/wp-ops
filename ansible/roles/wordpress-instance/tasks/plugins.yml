@@ -277,7 +277,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-cache-control
+    from: https://github.com/epfl-si/wp-plugin-epfl-cache-control
 
 - name: Cache-Control options
   wordpress_option: "{{ item }}"
@@ -317,7 +317,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-remote-content-shortcode
+    from: https://github.com/epfl-si/wp-plugin-epfl-remote-content
 
 - name: EPFL Gutenberg plugin
   wordpress_plugin:
@@ -437,7 +437,7 @@
   wordpress_plugin:
     name: epfl-emploi
     state: "{{ plugins_for_emploi_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-emploi
+    from: https://github.com/epfl-si/wp-plugin-epfl-emploi
 
 - name: epfl-restauration plugin
   wordpress_plugin:
@@ -455,7 +455,7 @@
   wordpress_plugin:
     name: epfl-courses-se
     state: "{{ plugins_for_cdhshs_category }}"
-    from: https://github.com/epfl-si/jahia2wp/tree/release2018/data/wp/wp-content/plugins/epfl-courses-se
+    from: https://github.com/epfl-si/wp-plugin-epfl-courses-se
 
 - name: MainWP plugin
   wordpress_plugin:
