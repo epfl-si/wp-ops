@@ -1,0 +1,2 @@
+wp_openshift_env: '{{ lookup("wpveritas", "openshiftEnv") }}'
+wp_site_url: '{{ lookup("wpveritas", "url") }}'
