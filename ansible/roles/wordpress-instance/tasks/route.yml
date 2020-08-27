@@ -1,0 +1,16 @@
+- include_vars: ../vars/route-vars.yml
+
+- debug:
+    msg: "openshift env : {{ wp_openshift_env }}"
+
+
+- name: Create route
+  wordpress_route:
+    site_url: "{{ wp_site_url }}"
+    openshift_env: "{{ wp_openshift_env }}"
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+  when: >-
+    wp_openshift_env == "subdomains-lite"
