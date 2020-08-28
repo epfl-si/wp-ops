@@ -87,6 +87,17 @@
       tags:
         - wp.route
 
+# TODO: Supprimer ce bloc et la task deleteroute.yml dès que j'ai compris 
+# comment importer les variables dans la task wipe.yml
+- name: Delete route
+  tags:
+    - wp.deleteroute
+  include_tasks:
+    file: "deleteroute.yml"
+    apply:
+      tags:
+        - wp.deleteroute
+
 - name: Restore
   include_tasks:
     file: "restore.yml"
