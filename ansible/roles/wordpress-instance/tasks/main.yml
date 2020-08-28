@@ -83,7 +83,7 @@
     - wp.create
     - wp.create.route
   include_tasks:
-    file: "route.yml"
+    file: "routes.yml"
     apply:
       tags:
         - wp.create

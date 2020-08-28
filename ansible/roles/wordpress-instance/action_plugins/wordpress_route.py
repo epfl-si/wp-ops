@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# There is a name clash with a module in Ansible named "copy":
-deepcopy = __import__('copy').deepcopy
-import re
 import sys
 import os.path
-import json
 import subprocess
 from urllib.parse import urlparse
 from route_helper import check_route_exist, getRouteName
@@ -29,17 +25,14 @@ class ActionModule(WordPressActionModule):
         self._hostname = urlparse(site_url).netloc
         self._openshift_namespace = self._task.args.get('openshift_namespace')
         
-
         # Note: 
-        # La gestion des routes des différents de tous les pods -
-        # à savoir subdomains-lite, www, inside, www2018, etc -
+        # La gestion des routes des différents pods -
+        # à savoir subdomains-lite, www, inside, www2018, unmanaged, etc -
         # est prise en compte.
-        # => Unmanaged:
-        # self._openshift_env commence par unm-
-        # TODO subdomains redirection: 
-        # Ajouter tous les sites dans la source de vérité + recréer les routes non conformes 
+        # - Pour les routes subdomains redirection: 
+        # TODO: Ajouter tous les sites dans la source de vérité + recréer les routes non conformes 
         # Exemple: https://lifev.org => httpd-lifev-org au lieu de l'actuel httpd-lifev
-        # => Archives
+        # - Pour les routes 'Archives':
         # On ne les gère car fin des archives en 1 Octobre 2020
 
         if not check_route_exist(self._openshift_namespace, self._route_name):          

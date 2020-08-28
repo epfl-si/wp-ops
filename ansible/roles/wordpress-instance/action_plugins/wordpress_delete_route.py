@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# There is a name clash with a module in Ansible named "copy":
-deepcopy = __import__('copy').deepcopy
-import re
 import sys
 import os.path
-import json
 import subprocess
 from route_helper import check_route_exist, getRouteName
 
