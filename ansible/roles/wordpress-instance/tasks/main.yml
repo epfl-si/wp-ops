@@ -79,11 +79,14 @@
 
 - name: Create route
   tags:
+    - wp
+    - wp.create
     - wp.create.route
   include_tasks:
     file: "route.yml"
     apply:
       tags:
+        - wp.create
         - wp.create.route
 
 - name: Restore
