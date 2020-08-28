@@ -1,0 +1,13 @@
+- include_vars: route-vars.yml
+
+- debug:
+    msg: "openshift env : {{ wp_openshift_env }}"
+
+- debug:
+    msg: "openshift namespace : {{ openshift_namespace }}"
+
+- name: Delete route
+  wordpress_delete_route:
+    openshift_namespace: "{{ openshift_namespace }}"
+    site_url: "{{ wp_site_url }}"
+    openshift_env: "{{ wp_openshift_env }}"
