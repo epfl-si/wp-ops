@@ -4,6 +4,7 @@
 - name: Varnish StatefulSet
   delegate_to: localhost
   openshift:
+    state: latest
     apiVersion: apps/v1
     kind: StatefulSet
     metadata:
@@ -141,6 +142,7 @@
 - name: Varnish service
   delegate_to: localhost
   openshift:
+    state: latest
     apiVersion: v1
     kind: Service
     metadata:
