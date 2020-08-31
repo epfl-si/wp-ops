@@ -1,10 +1,6 @@
 ---
 # tasks for WordPress OpenShift namespaces
 
-- name: "Disk usage report microservice"
-  import_tasks: disk-usage-report.yml
-  tags: diskusage
-
 - name: "Images and builds"
   import_tasks: images.yml
   tags: images
@@ -19,6 +15,25 @@
   loop_control:
     loop_var: dc
   tags: dc
+
+- name: "Varnish"
+  include_tasks:
+    file: "varnish.yml"
+    apply:
+      tags:
+        - varnish
+  tags:
+    - varnish
+    - varnish.statefulset
+
+- name: "Static routes"
+  include_tasks:
+    file: "routes.yml"
+    apply:
+      tags:
+        - routes
+  tags:
+    - routes
 
 - name: "Continuous integration"
   when: openshift_namespace == "wwp-test"
@@ -49,3 +64,7 @@
   when: openshift_namespace == "wwp"
   include: monitoring.yml
   tags: monitoring
+
+- name: "Disk usage report microservice"
+  import_tasks: disk-usage-report.yml
+  tags: diskusage
