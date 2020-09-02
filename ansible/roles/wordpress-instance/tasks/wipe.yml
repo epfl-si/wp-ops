@@ -39,24 +39,3 @@
     state: absent
     path: "{{ wp_dir }}/{{ item }}"
   with_items: "{{ wipe_paths }}"
-
-- debug:
-    msg: "openshift env : {{ wp_openshift_env }}"
-  tags:
-    - wp.wipe
-    - wp.wipe.route
-
-- debug:
-    msg: "openshift namespace : {{ openshift_namespace }}"
-  tags:
-    - wp.wipe
-    - wp.wipe.route
-
-- name: Delete route
-  wordpress_delete_route:
-    openshift_namespace: "{{ openshift_namespace }}"
-    site_url: "{{ wp_site_url }}"
-    openshift_env: "{{ wp_openshift_env }}"
-  tags:
-    - wp.wipe
-    - wp.wipe.route
