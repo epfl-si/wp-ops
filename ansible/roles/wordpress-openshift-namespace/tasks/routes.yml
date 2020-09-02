@@ -15,6 +15,9 @@
         app: "{{ item.name }}"
       annotations:
         haproxy.router.openshift.io/balance: roundrobin
+        # CloudFlare won't cache responses that use a Set-Cookie header:
+        # https://stackoverflow.com/a/45702483
+        haproxy.router.openshift.io/disable_cookies: 'true'
     spec:
       host: "{{ item.hostname }}"
       port:

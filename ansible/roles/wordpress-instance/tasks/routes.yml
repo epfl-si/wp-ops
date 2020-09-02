@@ -1,15 +1,34 @@
-- include_vars: route-vars.yml
+- include_vars: routes-vars.yml
+  tags: always
 
-- debug:
-    msg: "openshift env : {{ wp_openshift_env }}"
-
-- debug:
-    msg: "openshift namespace : {{ openshift_namespace }}"
-
-- name: Create route
-  wordpress_route:
-    openshift_namespace: "{{ openshift_namespace }}"
-    site_url: "{{ wp_site_url }}"
-    openshift_env: "{{ wp_openshift_env }}"
+- name: Per site route
+  when: site_has_own_route
+  delegate_to: localhost
+  openshift:
+    state: "{{ 'latest' if site_exists else 'absent' }}"
+    apiVersion: v1
+    kind: Route
+    metadata:
+      name: "{{ route_name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "httpd-{{ route_wp_veritas_env }}"
+      annotations:
+        haproxy.router.openshift.io/balance: roundrobin
+        # CloudFlare won't cache responses that use a Set-Cookie header:
+        # https://stackoverflow.com/a/45702483
+        haproxy.router.openshift.io/disable_cookies: 'true'
+    spec:
+      host: "{{ route_hostname }}"
+      port:
+        targetPort: http
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: varnish-varnish
+        weight: 100
+      wildcardPolicy: None
   tags:
-    - wp.create.route
+    - wp.route

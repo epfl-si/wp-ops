@@ -77,28 +77,15 @@
         - wp.create
         - wp.restore
 
-- name: Create route
+- name: Per site route
   tags:
     - wp
-    - wp.create
-    - wp.create.route
+    - wp.route
   include_tasks:
     file: "routes.yml"
     apply:
       tags:
-        - wp.create
-        - wp.create.route
-
-# TODO: Supprimer ce bloc et la task deleteroute.yml dès que j'ai compris 
-# comment importer les variables dans la task wipe.yml
-- name: Delete route
-  tags:
-    - wp.deleteroute
-  include_tasks:
-    file: "deleteroute.yml"
-    apply:
-      tags:
-        - wp.deleteroute
+        - wp.route
 
 - name: Restore
   include_tasks:
