@@ -163,4 +163,3 @@
         port: 8080
         protocol: TCP
         targetPort: http
-      
