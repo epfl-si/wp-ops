@@ -115,6 +115,17 @@
         - wp
         - wp.configure
 
+- name: Set up access
+  tags:
+    - wp
+    - wp.access
+  include_tasks:
+    file: "access.yml"
+    apply:
+      tags:
+        - wp
+        - wp.access
+
 - name: Set up metadata
   when:
     - wp_can.configure

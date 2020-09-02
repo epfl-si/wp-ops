@@ -1,0 +1,21 @@
+- name: Set up .htaccess for serving
+  when: wpveritas_is_live
+  shell:
+    cmd: |
+      oldsum="$(shasum "{{ wp_dir }}/.htaccess")"
+      {{ wp_cli_command }} rewrite flush --hard
+      if [ "$(shasum "{{ wp_dir }}/.htaccess")" = "$oldsum" ]; then
+        echo HTACCESS_UNCHANGED >&2
+      fi
+  register: _wp_htaccess_cmds
+  changed_when: |
+    "HTACCESS_UNCHANGED" not in _wp_htaccess_cmds.stderr
+
+- name: Set up .htaccess to cut off access
+  when: not wpveritas_is_live
+  blockinfile:
+    path: "{{ wp_dir }}/.htaccess"
+    marker: "# {mark} WordPress"
+    block: |
+      # This site was disabled by Ansible.
+      RewriteRule ^ - [R=404,L]
