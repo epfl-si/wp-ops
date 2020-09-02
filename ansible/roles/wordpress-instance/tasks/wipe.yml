@@ -1,7 +1,6 @@
 # Delete a WordPress site
 - include_vars: wp-destructive.yml
 - include_vars: wipe-vars.yml
-- include_vars: route-vars.yml
 
 - assert:
     that:
