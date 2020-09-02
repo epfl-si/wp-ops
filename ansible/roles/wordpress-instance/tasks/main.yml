@@ -66,6 +66,7 @@
   tags: always
 
 - name: "{{ 'Recreate' if 'wp.wipe' in ansible_run_tags else 'Create' }}"
+  when: wpveritas_is_live
   tags:
     - wp
     - wp.restore
@@ -100,7 +101,9 @@
     - wp.restore.sql
 
 - name: Configure
-  when: wp_can.configure
+  when:
+    - wp_can.configure
+    - wpveritas_is_live
   tags:
     - wp
     - wp.configure
@@ -113,7 +116,9 @@
         - wp.configure
 
 - name: Set up metadata
-  when: wp_can.configure
+  when:
+    - wp_can.configure
+    - wpveritas_is_live
   tags:
     - wp
     - wp.metadata
@@ -125,7 +130,9 @@
         - wp.metadata
 
 - name: Set up plugins
-  when: wp_can.configure or ansible_check_mode
+  when:
+    - wp_can.configure or ansible_check_mode
+    - wpveritas_is_live
   tags:
     - wp
     - wp.plugins
@@ -155,7 +162,9 @@
         - plugins
 
 - name: Set up themes
-  when: wp_can.configure or ansible_check_mode
+  when:
+    - wp_can.configure or ansible_check_mode
+    - wpveritas_is_live
   tags:
     - wp
     - wp.themes
@@ -170,7 +179,9 @@
         - themes
 
 - name: Delete sample pages and posts installed by WordPress
-  when: wp_can.configure
+  when:
+    - wp_can.configure
+    - wpveritas_is_live
   include_tasks:
     file: "samples.yml"
     apply:
@@ -182,7 +193,9 @@
     - wp.samples
 
 - name: Set up menus
-  when: wp_can.configure
+  when:
+    - wp_can.configure
+    - wpveritas_is_live
   include_tasks:
     file: "menus.yml"
     apply:
