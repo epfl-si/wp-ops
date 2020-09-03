@@ -46,7 +46,7 @@
     # wp-content/plugins, so that plug-ins are operational at once)
     cmd: |
       restic -r {{ restore_restic_repo_files }} --no-lock \
-          --tag "{{ backup_restic_tag | default('latest') }}" \
+          --tag "{{ restore_restic_tag | default('latest') }}" \
           restore latest \
           --target "{{ wp_dir }}" \
           --include .htaccess \
@@ -60,7 +60,7 @@
     cmd: |
       set -o pipefail
       restic -r {{ restore_restic_repo_sql }} --no-lock \
-          --tag "{{ backup_restic_tag | default('latest') }}" \
+          --tag "{{ restore_restic_tag | default('latest') }}" \
           --quiet dump latest db-backup.sql \
         | {{ wp_cli_command }} db import -
   tags: wp.restore.sql
