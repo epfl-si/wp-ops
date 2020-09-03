@@ -82,9 +82,6 @@
           "$(echo "$restore_url_rewrite_to" | sed 's|/|\\/|g')" \
           --skip-columns=guid
 
-- name: Correct site URL in .htaccess
-  shell: "{{ wp_cli_command }} rewrite flush --hard"
-
 - name: Regenerate media
   shell:
     cmd: "{{ wp_cli_command }} media regenerate --only-missing --yes"

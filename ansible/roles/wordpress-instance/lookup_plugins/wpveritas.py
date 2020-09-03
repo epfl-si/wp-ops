@@ -95,5 +95,5 @@ class WpVeritas(object):
         else:
             context = None
 
-        handle = urlopen(wpveritas_api_url + '/v1/sites', context=context)
+        handle = urlopen(wpveritas_api_url + '/v1/inventory/entries', context=context)
         return json.loads(handle.read().decode('utf-8'))

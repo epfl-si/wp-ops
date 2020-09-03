@@ -1,0 +1,9 @@
+route_wp_veritas_env: '{{ lookup("wpveritas", "openshiftEnv") }}'
+route_is_root_url: '{{ lookup("wpveritas", "url") is match("https?://[^/]+$") }}'
+route_hostname: '{{ lookup("wpveritas", "url") | hostname_of_url }}'
+route_name: '{{ lookup("wpveritas", "url") | route_name(route_wp_veritas_env) }}'
+site_exists: '{{ not lookup("wpveritas", "isDeleted") }}'
+site_has_own_route: > 
+    {{ route_wp_veritas_env.startswith("unm-")
+    or route_wp_veritas_env.startswith("subdomains")
+    or (openshift_namespace == "wwp-test" and route_is_root_url) }}

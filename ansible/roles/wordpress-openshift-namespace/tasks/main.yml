@@ -26,6 +26,15 @@
     - varnish
     - varnish.statefulset
 
+- name: "Static routes"
+  include_tasks:
+    file: "routes.yml"
+    apply:
+      tags:
+        - routes
+  tags:
+    - routes
+
 - name: "Continuous integration"
   when: openshift_namespace == "wwp-test"
   include_tasks:

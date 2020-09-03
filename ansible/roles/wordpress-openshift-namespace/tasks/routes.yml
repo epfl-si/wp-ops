@@ -1,0 +1,34 @@
+- include_vars: routes-vars.yml
+  tags: always
+
+- name: Create static routes
+  delegate_to: localhost
+  with_items: "{{ static_routes[openshift_namespace] }}"
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Route 
+    metadata:
+      name: "{{ item.name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "{{ item.name }}"
+      annotations:
+        haproxy.router.openshift.io/balance: roundrobin
+        # CloudFlare won't cache responses that use a Set-Cookie header:
+        # https://stackoverflow.com/a/45702483
+        haproxy.router.openshift.io/disable_cookies: 'true'
+    spec:
+      host: "{{ item.hostname }}"
+      port:
+        targetPort: http
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: varnish-varnish
+        weight: 100
+      wildcardPolicy: None
+  tags:
+    - routes

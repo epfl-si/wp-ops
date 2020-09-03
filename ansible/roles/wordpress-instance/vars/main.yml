@@ -47,3 +47,5 @@ _wpveritas_servers:
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_{{ 'prod' if openshift_namespace == 'wwp' else 'test' }}/eyaml-privkey.pem"
   pub: "{{ playbook_dir }}/../eyaml/epfl_wp_{{ 'prod' if openshift_namespace == 'wwp' else 'test' }}.pem"
+
+wpveritas_is_live: "{{ not lookup('wpveritas').get('isDeleted', False) }}"

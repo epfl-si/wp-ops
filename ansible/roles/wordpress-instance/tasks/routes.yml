@@ -1,0 +1,34 @@
+- include_vars: routes-vars.yml
+  tags: always
+
+- name: Per site route
+  when: site_has_own_route
+  delegate_to: localhost
+  openshift:
+    state: "{{ 'latest' if site_exists else 'absent' }}"
+    apiVersion: v1
+    kind: Route
+    metadata:
+      name: "{{ route_name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "httpd-{{ route_wp_veritas_env }}"
+      annotations:
+        haproxy.router.openshift.io/balance: roundrobin
+        # CloudFlare won't cache responses that use a Set-Cookie header:
+        # https://stackoverflow.com/a/45702483
+        haproxy.router.openshift.io/disable_cookies: 'true'
+    spec:
+      host: "{{ route_hostname }}"
+      port:
+        targetPort: http
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: varnish-varnish
+        weight: 100
+      wildcardPolicy: None
+  tags:
+    - wp.route
