@@ -1,0 +1,165 @@
+- include_vars: varnish-vars.yml
+  tags: always
+
+- name: Varnish StatefulSet
+  delegate_to: localhost
+  openshift:
+    state: latest
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: varnish-varnish
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      podManagementPolicy: OrderedReady
+      selector:
+        matchLabels:
+          app: varnish-varnish
+      serviceName: varnish-varnish
+      replicas: 2
+      template:
+        metadata:
+          labels:
+            app: varnish-varnish
+        spec:
+          containers:
+          - command:
+            - varnishd
+            - -a :8080
+            - -F
+            - -f
+            - /etc/varnish/default.vcl
+            - -n
+            - varnishd
+            - -s
+            - malloc,256m
+            image: "{{ varnish_image }}"
+            imagePullPolicy: IfNotPresent
+            name: varnish
+            ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /etc/varnish
+              name: varnish-config
+            - mountPath: /var/lib/varnish
+              name: varnish-runtime
+          - command:
+            - collectd
+            - -f
+            - -C
+            - /etc/collectd/collectd.conf
+            image: "{{ varnish_image }}"
+            imagePullPolicy: IfNotPresent
+            name: collectd
+            ports:
+            - containerPort: 9103
+              name: collectd
+              protocol: TCP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /var/lib/varnish
+              name: varnish-runtime
+            - mountPath: /etc/collectd
+              name: collectd-config
+            - mountPath: /tmp
+              name: metrics-dir
+          - command:
+            - /usr/local/sbin/vcl-reload-persistent.sh
+            env:
+            - name: VCLFILE
+              value: default.vcl
+            - name: INSTANCE
+              value: varnishd
+            image: "{{ varnish_image }}"
+            imagePullPolicy: IfNotPresent
+            name: varnish-reload
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /etc/varnish
+              name: varnish-config
+            - mountPath: /var/lib/varnish
+              name: varnish-runtime
+          - command:
+            - varnishkafka
+            - -S
+            - /etc/varnishkafka/varnishkafka.conf
+            - -n
+            - varnishd
+            image: "{{ varnish_image }}"
+            imagePullPolicy: IfNotPresent
+            name: varnish-kafka
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /etc/varnishkafka
+              name: varnish-kafka-config
+            - mountPath: /var/lib/varnish
+              name: varnish-runtime
+            - mountPath: /tmp
+              name: metrics-dir
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+          volumes:
+          - emptyDir: {}
+            name: metrics-dir
+          - emptyDir: {}
+            name: varnish-runtime
+          - configMap:
+              defaultMode: 420
+              name: varnish-test-varnish-kafka-metrics-script
+            name: script-dir
+          - configMap:
+              defaultMode: 420
+              name: varnish-test-varnish-collectd
+            name: collectd-config
+          - configMap:
+              defaultMode: 420
+              name: varnish-external-config
+            name: varnish-config
+          - configMap:
+              defaultMode: 420
+              name: varnish-test-varnish-varnishkafka
+            name: varnish-kafka-config
+      updateStrategy:
+        rollingUpdate:
+          partition: 0
+        type: RollingUpdate
+  tags: varnish.statefulset
+
+- name: Varnish service
+  delegate_to: localhost
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: varnish-varnish
+      name: varnish-varnish
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      type: ClusterIP
+      selector:
+        app: varnish-varnish
+      ports:
+      - name: collectd
+        port: 9103
+        protocol: TCP
+        targetPort: collectd
+      - name: http
+        port: 8080
+        protocol: TCP
+        targetPort: http
