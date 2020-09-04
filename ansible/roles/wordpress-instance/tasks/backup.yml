@@ -80,3 +80,14 @@
     snapshot_id:
       sql:   "{{ (_restic_backup_sql.stdout   | from_json).snapshot_id }}"
       files: "{{ (_restic_backup_files.stdout | from_json).snapshot_id }}"
+
+- name: Collect stats to pushgateway
+  environment: "{{ backup_restic_environment }}"
+  shell:
+    executable: /bin/bash
+    cmd: |
+      set -o pipefail
+      restic -r {{ backup_restic_repo_files }} stats --json \
+      | jq -r 'keys as $keys | . as $initial_data | $keys | map([., $initial_data[.]]) | .[] | @tsv' \
+      | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
+            http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
