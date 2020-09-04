@@ -49,6 +49,7 @@
           {{ [dict(from=
                      dict(kind="ImageStreamTag",
                           name=monitoring_prober_image_name + ":latest",
+                          namespace="wwp",
                           fieldPath='spec.template.spec.'
                                     'containers[?(@.name=="prober")].image')
                   )] | to_json }}
