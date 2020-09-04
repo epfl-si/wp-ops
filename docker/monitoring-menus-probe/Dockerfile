@@ -6,6 +6,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY index.js index.js
 EXPOSE 8080
 CMD [ "node", "index.js" ]
