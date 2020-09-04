@@ -70,7 +70,8 @@ async function siteToMetrics(siteUrl) {
 
   await Promise.all([
     scrapeMenus(siteUrl, metrics),
-    scrapeExternalMenus(siteUrl, metrics)
+    scrapeExternalMenus(siteUrl, metrics),
+    scrapeLanguages(siteUrl, metrics)
   ])
 
   return r.metrics()
@@ -82,6 +83,8 @@ async function scrapeMenus (siteUrl, metrics) {
                      withLabels({lang}, metrics))
   }
 }
+
+
 
 async function scrapeExternalMenus (siteUrl, metrics) {
   for (let externalMenu of
@@ -136,6 +139,13 @@ async function scrapeMenu (menuUrl, metrics) {
   }
   metrics.menuOrphanCount.set(orphans)
   metrics.menuCycleCount.set(graphlib.alg.findCycles(g).length)
+}
+
+async function scrapeLanguages (siteUrl, metrics) {
+  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
+    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
+                     withLabels({lang}, metrics))
+  }
 }
 
 async function fetchJson (url) {
