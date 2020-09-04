@@ -64,8 +64,8 @@ async function siteToMetrics(siteUrl) {
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
 
-    epflWPSite:                   wpSite('epfl_wp_site_langs',
-                                        'Langs presents in WP site'),
+    epflWPSiteLangs:              wpSite('epfl_wp_site_langs',
+                                         '1 for every different language configured in the site\'s Polylang plugin'),
   }
 
   await Promise.all([
@@ -143,8 +143,10 @@ async function scrapeMenu (menuUrl, metrics) {
 
 async function scrapeLanguages (siteUrl, metrics) {
   for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
-    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
-                     withLabels({lang}, metrics))
+    metrics.epflWPSiteLangs.set ({
+      url: siteUrl,
+      lang
+    }, 1)
   }
 }
 
