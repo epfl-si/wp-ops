@@ -9,7 +9,7 @@ const graphlib = require("graphlib")
 
 const app = express()
 
-app.get('/wpmenuprobe', async function (req, res) {
+app.get('/wpprobe', async function (req, res) {
   const target = req.query.target
   const q = getQueue(target)
   if (q.pending) {
