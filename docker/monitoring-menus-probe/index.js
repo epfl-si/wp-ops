@@ -41,6 +41,11 @@ async function siteToMetrics(siteUrl) {
                                   labelNames: ['lang', 'slug', 'external_menu_uri'],
                                   registers: [r] })
   }
+  function wpSite(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['url', 'lang'],
+                                  registers: [r] })
+  }
 
   const metrics = {
     menuTime:                     menuGauge('epfl_menu_request_time_seconds',
@@ -58,6 +63,9 @@ async function siteToMetrics(siteUrl) {
                                                     'Last time (in UNIX epoch format) when this external menu was successfully synced'),
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
+
+    epflWPSite:                   wpSite('epfl_wp_site_langs',
+                                        'Langs presents in WP site'),
   }
 
   await Promise.all([
