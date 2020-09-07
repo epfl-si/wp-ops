@@ -1,6 +1,5 @@
 - name: WordPress Backups
   hosts: all_wordpresses
-  strategy: free
   gather_facts: no
   tasks:
     - import_role:
