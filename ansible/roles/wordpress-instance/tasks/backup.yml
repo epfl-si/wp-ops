@@ -13,12 +13,23 @@
     - ../../../vars/env-secrets.yml                          # Used in backup-vars.yml
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
 
-- name: restic init
+- name: Backup start timestamp to pushgateway
+  failed_when: false
+  shell:
+    executable: /bin/bash
+    cmd: |
+      set -o pipefail
+      echo restic_start $(date +%s) \
+      | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
+            http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
+
+- name: restic init and unlock
   environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
   shell:
     executable: /bin/bash
     cmd: |
       restic -r {{ item }} init
+      restic -r {{ item }} unlock
   register: _restic_init
   changed_when: >-
     "created restic repository" in _restic_init.stdout
@@ -87,7 +98,9 @@
     executable: /bin/bash
     cmd: |
       set -o pipefail
-      restic -r {{ backup_restic_repo_files }} stats --json \
-      | jq -r 'keys as $keys | . as $initial_data | $keys | map([., $initial_data[.]]) | .[] | @tsv' \
-      | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
+      (
+        restic -r {{ backup_restic_repo_files }} stats --json \
+        | jq -r '. as $initial_data | keys | map(["restic_s3_" + ., $initial_data[.]]) | .[] | @tsv'
+        echo restic_success $(date +%s)
+      ) | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
