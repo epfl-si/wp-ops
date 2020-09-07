@@ -1,6 +1,7 @@
 # Backup a WordPress instance to EPFL's Scality system through its S3-like API
 
-- assert:
+- run_once: true
+  assert:
     that: >-
       ansible_verbosity <= 2
     msg: >-
