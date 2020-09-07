@@ -47,9 +47,14 @@
 - name: Back up files
   environment: "{{ backup_restic_environment }}"
   shell:
+    executable: /bin/bash
     cmd: |
       cd {{ wp_dir }}
-      restic -r {{ backup_restic_repo_files }} backup --json . \
+      declare -a excludes
+      for subwp in $(find . -mindepth 2 -maxdepth 2 -name wp-config.php); do
+        excludes+=(--exclude "$(dirname $subwp)/")
+      done
+      restic -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json . \
       | jq -s 'last(.[] | select(.message_type == "summary")) '
 
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
