@@ -14,15 +14,3 @@
   roles:
     - role: ../roles/wordpress-instance
 
-- name: WordPress Backups
-  hosts: all_wordpresses
-  strategy: free
-  gather_facts: no
-  tasks:
-    - import_role:
-        name: ../roles/wordpress-instance
-        tasks_from: backup.yml
-  tags:
-   - never
-   - wp.backup.free
-
