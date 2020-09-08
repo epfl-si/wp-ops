@@ -70,10 +70,13 @@ class _Site:
 
     @property
     def group_hierarchy(self):
+        def to_group_name_fragment(some_text):
+            return re.sub('-', '_', some_text)
+
         return [
             '%s_%s' % (self.group_prefix, suffix)
             for suffix in (
-                re.sub('-', '_', self.wwp_env),
+                to_group_name_fragment(self.wwp_env),
                 'wordpresses'
                 )
             ]
