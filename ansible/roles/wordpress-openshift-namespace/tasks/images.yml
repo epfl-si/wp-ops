@@ -20,6 +20,7 @@
     git:
         repository: "{{ wp_ops_git_uri }}"
         path: "{{ item.git_path }}"
+        ref: "{{ git_current_branch }}"
     strategy: "{{ item.strategy | default({}) }}"
   with_items:
     - name: "{{ wp_base_image_name }}"
