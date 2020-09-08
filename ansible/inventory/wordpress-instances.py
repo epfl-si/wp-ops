@@ -70,10 +70,20 @@ class _Site:
 
     @property
     def group_hierarchy(self):
+        def to_group_name_fragment(some_text):
+            return re.sub('[.-]', '_', some_text)
+
+        def hostname_to_slug(hostname):
+            matched = re.match('(.*)\.epfl\.ch', hostname)
+            if matched:
+                hostname = matched.group(1)
+            return to_group_name_fragment(hostname)
+
         return [
             '%s_%s' % (self.group_prefix, suffix)
             for suffix in (
-                re.sub('-', '_', self.wwp_env),
+                hostname_to_slug(self.wp_hostname),
+                to_group_name_fragment(self.wwp_env),
                 'wordpresses'
                 )
             ]
@@ -253,6 +263,8 @@ class Inventory:
         return json.dumps(self.inventory, sort_keys=True, indent=4)
 
     def _add(self, site):
+        if site.instance_name in self.inventory['_meta']['hostvars']:
+            return   # Duplicate
         self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
         self._add_site_to_groups(site)
 
