@@ -18,6 +18,7 @@
                                       name="{{ awx_inventory_source_name }}"
                                      ) as src:
                   src.source = 'custom'
+                  src.overwrite = True
                   src.update_on_launch = True
                   src.source_script = script
     supports_check_mode: yes
