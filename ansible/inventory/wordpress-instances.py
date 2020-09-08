@@ -263,6 +263,8 @@ class Inventory:
         return json.dumps(self.inventory, sort_keys=True, indent=4)
 
     def _add(self, site):
+        if site.instance_name in self.inventory['_meta']['hostvars']:
+            return   # Duplicate
         self.inventory['_meta']['hostvars'][site.instance_name] = site.hostvars
         self._add_site_to_groups(site)
 
