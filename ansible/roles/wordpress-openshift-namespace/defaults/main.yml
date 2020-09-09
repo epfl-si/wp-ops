@@ -1,2 +1,4 @@
 ---
 # defaults file for wordpress-openshift-namespace
+
+ingress_state: latest
