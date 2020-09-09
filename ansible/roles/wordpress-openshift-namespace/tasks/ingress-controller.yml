@@ -114,12 +114,7 @@
                 - --validating-webhook-certificate=/usr/local/certificates/cert
                 - --validating-webhook-key=/usr/local/certificates/key
               securityContext:
-                capabilities:
-                  drop:
-                    - ALL
-                  add:
-                    - NET_BIND_SERVICE
-                runAsUser: 101
+                runAsUser: 1000100101
                 allowPrivilegeEscalation: true
               env:
                 - name: POD_NAME
