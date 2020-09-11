@@ -227,9 +227,6 @@
                       fieldPath: metadata.namespace
           restartPolicy: OnFailure
           serviceAccountName: ingress-nginx-admission
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 2000
 
 - name: Another Job
   openshift:
