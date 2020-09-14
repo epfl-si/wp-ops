@@ -1,4 +1,4 @@
-# Things we don't mind losing in `-t wipe`
+# Things we don't mind losing in `-t wp.wipe`
 
 wipe_paths:
   - wp
