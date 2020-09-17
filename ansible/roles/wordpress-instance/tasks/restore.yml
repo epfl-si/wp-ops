@@ -26,11 +26,6 @@
       of disclosure of the Scality access credentials)
 
 - tags: always
-  assert:
-    that:
-      - wp_can.write_data
-
-- tags: always
   include_vars: "{{ item }}"
   with_items:
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"
