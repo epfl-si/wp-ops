@@ -4,10 +4,7 @@
 # to pass on the command line
 #
 # - wp_unit_id: The unit ID (used by jahia2wp.py generate)
-# - wp_destructive: See details in ../../vars/wp_destructive.yml
-
-wp_destructive: {}   # Default value
-
+# No default value
 #
 # - wp_restore_from: One of "generate" (the default), "backup-prod",
 #                      or "none" to skip the restore process

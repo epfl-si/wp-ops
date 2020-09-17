@@ -1,10 +1,5 @@
 # Delete a WordPress site
-- include_vars: wp-destructive.yml
 - include_vars: wipe-vars.yml
-
-- assert:
-    that:
-      - wp_can.wipe
 
 - name: Deactivate mainwp-child
   shell: "{{ wp_cli_command }} plugin deactivate mainwp-child"
