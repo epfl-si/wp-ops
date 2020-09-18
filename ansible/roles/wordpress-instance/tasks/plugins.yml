@@ -10,8 +10,9 @@
   tags: always
   with_items:
     - plugin-vars.yml
-    - "{{ 'plugin-secrets-' + openshift_namespace + '.yml' }}"
     - accred-vars.yml
+    - ../../../vars/env-secrets.yml
+    - "../../../vars/secrets-{{ openshift_namespace }}.yml"
 
 ##################### Plugins to clean ###########################
 
