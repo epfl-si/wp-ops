@@ -16,7 +16,7 @@ In this repository you will find:
 
 [Install the OpenShift command-line tools] and verify that you have access, e.g. <pre>
 oc login
-oc get pods -n wwp-tes
+oc get pods -n wwp-test
 </pre>
 
 ## Ansible
