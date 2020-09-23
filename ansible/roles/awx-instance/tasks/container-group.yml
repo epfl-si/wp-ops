@@ -76,6 +76,8 @@
                   name: mysql-super-credentials
               - secretRef:
                   name: backup-rw-credentials
+              - secretRef:
+                  name: wp-plugin-wpforms
             env:
               # Just to mute a stray error in /bin/entrypoint
               - name: CURRENT_UID

@@ -2,6 +2,8 @@
 
 - include_vars: k8s-vars.yml
 - include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
+- include_vars: "../../../vars/secrets-{{ ansible_oc_namespace }}.yml"
+- include_vars: ../../../vars/env-secrets.yml
 
 - name: Ansible Tower HTTP service
   openshift:
@@ -55,6 +57,17 @@
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
   notify: Restart AWX pod
+
+- name: wp-plugin-wpforms Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: wp-plugin-wpforms
+      namespace: "{{ ansible_oc_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_wp_plugin_wpforms | base64_values }}"
 
 - name: awx service account
   openshift:
