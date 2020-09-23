@@ -6,9 +6,6 @@
 ## (and ditto in the "release" branch as well).
 ## Please be sure to propagate your changes there as well.
 
-- assert:
-    that: wp_can.configure or ansible_check_mode
-
 - include_vars: "{{ item }}"
   tags: always
   with_items:
