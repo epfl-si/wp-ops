@@ -31,19 +31,27 @@ class DynamicConfig:
             self._sites = json.loads(self._get_json())
         return self._sites
 
-    @property
-    def targets(self):
-        # Only return wp sites that are managed and that are hosted on the OpenShift infra (aka ours wordpresses)
-        return [{"targets": [s['url'] for s in (s for s in self.sites if (s['wpInfra'] and not s['openshiftEnv'].startswith('unm')))]}]
+    def enumerate(self):
+        targets_by_env = {}
+        for s in self.sites:
+            if not s['wpInfra']:
+                continue
+            env = s['openshiftEnv']
+            if env.startswith('unm'):
+                continue
 
-    def to_json(self):
-        return json.dumps(self.targets)
+            url = s['url']
+            targets_by_env.setdefault(env, []).append(url)
+        return targets_by_env.items()
 
 while True:
     try:
-        targets_json = DynamicConfig().to_json()
         with open("/prometheus-config/dynamic/targets.json", "w") as f:
-            f.write(targets_json)
+            f.write(json.dumps([
+                dict(
+                    targets=targets,
+                    labels=dict(env=env))
+                for env, targets in DynamicConfig().enumerate()]))
     except:  # noqa
         logging.error(traceback.format_exc())
     time.sleep(60)
