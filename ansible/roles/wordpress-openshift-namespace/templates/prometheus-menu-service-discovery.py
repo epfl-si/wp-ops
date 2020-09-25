@@ -33,7 +33,8 @@ class DynamicConfig:
 
     @property
     def targets(self):
-        return [{"targets": [s['url'] for s in self.sites]}]
+        # Only return wp sites that are managed and that are hosted on the OpenShift infra (aka ours wordpresses)
+        return [{"targets": [s['url'] for s in (s for s in self.sites if (s['wpInfra'] and not s['openshiftEnv'].startswith('unm')))]}]
 
     def to_json(self):
         return json.dumps(self.targets)
