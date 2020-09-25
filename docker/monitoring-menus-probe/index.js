@@ -78,7 +78,7 @@ async function siteToMetrics(siteUrl) {
 }
 
 async function scrapeMenus (siteUrl, metrics) {
-  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
+  for (let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
     await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
                      withLabels({lang}, metrics))
   }
@@ -87,9 +87,7 @@ async function scrapeMenus (siteUrl, metrics) {
 
 
 async function scrapeExternalMenus (siteUrl, metrics) {
-  for (let externalMenu of
-       await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu'))
-  {
+  for (let externalMenu of await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu')) {
     let labels
     if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
       labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
@@ -151,7 +149,12 @@ async function scrapeLanguages (siteUrl, metrics) {
 }
 
 async function fetchJson (url) {
-  return fetch(url).then((resp) => resp.json())
+  let results = await fetch(url).then((resp) => resp.json())
+  if ('data' in results && 'status' in results.data && results.data.status == 401) {
+    // Avoid error in case of "coming soon" wp site
+    return []
+  }
+  return results
 }
 
 const queues = {}
