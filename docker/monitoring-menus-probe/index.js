@@ -41,6 +41,10 @@ async function siteToMetrics(options) {
                                   labelNames: ['lang'],
                                   registers: [r] })
   }
+  function siteGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  registers: [r] })
+  }
   function externalMenuGauge(name, help) {
     return new prometheus.Gauge({ name, help,
                                   labelNames: ['lang', 'slug', 'external_menu_uri'],
@@ -63,7 +67,8 @@ async function siteToMetrics(options) {
                                             'Number of orphan menu entries'),
     menuCycleCount:               menuGauge('epfl_menu_cycle_count',
                                             'Number of cycles in menu entries'),
-
+    pageCount:                    siteGauge('epfl_wp_site_pages',
+                                            'Number of WordPress pages on the site'),
     externalMenuSyncLastSuccess:  externalMenuGauge('epfl_externalmenu_sync_last_success',
                                                     'Last time (in UNIX epoch format) when this external menu was successfully synced'),
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
@@ -76,7 +81,8 @@ async function siteToMetrics(options) {
   await Promise.all([
     scrapeMenus(options, metrics),
     scrapeExternalMenus(options, metrics),
-    scrapeLanguages(options, metrics)
+    scrapeLanguages(options, metrics),
+    scrapePageCount (options, metrics)
   ])
 
   return r.metrics()
@@ -89,6 +95,14 @@ async function scrapeMenus (options, metrics) {
   }
 }
 
+async function scrapePageCount (options, metrics) {
+  const pages = await fetchJson(options, 'wp-json/wp/v2/pages')
+  console.debug(pages)
+  // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
+  if (pages && typeof(pages.length) === 'number') {
+    metrics.pageCount.set({}, pages.length)
+  }
+}
 
 
 async function scrapeExternalMenus (options, metrics) {
