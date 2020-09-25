@@ -66,16 +66,6 @@
         spec:
           terminationGracePeriodSeconds: 10
           containers:
-            - name: traefik
-              image: traefik
-              ports:
-              - containerPort: 9999
-                name: traefik
-              volumeMounts:
-                - name: traefik-config-static
-                  mountPath: /etc/traefik
-                - name: traefik-config-dynamic
-                  mountPath: /etc/traefik/dynamic
             - name: prometheus
               image: prom/prometheus
 #              ports:
@@ -95,6 +85,16 @@
                 - --query.lookback-delta=15m     # Menu values change slowly
                 - --web.console.libraries=/usr/share/prometheus/console_libraries
                 - --web.console.templates=/usr/share/prometheus/consoles/prometheus
+            - name: traefik
+              image: traefik
+              ports:
+              - containerPort: 9999
+                name: traefik
+              volumeMounts:
+                - name: traefik-config-static
+                  mountPath: /etc/traefik
+                - name: traefik-config-dynamic
+                  mountPath: /etc/traefik/dynamic
             - name: configurator
               image: python:3.7-alpine
               volumeMounts:
