@@ -1,24 +1,29 @@
 'use strict'
-const fetch = require("node-fetch")
+const fetch = require('node-fetch')
+const https = require('https');
+const { URL } = require('url');
 const express = require('express')
 const _ = require('lodash')
 require('express-async-errors')
 const {default: PQueue} = require('p-queue')
 const prometheus = require('prom-client')  // Not actually a client
-const graphlib = require("graphlib")
+const graphlib = require('graphlib')
 
 const app = express()
+const agent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 app.get('/wpprobe', async function (req, res) {
-  const target = req.query.target
-  const q = getQueue(target)
+  const options = { target: req.query.target, env: req.query.env }
+  const q = getQueue(options.target)
   if (q.pending) {
     // Prometheus is re-scraping the same site URL too fast.
     res.type(prometheus.contentType)
     res.send("")
   } else {
     await q.add(async () => {
-      const metrics = await siteToMetrics(target)
+      const metrics = await siteToMetrics(options)
       res.type(prometheus.contentType)
       res.send(metrics)
     })
@@ -27,9 +32,9 @@ app.get('/wpprobe', async function (req, res) {
 
 app.listen(8080) ///////////////////////////////////////////////////////////////
 
-async function siteToMetrics(siteUrl) {
+async function siteToMetrics(options) {
   const r = new prometheus.Registry()
-  r.setDefaultLabels({url: siteUrl})
+  r.setDefaultLabels({url: options.target})
 
   function menuGauge(name, help) {
     return new prometheus.Gauge({ name, help,
@@ -69,25 +74,25 @@ async function siteToMetrics(siteUrl) {
   }
 
   await Promise.all([
-    scrapeMenus(siteUrl, metrics),
-    scrapeExternalMenus(siteUrl, metrics),
-    scrapeLanguages(siteUrl, metrics)
+    scrapeMenus(options, metrics),
+    scrapeExternalMenus(options, metrics),
+    scrapeLanguages(options, metrics)
   ])
 
   return r.metrics()
 }
 
-async function scrapeMenus (siteUrl, metrics) {
-  for (let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
-    await scrapeMenu(siteUrl + '/wp-json/epfl/v1/menus/top?lang=' + lang,
+async function scrapeMenus (options, metrics) {
+  for (let lang of await fetchJson(options, 'wp-json/epfl/v1/languages')) {
+    await scrapeMenu(options, 'wp-json/epfl/v1/menus/top?lang=' + lang,
                      withLabels({lang}, metrics))
   }
 }
 
 
 
-async function scrapeExternalMenus (siteUrl, metrics) {
-  for (let externalMenu of await fetchJson(siteUrl + '/wp-json/wp/v2/epfl-external-menu')) {
+async function scrapeExternalMenus (options, metrics) {
+  for (let externalMenu of await fetchJson(options, 'wp-json/wp/v2/epfl-external-menu')) {
     let labels
     if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
       labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
@@ -108,9 +113,9 @@ async function scrapeExternalMenus (siteUrl, metrics) {
   }
 }
 
-async function scrapeMenu (menuUrl, metrics) {
+async function scrapeMenu (options, path, metrics) {
   const end = startTimer()
-  let menu = await fetchJson(menuUrl)
+  let menu = await fetchJson(options, path)
   metrics.menuTime.set(end())
 
   const items = menu.items
@@ -139,17 +144,29 @@ async function scrapeMenu (menuUrl, metrics) {
   metrics.menuCycleCount.set(graphlib.alg.findCycles(g).length)
 }
 
-async function scrapeLanguages (siteUrl, metrics) {
-  for(let lang of await fetchJson(siteUrl + '/wp-json/epfl/v1/languages')) {
+async function scrapeLanguages (options, metrics) {
+  for(let lang of await fetchJson(options, 'wp-json/epfl/v1/languages')) {
     metrics.epflWPSiteLangs.set ({
-      url: siteUrl,
+      url: options.target,
       lang
     }, 1)
   }
 }
 
-async function fetchJson (url) {
-  let results = await fetch(url).then((resp) => resp.json())
+async function fetchJson (options, path) {
+  const baseUrl = new URL(options.target)
+  const origHostname = baseUrl.hostname
+  baseUrl.hostname = 'httpd-' + options.env
+  baseUrl.port = '8443'
+  const apiUrl = new URL(path,
+                         baseUrl.href.endsWith("/") ?
+                         baseUrl.href :
+                         baseUrl.href + "/")
+  let results = (await fetch(apiUrl, {
+    headers: { Host: origHostname },
+    agent
+  })).json()
+
   if ('data' in results && 'status' in results.data && results.data.status == 401) {
     // Avoid error in case of "coming soon" wp site
     return []
