@@ -1,7 +1,7 @@
 'use strict'
 const fetch = require('node-fetch')
-const https = require('https');
-const { URL } = require('url');
+const https = require('https')
+const { URL } = require('url')
 const express = require('express')
 const _ = require('lodash')
 require('express-async-errors')
@@ -12,7 +12,7 @@ const graphlib = require('graphlib')
 const app = express()
 const agent = new https.Agent({
   rejectUnauthorized: false,
-});
+})
 
 app.get('/wpprobe', async function (req, res) {
   const options = { target: req.query.target, env: req.query.env }
