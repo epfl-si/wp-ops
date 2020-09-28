@@ -15,8 +15,9 @@ const agent = new https.Agent({
 })
 
 app.get('/wpprobe', async function (req, res) {
-  const options = { target: req.query.target, wp_env: req.query.wp_env }
-  console.log(`Scrapping ${options.target} in wp_env ${options.wp_env}`)
+  const targetUrl = req.query.target.endsWith("/") ? req.query.target : req.query.target + "/"
+  const options = { target: targetUrl, wp_env: req.query.wp_env }
+  console.log(`Get ${options.target} in wp_env ${options.wp_env}`)
   
   const q = getQueue(options.target)
   if (q.pending) {
@@ -91,7 +92,8 @@ async function siteToMetrics(options) {
 }
 
 async function scrapeMenus (options, metrics) {
-  for (let lang of await fetchJson(options, 'wp-json/epfl/v1/languages')) {
+  const languages = await fetchJson(options, 'wp-json/epfl/v1/languages')
+  for (let lang of languages) {
     await scrapeMenu(options, 'wp-json/epfl/v1/menus/top?lang=' + lang,
                      withLabels({lang}, metrics))
   }
@@ -99,20 +101,14 @@ async function scrapeMenus (options, metrics) {
 
 async function scrapePageCount (options, metrics) {
   const pages = await fetchJson(options, 'wp-json/wp/v2/pages')
-  //console.debug(pages)
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
   if (pages && typeof(pages.length) === 'number') {
     metrics.pageCount.set({}, pages.length)
   }
 }
 
-
 async function scrapeExternalMenus (options, metrics) {
   let externalMenus = await fetchJson(options, 'wp-json/wp/v2/epfl-external-menu')
-  if ('data' in externalMenus && 'status' in externalMenus.data && externalMenus.data.status >= 400) {
-    console.error(`${options.target}wp-json/wp/v2/epfl-external-menu is not accessible`)
-    return;
-  }
   for (let externalMenu of externalMenus) {
     let labels
     if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
@@ -137,11 +133,14 @@ async function scrapeExternalMenus (options, metrics) {
 async function scrapeMenu (options, path, metrics) {
   const end = startTimer()
   let menu = await fetchJson(options, path)
-  metrics.menuTime.set(end())
+  if (menu.length === 0) {
+    return
+  }
 
+  metrics.menuTime.set(end())
   const items = menu.items
   metrics.menuCount.set(items.length)
-
+  
   const g = new graphlib.Graph()
   for (let i of items) {
     const id = i.ID
@@ -166,7 +165,8 @@ async function scrapeMenu (options, path, metrics) {
 }
 
 async function scrapeLanguages (options, metrics) {
-  for(let lang of await fetchJson(options, 'wp-json/epfl/v1/languages')) {
+  let languages = await fetchJson(options, 'wp-json/epfl/v1/languages')
+  for (let lang of languages) {
     metrics.epflWPSiteLangs.set ({
       //url: options.target,
       lang
@@ -183,15 +183,23 @@ async function fetchJson (options, path) {
                          baseUrl.href.endsWith("/") ?
                          baseUrl.href :
                          baseUrl.href + "/")
-  let results = (await fetch(apiUrl, {
+  let results = await (await fetch(apiUrl, {
     headers: { Host: origHostname },
     agent
   })).json()
 
-  if ('data' in results && 'status' in results.data && results.data.status == 401) {
+  if ('data' in results && 'status' in results.data && results.data.status >= 400) {
     // Avoid error in case of "coming soon" wp site
+    console.error(`Error while fetching ${apiUrl}: ${JSON.stringify(results)}`)
     return []
-  }
+  }  
+
+  if ('status' in results && results.status != "OK") {
+    // Avoid error in case of "coming soon" wp site
+    console.error(`Error while fetching ${apiUrl}: ${JSON.stringify(results)}`)
+    return []
+  }  
+
   return results
 }
 
