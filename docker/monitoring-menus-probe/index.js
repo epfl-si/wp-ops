@@ -15,7 +15,9 @@ const agent = new https.Agent({
 })
 
 app.get('/wpprobe', async function (req, res) {
-  const options = { target: req.query.target, wp_env: req.query.env }
+  const options = { target: req.query.target, wp_env: req.query.wp_env }
+  console.log("wp_env: ", options.wp_env)
+  console.log("target: ", options.target)
   const q = getQueue(options.target)
   if (q.pending) {
     // Prometheus is re-scraping the same site URL too fast.
