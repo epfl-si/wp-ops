@@ -106,7 +106,12 @@ async function scrapePageCount (options, metrics) {
 
 
 async function scrapeExternalMenus (options, metrics) {
-  for (let externalMenu of await fetchJson(options, 'wp-json/wp/v2/epfl-external-menu')) {
+  let externalMenus = await fetchJson(options, 'wp-json/wp/v2/epfl-external-menu')
+  if ('data' in externalMenus && 'status' in externalMenus.data && externalMenus.data.status >= 400) {
+    console.error(`${options.target}wp-json/wp/v2/epfl-external-menu is not accessible`)
+    return;
+  }
+  for (externalMenu of externalMenus) {
     let labels
     if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
       labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
