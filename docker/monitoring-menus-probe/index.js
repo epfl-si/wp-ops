@@ -16,8 +16,8 @@ const agent = new https.Agent({
 
 app.get('/wpprobe', async function (req, res) {
   const options = { target: req.query.target, wp_env: req.query.wp_env }
-  console.log("wp_env: ", options.wp_env)
-  console.log("target: ", options.target)
+  console.log(`Scrapping ${options.target} in wp_env ${options.wp_env}`)
+  
   const q = getQueue(options.target)
   if (q.pending) {
     // Prometheus is re-scraping the same site URL too fast.
@@ -113,7 +113,7 @@ async function scrapeExternalMenus (options, metrics) {
     console.error(`${options.target}wp-json/wp/v2/epfl-external-menu is not accessible`)
     return;
   }
-  for (externalMenu of externalMenus) {
+  for (let externalMenu of externalMenus) {
     let labels
     if (externalMenu.meta && externalMenu.meta['epfl-emi-remote-slug']) {
       labels = { slug: externalMenu.meta['epfl-emi-remote-slug'],
