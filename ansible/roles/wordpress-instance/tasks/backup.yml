@@ -15,19 +15,19 @@
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
 
 - name: Backup
+  environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
   shell:
     executable: /bin/bash
-    environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
     cmd: |
       set -o pipefail
       set -e -x
 
-      echo restic_start $(date +%s) \
+      echo "restic_start{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"} $(date +%s)" \
       | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
 
       for repo in "{{ backup_restic_repo_files }}" "{{ backup_restic_repo_sql }}"; do
-        restic -r $repo init
+        restic -r $repo init || true
         restic -r $repo unlock
       done
 
@@ -66,10 +66,9 @@
       # Collect completion stats to pushgateway
       (
         restic -r {{ backup_restic_repo_files }} stats --json \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_" + ., $initial_data[.]]) | .[] | @tsv'
-        echo restic_success $(date +%s)
+        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"}", $initial_data[.]]) | .[] | @tsv'
+        echo "restic_success{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"} $(date +%s)"
       ) | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
-
   changed_when: true
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
