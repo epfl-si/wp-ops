@@ -1,6 +1,6 @@
 {
   "name": "monitoring-menus-probe",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Process EPFL menu stats on behalf of Prometheus",
   "main": "index.js",
   "scripts": {

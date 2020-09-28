@@ -15,7 +15,7 @@ const agent = new https.Agent({
 })
 
 app.get('/wpprobe', async function (req, res) {
-  const options = { target: req.query.target, env: req.query.env }
+  const options = { target: req.query.target, wp_env: req.query.env }
   const q = getQueue(options.target)
   if (q.pending) {
     // Prometheus is re-scraping the same site URL too fast.
@@ -34,7 +34,8 @@ app.listen(8080) ///////////////////////////////////////////////////////////////
 
 async function siteToMetrics(options) {
   const r = new prometheus.Registry()
-  r.setDefaultLabels({url: options.target})
+  r.setDefaultLabels({ url: options.target, 
+                       wp_env: options.wp_env })
 
   function menuGauge(name, help) {
     return new prometheus.Gauge({ name, help,
@@ -52,7 +53,7 @@ async function siteToMetrics(options) {
   }
   function wpSite(name, help) {
     return new prometheus.Gauge({ name, help,
-                                  labelNames: ['url', 'lang'],
+                                  labelNames: ['lang'],
                                   registers: [r] })
   }
 
@@ -73,7 +74,6 @@ async function siteToMetrics(options) {
                                                     'Last time (in UNIX epoch format) when this external menu was successfully synced'),
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
-
     epflWPSiteLangs:              wpSite('epfl_wp_site_langs',
                                          '1 for every different language configured in the site\'s Polylang plugin'),
   }
@@ -97,7 +97,7 @@ async function scrapeMenus (options, metrics) {
 
 async function scrapePageCount (options, metrics) {
   const pages = await fetchJson(options, 'wp-json/wp/v2/pages')
-  console.debug(pages)
+  //console.debug(pages)
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
   if (pages && typeof(pages.length) === 'number') {
     metrics.pageCount.set({}, pages.length)
@@ -166,7 +166,7 @@ async function scrapeMenu (options, path, metrics) {
 async function scrapeLanguages (options, metrics) {
   for(let lang of await fetchJson(options, 'wp-json/epfl/v1/languages')) {
     metrics.epflWPSiteLangs.set ({
-      url: options.target,
+      //url: options.target,
       lang
     }, 1)
   }
@@ -175,7 +175,7 @@ async function scrapeLanguages (options, metrics) {
 async function fetchJson (options, path) {
   const baseUrl = new URL(options.target)
   const origHostname = baseUrl.hostname
-  baseUrl.hostname = 'httpd-' + options.env
+  baseUrl.hostname = 'httpd-' + options.wp_env
   baseUrl.port = '8443'
   const apiUrl = new URL(path,
                          baseUrl.href.endsWith("/") ?
