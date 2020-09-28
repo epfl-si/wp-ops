@@ -22,7 +22,7 @@
       set -o pipefail
       set -e -x
 
-      echo "restic_start{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"} $(date +%s)" \
+      echo "restic_start{url=\"https://{{ wp_hostname }}/{{ wp_path }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" \
       | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
 
@@ -66,8 +66,8 @@
       # Collect completion stats to pushgateway
       (
         restic -r {{ backup_restic_repo_files }} stats --json \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"}", $initial_data[.]]) | .[] | @tsv'
-        echo "restic_success{url=\"https://{{ wp_hostname }}/{{ wp_path }}\"} $(date +%s)"
+        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"https://{{ wp_hostname }}/{{ wp_path }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        echo "restic_success{url=\"https://{{ wp_hostname }}/{{ wp_path }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)"
       ) | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
   changed_when: true
