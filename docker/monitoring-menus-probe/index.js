@@ -37,7 +37,9 @@ app.listen(8080) ///////////////////////////////////////////////////////////////
 
 async function siteToMetrics(options) {
   const r = new prometheus.Registry()
-  r.setDefaultLabels({ url: options.target, 
+  r.setDefaultLabels({ url: options.target.endsWith('/') ?
+                            options.target.slice(0, -1) :
+                            options.target, 
                        wp_env: options.wp_env })
 
   function menuGauge(name, help) {
