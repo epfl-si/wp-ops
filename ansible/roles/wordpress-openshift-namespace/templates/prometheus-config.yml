@@ -34,8 +34,8 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:8080
-      - source_labels: [env]
-        target_label: __param_env
+      - source_labels: [wp_env]
+        target_label: __param_wp_env
     file_sd_configs:
       - refresh_interval: 30s
         files:

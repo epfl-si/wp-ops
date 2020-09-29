@@ -32,17 +32,17 @@ class DynamicConfig:
         return self._sites
 
     def enumerate(self):
-        targets_by_env = {}
+        targets_by_wp_env = {}
         for s in self.sites:
             if not s['wpInfra']:
                 continue
-            env = s['openshiftEnv']
-            if env.startswith('unm'):
+            wp_env = s['openshiftEnv']
+            if wp_env.startswith('unm'):
                 continue
 
             url = s['url']
-            targets_by_env.setdefault(env, []).append(url)
-        return targets_by_env.items()
+            targets_by_wp_env.setdefault(wp_env, []).append(url)
+        return targets_by_wp_env.items()
 
 while True:
     try:
@@ -50,8 +50,8 @@ while True:
             f.write(json.dumps([
                 dict(
                     targets=targets,
-                    labels=dict(env=env))
-                for env, targets in DynamicConfig().enumerate()]))
+                    labels=dict(wp_env=wp_env))
+                for wp_env, targets in DynamicConfig().enumerate()]))
     except:  # noqa
         logging.error(traceback.format_exc())
     time.sleep(60)
