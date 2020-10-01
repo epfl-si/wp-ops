@@ -102,10 +102,11 @@ async function scrapeMenus (options, metrics) {
 }
 
 async function scrapePageCount (options, metrics) {
-  const pages = await fetchJson(options, 'wp-json/wp/v2/pages')
+  let totalPages = parseInt(await fetchHeader(options, 'wp-json/wp/v2/pages', 'x-wp-total'))
+  console.log("totalPages: ", totalPages)
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
-  if (pages && typeof(pages.length) === 'number') {
-    metrics.pageCount.set({}, pages.length)
+  if (totalPages && typeof(totalPages) == 'number') {
+    metrics.pageCount.set({}, totalPages)
   }
 }
 
@@ -176,33 +177,46 @@ async function scrapeLanguages (options, metrics) {
   }
 }
 
-async function fetchJson (options, path) {
+async function fetcher (options, path) {
   const baseUrl = new URL(options.target)
   const origHostname = baseUrl.hostname
   baseUrl.hostname = 'httpd-' + options.wp_env
   baseUrl.port = '8443'
   const apiUrl = new URL(path,
-                         baseUrl.href.endsWith("/") ?
-                         baseUrl.href :
-                         baseUrl.href + "/")
-  let results = await (await fetch(apiUrl, {
+                          baseUrl.href.endsWith("/") ?
+                          baseUrl.href :
+                          baseUrl.href + "/")
+  return await fetch(apiUrl, {
     headers: { Host: origHostname },
     agent
-  })).json()
+  })
+}
+
+async function fetchJson (options, path) {
+  
+  let results = await (await fetcher(options, path)).json()
 
   if ('data' in results && 'status' in results.data && results.data.status >= 400) {
     // Avoid error in case of "coming soon" wp site
-    console.error(`Error while fetching ${apiUrl}: ${JSON.stringify(results)}`)
+    console.error(`Error while fetching ${options.target}${path}: ${JSON.stringify(results)}`)
     return []
   }  
 
   if ('status' in results && results.status != "OK") {
     // Avoid error in case of "coming soon" wp site
-    console.error(`Error while fetching ${apiUrl}: ${JSON.stringify(results)}`)
+    console.error(`Error while fetching ${options.target}${path}: ${JSON.stringify(results)}`)
     return []
   }  
 
   return results
+}
+
+async function fetchHeader (options, path, header) {
+  let results = await fetcher(options, path)
+  console.log("header: ", header)
+  console.log("results.headers: ", results.headers)
+  console.log("results.headers.get(header): ", results.headers.get(header))
+  return results.headers.get(header)
 }
 
 const queues = {}
