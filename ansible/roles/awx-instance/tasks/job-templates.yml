@@ -46,3 +46,24 @@
       )
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
+
+- name: "Set up job template for backups"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.jobs import JobTemplate
+      from awx.main.models.inventory import Inventory
+      from awx.main.models.projects import Project
+      from awx.main.models.ha import InstanceGroup
+
+      with AnsibleGetOrCreate(JobTemplate, name="Backup") as jt:
+          jt.description = "Backup"
+          jt.job_type = "run"
+          jt.inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
+          jt.project = Project.objects.get(name="{{ awx_project_name }}")
+          jt.playbook = "ansible/playbooks/backup.yml"
+          jt.instance_groups.set([InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")])
+
+  tags: awx.bt
