@@ -2,7 +2,7 @@
 
 set -e
 
-: ${WORDPRESS_VERSION:=5.4}
+: ${WORDPRESS_VERSION:=5.5}
 
 usage() {
     die <<USAGE
@@ -120,7 +120,7 @@ do_wp_core_install () {
     else
         url=http://$wp_hostname/$wp_path
     fi
-    
+
     ( set -e -x
       wp core install --url="$url" \
          --title="$(basename "$(pwd)")" \
@@ -184,7 +184,7 @@ extra_php_for_wp_config () {
 if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) &&
     $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
     $_SERVER['HTTPS']='on';
-} 
+}
 
 define('ALLOW_UNFILTERED_UPLOADS', true);
 
