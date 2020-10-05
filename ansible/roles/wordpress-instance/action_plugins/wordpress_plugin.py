@@ -52,9 +52,11 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """Overridden to try with `wp plugin delete` first."""
         # First try to use wp-cli to uninstall:
         if desired_state == 'absent' and not self._is_check_mode():
-            result = self._run_wp_cli_action('plugin delete {}'.format(self._task.args.get('name')))
-            if "Plugin already deleted" not in result["stdout"] and "could not be found" not in result["stdout"]:
-                self.result.update(result)
+            orig_changed = self.result.get('changed', False)
+            self._run_wp_cli_change('plugin delete {}'.format(self._task.args.get('name')))
+            if ("Plugin already deleted" in self.result["stdout"]
+                or "could not be found" in self.result["stdout"]):
+                self.result['changed'] = orig_changed
 
         super(ActionModule, self)._ensure_all_files_state(desired_state)
 
@@ -63,8 +65,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """
         Uses WP-CLI to deactivate plugin
         """
-        result = self._run_wp_cli_action('plugin deactivate {}'.format(self._get_name()))
-        self._update_result(result)
-        return self.result
+        return self._run_wp_cli_change('plugin deactivate {}'.format(self._get_name()))
 
 

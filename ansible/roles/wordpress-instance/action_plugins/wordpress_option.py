@@ -50,13 +50,10 @@ class ActionModule(WordPressActionModule):
                 json_format = '--format=json'
 
         changed_status_orig = self.result.get('changed')
-        cmd = "option update {} {} '{}' --skip-themes --skip-plugins".format(json_format, self._task.args.get('name'), option_value)
-        result = self._run_wp_cli_action(cmd)
-        self._update_result(result)
-        if result.get('failed'):
-            return
+        self._run_wp_cli_change("option update {} {} '{}' --skip-themes --skip-plugins".format(
+            json_format, self._task.args.get('name'), option_value))
 
-        if 'option is unchanged.' in result['stdout']:
+        if 'option is unchanged.' in self.result['stdout']:
             if changed_status_orig is not None:
                 self.result['changed'] = changed_status_orig
             else:

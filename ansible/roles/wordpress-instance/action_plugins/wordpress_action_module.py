@@ -5,6 +5,7 @@ deepcopy = __import__('copy').deepcopy
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError, AnsibleActionFail
 from ansible.module_utils import six
+from ansible_collections.epfl_si.actions.plugins.module_utils.subactions import Subaction
 
 import re
 import os
@@ -18,7 +19,8 @@ class WordPressActionModule(ActionBase):
         # It will be initialized in child classes
         self.result = None
 
-        self._task_vars = task_vars
+        self._task_vars = task_vars  # TODO: remove
+        self._subaction = Subaction(self, self._task_vars)
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
@@ -78,27 +80,42 @@ class WordPressActionModule(ActionBase):
         """
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
-
-    def _run_wp_cli_action (self, args, also_in_check_mode=False, pipe_input=None, skip_loading_wp=False):
+    def _query_wp_cli (self, args, fast=False):
         """
-        Executes a given WP-CLI command
+        Run WP-CLI to query state.
+
+        If you want to change the WordPress state, use _run_wp_cli_change() instead.
+
+        :param args: WP-CLI command to execute
+        :param fast: Whether to pass `--skip-packages --skip-themes --skip-plugins` on the
+                     command line
+        """
+        cmd = '{} {} {}'.format(
+            self._get_ansible_var("wp_cli_command"),
+            ("--skip-packages --skip-themes --skip-plugins" if fast else ""),
+            args)
+        return self._subaction.query("command", dict(_raw_params=cmd))
+
+    def _run_wp_cli_change (self, args, pipe_input=None):
+        """
+        Run WP-CLI to effect a change.
+
+        If you want to read the WordPress state, use _query_wp_cli() instead.
 
         :param args: WP-CLI command to execute
         :param skip-loading-wp: if you don't want to load all the WP
         """
-        # wp_cli_command: "wp --path={{ wp_dir }}"
-        wp_cli_var_name = 'wp_cli_command_with_skip' if skip_loading_wp else 'wp_cli_command'
-        cmd = '{} {}'.format(self._get_ansible_var(wp_cli_var_name), args)
-
-        return self._run_shell_action(
-            cmd,
-            also_in_check_mode=also_in_check_mode,
-            pipe_input=pipe_input)
+        return self._subaction.change("command", dict(_raw_params=self._make_wp_cli_command(args),
+                                                      stdin=pipe_input),
+                                      update_result=self.result)
 
     def _get_wp_json (self, suffix, skip_loading_wp=False):
-        result = self._run_wp_cli_action(suffix, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
-        return json.loads(result['stdout'])
+        return json.loads(self._query_wp_cli(suffix, fast=skip_loading_wp)['stdout'])
 
+    def _make_wp_cli_command(self, args):
+        return '{} {}'.format(
+            self._get_ansible_var("wp_cli_command"),
+            args)
 
     def _run_php_code(self, code):
         """
@@ -329,7 +346,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             return
 
         if 'installed' in to_do:
-            self._update_result(self._run_wp_cli_action('plugin install {}'.format(self._task.args.get('from'))))
+            self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
             self._update_result(self._do_rimraf_file(basename))
@@ -392,9 +409,8 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        self._update_result(self._run_wp_cli_action(
-            '{} activate {}'.format(self._get_type(), self._get_name())))
-        return self.result
+        return self._run_wp_cli_change(
+            '{} activate {}'.format(self._get_type(), self._get_name()))
 
 
     def _activation_state(self, desired_state):
@@ -439,7 +455,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
-        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True)
+        result = self._query_wp_cli('{} list --format=csv'.format(wp_command))
 
         if 'failed' in result: return
 

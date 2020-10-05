@@ -1,2 +1,7 @@
-- src: epfl_si.ansible_module_openshift
-- src: epfl_si.ansible_module_eyaml
+roles:
+- name: epfl_si.ansible_module_openshift
+- name: epfl_si.ansible_module_eyaml
+
+collections:
+- name: epfl_si.actions
+  version: 0.1.0
