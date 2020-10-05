@@ -34,7 +34,8 @@ class WordPressActionModule(ActionBase):
             # Beware src / path inversion, as is customary with everything symlink:
             'src': self._get_symlink_target(basename),
             'path': self._get_symlink_path(basename),
-            })
+            },
+            update_result=True)
 
 
     def _do_rimraf_file (self, basename):
@@ -45,7 +46,8 @@ class WordPressActionModule(ActionBase):
         """
         self._run_action('file',
                          {'state': 'absent',
-                          'path': self._get_symlink_path(basename)})
+                          'path': self._get_symlink_path(basename)},
+                          update_result=True)
         return self.result
 
 
