@@ -64,6 +64,9 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """
         Uses WP-CLI to deactivate plugin
         """
-        return self._run_wp_cli_action('plugin deactivate {}'.format(self._get_name()),
-                                       update_result=True)
+        result = self._run_wp_cli_action('plugin deactivate {}'.format(self._get_name()),
+                                       update_result=False)
+        self._update_result(result)
+        return self.result
+
 

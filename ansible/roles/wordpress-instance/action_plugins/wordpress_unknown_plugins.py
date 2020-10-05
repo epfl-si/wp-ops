@@ -31,8 +31,9 @@ class ActionModule(WordPressActionModule):
             if name not in self.known_plugins:
                 task_args = dict(name=name, state=state)
                 task_args['is_mu'] = plugin.get('status') == 'must-use'
-                self._run_action('wordpress_plugin', task_args,
-                                 update_result=True)
+                self._update_result(self._run_action(
+                    'wordpress_plugin', task_args,
+                    update_result=False))
                 self.result['wordpress_unknown_plugins'].append(dict(
                     name=name,
                     is_mu=task_args['is_mu']))

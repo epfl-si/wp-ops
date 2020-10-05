@@ -29,13 +29,15 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder for which we have to create a symlink
         """
-        return self._run_action('file', {
+        result = self._run_action('file', {
             'state': 'link',
             # Beware src / path inversion, as is customary with everything symlink:
             'src': self._get_symlink_target(basename),
             'path': self._get_symlink_path(basename),
             },
-            update_result=True)
+            update_result=False)
+        self._update_result(result)
+        return self.result
 
 
     def _do_rimraf_file (self, basename):
@@ -44,10 +46,11 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder
         """
-        self._run_action('file',
-                         {'state': 'absent',
-                          'path': self._get_symlink_path(basename)},
-                          update_result=True)
+        self._update_result(self._run_action(
+            'file',
+            {'state': 'absent',
+             'path': self._get_symlink_path(basename)},
+            update_result=False))
         return self.result
 
 
@@ -401,8 +404,10 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()),
-                                       update_result=True)
+        self._update_result(self._run_wp_cli_action(
+            '{} activate {}'.format(self._get_type(), self._get_name()),
+            update_result=False))
+        return self.result
 
 
     def _activation_state(self, desired_state):
