@@ -18,7 +18,6 @@ class WordPressActionModule(ActionBase):
         # It will be initialized in child classes
         self.result = None
 
-        self._tmp = tmp
         self._task_vars = task_vars
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
@@ -158,7 +157,7 @@ class WordPressActionModule(ActionBase):
         try:
             # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
             return self._execute_module(module_name=action_name,
-                                        module_args=args, tmp=self._tmp,
+                                        module_args=args,
                                         task_vars=self._task_vars)
         except AnsibleError as e:
             if not e.message.endswith('was not found in configured module paths'):
