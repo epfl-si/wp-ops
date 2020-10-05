@@ -51,7 +51,7 @@ class ActionModule(WordPressActionModule):
 
         changed_status_orig = self.result.get('changed')
         cmd = "option update {} {} '{}' --skip-themes --skip-plugins".format(json_format, self._task.args.get('name'), option_value)
-        result = self._run_wp_cli_action(cmd)
+        result = self._run_wp_cli_action(cmd, update_result=True)
         if result.get('failed'):
             return
 

@@ -399,7 +399,8 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()),
+                                       update_result=True)
 
 
     def _activation_state(self, desired_state):

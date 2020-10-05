@@ -67,7 +67,7 @@ class ActionModule(WordPressActionModule):
                 restrict_to_groups_opt = "--restrict-to-groups={}".format(restrict_to_groups) if restrict_to_groups != "" else ""
 
                 wpcli_command = "epfl intranet update-protection {}".format(restrict_to_groups_opt)
-                self._run_wp_cli_action(wpcli_command)
+                self._run_wp_cli_action(wpcli_command, update_result=True)
         
         # Protection needs to be disabled
         else:
@@ -75,4 +75,4 @@ class ActionModule(WordPressActionModule):
             if 'is enabled' in result['stdout']:
                 
                 wpcli_command = "plugin deactivate epfl-intranet"
-                self._run_wp_cli_action(wpcli_command)
+                self._run_wp_cli_action(wpcli_command, update_result=True)
