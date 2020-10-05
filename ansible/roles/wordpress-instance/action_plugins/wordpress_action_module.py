@@ -34,8 +34,7 @@ class WordPressActionModule(ActionBase):
             # Beware src / path inversion, as is customary with everything symlink:
             'src': self._get_symlink_target(basename),
             'path': self._get_symlink_path(basename),
-            },
-            update_result=False)
+            })
         self._update_result(result)
         return self.result
 
@@ -49,8 +48,7 @@ class WordPressActionModule(ActionBase):
         self._update_result(self._run_action(
             'file',
             {'state': 'absent',
-             'path': self._get_symlink_path(basename)},
-            update_result=False))
+             'path': self._get_symlink_path(basename)}))
         return self.result
 
 
@@ -82,12 +80,11 @@ class WordPressActionModule(ActionBase):
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
-    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None, skip_loading_wp=False):
+    def _run_wp_cli_action (self, args, also_in_check_mode=False, pipe_input=None, skip_loading_wp=False):
         """
         Executes a given WP-CLI command
 
         :param args: WP-CLI command to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         :param skip-loading-wp: if you don't want to load all the WP
         """
         # wp_cli_command: "wp --path={{ wp_dir }}"
@@ -95,49 +92,46 @@ class WordPressActionModule(ActionBase):
         cmd = '{} {}'.format(self._get_ansible_var(wp_cli_var_name), args)
 
         return self._run_shell_action(
-            cmd, update_result=update_result,
+            cmd,
             also_in_check_mode=also_in_check_mode,
             pipe_input=pipe_input)
 
     def _get_wp_json (self, suffix, skip_loading_wp=False):
-        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
+        result = self._run_wp_cli_action(suffix, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
         return json.loads(result['stdout'])
 
 
-    def _run_php_code(self, code, update_result=True):
+    def _run_php_code(self, code):
         """
         Execute PHP code and returns result
 
         :param code: Code to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
+        result = self._run_shell_action("php -r '{}'".format(code))
 
         return result['stdout_lines']
 
 
-    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False, pipe_input=None):
+    def _run_shell_action (self, cmd, also_in_check_mode=False, pipe_input=None):
         """
         Executes a Shell command
 
         :param cmd: Command to execute.
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input }, update_result=update_result,
+        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input },
                                 also_in_check_mode=also_in_check_mode)
 
 
-    def _run_action (self, action_name, args, update_result=True, also_in_check_mode=False):
+    def _run_action (self, action_name, args, also_in_check_mode=False):
         """
         Executes an action, using an Ansible module.
 
         :param action_name: Ansible module name to use
         :param args: dict with arguments to give to module
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         """
 
-        self._display.vvv('_run_action(%s, %s, update_result=%s, also_in_check_mode=%s)' %
-                          (action_name, args, update_result, also_in_check_mode))
+        self._display.vvv('_run_action(%s, %s, also_in_check_mode=%s)' %
+                          (action_name, args, also_in_check_mode))
 
         result = None
         check_mode_orig = self._play_context.check_mode
@@ -157,12 +151,7 @@ class WordPressActionModule(ActionBase):
             finally:
                 self._play_context.check_mode = check_mode_orig
 
-        if update_result:
-            self._update_result(result)
-            return self.result
-
-        else:
-            return result
+        return result
 
 
     def _do_run_action(self, action_name, args):
@@ -382,7 +371,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         :param basename: name of element to check (can be a file or folder)
         """
         path = self._get_symlink_path(basename)
-        plugin_stat = self._run_action('stat', { 'path': path }, update_result=False, also_in_check_mode=True)
+        plugin_stat = self._run_action('stat', { 'path': path }, also_in_check_mode=True)
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
@@ -405,8 +394,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         Uses WP-CLI to activate plugin
         """
         self._update_result(self._run_wp_cli_action(
-            '{} activate {}'.format(self._get_type(), self._get_name()),
-            update_result=False))
+            '{} activate {}'.format(self._get_type(), self._get_name())))
         return self.result
 
 
@@ -452,7 +440,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
-        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True, update_result=False)
+        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True)
 
         if 'failed' in result: return
 

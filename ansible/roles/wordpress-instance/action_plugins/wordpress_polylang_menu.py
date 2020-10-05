@@ -45,5 +45,4 @@ class ActionModule(WordPressActionModule):
         """
         if not self._menu_exists(self.MAIN_MENU):
             self._update_result(self._run_wp_cli_action(
-                "pll menu create {} top".format(self.MAIN_MENU),
-                update_result=False))
+                "pll menu create {} top".format(self.MAIN_MENU)))

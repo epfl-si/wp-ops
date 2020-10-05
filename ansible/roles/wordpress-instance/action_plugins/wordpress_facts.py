@@ -61,4 +61,4 @@ class ActionModule(WordPressActionModule):
     def _stat (self, relpath):
         return self._run_action('stat', {
             'path': os.path.join(self._get_wp_dir(), relpath)
-        }, update_result=False, also_in_check_mode=True)
+        }, also_in_check_mode=True)

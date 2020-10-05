@@ -44,14 +44,13 @@ class ActionModule(WordPressActionModule):
 
     def _ensure_language_exists(self, language):
         cmd = "pll lang create {name} {slug} {locale} --flag={flag}".format(**self.locales[language])
-        self._update_result(self._run_wp_cli_action(cmd, update_result=False))
+        self._update_result(self._run_wp_cli_action(cmd))
         if language not in self._get_polylang_languages() and language != "en":
             raise AnsibleError("FATAL: {} did not have the expected effect of creating the language - Perhaps the metadata (e.g. the flag) is wrong in wordpress_polylang_language.py?".format(cmd))
 
     def _ensure_language_deleted(self, language):
         self._update_result(self._run_wp_cli_action(
-            "pll lang delete {}".format(language),
-            update_result=False))
+            "pll lang delete {}".format(language)))
 
     def _get_polylang_languages (self):
         """Returns: A dict of `mo_id`s keyed by language slug."""
@@ -67,7 +66,7 @@ class ActionModule(WordPressActionModule):
             # `wp pll option sync taxonomies` generates the mo id of
             # newly-created languages, and may or may not be doing something
             # else... Oh well
-            self._run_wp_cli_action("pll option sync taxonomies", update_result=False)
+            self._run_wp_cli_action("pll option sync taxonomies")
             retval = get_moids_by_slug()
 
             # Failing again is fatal.
