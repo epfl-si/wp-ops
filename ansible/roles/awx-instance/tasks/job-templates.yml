@@ -46,3 +46,32 @@
       )
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
+
+- name: "Set up job template for backups"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.jobs import JobTemplate
+      from awx.main.models.inventory import Inventory
+      from awx.main.models.projects import Project
+      from awx.main.models.ha import InstanceGroup
+      from awx.main.models.schedules import Schedule
+
+      with AnsibleGetOrCreate(JobTemplate, name="Backup") as jt:
+          jt.description = "Backup"
+          jt.job_type = "run"
+          jt.inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
+          jt.project = Project.objects.get(name="{{ awx_project_name }}")
+          jt.playbook = "ansible/playbooks/backup.yml"
+          jt.instance_groups.set([InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")])
+          # FIXME: remove limit
+          jt.limit = "prod_subdomains_lite"
+
+          with AnsibleGetOrCreate(Schedule, name="Backup nightly") as s:
+                s.unified_job_template = jt
+                s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T030303 RRULE:FREQ=DAILY;INTERVAL=1"
+
+  tags: awx.job-template.backups
+  
