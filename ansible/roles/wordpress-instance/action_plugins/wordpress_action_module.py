@@ -1,7 +1,3 @@
-
-# There is a name clash with a module in Ansible named "copy":
-deepcopy = __import__('copy').deepcopy
-
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError, AnsibleActionFail
 from ansible.module_utils import six
