@@ -30,15 +30,13 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder for which we have to create a symlink
         """
-        result = self._run_action('file', {
-            'state': 'link',
+        return self._subaction.change(
+            'file',
+            {'state': 'link',
             # Beware src / path inversion, as is customary with everything symlink:
-            'src': self._get_symlink_target(basename),
-            'path': self._get_symlink_path(basename),
-            })
-        self._update_result(result)
-        return self.result
-
+             'src': self._get_symlink_target(basename),
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
 
     def _do_rimraf_file (self, basename):
         """
@@ -46,12 +44,11 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder
         """
-        self._update_result(self._run_action(
+        return self._subaction.change(
             'file',
             {'state': 'absent',
-             'path': self._get_symlink_path(basename)}))
-        return self.result
-
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
 
     def _get_symlink_path (self, basename):
         """
@@ -111,70 +108,11 @@ class WordPressActionModule(ActionBase):
             self._get_ansible_var("wp_cli_command"),
             args)
 
-    def _run_action (self, action_name, args, also_in_check_mode=False):
-        """
-        Executes an action, using an Ansible module.
-
-        :param action_name: Ansible module name to use
-        :param args: dict with arguments to give to module
-        """
-
-        self._display.vvv('_run_action(%s, %s, also_in_check_mode=%s)' %
-                          (action_name, args, also_in_check_mode))
-
-        result = None
-        check_mode_orig = self._play_context.check_mode
-        if self._is_check_mode():
-            if also_in_check_mode:
-                # Get Ansible to run the task regardless
-                args = deepcopy(args)
-                if action_name == 'command':
-                    self._play_context.check_mode = False  # Meaning that yes, it supports check mode
-            else:
-                # Simulate "orange" condition
-                result = dict(changed=True)
-
-        if result is None:
-            try:
-                result = self._do_run_action(action_name, args)
-            finally:
-                self._play_context.check_mode = check_mode_orig
-
-        return result
-
-
-    def _do_run_action(self, action_name, args):
-        try:
-            # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
-            return self._execute_module(module_name=action_name,
-                                        module_args=args,
-                                        task_vars=self._task_vars)
-        except AnsibleError as e:
-            if not e.message.endswith('was not found in configured module paths'):
-                raise e
-
-        # Maybe action_name designates a "user-defined" action module
-        # Retry through self._shared_loader_obj
-        new_task = self._task.copy()
-        new_task.args = args
-
-        action = self._shared_loader_obj.action_loader.get(
-            action_name,
-            task=new_task,
-            connection=self._connection,
-            play_context=self._play_context,
-            loader=self._loader,
-            templar=self._templar,
-            shared_loader_obj=self._shared_loader_obj)
-        return action.run(task_vars=self._task_vars)
-
-
     def _get_wp_dir (self):
         """
         Returns directory in which WordPress is installed
         """
         return self._get_ansible_var('wp_dir')
-
 
     def _get_ansible_var (self, name):
         """
@@ -360,7 +298,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         :param basename: name of element to check (can be a file or folder)
         """
         path = self._get_symlink_path(basename)
-        plugin_stat = self._run_action('stat', { 'path': path }, also_in_check_mode=True)
+        plugin_stat = self._subaction.query('stat', { 'path': path })
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])

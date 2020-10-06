@@ -60,6 +60,6 @@ class ActionModule(WordPressActionModule):
         return not (('stat' in stat) and stat['stat'] and 'isdir' in stat['stat'] and (stat['stat']['isdir']))
 
     def _stat (self, relpath):
-        return self._run_action('stat', {
+        return self._subaction.query('stat', {
             'path': os.path.join(self._get_wp_dir(), relpath)
-        }, also_in_check_mode=True)
+        })
