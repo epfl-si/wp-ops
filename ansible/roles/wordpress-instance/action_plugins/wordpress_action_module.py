@@ -19,8 +19,8 @@ class WordPressActionModule(ActionBase):
         # It will be initialized in child classes
         self.result = None
 
-        self._task_vars = task_vars  # TODO: remove
-        self._subaction = Subaction(self, self._task_vars)
+        self._task_vars = task_vars  # For the _get_ansible_var() method
+        self._subaction = Subaction(self, task_vars)
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
