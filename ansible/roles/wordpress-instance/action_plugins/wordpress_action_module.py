@@ -111,27 +111,6 @@ class WordPressActionModule(ActionBase):
             self._get_ansible_var("wp_cli_command"),
             args)
 
-    def _run_php_code(self, code):
-        """
-        Execute PHP code and returns result
-
-        :param code: Code to execute
-        """
-        result = self._run_shell_action("php -r '{}'".format(code))
-
-        return result['stdout_lines']
-
-
-    def _run_shell_action (self, cmd, also_in_check_mode=False, pipe_input=None):
-        """
-        Executes a Shell command
-
-        :param cmd: Command to execute.
-        """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input },
-                                also_in_check_mode=also_in_check_mode)
-
-
     def _run_action (self, action_name, args, also_in_check_mode=False):
         """
         Executes an action, using an Ansible module.

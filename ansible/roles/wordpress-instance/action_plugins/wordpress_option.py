@@ -41,7 +41,7 @@ class ActionModule(WordPressActionModule):
             # Escaping double quotes to avoid problems and unserializing option value and converting it to JSON to reuse it
             # We use PHP do to this because Python doesn't have the appropriate functions for this.. not his job !
             php_cmd = 'echo json_encode(unserialize("{0}"));'.format(option_value.replace('"', '\\"'))
-            option_value = self._run_php_code(php_cmd)
+            option_value = self._php_query(php_cmd)
 
             option_value = option_value[0] if len(option_value) > 0 else ''
 
@@ -58,3 +58,14 @@ class ActionModule(WordPressActionModule):
                 self.result['changed'] = changed_status_orig
             else:
                 del self.result['changed']
+
+    def _php_query(self, code):
+        """
+        Execute some PHP code by forking/exec'ing the `php` command
+
+        :param code: Code to execute
+
+        :return: The list of lines on php's standard output
+        """
+        return self._subaction.query("command",
+                                     dict(_raw_params="php -r '{}'".format(code)))['stdout_lines']
