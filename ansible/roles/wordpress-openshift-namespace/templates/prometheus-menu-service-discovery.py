@@ -10,11 +10,24 @@ import os
 import time
 import traceback
 import urllib.request
-
+from datetime import datetime
 
 class DynamicConfig:
-    def __init__(self, url="https://wp-veritas.epfl.ch/api/v1/sites"):
+
+    targetPath = "/prometheus-config/dynamic/targets.json"
+
+    def __init__(self, url="https://wp-veritas.epfl.ch/api/v1/sites", targetPath=None, frequency=60):
         self.url = url
+        if targetPath:
+            self.targetPath = targetPath
+        else:
+            self.targetPath = DynamicConfig.targetPath
+        self.frequency = frequency
+        print(f"{datetime.now().isoformat()} Configurator started !"
+              f"\n\t - url: {self.url}"
+              f"\n\t - dynamic file: {self.targetPath}"
+              f"\n\t - frequency: {self.frequency}s",
+            flush=True)
 
     def _get_json(self):
         if 'HOME' in os.environ:
@@ -44,14 +57,23 @@ class DynamicConfig:
             targets_by_wp_env.setdefault(wp_env, []).append(url)
         return targets_by_wp_env.items()
 
-while True:
-    try:
-        with open("/prometheus-config/dynamic/targets.json", "w") as f:
-            f.write(json.dumps([
+    def _write(self, struct):
+        tmpTarget = self.targetPath + '.tmp'
+        with open(tmpTarget, "w") as f:
+            f.write(json.dumps(struct))
+        os.rename(tmpTarget, self.targetPath)
+
+    def write_targets(self):
+        self._write([
                 dict(
                     targets=targets,
                     labels=dict(wp_env=wp_env))
-                for wp_env, targets in DynamicConfig().enumerate()]))
+                for wp_env, targets in self.enumerate()])
+
+dc = DynamicConfig()
+while True:
+    try:
+        dc.write_targets()
     except:  # noqa
         logging.error(traceback.format_exc())
-    time.sleep(60)
+    time.sleep(dc.frequency)
