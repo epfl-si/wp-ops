@@ -44,7 +44,8 @@ class ActionModule(WordPressActionModule):
         if wp_is_installed:
             for wat in ['plugin', 'theme']:
                 try:
-                    facts['wp_%s_list' % wat] = self._get_wp_json('%s list --format=json' % wat, skip_loading_wp=True)
+                    facts['wp_%s_list' % wat] = self._get_wp_json(
+                        '%s list --format=json --skip-packages --skip-themes --skip-plugins' % wat)
                 except:
                     pass
 

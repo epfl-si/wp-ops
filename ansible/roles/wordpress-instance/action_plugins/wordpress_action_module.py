@@ -80,21 +80,15 @@ class WordPressActionModule(ActionBase):
         """
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
-    def _query_wp_cli (self, args, fast=False):
+    def _query_wp_cli (self, args):
         """
         Run WP-CLI to query state.
 
         If you want to change the WordPress state, use _run_wp_cli_change() instead.
 
         :param args: WP-CLI command to execute
-        :param fast: Whether to pass `--skip-packages --skip-themes --skip-plugins` on the
-                     command line
         """
-        cmd = '{} {} {}'.format(
-            self._get_ansible_var("wp_cli_command"),
-            ("--skip-packages --skip-themes --skip-plugins" if fast else ""),
-            args)
-        return self._subaction.query("command", dict(_raw_params=cmd))
+        return self._subaction.query("command", dict(_raw_params=self._make_wp_cli_command(args)))
 
     def _run_wp_cli_change (self, args, pipe_input=None):
         """
@@ -109,8 +103,8 @@ class WordPressActionModule(ActionBase):
                                                       stdin=pipe_input),
                                       update_result=self.result)
 
-    def _get_wp_json (self, suffix, skip_loading_wp=False):
-        return json.loads(self._query_wp_cli(suffix, fast=skip_loading_wp)['stdout'])
+    def _get_wp_json (self, suffix):
+        return json.loads(self._query_wp_cli(suffix)['stdout'])
 
     def _make_wp_cli_command(self, args):
         return '{} {}'.format(
