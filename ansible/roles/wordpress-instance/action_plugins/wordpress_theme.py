@@ -25,7 +25,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         if desired_installation_state:
             # Setting desired installation state
             self._ensure_all_files_state(desired_installation_state)
-            if 'failed' in self.result: return self.result
 
         if (
                 bool(desired_activation_state) and
@@ -34,6 +33,5 @@ class ActionModule(WordPressPluginOrThemeActionModule):
             
             
             self._do_activate_element()
-            if 'failed' in self.result: return self.result
 
         return self.result

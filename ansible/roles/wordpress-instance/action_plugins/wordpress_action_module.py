@@ -143,28 +143,6 @@ class WordPressActionModule(ActionBase):
         return self._task_vars.get('ansible_check_mode', False)
 
 
-    def _update_result (self, result):
-        """
-        Updates result dict
-
-        :param result: dict to update with
-        """
-        oldresult = deepcopy(self.result)
-        self.result.update(result)
-
-        def _keep_flag_truthy(flag_name):
-            if (flag_name in oldresult and
-                oldresult[flag_name] and
-                flag_name in self.result and
-                not self.result[flag_name]
-            ):
-                self.result[flag_name] = oldresult[flag_name]
-
-        _keep_flag_truthy('changed')
-
-        return self.result
-
-
 class WordPressPluginOrThemeActionModule(WordPressActionModule):
     """Common superclass for the wordpress_plugin and wordpress_theme action modules."""
     # Has to be set in child classes with one of the following value:
@@ -260,12 +238,10 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
-            self._update_result(self._do_rimraf_file(basename))
-            if 'failed' in self.result: return self.result
+            self._do_rimraf_file(basename)
 
         if 'symlinked' in to_do:
-            self._update_result(self._do_symlink_file(basename))
-            if 'failed' in self.result: return self.result
+            self._do_symlink_file(basename)
 
 
     def _ensure_all_files_state (self, desired_state):
@@ -288,7 +264,6 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # Going through each files/folder for plugin
         for basename in basenames:
             self._ensure_file_state(desired_state, basename)
-            if 'failed' in self.result: return self.result
 
 
     def _get_current_file_state (self, basename):

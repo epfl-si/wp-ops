@@ -30,13 +30,11 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 bool(desired_activation_state) and
                 'active' in set([current_activation_state]) - set([desired_activation_state])
         ):
-            self._update_result(self._do_deactivate_plugin())
-            if 'failed' in self.result: return self.result
+            self._do_deactivate_plugin()
 
         if desired_installation_state:
             # Setting desired installation state
             self._ensure_all_files_state(desired_installation_state)
-            if 'failed' in self.result: return self.result
 
         if (
                 not self._is_mandatory() and
@@ -44,7 +42,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
             self._do_activate_element()
-            if 'failed' in self.result: return self.result
 
         return self.result
 

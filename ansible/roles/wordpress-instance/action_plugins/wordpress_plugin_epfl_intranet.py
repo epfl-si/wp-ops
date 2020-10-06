@@ -51,8 +51,6 @@ class ActionModule(WordPressActionModule):
 
         result = self._query_wp_cli("epfl intranet status")
 
-        if 'failed' in self.result: return
-
         # Getting parameters
         protection_enabled = self._task.args.get('protection_enabled').strip().lower() == 'yes'
         restrict_to_groups = str(self._task.args.get('restrict_to_groups')).strip()
