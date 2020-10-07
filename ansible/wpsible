@@ -103,7 +103,6 @@ set -e
 platform_check
 case "$mode" in
     ansible-playbook)
-        ansible-galaxy install -i -r requirements.yml >/dev/null 2>&1
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
                          .interactive-playbooks/main.yml
