@@ -54,3 +54,10 @@ RUN groupdel $(getent group {{ awx_unix_credentials.uid }} |cut -d: -f1)
 RUN groupadd -g {{ awx_unix_credentials.gid }} {{ awx_unix_credentials.group }}
 RUN useradd -u {{ awx_unix_credentials.uid }} -g {{ awx_unix_credentials.gid }} -d /runner {{ awx_unix_credentials.user }}
 RUN chgrp -R {{ awx_unix_credentials.group }} /runner
+
+# Add dependencies
+RUN set -e -x; mkdir /tmp/install; \
+    curl -o /tmp/install/requirements.yml https://raw.githubusercontent.com/epfl-si/wp-ops/{{ git_current_branch }}/ansible/requirements.yml ; \
+    ansible-galaxy install -i -r /tmp/install/requirements.yml ; \
+    ansible-galaxy collection install -i -r /tmp/install/requirements.yml ; \
+    rm /tmp/install/requirements.yml
