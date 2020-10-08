@@ -12,10 +12,14 @@ thisdir = os.path.dirname(__file__)
 if thisdir not in sys.path:
     sys.path.append(thisdir)
 
-from cache import InMemoryDecoratorCache
+from cache import InMemoryDecoratorCache, OnDiskDecoratorCache
 from wordpress_action_module import WordPressPluginOrThemeActionModule
 
-query_cache = InMemoryDecoratorCache()
+on_disk_cache_path = os.getenv("WPSIBLE_WPCLI_CACHE_DIR")
+if on_disk_cache_path is not None:
+    query_cache = OnDiskDecoratorCache(on_disk_cache_path)
+else:
+    query_cache = InMemoryDecoratorCache()
 
 class ActionModule(WordPressPluginOrThemeActionModule):
     def run (self, tmp=None, task_vars=None):
@@ -68,7 +72,7 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """
         return self._run_wp_cli_change('plugin deactivate {}'.format(self._get_name()))
 
-    @query_cache.by(lambda self, args: (self._inventory_hostname, json.dumps(args)))
+    @query_cache.by(lambda self, args: (self._inventory_hostname, args))
     def _query_wp_cli (self, args):
         """Overridden for caching."""
         return super(ActionModule, self)._query_wp_cli(args)

@@ -1,6 +1,9 @@
 from ansible.module_utils import six
 import collections
 import inspect
+import os
+import pickle
+import shutil
 
 class _DecoratorCache(object):
     def __init__(self_, cache):
@@ -79,5 +82,41 @@ class _InMemoryPrefixCache(object):
             return False
 
 
+class _OnDiskPrefixCache(object):
+    def __init__(self, path):
+        self._path = path
+        os.makedirs(path, exist_ok=True)
+
+    def has(self, key):
+        return os.path.exists(self._key_path(key))
+
+    def get(self, key):
+        with open(self._key_path(key)) as f:
+            return pickle.load(f)
+
+    def set(self, key, value):
+        key_path = self._key_path(key)
+        os.makedirs(os.path.dirname(key_path), exist_ok=True)
+        with open(key_path, 'w') as f:
+            pickle.dump(value, f)
+
+    def invalidate_prefix(self, key_prefix):
+        shutil.rmtree(self._key_path(key_prefix))
+
+    def _key_path(self, key):
+        def as_path_component(k):
+            if isinstance(k, six.string_types):
+                return k
+            else:
+                return json.dumps(k)
+
+        return os.path.join(
+            self._path,
+            *(as_path_component(k) for k in key))
+
+
 def InMemoryDecoratorCache():
     return _DecoratorCache(_InMemoryPrefixCache())
+
+def OnDiskDecoratorCache(topdir):
+    return _DecoratorCache(_OnDiskPrefixCache(topdir))
