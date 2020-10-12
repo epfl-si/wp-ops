@@ -1,7 +1,0 @@
-- name: WordPress Backups
-  hosts: all_wordpresses
-  gather_facts: no
-  tasks:
-    - import_role:
-        name: ../roles/wordpress-instance
-        tasks_from: backup.yml
