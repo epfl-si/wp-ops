@@ -17,8 +17,8 @@ const agent = new https.Agent({
 app.get('/wpprobe', async function (req, res) {
   const targetUrl = req.query.target.endsWith("/") ? req.query.target : req.query.target + "/"
   const options = { target: targetUrl, wp_env: req.query.wp_env }
-  console.log(`Get ${options.target} in wp_env ${options.wp_env}`)
-  
+  console.log(`Get probe on ${options.target} (wp_env: ${options.wp_env})`)
+
   const q = getQueue(options.target)
   if (q.pending) {
     // Prometheus is re-scraping the same site URL too fast.
@@ -101,7 +101,6 @@ async function scrapeMenus (options, metrics) {
 
 async function scrapePageCount (options, metrics) {
   let totalPages = parseInt(await fetchHeader(options, 'wp-json/wp/v2/pages', 'x-wp-total'))
-  console.log("totalPages: ", totalPages)
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
   if (totalPages && typeof(totalPages) == 'number') {
     metrics.pageCount.set({}, totalPages)
@@ -184,6 +183,7 @@ async function fetcher (options, path) {
                           baseUrl.href.endsWith("/") ?
                           baseUrl.href :
                           baseUrl.href + "/")
+  console.log(` → ${options.target} | fetching ${apiUrl} (${options.target}${path})`)
   return await fetch(apiUrl, {
     headers: { Host: origHostname },
     agent
@@ -191,14 +191,14 @@ async function fetcher (options, path) {
 }
 
 async function fetchJson (options, path) {
-  
+
   let results = await (await fetcher(options, path)).json()
 
   if ('data' in results && 'status' in results.data && results.data.status >= 400) {
     // Avoid error in case of "coming soon" wp site
     console.error(`Error while fetching ${options.target}${path}: ${JSON.stringify(results)}`)
     return []
-  }  
+  }
 
   if ('status' in results && results.status != "OK") {
     // Avoid error in case of "coming soon" wp site
@@ -211,9 +211,6 @@ async function fetchJson (options, path) {
 
 async function fetchHeader (options, path, header) {
   let results = await fetcher(options, path)
-  console.log("header: ", header)
-  console.log("results.headers: ", results.headers)
-  console.log("results.headers.get(header): ", results.headers.get(header))
   return results.headers.get(header)
 }
 
