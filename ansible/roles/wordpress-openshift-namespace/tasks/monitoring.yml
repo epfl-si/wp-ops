@@ -163,14 +163,14 @@
       basic-auth.yml: >
         {{ lookup("template", "traefik-config-dynamic.yml") }}
 
-- name: "ImageStream/monitoring-menus-probe and BuildConfig/monitoring-menus-probe"
+- name: "ImageStream/monitoring-wpprobe and BuildConfig/monitoring-wpprobe"
   openshift_imagestream:
     name: "{{ monitoring_prober_image_name }}"
     namespace: "{{ openshift_namespace }}"
     git:
       repository: https://github.com/epfl-si/wp-ops
       ref: "{{ git_current_branch }}"
-      path: docker/monitoring-menus-probe
+      path: docker/monitoring-wpprobe
     metadata:
       labels:
         app: prometheus
