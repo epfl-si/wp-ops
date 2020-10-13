@@ -168,6 +168,7 @@ class WpVeritasSite(ProdSiteTrait, _Site):
     def hostvars(self):
         hostvars = _Site.hostvars.fget(self)
         hostvars['wpveritas_url'] = self.url
+        hostvars['wpveritas_site'] = json.dumps(self.__dict__)
         return hostvars
 
 
