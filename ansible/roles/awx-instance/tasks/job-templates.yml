@@ -64,14 +64,13 @@
           jt.job_type = "run"
           jt.inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
           jt.project = Project.objects.get(name="{{ awx_project_name }}")
-          jt.playbook = "ansible/playbooks/backup.yml"
+          jt.playbook = "ansible/playbooks/wordpress-main.yml"
+          jt.job_tags = "wp.backup"
           jt.instance_groups.set([InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")])
-          # FIXME: remove limit
-          jt.limit = "prod_subdomains_lite"
+          jt.limit = "" # use "prod_subdomains_lite", etc.
 
           with AnsibleGetOrCreate(Schedule, name="Backup nightly") as s:
                 s.unified_job_template = jt
                 s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T030303 RRULE:FREQ=DAILY;INTERVAL=1"
 
   tags: awx.job-template.backups
-  
