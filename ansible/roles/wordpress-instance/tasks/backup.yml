@@ -1,6 +1,7 @@
 # Backup a WordPress instance to EPFL's Scality system through its S3-like API
 
-- assert:
+- run_once: true
+  assert:
     that: >-
       ansible_verbosity <= 2
     msg: >-
@@ -13,70 +14,63 @@
     - ../../../vars/env-secrets.yml                          # Used in backup-vars.yml
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
 
-- name: restic init
+- name: Backup
   environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
   shell:
     executable: /bin/bash
     cmd: |
-      restic -r {{ item }} init
-  register: _restic_init
-  changed_when: >-
-    "created restic repository" in _restic_init.stdout
-  failed_when: >-
-    not (
-      (_restic_init.rc == 0)
-      or
-      ("already initialized" in _restic_init.stderr)
-    )
-  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
-  with_items:
-    - "{{ backup_restic_repo_files }}"
-    - "{{ backup_restic_repo_sql }}"
-
-- name: Back up files
-  environment: "{{ backup_restic_environment }}"
-  shell:
-    cmd: |
-      cd {{ wp_dir }}
-      restic -r {{ backup_restic_repo_files }} backup --json . | \
-        jq -s '.[] | select(.message_type == "summary")'
-
-  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
-  register: _restic_backup_files
-
-- name: Back up MySQL database
-  environment: "{{ backup_restic_environment }}"
-  shell:
-    executable: /bin/bash
-    cmd: |
       set -o pipefail
-      {{ wp_cli_command }} db export - | \
-        restic -r {{ backup_restic_repo_sql }} backup \
-            --stdin --stdin-filename db-backup.sql \
-            --json | \
-          jq -s '.[] | select(.message_type == "summary")'
-  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"
-  register: _restic_backup_sql
-
-- name: Update tags
-  environment: "{{ backup_restic_environment }}"
-  when:
-    - _restic_backup_files is success
-    - _restic_backup_sql   is success
-  shell:
-    cmd: |
       set -e -x
+
+      echo "restic_start{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" \
+      | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
+            http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
+
+      for repo in "{{ backup_restic_repo_files }}" "{{ backup_restic_repo_sql }}"; do
+        restic -r $repo init || true
+        restic -r $repo unlock
+      done
+
+      # Back up files
+      declare -a excludes
+      for subwp in $(find . -mindepth 2 -maxdepth 2 -name wp-config.php); do
+        excludes+=(--exclude "$(dirname $subwp)/")
+      done
+      files_snapshot_id=$(
+        cd {{ wp_dir }}
+        restic -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json . \
+        | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
+      )
+
+      # Back up MySQL database to a distinct restic depot (making metadata
+      # management that much simpler)
+      sql_snapshot_id=$(
+        cd {{ wp_dir }}
+        {{ wp_cli_command }} db export - \
+        | restic -r {{ backup_restic_repo_sql }} backup \
+              --stdin --stdin-filename db-backup.sql \
+              --json \
+        | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
+      )
+
+      # Move tags forward
       date_short="$(date +%Y%m%d)"
       date_full="$(date +%Y%m%d-%H%M%S)"
       restic -r {{ backup_restic_repo_files }} tag \
         --remove latest --remove "$date_short" --remove "$date_full"
       restic -r {{ backup_restic_repo_sql   }} tag \
         --remove latest --remove "$date_short" --remove "$date_full"
-      restic -r {{ backup_restic_repo_files }} tag {{ snapshot_id.files }} \
+      restic -r {{ backup_restic_repo_files }} tag "$files_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
-      restic -r {{ backup_restic_repo_sql   }} tag {{ snapshot_id.sql }} \
+      restic -r {{ backup_restic_repo_sql   }} tag "$sql_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
-  vars:
-    snapshot_id:
-      sql:   "{{ (_restic_backup_sql.stdout   | from_json).snapshot_id }}"
-      files: "{{ (_restic_backup_files.stdout | from_json).snapshot_id }}"
+
+      # Collect completion stats to pushgateway
+      (
+        restic -r {{ backup_restic_repo_files }} stats --json \
+        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        echo "restic_success{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)"
+      ) | curl -X POST -H  "Content-Type: text/plain" --data-binary @- \
+            http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
+  changed_when: true
+  ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"

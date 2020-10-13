@@ -1,0 +1,17 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+providers:
+  # Point to the so-called “dynamic” configuration, managed by
+  # Ansible
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: DEBUG
+
+entryPoints:
+  web:
+    address: ":9999"

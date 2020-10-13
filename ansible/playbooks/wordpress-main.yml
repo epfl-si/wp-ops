@@ -13,3 +13,4 @@
   gather_facts: no   # But see ../roles/wordpress-instance/action_plugins/wordpress_facts.py
   roles:
     - role: ../roles/wordpress-instance
+

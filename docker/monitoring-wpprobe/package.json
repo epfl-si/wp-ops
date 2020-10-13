@@ -1,6 +1,6 @@
 {
-  "name": "monitoring-menus-probe",
-  "version": "0.1.0",
+  "name": "monitoring-wpprobe",
+  "version": "0.2.0",
   "description": "Process EPFL menu stats on behalf of Prometheus",
   "main": "index.js",
   "scripts": {
@@ -25,9 +25,9 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "graphlib": "^2.1.8",
-    "lodash": "^4.17.19",
-    "node-fetch": "^2.6.0",
-    "p-queue": "^6.2.1",
-    "prom-client": "^11.5.3"
+    "lodash": "^4.17.20",
+    "node-fetch": "^2.6.1",
+    "p-queue": "^6.6.1",
+    "prom-client": "^12.0.0"
   }
 }

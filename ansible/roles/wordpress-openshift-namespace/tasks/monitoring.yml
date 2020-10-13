@@ -1,4 +1,5 @@
 - include_vars: monitoring-vars.yml
+- include_vars: secrets-prometheus-wwp.yml
 
 - name: Prometheus service
   openshift:
@@ -12,8 +13,8 @@
         app: prometheus
     spec:
       ports:
-        - name: prometheus
-          port: 9090
+        - name: traefik
+          port: 9999
       selector:
         app: prometheus
 
@@ -28,7 +29,7 @@
     spec:
       host: prometheus-wwp.epfl.ch
       port:
-        targetPort: prometheus
+        targetPort: traefik
       tls:
         termination: edge
       to:
@@ -49,9 +50,10 @@
           {{ [dict(from=
                      dict(kind="ImageStreamTag",
                           name=monitoring_prober_image_name + ":latest",
-                          fieldPath='spec.template.spec.'
-                                    'containers[?(@.name=="prober")].image')
+                          namespace="wwp"),
+                   fieldPath='spec.template.spec.containers[?(@.name=="prober")].image'
                   )] | to_json }}
+
     spec:
       serviceName: prometheus  # Refs the service above, so that the pods get
                                # a predictable KubeDNS name
@@ -67,9 +69,9 @@
           containers:
             - name: prometheus
               image: prom/prometheus
-              ports:
-              - containerPort: 9090
-                name: prometheus
+#              ports:
+#              - containerPort: 9090
+#                name: prometheus
               volumeMounts:
                 - name: storage
                   mountPath: /prometheus
@@ -84,6 +86,16 @@
                 - --query.lookback-delta=15m     # Menu values change slowly
                 - --web.console.libraries=/usr/share/prometheus/console_libraries
                 - --web.console.templates=/usr/share/prometheus/consoles/prometheus
+            - name: traefik
+              image: traefik
+              ports:
+              - containerPort: 9999
+                name: traefik
+              volumeMounts:
+                - name: traefik-config-static
+                  mountPath: /etc/traefik
+                - name: traefik-config-dynamic
+                  mountPath: /etc/traefik/dynamic
             - name: configurator
               image: python:3.7-alpine
               volumeMounts:
@@ -107,6 +119,12 @@
             - name: static-config
               configMap:
                 name: prometheus
+            - name: traefik-config-static
+              configMap:
+                name: traefik
+            - name: traefik-config-dynamic
+              configMap:
+                name: traefikdyna
 
 - name: Prometheus ConfigMap (configuration and sync scripts)
   openshift:
@@ -122,14 +140,81 @@
       prometheus-menu-service-discovery.py: >
         {{ lookup("template", "prometheus-menu-service-discovery.py") }}
 
-- name: "ImageStream/monitoring-menus-probe and BuildConfig/monitoring-menus-probe"
+- name: Traefik ConfigMap Static (configuration and sync scripts)
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: traefik
+      namespace: "{{ openshift_namespace }}"
+    data:
+      traefik.yml: >
+        {{ lookup("template", "traefik-config-static.yml") }}
+
+- name: Traefik ConfigMap Dynamic (configuration and sync scripts)
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: traefikdyna
+      namespace: "{{ openshift_namespace }}"
+    data:
+      basic-auth.yml: >
+        {{ lookup("template", "traefik-config-dynamic.yml") }}
+
+- name: "ImageStream/monitoring-wpprobe and BuildConfig/monitoring-wpprobe"
   openshift_imagestream:
     name: "{{ monitoring_prober_image_name }}"
     namespace: "{{ openshift_namespace }}"
     git:
       repository: https://github.com/epfl-si/wp-ops
       ref: "{{ git_current_branch }}"
-      path: docker/monitoring-menus-probe
+      path: docker/monitoring-wpprobe
     metadata:
       labels:
         app: prometheus
+
+- name: "Pushgateway service"
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: pushgateway
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: pushgateway
+    spec:
+      ports:
+        - name: pushgateway
+          port: 9091
+      selector:
+        app: pushgateway
+
+- name: Pushgateway Deployment config
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: pushgateway
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      replicas: 1
+      selector:
+        app: pushgateway
+      template:
+        metadata:
+          labels:
+            app: pushgateway
+        spec:
+          containers:
+            - name: pushgateway
+              image: prom/pushgateway
+              ports:
+              - containerPort: 9091
+                name: pushgateway
+      triggers:
+      - type: ConfigChange

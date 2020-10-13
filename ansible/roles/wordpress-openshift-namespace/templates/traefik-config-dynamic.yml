@@ -1,0 +1,17 @@
+http:
+  routers:
+    prometheus:
+      service: "prometheus"
+      middlewares:
+        - "basic-auth-middleware"
+      entryPoints: ["web"]
+      rule: "Host(``)"
+  services:
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus-0:9090"
+  middlewares:
+    basic-auth-middleware:
+      basicAuth:
+        users: {{ prometheus_htpass }}
