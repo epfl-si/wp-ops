@@ -1,4 +1,3 @@
 monitoring_prober_image_name: monitoring-wpprobe
 
-_prometheus_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_prod/ansible_prometheus_secrets.yml') | from_yaml }}"
-prometheus_htpass: "\n{% for cred in _prometheus_secrets.prometheus.credentials %}\n          - \"{{ cred.user }}:{{ cred.pass | password_hash('bcrypt') }}\"\n{% endfor %}"
+prometheus_htpass: "\n{% for cred in prometheus.credentials %}\n          - \"{{ cred.user }}:{{ cred.pass | eyaml(eyaml_keys) | password_hash('bcrypt') }}\"\n{% endfor %}"
