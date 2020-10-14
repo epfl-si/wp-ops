@@ -31,13 +31,15 @@
         restic -r $repo unlock
       done
 
+      cd {{ wp_dir }}
+
       # Back up files
       declare -a excludes
-      for subwp in $(find {{ wp_dir }} -mindepth 2 -maxdepth 2 -name wp-config.php); do
+      for subwp in $(find . -mindepth 2 -maxdepth 2 -name wp-config.php); do
         excludes+=(--exclude "$(dirname $subwp)/")
       done
       files_snapshot_id=$(
-        restic -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json {{ wp_dir }} \
+        restic -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json . \
         | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
       )
 
