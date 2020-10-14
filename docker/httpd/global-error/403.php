@@ -10,7 +10,7 @@
   header("HTTP/1.1 403 Forbidden");
 
   // request variables
-  $request_id  = $_SERVER["UNIQUE_ID"];
+  $request_id  = $_SERVER["UNIQUE_ID"] ?? '';
   $request_uri = $_SERVER["REQUEST_URI"];
   // If using CloudFlare, we retrieve original client IP in 'HTTP_CF_CONNECTING_IP'. The content of 'REMOTE_ADDR' is a CloudFlare IP.
   $request_ip  = (array_key_exists("HTTP_CF_CONNECTING_IP", $_SERVER)) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER["REMOTE_ADDR"];
@@ -44,7 +44,7 @@
   // this is useful for testing and it's used for the
   // accred error, because it comes from a redirect. We
   // check that's is a supported error:
-  if (in_array($_GET["error_type"], $error_types))
+  if (array_key_exists("error_type", $_GET) && in_array($_GET["error_type"], $error_types))
   {
     $error_type = $_GET["error_type"];
   }
