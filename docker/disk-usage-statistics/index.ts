@@ -1,7 +1,7 @@
 import lines from "lines-async-iterator";
-import { from } from "ix/asynciterable";
-
-import { flatMap } from "ix/asynciterable/operators";
+import { AsyncIterableX, from } from "ix/asynciterable";
+import { map, flatMap } from "ix/asynciterable/operators";
+import { UnaryFunction } from "ix/interfaces";
 
 function parseQdirstat (path: string) {
   return from(lines(path)).pipe(
@@ -9,12 +9,10 @@ function parseQdirstat (path: string) {
       const parsed = parseLine(x);
       return from(parsed ? [parsed] : []);
     })
-  );
+  )
 }
 
 class Site {
-
-  
 
   public label : string
 
@@ -58,9 +56,20 @@ function parseLine (line: string): Record | undefined {
   }
 }
 
+let pathPrefix
+const qualifyFiles : UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
+  if (record.kind === 'D') {
+    pathPrefix = record.path
+  }
+  if (record.kind === 'F' && pathPrefix) {
+    record.path = `${pathPrefix}/${record.path}`
+  }
+  return record
+})
+
 const filename = process.argv[process.argv.length - 1]
 const stats : {[k: string] : {count: number}} = {}
-parseQdirstat(filename).forEach((record) => {
+parseQdirstat(filename).pipe(qualifyFiles).forEach((record) => {
   if (! stats[Site.find(record.path).label]){
     stats[Site.find(record.path).label] = {count: 0}
   } 
