@@ -20,6 +20,7 @@ class Site {
   public label: string
   private veritasPath: string
   private static sites: Array<Site>
+  private static bestCache: {[path: string]: Site} = {}
 
   static async loadAll() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
@@ -35,11 +36,17 @@ class Site {
    * @returns The “best” match, i.e. the Site instance that is lowest
    *          in the filesystem tree and contains `path`.
    */
-  static find(path: string): Site {
-    return Site.best(Site.sites.filter((s) => s.has(path)))
+  static find (pathPrefix: string): Site {
+    if (! pathPrefix) return
+    if (! (pathPrefix in Site.bestCache)) {
+      Site.bestCache[pathPrefix] = Site.best(Site.sites.filter((s) => s.has(pathPrefix)))
+    }
+    const retval = Site.bestCache[pathPrefix]
+    debug(`find(${pathPrefix}) -> ${retval ? retval.label : "<undefined>"}`)
+    return retval
   }
 
-  static fromWpVeritas(wpVeritasRecord): Site {
+  static fromWpVeritas(wpVeritasRecord : any): Site {
     const url = new URL.URL(wpVeritasRecord.url)
     const site = new Site()
     site.label = wpVeritasRecord.ansibleHost
@@ -61,7 +68,8 @@ class Site {
 
 type Record = {
   kind: string
-  path: string
+  path?: string
+  dir?: string
   size: number
   time: number
 }
@@ -70,22 +78,26 @@ function parseLine(line: string): Record | undefined {
   const regexp = /^(.)\s+(.*?)\s+(\d+)\s+(0x[0-9a-f]+)/gm
   let matches = regexp.exec(line)
   if (matches) {
-    return {
-      kind: matches[1],
-      path: matches[2],
-      size: Number(matches[3]),
-      time: Number(matches[4]),
+    const kind = matches[1], size = Number(matches[3]), time = Number(matches[4])
+    if (kind === "D") {
+      return {
+        kind, size, time, dir: matches[2]
+      }
+    } else {
+      return {
+        kind, size, time, path: matches[2]
+      }
     }
   }
 }
 
-let pathPrefix
+let pathPrefix : string
 const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
   if (record.kind === 'D') {
     pathPrefix = record.path
   }
-  if (record.kind === 'F' && pathPrefix) {
-    record.path = `${pathPrefix}/${record.path}`
+  if (record.kind === 'F') {
+    record.dir = pathPrefix
   }
   debug(record)
   return record
@@ -98,7 +110,7 @@ Site.loadAll()
     parseQdirstat(filename)
       .pipe(qualifyFiles)
       .forEach((record) => {
-        const site = Site.find(record.path)
+        const site = Site.find(record.dir)
         if (!site) {
           return
         }
