@@ -104,7 +104,21 @@ const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>>
 })
 
 const filename = process.argv[process.argv.length - 1]
-const stats: { [k: string]: { count: number } } = {}
+
+type SiteStats = {
+  files: {
+    total: number
+    'wp-content': number
+    uploads: number
+  }
+  size: {
+    total: number
+    'wp-content': number
+    uploads: number
+  }
+}
+
+const stats: { [k: string]: SiteStats } = {}
 Site.loadAll()
   .then(() =>
     parseQdirstat(filename)
@@ -116,9 +130,20 @@ Site.loadAll()
         }
         const label = site.label
         if (!stats[label]) {
-          stats[label] = { count: 0 }
+          stats[label] = { files: { total: 0, 'wp-content': 0, uploads: 0 }, size: { total: 0, 'wp-content': 0, uploads: 0 } }
         }
-        stats[label].count += 1
+        stats[label].files.total += 1
+        stats[label].size.total += record.size
+
+        if (record.dir.includes('/wp-content/')) {
+          stats[label].files['wp-content'] += 1
+          stats[label].size['wp-content'] += record.size
+        }
+ 
+        if (record.dir.includes('/wp-content/uploads/')) {
+          stats[label].files.uploads += 1
+          stats[label].size.uploads += record.size
+        }
       })
   )
   .then(() => {
