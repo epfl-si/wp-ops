@@ -19,5 +19,13 @@
     "ix": "^4.0.0",
     "lines-async-iterator": "^0.9.0",
     "node-fetch": "^2.6.1"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 140,
+    "arrowParens": "always"
   }
 }

@@ -2,7 +2,7 @@ import lines from 'lines-async-iterator'
 import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
 import { UnaryFunction } from 'ix/interfaces'
-import fetch from "node-fetch"
+import fetch from 'node-fetch'
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -18,8 +18,8 @@ class Site {
   private static data: any
 
   static async load() {
-    const response = await fetch("https://wp-veritas.epfl.ch/api/v1/inventory/entries")
-    Site.data = await response.json();
+    const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
+    Site.data = await response.json()
   }
 
   /**
@@ -58,10 +58,7 @@ function parseLine(line: string): Record | undefined {
 }
 
 let pathPrefix
-const qualifyFiles: UnaryFunction<
-  AsyncIterable<Record>,
-  AsyncIterableX<Record>
-> = map((record) => {
+const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
   if (record.kind === 'D') {
     pathPrefix = record.path
   }
