@@ -4,6 +4,8 @@ import { map, flatMap } from 'ix/asynciterable/operators'
 import { UnaryFunction } from 'ix/interfaces'
 import fetch from 'node-fetch'
 import URL from 'url'
+import Debug from 'debug'
+const debug = Debug("disk-usage-metrics")
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -85,7 +87,7 @@ const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>>
   if (record.kind === 'F' && pathPrefix) {
     record.path = `${pathPrefix}/${record.path}`
   }
-  console.log(record)
+  debug(record)
   return record
 })
 
