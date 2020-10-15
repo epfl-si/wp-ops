@@ -3,6 +3,7 @@ import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
 import { UnaryFunction } from 'ix/interfaces'
 import fetch from 'node-fetch'
+import URL from 'url'
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -15,11 +16,13 @@ function parseQdirstat(path: string) {
 
 class Site {
   public label: string
-  private static data: any
+  private veritasPath: string
+  private static sites: Array<Site>
 
-  static async load() {
+  static async loadAll() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
-    Site.data = await response.json()
+    const data = await response.json()
+    Site.sites = data.map((wpv) => Site.fromWpVeritas(wpv))
   }
 
   /**
@@ -30,10 +33,27 @@ class Site {
    * @returns The “best” match, i.e. the Site instance that is lowest
    *          in the filesystem tree and contains `path`.
    */
-  static find(path: String): Site {
-    const s = new Site()
-    s.label = 'mu'
-    return s
+  static find(path: string): Site {
+    return Site.best(Site.sites.filter((s) => s.has(path)))
+  }
+
+  static fromWpVeritas(wpVeritasRecord): Site {
+    const url = new URL.URL(wpVeritasRecord.url)
+    const site = new Site()
+    site.label = wpVeritasRecord.ansibleHost
+    site.veritasPath = `/srv/${wpVeritasRecord.openshiftEnv}/${url.hostname}/htdocs${url.pathname}`
+    return site
+  }
+
+  private has(path: string) {
+    return path.startsWith(this.veritasPath)
+  }
+
+  /**
+   * @return The “best” (most specific i.e. lowest in the tree) site in `sites`
+   */
+  static best(sites: Array<Site>) {
+    return sites.sort((a, b) => a.veritasPath.length - b.veritasPath.length)[0]
   }
 }
 
@@ -65,19 +85,28 @@ const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>>
   if (record.kind === 'F' && pathPrefix) {
     record.path = `${pathPrefix}/${record.path}`
   }
+  console.log(record)
   return record
 })
 
 const filename = process.argv[process.argv.length - 1]
 const stats: { [k: string]: { count: number } } = {}
-parseQdirstat(filename)
-  .pipe(qualifyFiles)
-  .forEach((record) => {
-    if (!stats[Site.find(record.path).label]) {
-      stats[Site.find(record.path).label] = { count: 0 }
-    }
-    stats[Site.find(record.path).label].count += 1
-  })
+Site.loadAll()
+  .then(() =>
+    parseQdirstat(filename)
+      .pipe(qualifyFiles)
+      .forEach((record) => {
+        const site = Site.find(record.path)
+        if (!site) {
+          return
+        }
+        const label = site.label
+        if (!stats[label]) {
+          stats[label] = { count: 0 }
+        }
+        stats[label].count += 1
+      })
+  )
   .then(() => {
     console.log(stats)
   })
