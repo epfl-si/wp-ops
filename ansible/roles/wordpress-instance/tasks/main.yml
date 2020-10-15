@@ -199,10 +199,11 @@
       tags:
         - wp
         - wp.menus
+        - wp.menus.refresh
   tags:
     - wp
     - wp.menus
-    - wp.menus.refresh.force
+    - wp.menus.refresh
 
 - name: Generate reports locally
   include_tasks:
