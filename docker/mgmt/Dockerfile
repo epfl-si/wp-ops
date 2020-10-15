@@ -59,7 +59,7 @@ RUN sed -ir 's#www-data.*:/usr/sbin/nologin#www-data:x:33:33:www-data:/var/www:/
 # Install jahia2wp and its dependencies
 RUN set -e -x; cd /; git clone --single-branch --branch release2018 https://github.com/epfl-si/jahia2wp
 RUN set -e -x; \
-    apt -qy install build-essential libxml2-dev python3-dev ; \
+    apt -qy update && apt -qy install build-essential libxml2-dev python3-dev ; \
     pip3 install -r /jahia2wp/requirements/local.txt; \
     apt -qy remove --purge build-essential libxml2-dev python3-dev ; \
     apt -qy autoremove --purge
