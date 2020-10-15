@@ -5,7 +5,7 @@ import { UnaryFunction } from 'ix/interfaces'
 import fetch from 'node-fetch'
 import URL from 'url'
 import Debug from 'debug'
-const debug = Debug("disk-usage-metrics")
+const debug = Debug('disk-usage-metrics')
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -20,7 +20,7 @@ class Site {
   public label: string
   private veritasPath: string
   private static sites: Array<Site>
-  private static bestCache: {[path: string]: Site} = {}
+  private static bestCache: { [path: string]: Site } = {}
 
   static async loadAll() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
@@ -36,17 +36,17 @@ class Site {
    * @returns The “best” match, i.e. the Site instance that is lowest
    *          in the filesystem tree and contains `path`.
    */
-  static find (pathPrefix: string): Site {
-    if (! pathPrefix) return
-    if (! (pathPrefix in Site.bestCache)) {
+  static find(pathPrefix: string): Site {
+    if (!pathPrefix) return
+    if (!(pathPrefix in Site.bestCache)) {
       Site.bestCache[pathPrefix] = Site.best(Site.sites.filter((s) => s.has(pathPrefix)))
     }
     const retval = Site.bestCache[pathPrefix]
-    debug(`find(${pathPrefix}) -> ${retval ? retval.label : "<undefined>"}`)
+    debug(`find(${pathPrefix}) -> ${retval ? retval.label : '<undefined>'}`)
     return retval
   }
 
-  static fromWpVeritas(wpVeritasRecord : any): Site {
+  static fromWpVeritas(wpVeritasRecord: any): Site {
     const url = new URL.URL(wpVeritasRecord.url)
     const site = new Site()
     site.label = wpVeritasRecord.ansibleHost
@@ -78,20 +78,28 @@ function parseLine(line: string): Record | undefined {
   const regexp = /^(.)\s+(.*?)\s+(\d+)\s+(0x[0-9a-f]+)/gm
   let matches = regexp.exec(line)
   if (matches) {
-    const kind = matches[1], size = Number(matches[3]), time = Number(matches[4])
-    if (kind === "D") {
+    const kind = matches[1],
+      size = Number(matches[3]),
+      time = Number(matches[4])
+    if (kind === 'D') {
       return {
-        kind, size, time, dir: matches[2]
+        kind,
+        size,
+        time,
+        dir: matches[2],
       }
     } else {
       return {
-        kind, size, time, path: matches[2]
+        kind,
+        size,
+        time,
+        path: matches[2],
       }
     }
   }
 }
 
-let pathPrefix : string
+let pathPrefix: string
 const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
   if (record.kind === 'D') {
     pathPrefix = record.path
