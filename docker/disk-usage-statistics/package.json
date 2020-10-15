@@ -1,0 +1,11 @@
+{
+  "name": "disk-usage-statistics",
+  "version": "0.1.0",
+  "description": "Process a qirstat dump into Prometheus-friendly metrics per site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "EPFL IDEV-FSD <idev-fsd@groupes.epfl.ch>",
+  "license": "ISC"
+}
