@@ -55,7 +55,7 @@ class Site {
    * @return The “best” (most specific i.e. lowest in the tree) site in `sites`
    */
   static best(sites: Array<Site>) {
-    return sites.sort((a, b) => a.veritasPath.length - b.veritasPath.length)[0]
+    return sites.sort((a, b) => b.veritasPath.length - a.veritasPath.length)[0]
   }
 }
 
