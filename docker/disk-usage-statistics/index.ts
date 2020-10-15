@@ -2,6 +2,7 @@ import lines from 'lines-async-iterator'
 import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
 import { UnaryFunction } from 'ix/interfaces'
+import fetch from "node-fetch"
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -14,8 +15,12 @@ function parseQdirstat(path: string) {
 
 class Site {
   public label: string
+  private static data: any
 
-  static async load() {}
+  static async load() {
+    const response = await fetch("https://wp-veritas.epfl.ch/api/v1/inventory/entries")
+    Site.data = await response.json();
+  }
 
   /**
    * Find a Site by the path of one of its files or directories.
