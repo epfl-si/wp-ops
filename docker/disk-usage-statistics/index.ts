@@ -1,11 +1,11 @@
-import lines from 'lines-async-iterator'
-import { AsyncIterableX, from } from 'ix/asynciterable'
-import { map, flatMap } from 'ix/asynciterable/operators'
-import { UnaryFunction } from 'ix/interfaces'
-import fetch from 'node-fetch'
-import URL from 'url'
 import Debug from 'debug'
 const debug = Debug('disk-usage-metrics')
+import URL from 'url'
+import fetch from 'node-fetch'
+import lines from 'lines-async-iterator'
+import { UnaryFunction } from 'ix/interfaces'
+import { AsyncIterableX, from } from 'ix/asynciterable'
+import { map, flatMap } from 'ix/asynciterable/operators'
 
 // -- Args ---------------------------------------------------------------------
 const { program } = require('commander')
@@ -167,7 +167,7 @@ Site.loadAll()
           stats[label].files['wp-content'] += 1
           stats[label].size['wp-content'] += record.size
         }
- 
+
         if (record.dir.includes('/wp-content/uploads/')) {
           stats[label].files.uploads += 1
           stats[label].size.uploads += record.size
