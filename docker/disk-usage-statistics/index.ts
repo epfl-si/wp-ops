@@ -1,21 +1,13 @@
-import * as fs from 'fs/promises'
-import { createReadStream } from 'fs'
 import Rx from 'rx'
 
-import { readline } from 'readline');
+import LineByLineReader from 'line-by-line'
 
 
-async function parseQdirstat (path: string) {  
-  const read = createReadStream(path, {encoding: 'utf8'})
+function parseQdirstat (path: string) : Rx.Observable<string> {  
+  const rl = new LineByLineReader(path)
 
-  read.on('data',
-    function (data) {
-      console.log(data)
-      if (data.startsWith("#")) {
-
-      }
-    }
-  )
+  return Rx.Observable.fromEvent<string>(rl, 'line')
+    .takeUntil(Rx.Observable.fromEvent(rl, 'close'))
 }
 
 type Record = {
@@ -25,4 +17,4 @@ type Record = {
   time: number
 }
 
-parseQdirstat(process.argv[process.argv.length - 1])
+parseQdirstat(process.argv[process.argv.length - 1]).subscribe((line) => console.log(line))
