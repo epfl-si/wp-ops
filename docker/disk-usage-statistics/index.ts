@@ -1,11 +1,14 @@
-import Rx from 'rx'
-import LineByLineReader from 'line-by-line'
+import lines from "lines-async-iterator"
+import { from } from 'ix/asynciterable'
 
-function parseQdirstat (path: string) : Rx.Observable<string> {
-  const rl = new LineByLineReader(path)
+import { flatMap } from 'ix/asynciterable/operators'
 
-  return Rx.Observable.fromEvent<string>(rl, 'line')
-    .takeUntil(Rx.Observable.fromEvent(rl, 'close'))
+function parseQdirstat (path: string) {
+  return from(lines(path))
+    .pipe(flatMap((x) => {
+      const parsed = parseLine(x)
+      return from(parsed ? [parsed] : [])
+    }))
 }
 
 type Record = {
@@ -15,17 +18,13 @@ type Record = {
   time: number
 }
 
-function parseLine (line) {
-  const regexp = /^(.)\s+(.*?)\s+(\d+)\s+(0x[0-9a-f]+)/gm;
+function parseLine (line : string) : Record|undefined {
+  const regexp = /^(.)\s+(.*?)\s+(\d+)\s+(0x[0-9a-f]+)/gm
   let matches = regexp.exec(line)
-  // console.log(matches)
-  return { kind: 'F', path: 'path', size: 0, time: 0}
+  if (matches) {
+    return { kind: 'F', path: 'path', size: 0, time: 0}
+  }
 }
 
-parseQdirstat(process.argv[process.argv.length - 1]).subscribe(
-  (line) => {
-    // console.log(line)
-    let parsedLine = parseLine(line)
-    console.log(parsedLine)
-  }
-)
+const filename = process.argv[process.argv.length - 1]
+parseQdirstat(filename).forEach(console.log)
