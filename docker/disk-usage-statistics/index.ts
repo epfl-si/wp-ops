@@ -199,7 +199,7 @@ async function main() {
         // Add metrics' type and help only once
         if (!metricsHelp[metrics]) {
           metricsHelp[metrics] = true
-          let help = (data === 'files') ? `Files count of ${key}.` : (data === 'size') ? `Total size of ${key} in bytes.` : ''
+          let help = data === 'files' ? `Files count of ${key}.` : data === 'size' ? `Total size of ${key} in bytes.` : ''
           result += `# TYPE ${metrics} gauge\n`
           result += `# HELP ${metrics} ${help}\n`
         }
