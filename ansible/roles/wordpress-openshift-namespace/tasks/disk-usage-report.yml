@@ -49,9 +49,6 @@
       name: srv-disk-usage-report
       namespace: "{{ openshift_namespace }}"
     spec:
-      # If you want state: latest (above) to do what you want, you
-      # need to explicitly set everything (even if the value is the
-      # same as the default)
       concurrencyPolicy: Forbid
       schedule: "5 03 * * *"
       jobTemplate:
