@@ -39,10 +39,11 @@ function parseQdirstat(path: string) {
 }
 
 class Site {
-  public label: string
   private veritasPath: string
   private static sites: Array<Site>
   private static bestCache: { [path: string]: Site } = {}
+  public label: string
+  public url: string
 
   static async loadAll() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
@@ -73,6 +74,7 @@ class Site {
     const site = new Site()
     site.label = wpVeritasRecord.ansibleHost
     site.veritasPath = `/srv/${wpVeritasRecord.openshiftEnv}/${url.hostname}/htdocs${url.pathname}`
+    site.url = wpVeritasRecord.url
     return site
   }
 
@@ -144,6 +146,7 @@ type SiteStats = {
     'wp-content': number
     uploads: number
   }
+  url: string
 }
 
 const stats: { [k: string]: SiteStats } = {}
@@ -158,7 +161,12 @@ Site.loadAll()
         }
         const label = site.label
         if (!stats[label]) {
-          stats[label] = { files: { total: 0, 'wp-content': 0, uploads: 0 }, size: { total: 0, 'wp-content': 0, uploads: 0 } }
+          stats[label] = {
+            files: { total: 0, 'wp-content': 0, uploads: 0 },
+            size: { total: 0, 'wp-content': 0, uploads: 0 },
+            url: site.url,
+          
+          }
         }
         stats[label].files.total += 1
         stats[label].size.total += record.size
@@ -177,3 +185,28 @@ Site.loadAll()
   .then(() => {
     console.log(stats)
   })
+  .then(() => {
+    let result = ''
+    for (const [ansibleHost, site] of Object.entries(stats)) {
+      for (const [data, diskUsage] of Object.entries(site)) {
+        if (data === 'url') {
+          continue
+        }
+        for (const [key, value] of Object.entries(diskUsage)) {
+          result += `wp_disk_usage_${data}_${keyify(key)}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
+        }
+      }
+      console.log(result)
+
+      let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
+      fetch(pushgatewayUrl, {
+        method: 'post',
+        body: result,
+        headers: { 'Content-Type': 'application/text' },
+      }).then((res) => console.log(res))
+    }
+  })
+
+function keyify(label : string) : string {
+  return label.replace(/-/g, '_'); 
+}
