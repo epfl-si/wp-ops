@@ -176,6 +176,18 @@
       labels:
         app: prometheus
 
+- name: "ImageStream/monitoring-disk-usage-report and BuildConfig/monitoring-disk-usage-report"
+  openshift_imagestream:
+    name: "{{ monitoring_disk_usage_report_image_name }}"
+    namespace: "{{ openshift_namespace }}"
+    git:
+      repository: https://github.com/epfl-si/wp-ops
+      ref: "{{ git_current_branch }}"
+      path: docker/disk-usage-statistics
+    metadata:
+      labels:
+        app: prometheus
+
 - name: "Pushgateway service"
   openshift:
     state: latest
