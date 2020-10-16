@@ -42,6 +42,12 @@ function parseQdirstat(path: string) {
   )
 }
 
+type WpVeritasRecord = {
+    url: string
+    ansibleHost: string
+    openshiftEnv: string
+}
+
 class Site {
   private veritasPath: string
   private static sites: Array<Site>
@@ -52,7 +58,7 @@ class Site {
   static async loadAll() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/inventory/entries')
     const data = await response.json()
-    Site.sites = data.map((wpv) => Site.fromWpVeritas(wpv))
+    Site.sites = data.map((wpv : WpVeritasRecord) => Site.fromWpVeritas(wpv))
   }
 
   /**
@@ -73,7 +79,7 @@ class Site {
     return retval
   }
 
-  static fromWpVeritas(wpVeritasRecord: any): Site {
+  static fromWpVeritas(wpVeritasRecord: WpVeritasRecord): Site {
     const url = new URL.URL(wpVeritasRecord.url)
     const site = new Site()
     site.label = wpVeritasRecord.ansibleHost
@@ -220,14 +226,14 @@ function keyify(label: string): string {
 }
 
 class Webhook {
-  private server
-  private response
+  private server : http.Server
+  private response : http.ServerResponse
 
   public async await(port?: number) {
     if (!port) port = 8080
     return new Promise((resolve) => {
       this.server = http
-        .createServer((req, res) => {
+        .createServer((_, res) => {
           this.response = res
           resolve()
         })
