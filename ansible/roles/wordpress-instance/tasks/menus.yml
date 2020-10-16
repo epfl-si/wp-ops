@@ -11,7 +11,7 @@
     inventory_hostname.startswith('www')
     and
     (
-      ("wp.menus.refresh.force" in ansible_run_tags)
+      ("wp.menus.refresh" in ansible_run_tags)
       or
       (_external_menu_entry_count.stdout == "0")
       or
