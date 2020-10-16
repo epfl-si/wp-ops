@@ -187,6 +187,12 @@
     metadata:
       labels:
         app: prometheus
+  register: _openshift_imagestream_disk_usage_report
+
+- name: "Rebuild {{ monitoring_disk_usage_report_image_name }} now"
+  when: _openshift_imagestream_disk_usage_report is changed
+  shell: "oc -n {{ openshift_namespace }} start-build --wait {{ monitoring_disk_usage_report_image_name }}"
+  delegate_to: localhost
 
 - name: "Pushgateway service"
   openshift:
