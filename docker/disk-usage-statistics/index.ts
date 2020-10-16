@@ -1,5 +1,6 @@
 import Debug from 'debug'
 const debug = Debug('disk-usage-metrics')
+import http from 'http'
 import URL from 'url'
 import fetch from 'node-fetch'
 import lines from 'lines-async-iterator'
@@ -17,6 +18,7 @@ program
   .option('-d, --debug', 'output extra debugging')
   .option('-i, --input-file <file>', '`qdirstat` input file')
   .option('-p, --pushgateway-base-url <url>', 'prometheus pushgateway url')
+  .option('-w, --webhook', 'if true, wait for webhook')
 
 program.parse(process.argv)
 
@@ -149,64 +151,85 @@ type SiteStats = {
   url: string
 }
 
-const stats: { [k: string]: SiteStats } = {}
-Site.loadAll()
-  .then(() =>
-    parseQdirstat(program.inputFile)
-      .pipe(qualifyFiles)
-      .forEach((record) => {
-        const site = Site.find(record.dir)
-        if (!site) {
-          return
-        }
-        const label = site.label
-        if (!stats[label]) {
-          stats[label] = {
-            files: { total: 0, 'wp-content': 0, uploads: 0 },
-            size: { total: 0, 'wp-content': 0, uploads: 0 },
-            url: site.url,
-          
-          }
-        }
-        stats[label].files.total += 1
-        stats[label].size.total += record.size
+async function main() {
+  const stats: { [k: string]: SiteStats } = {}
+  await Site.loadAll()
 
-        if (record.dir.includes('/wp-content/')) {
-          stats[label].files['wp-content'] += 1
-          stats[label].size['wp-content'] += record.size
-        }
-
-        if (record.dir.includes('/wp-content/uploads/')) {
-          stats[label].files.uploads += 1
-          stats[label].size.uploads += record.size
-        }
-      })
-  )
-  .then(() => {
-    console.log(stats)
-  })
-  .then(() => {
-    let result = ''
-    for (const [ansibleHost, site] of Object.entries(stats)) {
-      for (const [data, diskUsage] of Object.entries(site)) {
-        if (data === 'url') {
-          continue
-        }
-        for (const [key, value] of Object.entries(diskUsage)) {
-          result += `wp_disk_usage_${data}_${keyify(key)}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
+  await parseQdirstat(program.inputFile)
+    .pipe(qualifyFiles)
+    .forEach((record) => {
+      const site = Site.find(record.dir)
+      if (!site) {
+        return
+      }
+      const label = site.label
+      if (!stats[label]) {
+        stats[label] = {
+          files: { total: 0, 'wp-content': 0, uploads: 0 },
+          size: { total: 0, 'wp-content': 0, uploads: 0 },
+          url: site.url,
         }
       }
-      console.log(result)
+      stats[label].files.total += 1
+      stats[label].size.total += record.size
 
-      let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
-      fetch(pushgatewayUrl, {
-        method: 'post',
-        body: result,
-        headers: { 'Content-Type': 'application/text' },
-      }).then((res) => console.log(res))
+      if (record.dir.includes('/wp-content/')) {
+        stats[label].files['wp-content'] += 1
+        stats[label].size['wp-content'] += record.size
+      }
+
+      if (record.dir.includes('/wp-content/uploads/')) {
+        stats[label].files.uploads += 1
+        stats[label].size.uploads += record.size
+      }
+    })
+
+  console.log(stats)
+
+  let result = ''
+  for (const [ansibleHost, site] of Object.entries(stats)) {
+    for (const [data, diskUsage] of Object.entries(site)) {
+      if (data === 'url') {
+        continue
+      }
+      for (const [key, value] of Object.entries(diskUsage)) {
+        result += `wp_disk_usage_${data}_${keyify(key)}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
+      }
     }
-  })
+  }
+  console.log(result)
 
-function keyify(label : string) : string {
-  return label.replace(/-/g, '_'); 
+  let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
+  await fetch(pushgatewayUrl, {
+    method: 'POST',
+    body: result,
+    headers: { 'Content-Type': 'application/text' },
+  })
+}
+
+function keyify(label: string): string {
+  return label.replace(/-/g, '_')
+}
+
+async function awaitWebhook(port?: number) {
+  if (!port) port = 8080
+  return new Promise((resolve) => {
+    let server
+    server = http
+      .createServer((req, res) => {
+        // https://nodejs.org/api/http.html
+        res.statusCode = 204
+        res.statusMessage = "It's cool dude"
+        res.end()
+        server.close()
+        resolve()
+      })
+      .listen(port)
+  })
+}
+
+if (program.webhook) {
+  awaitWebhook().then(main)
+} else {
+  main()
 }
