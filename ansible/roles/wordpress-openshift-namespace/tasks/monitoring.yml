@@ -288,7 +288,7 @@
       namespace: "{{ openshift_namespace }}"
     spec:
       concurrencyPolicy: Forbid
-      schedule: "{{ disk_usage_schedule | expand_asap | default('5 03 * * *') }}"
+      schedule: "{{ disk_usage_schedule | default('5 03 * * *') | expand_asap }}"
       jobTemplate:
         spec:
           template:
