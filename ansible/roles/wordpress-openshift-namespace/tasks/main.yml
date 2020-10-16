@@ -60,11 +60,7 @@
     - mgmt
     - mgmt.secrets
 
-- name: "Monitoring"
+- name: "Monitoring and disk usage report microservice"
   when: openshift_namespace == "wwp"
   include: monitoring.yml
   tags: monitoring
-
-- name: "Disk usage report microservice"
-  import_tasks: disk-usage-report.yml
-  tags: diskusage
