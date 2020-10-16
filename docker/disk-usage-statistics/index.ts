@@ -203,11 +203,11 @@ async function main() {
           result += `# TYPE ${metrics} gauge\n`
           result += `# HELP ${metrics} ${help}\n`
         }
-        result += `${metrics}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
+        result += `${metrics}{url="${site.url}"} ${value}\n`
       }
     }
 
-    let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
+    let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/instance/${ansibleHost}`
     await fetch(pushgatewayUrl, {
       method: 'POST',
       body: result,
