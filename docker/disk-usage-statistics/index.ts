@@ -187,13 +187,23 @@ async function main() {
   console.log(stats)
 
   let result = ''
+  let metricsHelp = []
   for (const [ansibleHost, site] of Object.entries(stats)) {
     for (const [data, diskUsage] of Object.entries(site)) {
       if (data === 'url') {
         continue
       }
       for (const [key, value] of Object.entries(diskUsage)) {
-        result += `wp_disk_usage_${data}_${keyify(key)}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
+        let metrics = `wp_disk_usage_${data}_${keyify(key)}`
+
+        // Add metrics' type and help only once
+        if (!metricsHelp[metrics]) {
+          metricsHelp[metrics] = true
+          let help = (data === 'files') ? `Files count of ${key}.` : (data === 'size') ? `Total size of ${key} in bytes.` : ''
+          result += `# TYPE ${metrics} gauge\n`
+          result += `# HELP ${metrics} ${help}\n`
+        }
+        result += `${metrics}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
       }
     }
   }
