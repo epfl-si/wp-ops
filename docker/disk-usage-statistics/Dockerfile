@@ -1,9 +1,9 @@
 # https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
-FROM node:13
+FROM node:14
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package*.json tsconfig.json ./
 RUN npm install
 
 COPY index.ts index.ts
