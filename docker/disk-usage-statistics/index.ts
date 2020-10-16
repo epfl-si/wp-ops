@@ -186,9 +186,9 @@ async function main() {
 
   console.log(stats)
 
-  let result = ''
   let metricsHelp = []
   for (const [ansibleHost, site] of Object.entries(stats)) {
+    let result = ''
     for (const [data, diskUsage] of Object.entries(site)) {
       if (data === 'url') {
         continue
@@ -206,15 +206,15 @@ async function main() {
         result += `${metrics}{url="${site.url}",instance="${ansibleHost}"} ${value}\n`
       }
     }
-  }
-  console.log(result)
 
-  let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
-  await fetch(pushgatewayUrl, {
-    method: 'POST',
-    body: result,
-    headers: { 'Content-Type': 'application/text' },
-  })
+    let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/`
+    await fetch(pushgatewayUrl, {
+      method: 'POST',
+      body: result,
+      headers: { 'Content-Type': 'application/text' },
+    })
+    console.log(result)
+  }
 }
 
 function keyify(label: string): string {
