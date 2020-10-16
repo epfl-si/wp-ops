@@ -221,25 +221,36 @@ function keyify(label: string): string {
   return label.replace(/-/g, '_')
 }
 
-async function awaitWebhook(port?: number) {
-  if (!port) port = 8080
-  return new Promise((resolve) => {
-    let server
-    server = http
-      .createServer((req, res) => {
-        // https://nodejs.org/api/http.html
-        res.statusCode = 204
-        res.statusMessage = "It's cool dude"
-        res.end()
-        server.close()
-        resolve()
-      })
-      .listen(port)
-  })
+class Webhook {
+  private server
+  private response
+
+  public async await(port?: number) {
+    if (!port) port = 8080
+    return new Promise((resolve) => {
+      this.server = http
+        .createServer((req, res) => {
+          this.response = res
+          resolve()
+        })
+        .listen(port)
+    })
+  }
+
+  public async success() {
+    // https://nodejs.org/api/http.html
+    this.response.statusCode = 204
+    this.response.statusMessage = "It's cool dude"
+    this.response.end()
+    this.server.close()
+  }
 }
 
 if (program.webhook) {
-  awaitWebhook().then(main)
+  const w = new Webhook()
+  w.await()
+    .then(main)
+    .then(() => w.success())
 } else {
   main()
 }
