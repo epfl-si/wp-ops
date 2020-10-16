@@ -73,6 +73,9 @@
                       /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.NEW
                       gzip -c $OUTDIR/qdirstat.NEW > $OUTDIR/qdirstat.gz
                       rm $OUTDIR/qdirstat.NEW
+
+                      # Kick off disk-usage-metrics container
+                      curl http://localhost:8080/
                   volumeMounts:
                     - name: scripts
                       mountPath: /scripts
