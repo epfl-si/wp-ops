@@ -9,9 +9,9 @@ import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
 
 // -- Args ---------------------------------------------------------------------
-const { program } = require('commander')
-program.version(require('./package.json').version)
-program
+const lecommander = require('commander')
+lecommander.version(require('./package.json').version)
+lecommander
   .name('npm start -- ')
   .usage('-d -i qdirstat -p http://localhost:9091')
   .description('An application that parse qdirstat output file and send metrics to a prometheus pushgateway.')
@@ -20,15 +20,15 @@ program
   .option('-p, --pushgateway-base-url <url>', 'prometheus pushgateway url')
   .option('-w, --webhook', 'if true, wait for webhook')
 
-program.parse(process.argv)
+lecommander.parse(process.argv)
 
-if (program.debug) console.log(program.opts())
+if (lecommander.debug) console.log(lecommander.opts())
 console.log('Run details:')
-if (program.inputFile) console.log(` - input-file: ${program.inputFile}`)
-if (!program.pushgatewayBaseUrl) {
-  program.pushgatewayBaseUrl = 'http://pushgateway:9091/'
+if (lecommander.inputFile) console.log(` - input-file: ${lecommander.inputFile}`)
+if (!lecommander.pushgatewayBaseUrl) {
+  lecommander.pushgatewayBaseUrl = 'http://pushgateway:9091/'
 }
-console.log(` - pushgateway-base-url: ${program.pushgatewayBaseUrl}`)
+console.log(` - pushgateway-base-url: ${lecommander.pushgatewayBaseUrl}`)
 // -- End Args -----------------------------------------------------------------
 
 function parseQdirstat(path: string) {
@@ -155,7 +155,7 @@ async function main() {
   const stats: { [k: string]: SiteStats } = {}
   await Site.loadAll()
 
-  await parseQdirstat(program.inputFile)
+  await parseQdirstat(lecommander.inputFile)
     .pipe(qualifyFiles)
     .forEach((record) => {
       const site = Site.find(record.dir)
@@ -203,7 +203,7 @@ async function main() {
       }
     }
 
-    let pushgatewayUrl = `${program.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/instance/${ansibleHost}`
+    let pushgatewayUrl = `${lecommander.pushgatewayBaseUrl}/metrics/job/wp_disk_usage/instance/${ansibleHost}`
     await fetch(pushgatewayUrl, {
       method: 'POST',
       body: result,
@@ -242,7 +242,7 @@ class Webhook {
   }
 }
 
-if (program.webhook) {
+if (lecommander.webhook) {
   const w = new Webhook()
   w.await()
     .then(main)
