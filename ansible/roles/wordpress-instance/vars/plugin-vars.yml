@@ -261,7 +261,7 @@ plugin_ewww_image_optimizer_options:
   - name: ewww_image_optimizer_dismiss_media_notice
     value: '1'
   - name: ewww_image_optimizer_debug
-    value: false
+    value: ''
 
 # Enlighter
 plugin_enlighter_options:
