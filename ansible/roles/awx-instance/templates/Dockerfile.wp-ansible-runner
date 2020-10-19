@@ -1,6 +1,8 @@
 FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ wp_base_image_name }}:latest
 FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_base_image_name }}:latest
 
+RUN yum -y update
+
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
@@ -10,6 +12,8 @@ RUN dnf module enable php:remi-7.4 -y
 RUN yum -y install yum-plugin-copr && yum -y copr enable copart/restic
 
 RUN yum -y install php-cli php-mysql python3 restic jq mysql
+
+RUN pip3 install awscli
 
 ARG RUNNER_PATCH_URLS=""
 ARG ANSIBLE_PATCH_URLS=""

@@ -1,6 +1,7 @@
 FROM epflsi/os-wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
+    awscli \
     bash-completion \
     htop \
     inotify-tools \
