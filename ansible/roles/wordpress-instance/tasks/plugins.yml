@@ -384,6 +384,7 @@
 - name: ewww-image-optimizer configuration
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_ewww_image_optimizer_options }}"
+  tags: wp.plugins.ewww.configure
 
 - name: enlighter plugin
   wordpress_plugin:
