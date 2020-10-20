@@ -176,6 +176,24 @@
       labels:
         app: prometheus
 
+- name: "ImageStream/monitoring-disk-usage-report and BuildConfig/monitoring-disk-usage-report"
+  openshift_imagestream:
+    name: "{{ monitoring_disk_usage_report_image_name }}"
+    namespace: "{{ openshift_namespace }}"
+    git:
+      repository: https://github.com/epfl-si/wp-ops
+      ref: "{{ git_current_branch }}"
+      path: docker/disk-usage-statistics
+    metadata:
+      labels:
+        app: prometheus
+  register: _openshift_imagestream_disk_usage_report
+
+- name: "Rebuild {{ monitoring_disk_usage_report_image_name }} now"
+  when: _openshift_imagestream_disk_usage_report is changed
+  shell: "oc -n {{ openshift_namespace }} start-build --wait {{ monitoring_disk_usage_report_image_name }}"
+  delegate_to: localhost
+
 - name: "Pushgateway service"
   openshift:
     state: latest
@@ -218,3 +236,111 @@
                 name: pushgateway
       triggers:
       - type: ConfigChange
+
+# OpenShift cron job to create a qdirstat-compatible report every morning.
+- name: BuildConfig for the customized Perl Docker image
+  openshift:
+    state: latest
+    apiVersion: build.openshift.io/v1
+    kind: BuildConfig
+    metadata:
+      name: perl-disk-usage-report
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      output:
+        to:
+          kind: "DockerImage"
+          name: "docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest"
+      source:
+        type: Dockerfile
+        dockerfile: |
+          FROM perl
+          RUN cpan URI::Escape
+      runPolicy: Serial
+      strategy:
+        dockerStrategy:
+          noCache: true
+        type: Docker
+      successfulBuildsHistoryLimit: 5
+
+- name: Perl script as a ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: srv-disk-usage-report-scripts
+      namespace: "{{ openshift_namespace }}"
+    data:
+      # A Jinja "include" doesn't work here, because the include
+      # directory is random and Jinja forbids leaving it with ../
+      # or / (think path traversal attacks). The Ansible "lookup"
+      # function comes to the rescue:
+      qdirstat-cache-writer: '{{ lookup("file", "templates/qdirstat-cache-writer") }}'
+
+- name: Cron job
+  openshift:
+    state: latest
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: srv-disk-usage-report
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      concurrencyPolicy: Forbid
+      schedule: "{{ disk_usage_schedule | default('5 03 * * *') | expand_asap }}"
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              restartPolicy: Never
+              containers:
+                - name: qdirstat-cache-writer
+                  image: "docker-registry.default.svc:5000/{{ openshift_namespace }}/perl-disk-usage-report:latest"
+                  imagePullPolicy: Always
+                  command:
+                    - /bin/sh
+                    - -c
+                    - |
+                      OUTDIR=/srv/batch/disk-usage-report
+                      TARGET=/srv
+                      exec >> $OUTDIR/log.txt 2>&1; set -e -x; date; id
+                      /scripts/qdirstat-cache-writer $TARGET $OUTDIR/qdirstat.NEW
+                      gzip -c $OUTDIR/qdirstat.NEW > $OUTDIR/qdirstat.gz
+
+                      # Kick off disk-usage-metrics container
+                      curl http://localhost:8080/
+
+                      rm $OUTDIR/qdirstat.NEW
+                  volumeMounts:
+                    - name: scripts
+                      mountPath: /scripts
+                    - name: srv
+                      mountPath: /srv
+                - name: "{{ monitoring_disk_usage_report_image_name }}"
+                  image: "docker-registry.default.svc:5000/{{ openshift_namespace }}/{{ monitoring_disk_usage_report_image_name }}:latest"
+                  imagePullPolicy: Always
+                  command:
+                    - node
+                    - -r 
+                    - ts-node/register
+                    - index.ts
+                    - -i
+                    - /srv/batch/disk-usage-report/qdirstat.NEW
+                    - -p
+                    - http://pushgateway:9091
+                    - --webhook
+                  volumeMounts:
+                    - name: srv
+                      mountPath: /srv
+              volumes:
+              - name: scripts
+                configMap:
+                  name: srv-disk-usage-report-scripts
+                  items:
+                    - key: qdirstat-cache-writer
+                      path: qdirstat-cache-writer
+                      mode: 0755
+              - name: srv
+                persistentVolumeClaim:
+                  claimName: wordpress-0

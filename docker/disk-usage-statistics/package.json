@@ -1,0 +1,35 @@
+{
+  "name": "disk-usage-statistics",
+  "version": "0.3.0",
+  "description": "Process a qirstat dump into Prometheus-friendly metrics per site",
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r ts-node/register index.ts",
+    "debug": "env DEBUG='*' node -r ts-node/register index.ts"
+  },
+  "author": "EPFL IDEV-FSD <idev-fsd@groupes.epfl.ch>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/line-by-line": "^0.1.4",
+    "@types/node": "^14.11.8",
+    "@types/node-fetch": "^2.5.7",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "commander": "^6.1.0",
+    "debug": "^4.2.0",
+    "ix": "^4.0.0",
+    "lines-async-iterator": "^0.9.0",
+    "node-fetch": "^2.6.1"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 140,
+    "arrowParens": "always"
+  }
+}

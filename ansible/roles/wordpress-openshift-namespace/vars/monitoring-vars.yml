@@ -1,3 +1,4 @@
 monitoring_prober_image_name: monitoring-wpprobe
+monitoring_disk_usage_report_image_name: monitoring-disk-usage-report
 
 prometheus_htpass: "\n{% for cred in prometheus.credentials %}\n          - \"{{ cred.user }}:{{ cred.pass | eyaml(eyaml_keys) | password_hash('bcrypt') }}\"\n{% endfor %}"
