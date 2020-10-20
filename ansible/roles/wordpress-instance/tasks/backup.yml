@@ -71,13 +71,15 @@
       (
         {{ backup_bash_stop_on_any_errors }}
         restic -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        | jq -r '. as $initial_data | keys | map(["restic_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
         restic -r {{ backup_restic_repo_files }} stats --mode restore-size --json latest \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        | jq -r '. as $initial_data | keys | map(["restic_files_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
       ) | {{ backup_curl_to_pushgateway_cmd }}
 
       (
         {{ backup_bash_stop_on_any_errors }}
+        # Re-use the same vocabulary for the variable names as the output of restic --json, i.e. ..._total_size and
+        # ..._total_file_count
         echo -n "s3_backup_files_total_size{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} "; \
            {{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/files | {{ backup_aws_s3api_jq_sum_cmd }}
         echo -n "s3_backup_sql_total_size{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} "; \
