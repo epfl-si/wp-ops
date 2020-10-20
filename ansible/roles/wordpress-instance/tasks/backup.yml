@@ -22,7 +22,7 @@
       set -o pipefail
       set -e -x
 
-      echo "restic_start{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" \
+      echo "restic_start{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" \
       | curl -X POST -H "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
 
@@ -68,14 +68,19 @@
       # Collect completion stats to pushgateway
       (
         restic -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_sql_" + . + "{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'        
+        | jq -r '. as $initial_data | keys | map(["restic_s3_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'        
       ) | curl -X POST -H "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
 
       (
         restic -r {{ backup_restic_repo_files }} stats --mode restore-size --json latest \
-        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
-        echo "restic_success{url=\"{{ wp_base_url | ensure_trailing_slash }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)"
+        | jq -r '. as $initial_data | keys | map(["restic_s3_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        echo "restic_success{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)"
+
+        echo "s3_backup_files_total_size{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $({{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/files | {{ backup_aws_s3api_jq_sum_cmd }})"
+        echo "s3_backup_sql_total_size{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $({{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/sql | {{ backup_aws_s3api_jq_sum_cmd }})"
+        echo "s3_backup_files_total_file_count{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $({{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/files | {{ backup_aws_s3api_jq_count_cmd }})"
+        echo "s3_backup_sql_total_file_count{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $({{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/sql | {{ backup_aws_s3api_jq_count_cmd }})"
       ) | curl -X POST -H "Content-Type: text/plain" --data-binary @- \
             http://pushgateway:9091/metrics/job/backup/instance/{{ inventory_hostname }}
 
