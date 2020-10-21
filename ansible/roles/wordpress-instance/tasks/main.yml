@@ -38,7 +38,11 @@
 # interfere with user-supplied configuration; in which case, they will
 # be guarded by a suitable `when:` clause, which ensures that we do
 # nothing if the user already took the matters in their own hands.
-
+- name: TestWpVeritasIsLive
+  debug:
+    var: site_is_not_deleted_in_wpveritas
+  tags:
+    - wp.testIsLive
 - name: Backup
   tags:
     - never  # That is, skip unless "-t wp.wipe" or "-t wp.backup" is
@@ -63,7 +67,7 @@
   tags: always
 
 - name: "{{ 'Recreate' if 'wp.wipe' in ansible_run_tags else 'Create' }}"
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   tags:
     - wp
     - wp.restore
@@ -99,7 +103,7 @@
     - wp.restore.sql
 
 - name: Configure
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   tags:
     - wp
     - wp.configure
@@ -123,7 +127,7 @@
         - wp.access
 
 - name: Set up metadata
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   tags:
     - wp
     - wp.metadata
@@ -135,7 +139,7 @@
         - wp.metadata
 
 - name: Set up plugins
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   tags:
     - wp
     - wp.plugins
@@ -166,7 +170,7 @@
         - plugins
 
 - name: Set up themes
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   tags:
     - wp
     - wp.themes
@@ -181,7 +185,7 @@
         - themes
 
 - name: Delete sample pages and posts installed by WordPress
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   include_tasks:
     file: "samples.yml"
     apply:
@@ -193,7 +197,7 @@
     - wp.samples
 
 - name: Set up menus
-  when: wpveritas_is_live
+  when: site_is_not_deleted_in_wpveritas
   include_tasks:
     file: "menus.yml"
     apply:
