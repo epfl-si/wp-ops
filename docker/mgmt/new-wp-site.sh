@@ -20,6 +20,7 @@ main() {
 
     ( set -x; wp --path=. core symlink --path_to_version="/wp/$WORDPRESS_VERSION" )
 
+    db_host="${MYSQL_DB_HOST:-db}"
     if [ -f wp-config.php ]; then
         # Retrieve DB credentials from wp-config.php
         eval "$(perl -ne 'm/(DB_(NAME|USER|PASSWORD)).*, '\''(.*)'\''/ && print lc($1) . "=$3\n";' < wp-config.php)"
@@ -27,7 +28,6 @@ main() {
         db_name="wp_$(mkid 29)"
         db_user="$(mkid 16)"
         db_password="$(mkpass 20)"
-        db_host="${MYSQL_DB_HOST:-db}"
         # `wp config create` doesn't care whether the credentials work or not
         ( set -x;
           extra_php_for_wp_config | wp --path=. config create \
