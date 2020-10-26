@@ -31,6 +31,8 @@ if (!lecommander.pushgatewayBaseUrl) {
 console.log(` - pushgateway-base-url: ${lecommander.pushgatewayBaseUrl}`)
 // -- End Args -----------------------------------------------------------------
 
+const BLOCKSIZE = 512
+
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
     flatMap((x) => {
@@ -105,7 +107,7 @@ function parseLine(line: string): Record | undefined {
   let matches = regexp.exec(line)
   if (matches) {
     const kind = matches[1],
-      size = Number(matches[3]),
+      size = Math.ceil(Number(matches[3]) / BLOCKSIZE) * BLOCKSIZE,
       time = Number(matches[4])
     if (kind === 'D') {
       return {
