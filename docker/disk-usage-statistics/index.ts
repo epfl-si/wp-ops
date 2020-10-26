@@ -128,7 +128,7 @@ function parseLine(line: string): Record | undefined {
 let pathPrefix: string
 const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
   if (record.kind === 'D') {
-    pathPrefix = record.path
+    pathPrefix = record.dir
   }
   if (record.kind === 'F') {
     record.dir = pathPrefix
