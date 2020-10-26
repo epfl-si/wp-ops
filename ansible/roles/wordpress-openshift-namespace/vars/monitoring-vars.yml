@@ -1,4 +1,6 @@
 monitoring_prober_image_name: monitoring-wpprobe
 monitoring_disk_usage_report_image_name: monitoring-disk-usage-report
+monitoring_disk_usage_report_webhook_secret: >-
+  {{ webhooks.github.monitoring_disk_usage_report | eyaml(eyaml_keys) }}
 
 prometheus_htpass: "\n{% for cred in prometheus.credentials %}\n          - \"{{ cred.user }}:{{ cred.pass | eyaml(eyaml_keys) | password_hash('bcrypt') }}\"\n{% endfor %}"

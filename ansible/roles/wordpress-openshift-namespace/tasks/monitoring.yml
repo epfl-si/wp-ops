@@ -175,13 +175,14 @@
       labels:
         app: prometheus
 
-- name: "ImageStream/monitoring-disk-usage-report and BuildConfig/monitoring-disk-usage-report"
+- name: "ImageStream/monitoring-disk-usage-report, BuildConfig/monitoring-disk-usage-report and Secret/monitoring-disk-usage-report-webhook"
   openshift_imagestream:
     name: "{{ monitoring_disk_usage_report_image_name }}"
     namespace: "{{ openshift_namespace }}"
     git:
       repository: https://github.com/epfl-si/wp-ops
       path: docker/disk-usage-statistics
+      webhook_secret: "{{ monitoring_disk_usage_report_webhook_secret }}"
     metadata:
       labels:
         app: prometheus
