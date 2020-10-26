@@ -1,5 +1,5 @@
 - include_vars: monitoring-vars.yml
-- include_vars: secrets-prometheus-wwp.yml
+- include_vars: secrets-wwp.yml
 
 - name: Prometheus service
   openshift:
