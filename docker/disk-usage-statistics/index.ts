@@ -7,9 +7,9 @@ import lines from 'lines-async-iterator'
 import { UnaryFunction } from 'ix/interfaces'
 import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
+import lecommander from 'commander'
 
 // -- Args ---------------------------------------------------------------------
-const lecommander = require('commander')
 lecommander.version(require('./package.json').version)
 lecommander
   .name('npm start -- ')
