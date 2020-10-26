@@ -81,7 +81,7 @@ class Site {
   }
 
   private has(path: string) {
-    return path.startsWith(this.veritasPath)
+    return path.replace(/(?<!\/)$/, '/').startsWith(this.veritasPath)
   }
 
   /**
