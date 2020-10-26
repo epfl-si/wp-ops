@@ -170,7 +170,6 @@
     namespace: "{{ openshift_namespace }}"
     git:
       repository: https://github.com/epfl-si/wp-ops
-      ref: "{{ git_current_branch }}"
       path: docker/monitoring-wpprobe
     metadata:
       labels:
@@ -182,7 +181,6 @@
     namespace: "{{ openshift_namespace }}"
     git:
       repository: https://github.com/epfl-si/wp-ops
-      ref: "{{ git_current_branch }}"
       path: docker/disk-usage-statistics
     metadata:
       labels:
