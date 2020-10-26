@@ -7,9 +7,9 @@ import lines from 'lines-async-iterator'
 import { UnaryFunction } from 'ix/interfaces'
 import { AsyncIterableX, from } from 'ix/asynciterable'
 import { map, flatMap } from 'ix/asynciterable/operators'
+import lecommander from 'commander'
 
 // -- Args ---------------------------------------------------------------------
-const lecommander = require('commander')
 lecommander.version(require('./package.json').version)
 lecommander
   .name('npm start -- ')
@@ -30,6 +30,8 @@ if (!lecommander.pushgatewayBaseUrl) {
 }
 console.log(` - pushgateway-base-url: ${lecommander.pushgatewayBaseUrl}`)
 // -- End Args -----------------------------------------------------------------
+
+const BLOCKSIZE = 512
 
 function parseQdirstat(path: string) {
   return from(lines(path)).pipe(
@@ -81,7 +83,7 @@ class Site {
   }
 
   private has(path: string) {
-    return path.startsWith(this.veritasPath)
+    return path.replace(/(?<!\/)$/, '/').startsWith(this.veritasPath)
   }
 
   /**
@@ -105,7 +107,7 @@ function parseLine(line: string): Record | undefined {
   let matches = regexp.exec(line)
   if (matches) {
     const kind = matches[1],
-      size = Number(matches[3]),
+      size = Math.ceil(Number(matches[3]) / BLOCKSIZE) * BLOCKSIZE,
       time = Number(matches[4])
     if (kind === 'D') {
       return {
@@ -128,7 +130,7 @@ function parseLine(line: string): Record | undefined {
 let pathPrefix: string
 const qualifyFiles: UnaryFunction<AsyncIterable<Record>, AsyncIterableX<Record>> = map((record) => {
   if (record.kind === 'D') {
-    pathPrefix = record.path
+    pathPrefix = record.dir
   }
   if (record.kind === 'F') {
     record.dir = pathPrefix
