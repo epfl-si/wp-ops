@@ -1,0 +1,48 @@
+# Daemonset for profiling metrics run on all nodes
+- include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
+
+- name: Telegraf Daemonset
+  openshift:
+    state: latest
+    apiVersion: apps/v1    
+    kind: DaemonSet
+    metadata:
+      name: telegraf
+      namespace: "{{ ansible_oc_namespace }}"    
+    spec:
+      selector:
+        matchLabels:
+          name: telegraf
+      template:
+        spec:
+          containers:
+            - name: telegraf
+              image: telegraf:1.15
+              env:
+                - name: K8S_NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+              volumeMounts:
+              - name: telegraf-config
+                mountPath: /etc/telegraf
+                readOnly: true
+          volumes:
+          - name: telegraf-config
+            configMap:
+              name: telegraf-config
+              defaultMode: 0644
+        metadata:
+          labels:
+            name: telegraf
+
+- name: ConfigMap for Telegraf configuration
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: telegraf-config
+      namespace: "{{ ansible_oc_namespace }}"
+    data:
+      telegraf.conf: "{{ lookup('template', 'telegraf.conf') }}"

@@ -72,6 +72,12 @@
             prj.scm_url = "{{ awx_project_github_url }}"
             prj.scm_branch = "{{ git_current_branch }}"
 
+
+- import_tasks: profiling-metrics.yml
+  tags: 
+    - never
+    - awx.profiling
+
 - import_tasks: container-group.yml
   tags: awx
 

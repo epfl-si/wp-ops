@@ -11,12 +11,61 @@ RUN dnf module enable php:remi-7.4 -y
 
 RUN yum -y install yum-plugin-copr && yum -y copr enable copart/restic
 
-RUN yum -y install php-cli php-mysql python3 restic jq mysql
 
+
+#zzz201006.172305
+#RUN yum -y install php-cli php-mysql python3 restic jq mysql
+RUN yum -y install php-cli php-mysql python3 restic jq mysql php-opcache
+#zzz
+
+
+
+#zzz201007.164411
+RUN mkdir /runner/.opcache;                                                     \
+    chmod 777 /runner/.opcache;                                                 \
+    ( echo 'zend_extension=/usr/lib64/php/modules/opcache.so';                  \
+      echo 'opcache.enable=1';                                                  \
+      echo 'opcache.memory_consumption=128';                                    \
+      echo 'opcache.interned_strings_buffer=32';                                \
+      echo 'opcache.max_accelerated_files=3000';                                \
+      echo 'opcache.revalidate_freq=600';                                       \
+      echo 'opcache.fast_shutdown=0';                                           \
+      echo 'opcache.enable_cli=1';                                              \
+      echo 'opcache.revalidate_path=0';                                         \
+      echo 'opcache.validate_timestamps=1';                                     \
+      echo 'opcache.max_file_size=0';                                           \
+      echo 'opcache.file_cache=/runner/.opcache';                               \
+      echo 'opcache.file_cache_only=1';)                                        \
+    > /etc/php.d/10-opcache.ini
+#zzz
+
+
+
+
+#zzz201020.1008
+# mitogen_free
+# mitogen_host_pinned
+# mitogen_linear
+RUN pip3 install mitogen==0.2.9
+RUN mkdir /etc/ansible;                                                         \
+    ( echo '[defaults]';                                                        \
+      echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy'; \
+      echo 'strategy = mitogen_host_pinned')                                         \
+    > /etc/ansible/ansible.cfg
+#zzz
+
+    
 RUN pip3 install awscli
 
+
 ARG RUNNER_PATCH_URLS=""
-ARG ANSIBLE_PATCH_URLS=""
+
+
+#zzz201006.0916
+ARG ANSIBLE_PATCH_URLS="https://patch-diff.githubusercontent.com/raw/epfl-si/ansible/pull/1.patch"
+#zzz
+
+
 RUN set -e -x; yum -y install patch;                                        \
     for url in $RUNNER_PATCH_URLS; do                                       \
         curl $url |                                                         \
@@ -27,6 +76,43 @@ RUN set -e -x; yum -y install patch;                                        \
             patch -d /usr/local/lib/python3.6/site-packages/ansible -p3 ;   \
     done;                                                                   \
     yum -y history undo patch
+
+
+    
+
+
+    #zzz200518.1055
+    # installation des packages manquants
+    RUN yum -y install htop nano git
+
+    #zzz200513.1602
+    # Permet de devenir root avec la commande sudo
+    RUN echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    RUN echo "add sudoer canary201006.172533" >> /canary.txt
+
+    # #zzz200518.1534
+    # # Installation de la sonde Telegraf
+    # RUN git clone https://github.com/zuzu59/telegraf.git && \
+    # export dbflux_srv_host={{ lookup('env','dbflux_srv_host') }} && \
+    # export dbflux_srv_port={{ lookup('env','dbflux_srv_port') }} && \
+    # export dbflux_u_user={{ lookup('env','dbflux_u_user') }} && \
+    # export dbflux_p_user={{ lookup('env','dbflux_p_user') }} && \
+    # /runner/telegraf/install_docker_centos.sh
+    # 
+    # #zzz200519.1136
+    # # Lance Telegraf au démarrage du container
+    # RUN sed -i '$ i\/runner/telegraf/start_docker.sh' /usr/bin/entrypoint
+    # 
+    # #zzz200723.1129
+    # RUN echo "telegraf install canary200723.1128" >> /canary.txt
+    #zzz200723.1129
+
+
+
+
+
+
+
 
 COPY --from=0 /usr/local/bin/wp /usr/local/bin/
 RUN mkdir /runner/.wp-cli

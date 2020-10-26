@@ -1,3 +1,4 @@
+#canary201026.0946
 # Kubernetes (OpenShift) objects required to run AWX
 
 - include_vars: k8s-vars.yml

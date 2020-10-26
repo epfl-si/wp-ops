@@ -1,3 +1,6 @@
+#zzz200929.102039
+#canary201005.1159
+#zzz
 
 # There is a name clash with a module in Ansible named "copy":
 deepcopy = __import__('copy').deepcopy
@@ -9,6 +12,16 @@ from ansible.module_utils import six
 import re
 import os
 import json
+
+
+#zzz200922
+import socket                
+from datetime import datetime, timezone, timedelta
+ztz = 2     # été = 2, hiver = 1
+#zzz
+
+
+
 
 class WordPressActionModule(ActionBase):
 
@@ -85,6 +98,11 @@ class WordPressActionModule(ActionBase):
         :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
         :param skip-loading-wp: if you don't want to load all the WP
         """
+
+        #zzz200922.0914
+        #print("toto091433 _run_wp_cli_action")
+        #zzz
+
         # wp_cli_command: "wp --path={{ wp_dir }}"
         wp_cli_var_name = 'wp_cli_command_with_skip' if skip_loading_wp else 'wp_cli_command'
         cmd = '{} {}'.format(self._get_ansible_var(wp_cli_var_name), args)
@@ -95,7 +113,34 @@ class WordPressActionModule(ActionBase):
             pipe_input=pipe_input)
 
     def _get_wp_json (self, suffix, skip_loading_wp=False):
+
+        #zzz200922.1021
+        #print("toto102116.1 _get_wp_json")
+        t1 = datetime.now()
+        #zzz
         result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
+        #zzz
+        t2 = datetime.now()
+        duration = t2 - t1
+        duration_in_s = duration.total_seconds()
+        #print("duration: " + str(duration_in_s))
+        #zzz200922
+        ztimestamp = "log duration by zuzu, " + "_get_wp_json" + " at " + str(datetime.now(timezone(timedelta(hours=ztz)))) + ", duration: " + str(duration_in_s) + "\n"
+        s = socket.socket()    
+        try:
+            # print("connexion 1")
+            s.connect(('www.zuzu-test.ml', 55515))
+            s.send(bytes(ztimestamp, encoding='utf-8')) 
+            s.close()   
+        except socket.error as e:
+            pass
+        #zzz    
+
+        #zzz200922.1021
+        #print("toto102116.2")
+        #zzz
+        
+        
         return json.loads(result['stdout'])
 
 
@@ -293,7 +338,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         desired_state = self._task.args.get('state', 'absent')
         if isinstance(desired_state, six.string_types):
-             desired_state = set([desired_state.strip()])
+            desired_state = set([desired_state.strip()])
         elif isinstance(desired_state, list):
             desired_state = set(desired_state)
         else:
@@ -336,8 +381,17 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             return
 
         if 'installed' in to_do:
+    
+            #zzz200922.1022
+            #print("toto102200.1 _ensure_file_state")
+            #zzz
+
             self._update_result(self._run_wp_cli_action('plugin install {}'.format(self._task.args.get('from'))))
 
+            #zzz200922.1022
+            #print("toto102200.2")
+            #zzz
+            
         if 'symlinked' in to_undo or 'installed' in to_undo:
             self._update_result(self._do_rimraf_file(basename))
             if 'failed' in self.result: return self.result
@@ -399,7 +453,17 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+
+        #zzz200922.1022
+        #print("toto102228.1 _do_activate_element")
+
+        #return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+        result = self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+
+        #print("toto102228.2")
+
+        return result
+        #zzz
 
 
     def _activation_state(self, desired_state):
@@ -444,7 +508,40 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
+        #zzz200922.1022
+        #print("toto102254.1 _get_activation_state")
+        #zzz
+
+        t1 = datetime.now()
         result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True, update_result=False)
+        t2 = datetime.now()
+
+        duration = t2 - t1
+        duration_in_s = duration.total_seconds()
+        #print("duration: " + str(duration_in_s))
+        
+        # import sys; sys.path.append("/Users/zuzu/Library/Application Support/JetBrains/IntelliJIdea2020.2/plugins/python/pydevd-pycharm.egg"); import pydevd; pydevd.settrace('localhost', port=12477, stdoutToServer=True, stderrToServer=True)
+        
+        #zzz200929.102039
+                
+        # ztimestamp = "log duration by zuzu, site: " + sys.argv[17] + ", task: " + sys.argv[17] + ", action: " + "_get_activation_state" + " at " + str(datetime.now(timezone(timedelta(hours=ztz)))) + ", duration: " + str(duration_in_s) + "\n"
+        ztimestamp = "log duration by zuzu, " + str(self._task_vars['inventory_hostname']) + ": PATH: /zzz, " + str(self._task) + ", action: " + "_get_activation_state" + " at " + str(datetime.now(timezone(timedelta(hours=ztz)))) + ", duration: " + str(duration_in_s) + "\n"
+
+        s = socket.socket()    
+        try:
+            # print("connexion 1")
+            # s.connect(('www.zuzu-test.ml', 55515))
+            s.connect(('www.zuzu-test.ml', 55514))
+            s.send(bytes(ztimestamp, encoding='utf-8')) 
+            s.close()   
+        except socket.error as e:
+            pass
+        #zzz    
+
+
+        #zzz200922.1022
+        #print("toto102254.2")
+        #zzz
 
         if 'failed' in result: return
 
