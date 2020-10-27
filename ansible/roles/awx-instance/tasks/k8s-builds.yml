@@ -24,3 +24,27 @@
   when: _awx_runner_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
+
+- name: "Patch {{ awx_base_image_full_name }} into {{ awx_image_name }}"
+  register: _awx_buildconfig
+  when: ansible_oc_namespace == "wwp-test"
+  delegate_to: localhost
+  openshift_imagestream:
+    tag: "{{ awx_version }}"
+    metadata:
+      name: "{{ awx_image_name }}"
+      namespace: "{{ ansible_oc_namespace }}"
+    dockerfile: |
+       FROM {{ awx_base_image_full_name }}
+
+       USER 0
+       RUN yum -y install patch && yum -y clean all
+       # Work around “NoneType has no attribute hostname” traceback
+       RUN curl https://github.com/ansible/awx/commit/79d7c6d9b3c80aba3f9e35a8dc076355223f9c2c.patch | \
+           patch -p1 -d /var/lib/awx/venv/awx/lib/python3.6/site-packages/
+       USER 1000
+
+- name: "Rebuild {{ awx_image_name }} now"
+  when: _awx_buildconfig is changed
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
+  delegate_to: localhost
