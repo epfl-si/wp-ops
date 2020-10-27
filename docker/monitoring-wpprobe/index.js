@@ -59,6 +59,15 @@ async function siteToMetrics(options) {
                                   labelNames: ['lang'],
                                   registers: [r] })
   }
+  function pluginGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  registers: [r] })
+  }
+  function pluginNameGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['name'],
+                                  registers: [r] })
+  }
 
   const metrics = {
     menuTime:                     menuGauge('epfl_menu_request_time_seconds',
@@ -79,13 +88,19 @@ async function siteToMetrics(options) {
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
     epflWPSiteLangs:              wpSite('epfl_wp_site_langs',
                                          '1 for every different language configured in the site\'s Polylang plugin'),
+    pluginCount:                  pluginGauge('epfl_wp_site_plugin_count',
+                                              'Number of plugins installed on the site'),
+    //activePluginCount
+    pluginList:                   pluginNameGauge('epfl_wp_site_plugin_name', ''),
+
   }
 
   await Promise.all([
     scrapeMenus(options, metrics),
     scrapeExternalMenus(options, metrics),
     scrapeLanguages(options, metrics),
-    scrapePageCount (options, metrics)
+    scrapePageCount (options, metrics),
+    scrapePlugins(options, metrics)
   ])
 
   return r.metrics()
@@ -171,6 +186,16 @@ async function scrapeLanguages (options, metrics) {
       //url: options.target,
       lang
     }, 1)
+  }
+}
+
+async function scrapePlugins (options, metrics) {
+  let plugins = await fetchJson(options, 'wp-json/wp/v2/plugins')
+  metrics.pluginCount.set ({}, plugins.length)
+  for (let plugin of plugins) {
+    metrics.pluginList.set ({
+      name: plugin.name
+    }, plugin.status === 'active' ? 1 : 0)
   }
 }
 
