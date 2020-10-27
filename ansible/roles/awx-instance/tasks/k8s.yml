@@ -101,7 +101,7 @@
           containers:
           #####################################################
           - name: awx-web
-            image: "ansible/awx_web:{{ awx_version }}"
+            image: "{{ awx_image_full_name }}"
             ports:
             - containerPort: 8052
               protocol: TCP
@@ -124,11 +124,9 @@
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
-            - name: awx-memcached-socket
-              mountPath: "/var/run/memcached"
           #####################################################
           - name: awx-task
-            image: "ansible/awx_web:{{ awx_version }}"
+            image: "{{ awx_image_full_name }}"
             command:
             - /usr/bin/launch_awx_task.sh
             resources:
@@ -144,8 +142,6 @@
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
-            - name: awx-memcached-socket
-              mountPath: "/var/run/memcached"
             - name: wp-nfs
               mountPath: "/srv"
               readOnly: true

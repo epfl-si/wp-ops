@@ -3,6 +3,7 @@
 - include_vars: k8s-vars.yml
 
 - name: "Pull {{ awx_runner_base_image_fullname }}"
+  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ awx_runner_base_image_name }}"
@@ -12,6 +13,7 @@
 
 - name: "Build {{ awx_runner_image_name }} in OpenShift"
   register: _awx_runner_buildconfig
+  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ awx_runner_image_name }}"

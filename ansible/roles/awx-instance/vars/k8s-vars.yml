@@ -1,4 +1,5 @@
 awx_version: 15.0.1
+awx_image_full_name: ansible/awx:{{ awx_version }}
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
