@@ -65,14 +65,4 @@ LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '{}:{}'.format("localhost", "11211")
-    },
-    'ephemeral': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    },
-}
-
 USE_X_FORWARDED_PORT = True

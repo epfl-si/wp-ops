@@ -170,23 +170,6 @@
               - name: awx-redis-socket
                 mountPath: "/var/run/redis"
           #####################################################
-          - name: awx-memcached
-            image: memcached:latest
-            imagePullPolicy: Always
-            resources:
-              requests:
-                cpu: 250m
-                memory: 1Gi
-            command:
-              - 'memcached'
-              - '-s'
-              - '/var/run/memcached/memcached.sock'
-              - '-a'
-              - '0666'
-            volumeMounts:
-              - name: awx-memcached-socket
-                mountPath: "/var/run/memcached"
-          #####################################################
 
 
           dnsPolicy: ClusterFirst
