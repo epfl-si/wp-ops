@@ -27,7 +27,6 @@
 
 - name: "Patch {{ awx_base_image_full_name }} into {{ awx_image_name }}"
   register: _awx_buildconfig
-  when: ansible_oc_namespace == "wwp-test"
   delegate_to: localhost
   openshift_imagestream:
     tag: "{{ awx_version }}"

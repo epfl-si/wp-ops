@@ -27,7 +27,7 @@
     promote_image_tag: "{{ item.version }}"
     promote_from_namespace: "{{ awx_build_namespace }}"
   with_items:
-    - name: "{{ awx_task_image_name }}"
+    - name: "{{ awx_image_name }}"
       version: "{{ awx_version }}"
     - name: "{{ awx_runner_image_name }}"
       version: latest
