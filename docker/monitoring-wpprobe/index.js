@@ -91,7 +91,8 @@ async function siteToMetrics(options) {
     pluginCount:                  pluginGauge('epfl_wp_site_plugin_count',
                                               'Number of plugins installed on the site'),
     //activePluginCount
-    pluginList:                   pluginNameGauge('epfl_wp_site_plugin_name', ''),
+    pluginList:                   pluginNameGauge('epfl_wp_site_plugin_name', 
+                                                  '1 if this plugin is active, 0 otherwise'),
 
   }
 
