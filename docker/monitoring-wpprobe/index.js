@@ -1,13 +1,13 @@
 'use strict'
-const fetch = require('node-fetch')
-const https = require('https')
-const { URL } = require('url')
-const express = require('express')
 const _ = require('lodash')
-require('express-async-errors')
-const {default: PQueue} = require('p-queue')
-const prometheus = require('prom-client')  // Not actually a client
+const { URL } = require('url')
+const { default: PQueue } = require('p-queue')
+const express = require('express')
+const fetch = require('node-fetch')
 const graphlib = require('graphlib')
+const https = require('https')
+const prometheus = require('prom-client')  // Not actually a client
+require('express-async-errors')
 
 const app = express()
 const agent = new https.Agent({
