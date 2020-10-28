@@ -1,6 +1,6 @@
 {
   "name": "monitoring-wpprobe",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Process EPFL menu stats on behalf of Prometheus",
   "main": "index.js",
   "scripts": {
