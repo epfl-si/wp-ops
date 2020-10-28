@@ -398,7 +398,7 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_enlighter_options }}"
 
-- name: 'Find My Blocks' plugin
+- name: "'Find My Blocks' plugin"
   wordpress_plugin:
     name: find-my-blocks
     state:
