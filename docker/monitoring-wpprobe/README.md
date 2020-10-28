@@ -11,10 +11,10 @@ In order to test new version of the prober, follow these steps:
 2. Deploy the new version with Ansible (the current branch will be used):  
    `./ansible/wpsible -t monitoring --prod`  
    Note: you can check the active branch on openshift (Builds > Build > monitoring-wpprobe > Edit YAML: git/ref)
-3. Rebuild the buildConfig for the container (will rebuild the ImageStream and ImageStreamTag) on openshift:  
+(3. Rebuild the buildConfig for the container (will rebuild the ImageStream and ImageStreamTag) on openshift:  
    `oc start-build monitoring-wpprobe`  
    The ouput gives you the id of the build:  
-   `build.build.openshift.io/monitoring-wpprobe-71 started`
+   `build.build.openshift.io/monitoring-wpprobe-71 started`)
 4. Follow the logs  
    `oc logs -f build.build.openshift.io/monitoring-wpprobe-71`
 5. Kick the pod that includes this container (tells openshift to use the latest ImageStream of the container):  
@@ -28,8 +28,8 @@ In order to test new version of the prober, follow these steps:
 
 ## ToDos
 
-- [ ] Ansible: trigger start-build and redeploy when changed
+- [x] Ansible: trigger start-build and redeploy when changed
 - [x] Rename `epflWPSiteLangs` and homogenize metrics names
-- [ ] Plugin: add plugin status as label ?
+- [x] Plugin: add plugin status as label ?
 - [ ] Lang: only one request ?
 - [x] Comfort: add version to console when starting
