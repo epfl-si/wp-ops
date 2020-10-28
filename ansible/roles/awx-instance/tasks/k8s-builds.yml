@@ -3,6 +3,7 @@
 - include_vars: k8s-vars.yml
 
 - name: "Pull {{ awx_runner_base_image_fullname }}"
+  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ awx_runner_base_image_name }}"
@@ -12,6 +13,7 @@
 
 - name: "Build {{ awx_runner_image_name }} in OpenShift"
   register: _awx_runner_buildconfig
+  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ awx_runner_image_name }}"
@@ -23,22 +25,30 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
 
-- name: "Patch {{ awx_task_base_image_fullname }} into {{ awx_task_image_name }}"
-  register: _awx_task_buildconfig
+- name: "Patch {{ awx_base_image_full_name }} into {{ awx_image_name }}"
+  register: _awx_buildconfig
+  delegate_to: localhost
   openshift_imagestream:
     tag: "{{ awx_version }}"
     metadata:
-      name: "{{ awx_task_image_name }}"
+      name: "{{ awx_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
     dockerfile: |
-       FROM {{ awx_task_base_image_fullname }}
+       FROM {{ awx_base_image_full_name }}
 
-       # https://github.com/ansible/awx/issues/6692#issuecomment-613451838
        USER 0
-       RUN set -e -x; for playbook in /var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/playbooks/*_isolated.yml; do sed -i '/rsync_opts:/a \ \ \ \ \ \ \ \ \ \ -\ "--blocking-io"' $playbook; done
+       RUN yum -y install patch && yum -y clean all
+       # Work around “NoneType has no attribute hostname” traceback
+       RUN curl https://github.com/ansible/awx/commit/79d7c6d9b3c80aba3f9e35a8dc076355223f9c2c.patch | \
+           patch -p1 -d /var/lib/awx/venv/awx/lib/python3.6/site-packages/
+
+       # Fix (same symptom as) https://github.com/ansible-collections/community.kubernetes/issues/250
+       RUN curl https://patch-diff.githubusercontent.com/raw/ansible/ansible/pull/72131.patch | \
+           patch -p2 -d /usr/lib/python3.6/site-packages/
+
        USER 1000
 
-- name: "Rebuild {{ awx_task_image_name }} now"
-  when: _awx_task_buildconfig is changed
-  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_task_image_name }}"
+- name: "Rebuild {{ awx_image_name }} now"
+  when: _awx_buildconfig is changed
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   delegate_to: localhost

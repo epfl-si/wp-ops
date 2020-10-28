@@ -1,4 +1,7 @@
-awx_version: 10.0.0
+awx_version: 15.0.1
+awx_image_name: wp-awx
+awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
+awx_base_image_full_name: "ansible/awx:{{ awx_version }}"
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
@@ -7,9 +10,6 @@ awx_web_hostnames:
 awx_runner_base_image_name: ansible-runner
 awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
 awx_runner_image_name: "wp-ansible-runner"
-
-awx_task_base_image_fullname: "docker.io/ansible/awx_task:{{ awx_version }}"
-awx_task_image_name: "wp-awx-task"
 
 awx_inventory: "{{ awx_inventories[ansible_oc_namespace] }}"
 awx_inventories:

@@ -101,7 +101,7 @@
           containers:
           #####################################################
           - name: awx-web
-            image: "ansible/awx_web:{{ awx_version }}"
+            image: "{{ awx_image_full_name }}"
             ports:
             - containerPort: 8052
               protocol: TCP
@@ -124,11 +124,9 @@
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
-            - name: awx-memcached-socket
-              mountPath: "/var/run/memcached"
           #####################################################
           - name: awx-task
-            image: docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_task_image_name }}:{{ awx_version }}
+            image: "{{ awx_image_full_name }}"
             command:
             - /usr/bin/launch_awx_task.sh
             resources:
@@ -144,8 +142,6 @@
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
-            - name: awx-memcached-socket
-              mountPath: "/var/run/memcached"
             - name: wp-nfs
               mountPath: "/srv"
               readOnly: true
@@ -173,23 +169,6 @@
                 readOnly: true
               - name: awx-redis-socket
                 mountPath: "/var/run/redis"
-          #####################################################
-          - name: awx-memcached
-            image: memcached:latest
-            imagePullPolicy: Always
-            resources:
-              requests:
-                cpu: 250m
-                memory: 1Gi
-            command:
-              - 'memcached'
-              - '-s'
-              - '/var/run/memcached/memcached.sock'
-              - '-a'
-              - '0666'
-            volumeMounts:
-              - name: awx-memcached-socket
-                mountPath: "/var/run/memcached"
           #####################################################
 
 
