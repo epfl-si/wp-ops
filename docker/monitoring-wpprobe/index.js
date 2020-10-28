@@ -10,6 +10,8 @@ const prometheus = require("prom-client"); // Not actually a client
 const pjson = require("./package.json");
 require("express-async-errors");
 
+const debugURLStartingWith = ""; // leave blank to debug all the sites
+
 const app = express();
 const port = 8080;
 const agent = new https.Agent({
@@ -268,18 +270,19 @@ async function scrapeBlocks(options, metrics) {
 
 async function scrapeFMBlocks(options, metrics) {
   let blocks = await fetchJson(options, "wp-json/find-my-blocks/blocks");
-
-  for (let entry of blocks) {
-    let blockCountUsage = 0;
-    for (let post of entry.posts) {
-      blockCountUsage += post.count;
+  if (blocks.hasOwnProperty("blocks")) {
+    for (let entry of blocks.blocks) {
+      let blockCountUsage = 0;
+      for (let post of entry.posts) {
+        blockCountUsage += post.count;
+      }
+      metrics.blockUsageCount.set(
+        {
+          blockName: entry.name,
+        },
+        blockCountUsage
+      );
     }
-    metrics.blockUsageCount.set(
-      {
-        blockName: entry.name,
-      },
-      blockCountUsage
-    );
   }
 }
 
@@ -292,9 +295,11 @@ async function fetcher(options, path) {
     path,
     baseUrl.href.endsWith("/") ? baseUrl.href : baseUrl.href + "/"
   );
-  console.log(
-    ` → ${options.target} | fetching ${apiUrl} (${options.target}${path})`
-  );
+  if (options.target.startsWith(debugURLStartingWith)) {
+    console.log(
+      ` → ${options.target} | fetching ${apiUrl} (${options.target}${path})`
+    );
+  }
   return await fetch(apiUrl, {
     headers: { Host: origHostname },
     agent,
@@ -310,21 +315,25 @@ async function fetchJson(options, path) {
     results.data.status >= 400
   ) {
     // Avoid error in case of "coming soon" wp site
-    console.error(
-      `Error while fetching ${options.target}${path}: ${JSON.stringify(
-        results
-      )}`
-    );
+    if (options.target.startsWith(debugURLStartingWith)) {
+      console.error(
+        `Error while fetching ${options.target}${path}: ${JSON.stringify(
+          results
+        )}`
+      );
+    }
     return [];
   }
 
   if ("status" in results && results.status != "OK") {
-    // Avoid error in case of "coming soon" wp site
-    console.error(
-      `Error while fetching ${options.target}${path}: ${JSON.stringify(
-        results
-      )}`
-    );
+    if (options.target.startsWith(debugURLStartingWith)) {
+      // Avoid error in case of "coming soon" wp site
+      console.error(
+        `Error while fetching ${options.target}${path}: ${JSON.stringify(
+          results
+        )}`
+      );
+    }
     return [];
   }
 

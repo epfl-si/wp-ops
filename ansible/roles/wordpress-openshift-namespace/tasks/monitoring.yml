@@ -175,6 +175,7 @@
     metadata:
       labels:
         app: prometheus
+        rebuild: changeMe
   register: _openshift_imagestream_monitoring_wpprobe
 
 - name: "Rebuild {{ monitoring_prober_image_name }} now"
