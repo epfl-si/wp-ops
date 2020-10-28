@@ -43,14 +43,14 @@ async function siteToMetrics(options) {
   const r = new prometheus.Registry()
   r.setDefaultLabels({ url: options.target,
                        wp_env: options.wp_env })
-
-  function menuGauge(name, help) {
+  
+  function genericGauge(name, help) {
     return new prometheus.Gauge({ name, help,
-                                  labelNames: ['lang'],
                                   registers: [r] })
   }
-  function siteGauge(name, help) {
+  function perLangGauge(name, help) {
     return new prometheus.Gauge({ name, help,
+                                  labelNames: ['lang'],
                                   registers: [r] })
   }
   function externalMenuGauge(name, help) {
@@ -58,45 +58,44 @@ async function siteToMetrics(options) {
                                   labelNames: ['lang', 'slug', 'external_menu_uri'],
                                   registers: [r] })
   }
-  function langGauge(name, help) {
-    return new prometheus.Gauge({ name, help,
-                                  labelNames: ['lang'],
-                                  registers: [r] })
-  }
-  function pluginGauge(name, help) {
-    return new prometheus.Gauge({ name, help,
-                                  registers: [r] })
-  }
   function pluginNameGauge(name, help) {
     return new prometheus.Gauge({ name, help,
                                   labelNames: ['pluginName'],
                                   registers: [r] })
   }
+  function blockGauge(name, help) {
+    return new prometheus.Gauge({ name, help,
+                                  labelNames: ['blockName'],
+                                  registers: [r] })
+  }
 
   const metrics = {
-    menuTime:                     menuGauge('epfl_menu_request_time_seconds',
-                                            'Time in seconds it took to scrape the JSON menu'),
-    menuCount:                    menuGauge('epfl_menu_count',
-                                            'Number of menu entries that live on this site (not parent nor sub-sites)'),
-    menuCountUnique:              menuGauge('epfl_menu_unique_count',
-                                            'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
-    menuOrphanCount:              menuGauge('epfl_menu_orphan_count',
-                                            'Number of orphan menu entries'),
-    menuCycleCount:               menuGauge('epfl_menu_cycle_count',
-                                            'Number of cycles in menu entries'),
-    pageCount:                    siteGauge('epfl_wp_site_pages',
-                                            'Number of WordPress pages on the site'),
+    menuTime:                     perLangGauge('epfl_menu_request_time_seconds',
+                                               'Time in seconds it took to scrape the JSON menu'),
+    menuCount:                    perLangGauge('epfl_menu_count',
+                                               'Number of menu entries that live on this site (not parent nor sub-sites)'),
+    menuCountUnique:              perLangGauge('epfl_menu_unique_count',
+                                               'Number of unique menu entries that live on this site (not parent nor sub-sites)'),
+    menuOrphanCount:              perLangGauge('epfl_menu_orphan_count',
+                                               'Number of orphan menu entries'),
+    menuCycleCount:               perLangGauge('epfl_menu_cycle_count',
+                                               'Number of cycles in menu entries'),
+    pageCount:                    genericGauge('epfl_wp_site_pages',
+                                              'Number of WordPress pages on the site'),
     externalMenuSyncLastSuccess:  externalMenuGauge('epfl_externalmenu_sync_last_success',
                                                     'Last time (in UNIX epoch format) when this external menu was successfully synced'),
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
-    langName:                     langGauge('epfl_wp_site_langs',
-                                            '1 for every different language configured in the site\'s Polylang plugin'),
-    pluginCount:                  pluginGauge('epfl_wp_site_plugin_count',
-                                              'Number of plugins installed on the site'),
+    langName:                     perLangGauge('epfl_wp_site_langs',
+                                               '1 for every different language configured in the site\'s Polylang plugin'),
+    pluginCount:                  genericGauge('epfl_wp_site_plugin_count',
+                                               'Number of plugins installed on the site'),
     pluginName:                   pluginNameGauge('epfl_wp_site_plugin_name', 
                                                   '1 if this plugin is active, 0 otherwise'),
-
+    blockCount:                   genericGauge('epfl_wp_site_block_count',
+                                               'Number of blocks installed on the site'),
+    blockUsageCount:              blockGauge('epfl_wp_site_block_usage_count',
+                                             'Number of blocks used per block on the site'),
   }
 
   await Promise.all([
@@ -104,7 +103,9 @@ async function siteToMetrics(options) {
     scrapeExternalMenus(options, metrics),
     scrapeLanguages(options, metrics),
     scrapePageCount (options, metrics),
-    scrapePlugins(options, metrics)
+    scrapePlugins(options, metrics),
+    scrapeBlocks(options, metrics),
+    scrapeFMBlocks(options, metrics),
   ])
 
   return r.metrics()
@@ -199,6 +200,25 @@ async function scrapePlugins (options, metrics) {
     metrics.pluginName.set ({
       pluginName: plugin.textdomain
     }, plugin.status === 'active' ? 1 : 0)
+  }
+}
+
+async function scrapeBlocks (options, metrics) {
+  let blocks = await fetchJson(options, 'wp-json/wp/v2/block-types')
+  metrics.blockCount.set ({}, blocks.length)
+}
+
+async function scrapeFMBlocks (options, metrics) {
+  let blocks = await fetchJson(options, 'wp-json/find-my-blocks/blocks')
+  
+  for (let entry of blocks) {
+    let blockCountUsage = 0
+    for (let post of entry.posts) {
+      blockCountUsage += post.count
+    }
+    metrics.blockUsageCount.set ({
+      blockName: entry.name
+    }, blockCountUsage)
   }
 }
 
