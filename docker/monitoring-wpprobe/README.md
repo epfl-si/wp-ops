@@ -32,3 +32,4 @@ In order to test new version of the prober, follow these steps:
 - [x] Rename `epflWPSiteLangs` and homogenize metrics names
 - [ ] Plugin: add plugin status as label ?
 - [ ] Lang: only one request ?
+- [x] Comfort: add version to console when starting

@@ -7,9 +7,11 @@ const fetch = require('node-fetch')
 const graphlib = require('graphlib')
 const https = require('https')
 const prometheus = require('prom-client')  // Not actually a client
+const pjson = require('./package.json')
 require('express-async-errors')
 
 const app = express()
+const port = 8080
 const agent = new https.Agent({
   rejectUnauthorized: false,
 })
@@ -33,7 +35,9 @@ app.get('/wpprobe', async function (req, res) {
   }
 })
 
-app.listen(8080) ///////////////////////////////////////////////////////////////
+app.listen(port, () => {
+  console.log(`monitoring-wpprobe (version ${pjson.version}) listening at http://localhost:${port}\n`)
+})
 
 async function siteToMetrics(options) {
   const r = new prometheus.Registry()
