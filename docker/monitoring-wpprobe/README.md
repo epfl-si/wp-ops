@@ -1,4 +1,4 @@
-# Pmonitoring-wpprobe
+# monitoring-wpprobe
 
 This docker allow to fetch data from wordpresses and push metrics to prometheus.
 
@@ -29,4 +29,6 @@ In order to test new version of the prober, follow these steps:
 ## ToDos
 
 - [ ] Ansible: trigger start-build and redeploy when changed
-- [ ] Rename `epflWPSiteLangs` and homogenize metrics names
+- [x] Rename `epflWPSiteLangs` and homogenize metrics names
+- [ ] Plugin: add plugin status as label ?
+- [ ] Lang: only one request ?
