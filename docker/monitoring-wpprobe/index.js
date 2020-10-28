@@ -54,7 +54,7 @@ async function siteToMetrics(options) {
                                   labelNames: ['lang', 'slug', 'external_menu_uri'],
                                   registers: [r] })
   }
-  function wpSite(name, help) {
+  function langGauge(name, help) {
     return new prometheus.Gauge({ name, help,
                                   labelNames: ['lang'],
                                   registers: [r] })
@@ -65,7 +65,7 @@ async function siteToMetrics(options) {
   }
   function pluginNameGauge(name, help) {
     return new prometheus.Gauge({ name, help,
-                                  labelNames: ['name'],
+                                  labelNames: ['pluginName'],
                                   registers: [r] })
   }
 
@@ -86,12 +86,11 @@ async function siteToMetrics(options) {
                                                     'Last time (in UNIX epoch format) when this external menu was successfully synced'),
     externalMenuSyncFailingSince: externalMenuGauge('epfl_externalmenu_sync_failing_since',
                                                     'Time (in UNIX epoch format) at which the current streak of sync failures started'),
-    epflWPSiteLangs:              wpSite('epfl_wp_site_langs',
-                                         '1 for every different language configured in the site\'s Polylang plugin'),
+    langName:                     langGauge('epfl_wp_site_langs',
+                                            '1 for every different language configured in the site\'s Polylang plugin'),
     pluginCount:                  pluginGauge('epfl_wp_site_plugin_count',
                                               'Number of plugins installed on the site'),
-    //activePluginCount
-    pluginList:                   pluginNameGauge('epfl_wp_site_plugin_name', 
+    pluginName:                   pluginNameGauge('epfl_wp_site_plugin_name', 
                                                   '1 if this plugin is active, 0 otherwise'),
 
   }
@@ -183,8 +182,7 @@ async function scrapeMenu (options, path, metrics) {
 async function scrapeLanguages (options, metrics) {
   let languages = await fetchJson(options, 'wp-json/epfl/v1/languages')
   for (let lang of languages) {
-    metrics.epflWPSiteLangs.set ({
-      //url: options.target,
+    metrics.langName.set ({
       lang
     }, 1)
   }
@@ -194,8 +192,8 @@ async function scrapePlugins (options, metrics) {
   let plugins = await fetchJson(options, 'wp-json/wp/v2/plugins')
   metrics.pluginCount.set ({}, plugins.length)
   for (let plugin of plugins) {
-    metrics.pluginList.set ({
-      name: plugin.name
+    metrics.pluginName.set ({
+      pluginName: plugin.textdomain
     }, plugin.status === 'active' ? 1 : 0)
   }
 }
