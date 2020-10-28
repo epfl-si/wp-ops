@@ -65,7 +65,7 @@ async function siteToMetrics(options) {
   }
   function pluginNameGauge(name, help) {
     return new prometheus.Gauge({ name, help,
-                                  labelNames: ['name'],
+                                  labelNames: ['pluginName'],
                                   registers: [r] })
   }
 
@@ -90,8 +90,7 @@ async function siteToMetrics(options) {
                                             '1 for every different language configured in the site\'s Polylang plugin'),
     pluginCount:                  pluginGauge('epfl_wp_site_plugin_count',
                                               'Number of plugins installed on the site'),
-    //activePluginCount
-    pluginList:                   pluginNameGauge('epfl_wp_site_plugin_name', 
+    pluginName:                   pluginNameGauge('epfl_wp_site_plugin_name', 
                                                   '1 if this plugin is active, 0 otherwise'),
 
   }
@@ -193,8 +192,8 @@ async function scrapePlugins (options, metrics) {
   let plugins = await fetchJson(options, 'wp-json/wp/v2/plugins')
   metrics.pluginCount.set ({}, plugins.length)
   for (let plugin of plugins) {
-    metrics.pluginList.set ({
-      name: plugin.name
+    metrics.pluginName.set ({
+      pluginName: plugin.textdomain
     }, plugin.status === 'active' ? 1 : 0)
   }
 }
