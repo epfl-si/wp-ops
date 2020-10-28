@@ -1,4 +1,4 @@
-#canary201026.0936
+#canary201027.0847
 
 # Custom runner image with the `wp` command-line tool and a WordPress layout in /wp
 - include_vars: ../../../vars/image-vars.yml

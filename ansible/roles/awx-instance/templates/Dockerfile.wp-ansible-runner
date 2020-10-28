@@ -42,17 +42,17 @@ RUN mkdir /runner/.opcache;                                                     
 
 
 
-#zzz201020.1008
-# mitogen_free
-# mitogen_host_pinned
-# mitogen_linear
-RUN pip3 install mitogen==0.2.9
-RUN mkdir /etc/ansible;                                                         \
-    ( echo '[defaults]';                                                        \
-      echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy'; \
-      echo 'strategy = mitogen_host_pinned')                                         \
-    > /etc/ansible/ansible.cfg
-#zzz
+# #zzz201020.1008
+# # mitogen_free
+# # mitogen_host_pinned
+# # mitogen_linear
+# RUN pip3 install mitogen==0.2.9
+# RUN mkdir /etc/ansible;                                                         \
+#     ( echo '[defaults]';                                                        \
+#       echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy'; \
+#       echo 'strategy = mitogen_host_pinned')                                         \
+#     > /etc/ansible/ansible.cfg
+# #zzz
 
     
 RUN pip3 install awscli
