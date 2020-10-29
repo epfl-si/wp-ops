@@ -20,6 +20,7 @@
     git:
         repository: "{{ wp_ops_git_uri }}"
         path: "{{ item.git_path }}"
+        ref: "{{ git_current_branch }}"
     strategy: "{{ item.strategy | default({}) }}"
   with_items:
     - name: "{{ wp_base_image_name }}"
@@ -37,6 +38,9 @@
     - name: "{{ mgmt_image_name }}"
       git_path: docker/mgmt
       from: "{{ wp_base_image_name }}"
+    - name: "{{ backup_cron_image_name }}"
+      git_path: docker/cronjob
+      from: "{{ mgmt_image_name }}"
 
 - name: "Production ImageStreams"
   when: openshift_is_production
