@@ -48,6 +48,7 @@ platform_check () {
     fi
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
+    export ANSIBLE_COLLECTIONS_PATHS="$PWD/ansible-deps-cache"
 
     oc_check
 }

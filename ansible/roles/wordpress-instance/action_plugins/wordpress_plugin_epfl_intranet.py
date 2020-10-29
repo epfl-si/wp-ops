@@ -33,7 +33,7 @@ class ActionModule(WordPressActionModule):
         Tells if the plugin is installed
         """
 
-        result = self._run_wp_cli_action("plugin list --format=csv", update_result=False)
+        result = self._query_wp_cli("plugin list --format=csv")
 
         for line in result['stdout_lines'][1:]:
             fields = line.split(',')
@@ -49,9 +49,7 @@ class ActionModule(WordPressActionModule):
         Set correct protection state for plugin
         """
 
-        result = self._run_wp_cli_action("epfl intranet status", update_result=False)
-
-        if 'failed' in self.result: return
+        result = self._query_wp_cli("epfl intranet status")
 
         # Getting parameters
         protection_enabled = self._task.args.get('protection_enabled').strip().lower() == 'yes'
@@ -66,14 +64,11 @@ class ActionModule(WordPressActionModule):
                 # Creating restriction option
                 restrict_to_groups_opt = "--restrict-to-groups={}".format(restrict_to_groups) if restrict_to_groups != "" else ""
 
-                wpcli_command = "epfl intranet update-protection {}".format(restrict_to_groups_opt)
-                #self._update_result(self._run_wp_cli_action(wpcli_command))
-                self._run_wp_cli_action(wpcli_command)
+                self._run_wp_cli_change("epfl intranet update-protection {}".format(restrict_to_groups_opt))
         
         # Protection needs to be disabled
         else:
             
             if 'is enabled' in result['stdout']:
                 
-                wpcli_command = "plugin deactivate epfl-intranet"
-                self._run_wp_cli_action(wpcli_command)
+                self._run_wp_cli_change("plugin deactivate epfl-intranet")

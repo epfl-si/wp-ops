@@ -30,13 +30,11 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 bool(desired_activation_state) and
                 'active' in set([current_activation_state]) - set([desired_activation_state])
         ):
-            self._update_result(self._do_deactivate_plugin())
-            if 'failed' in self.result: return self.result
+            self._do_deactivate_plugin()
 
         if desired_installation_state:
             # Setting desired installation state
             self._ensure_all_files_state(desired_installation_state)
-            if 'failed' in self.result: return self.result
 
         if (
                 not self._is_mandatory() and
@@ -44,7 +42,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
             self._do_activate_element()
-            if 'failed' in self.result: return self.result
 
         return self.result
 
@@ -52,10 +49,11 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """Overridden to try with `wp plugin delete` first."""
         # First try to use wp-cli to uninstall:
         if desired_state == 'absent' and not self._is_check_mode():
-            result = self._run_wp_cli_action('plugin delete {}'.format(self._task.args.get('name')),
-                                             update_result=False)
-            if "Plugin already deleted" not in result["stdout"] and "could not be found" not in result["stdout"]:
-                self.result.update(result)
+            orig_changed = self.result.get('changed', False)
+            self._run_wp_cli_change('plugin delete {}'.format(self._task.args.get('name')))
+            if ("Plugin already deleted" in self.result["stdout"]
+                or "could not be found" in self.result["stdout"]):
+                self.result['changed'] = orig_changed
 
         super(ActionModule, self)._ensure_all_files_state(desired_state)
 
@@ -64,5 +62,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
         """
         Uses WP-CLI to deactivate plugin
         """
-        return self._run_wp_cli_action('plugin deactivate {}'.format(self._get_name()))
+        return self._run_wp_cli_change('plugin deactivate {}'.format(self._get_name()))
+
 

@@ -1,10 +1,7 @@
-
-# There is a name clash with a module in Ansible named "copy":
-deepcopy = __import__('copy').deepcopy
-
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError, AnsibleActionFail
 from ansible.module_utils import six
+from ansible_collections.epfl_si.actions.plugins.module_utils.subactions import Subaction
 
 import re
 import os
@@ -18,8 +15,8 @@ class WordPressActionModule(ActionBase):
         # It will be initialized in child classes
         self.result = None
 
-        self._tmp = tmp
-        self._task_vars = task_vars
+        self._task_vars = task_vars  # For the _get_ansible_var() method
+        self._subaction = Subaction(self, task_vars)
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
@@ -29,13 +26,13 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder for which we have to create a symlink
         """
-        return self._run_action('file', {
-            'state': 'link',
+        return self._subaction.change(
+            'file',
+            {'state': 'link',
             # Beware src / path inversion, as is customary with everything symlink:
-            'src': self._get_symlink_target(basename),
-            'path': self._get_symlink_path(basename),
-            })
-
+             'src': self._get_symlink_target(basename),
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
 
     def _do_rimraf_file (self, basename):
         """
@@ -43,11 +40,11 @@ class WordPressActionModule(ActionBase):
 
         :param basename: given plugin file/folder
         """
-        self._run_action('file',
-                         {'state': 'absent',
-                          'path': self._get_symlink_path(basename)})
-        return self.result
-
+        return self._subaction.change(
+            'file',
+            {'state': 'absent',
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
 
     def _get_symlink_path (self, basename):
         """
@@ -76,122 +73,42 @@ class WordPressActionModule(ActionBase):
         """
         return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
-
-    def _run_wp_cli_action (self, args, update_result=True, also_in_check_mode=False, pipe_input=None, skip_loading_wp=False):
+    def _query_wp_cli (self, args):
         """
-        Executes a given WP-CLI command
+        Run WP-CLI to query state.
+
+        If you want to change the WordPress state, use _run_wp_cli_change() instead.
 
         :param args: WP-CLI command to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
+        """
+        return self._subaction.query("command", dict(_raw_params=self._make_wp_cli_command(args)))
+
+    def _run_wp_cli_change (self, args, pipe_input=None):
+        """
+        Run WP-CLI to effect a change.
+
+        If you want to read the WordPress state, use _query_wp_cli() instead.
+
+        :param args: WP-CLI command to execute
         :param skip-loading-wp: if you don't want to load all the WP
         """
-        # wp_cli_command: "wp --path={{ wp_dir }}"
-        wp_cli_var_name = 'wp_cli_command_with_skip' if skip_loading_wp else 'wp_cli_command'
-        cmd = '{} {}'.format(self._get_ansible_var(wp_cli_var_name), args)
+        return self._subaction.change("command", dict(_raw_params=self._make_wp_cli_command(args),
+                                                      stdin=pipe_input),
+                                      update_result=self.result)
 
-        return self._run_shell_action(
-            cmd, update_result=update_result,
-            also_in_check_mode=also_in_check_mode,
-            pipe_input=pipe_input)
+    def _get_wp_json (self, suffix):
+        return json.loads(self._query_wp_cli(suffix)['stdout'])
 
-    def _get_wp_json (self, suffix, skip_loading_wp=False):
-        result = self._run_wp_cli_action(suffix, update_result=False, also_in_check_mode=True, skip_loading_wp=skip_loading_wp)
-        return json.loads(result['stdout'])
-
-
-    def _run_php_code(self, code, update_result=True):
-        """
-        Execute PHP code and returns result
-
-        :param code: Code to execute
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        result = self._run_shell_action("php -r '{}'".format(code), update_result=update_result)
-
-        return result['stdout_lines']
-
-
-    def _run_shell_action (self, cmd, update_result=True, also_in_check_mode=False, pipe_input=None):
-        """
-        Executes a Shell command
-
-        :param cmd: Command to execute.
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-        return self._run_action('command', { '_raw_params': cmd, '_uses_shell': True, 'stdin': pipe_input }, update_result=update_result,
-                                also_in_check_mode=also_in_check_mode)
-
-
-    def _run_action (self, action_name, args, update_result=True, also_in_check_mode=False):
-        """
-        Executes an action, using an Ansible module.
-
-        :param action_name: Ansible module name to use
-        :param args: dict with arguments to give to module
-        :param update_result: To tell if we have to update result after command. Give "False" if it is a "read only" command
-        """
-
-        self._display.vvv('_run_action(%s, %s, update_result=%s, also_in_check_mode=%s)' %
-                          (action_name, args, update_result, also_in_check_mode))
-
-        result = None
-        check_mode_orig = self._play_context.check_mode
-        if self._is_check_mode():
-            if also_in_check_mode:
-                # Get Ansible to run the task regardless
-                args = deepcopy(args)
-                if action_name == 'command':
-                    self._play_context.check_mode = False  # Meaning that yes, it supports check mode
-            else:
-                # Simulate "orange" condition
-                result = dict(changed=True)
-
-        if result is None:
-            try:
-                result = self._do_run_action(action_name, args)
-            finally:
-                self._play_context.check_mode = check_mode_orig
-
-        if update_result:
-            self._update_result(result)
-            return self.result
-
-        else:
-            return result
-
-
-    def _do_run_action(self, action_name, args):
-        try:
-            # https://www.ansible.com/blog/how-to-extend-ansible-through-plugins at "Action Plugins"
-            return self._execute_module(module_name=action_name,
-                                        module_args=args, tmp=self._tmp,
-                                        task_vars=self._task_vars)
-        except AnsibleError as e:
-            if not e.message.endswith('was not found in configured module paths'):
-                raise e
-
-        # Maybe action_name designates a "user-defined" action module
-        # Retry through self._shared_loader_obj
-        new_task = self._task.copy()
-        new_task.args = args
-
-        action = self._shared_loader_obj.action_loader.get(
-            action_name,
-            task=new_task,
-            connection=self._connection,
-            play_context=self._play_context,
-            loader=self._loader,
-            templar=self._templar,
-            shared_loader_obj=self._shared_loader_obj)
-        return action.run(task_vars=self._task_vars)
-
+    def _make_wp_cli_command(self, args):
+        return '{} {}'.format(
+            self._get_ansible_var("wp_cli_command"),
+            args)
 
     def _get_wp_dir (self):
         """
         Returns directory in which WordPress is installed
         """
         return self._get_ansible_var('wp_dir')
-
 
     def _get_ansible_var (self, name):
         """
@@ -220,28 +137,6 @@ class WordPressActionModule(ActionBase):
 
     def _is_check_mode (self):
         return self._task_vars.get('ansible_check_mode', False)
-
-
-    def _update_result (self, result):
-        """
-        Updates result dict
-
-        :param result: dict to update with
-        """
-        oldresult = deepcopy(self.result)
-        self.result.update(result)
-
-        def _keep_flag_truthy(flag_name):
-            if (flag_name in oldresult and
-                oldresult[flag_name] and
-                flag_name in self.result and
-                not self.result[flag_name]
-            ):
-                self.result[flag_name] = oldresult[flag_name]
-
-        _keep_flag_truthy('changed')
-
-        return self.result
 
 
 class WordPressPluginOrThemeActionModule(WordPressActionModule):
@@ -336,15 +231,13 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             return
 
         if 'installed' in to_do:
-            self._update_result(self._run_wp_cli_action('plugin install {}'.format(self._task.args.get('from'))))
+            self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
 
         if 'symlinked' in to_undo or 'installed' in to_undo:
-            self._update_result(self._do_rimraf_file(basename))
-            if 'failed' in self.result: return self.result
+            self._do_rimraf_file(basename)
 
         if 'symlinked' in to_do:
-            self._update_result(self._do_symlink_file(basename))
-            if 'failed' in self.result: return self.result
+            self._do_symlink_file(basename)
 
 
     def _ensure_all_files_state (self, desired_state):
@@ -367,7 +260,6 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # Going through each files/folder for plugin
         for basename in basenames:
             self._ensure_file_state(desired_state, basename)
-            if 'failed' in self.result: return self.result
 
 
     def _get_current_file_state (self, basename):
@@ -377,7 +269,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         :param basename: name of element to check (can be a file or folder)
         """
         path = self._get_symlink_path(basename)
-        plugin_stat = self._run_action('stat', { 'path': path }, update_result=False, also_in_check_mode=True)
+        plugin_stat = self._subaction.query('stat', { 'path': path })
         if 'failed' in plugin_stat:
             raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
         file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
@@ -399,7 +291,8 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         """
         Uses WP-CLI to activate plugin
         """
-        return self._run_wp_cli_action('{} activate {}'.format(self._get_type(), self._get_name()))
+        return self._run_wp_cli_change(
+            '{} activate {}'.format(self._get_type(), self._get_name()))
 
 
     def _activation_state(self, desired_state):
@@ -444,7 +337,7 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         # To use 'wp plugin' for MU-Plugins
         wp_command = 'plugin' if self._get_type() == 'mu-plugin' else self._get_type()
 
-        result = self._run_wp_cli_action('{} list --format=csv'.format(wp_command), also_in_check_mode=True, update_result=False)
+        result = self._query_wp_cli('{} list --format=csv'.format(wp_command))
 
         if 'failed' in result: return
 

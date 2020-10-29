@@ -44,7 +44,8 @@ class ActionModule(WordPressActionModule):
         if wp_is_installed:
             for wat in ['plugin', 'theme']:
                 try:
-                    facts['wp_%s_list' % wat] = self._get_wp_json('%s list --format=json' % wat, skip_loading_wp=True)
+                    facts['wp_%s_list' % wat] = self._get_wp_json(
+                        '%s list --format=json --skip-packages --skip-themes --skip-plugins' % wat)
                 except:
                     pass
 
@@ -59,6 +60,6 @@ class ActionModule(WordPressActionModule):
         return not (('stat' in stat) and stat['stat'] and 'isdir' in stat['stat'] and (stat['stat']['isdir']))
 
     def _stat (self, relpath):
-        return self._run_action('stat', {
+        return self._subaction.query('stat', {
             'path': os.path.join(self._get_wp_dir(), relpath)
-        }, update_result=False, also_in_check_mode=True)
+        })
