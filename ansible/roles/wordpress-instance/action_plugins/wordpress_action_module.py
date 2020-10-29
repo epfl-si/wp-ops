@@ -122,6 +122,9 @@ class WordPressActionModule(ActionBase):
         else:
             return self._templar.template(unexpanded)
 
+    @property
+    def _inventory_hostname(self):
+        return self._get_ansible_var("inventory_hostname")
 
     def _is_filename (self, from_piece):
         """
