@@ -1,3 +1,5 @@
+#canary201029.1117
+
 # Set up a container group for systolic Ansible execution.
 #
 # As AWX runs tasks in the `tower-elastic` container group, additional containers will be started
@@ -55,10 +57,30 @@
       apiVersion: v1
       kind: Pod
       metadata:
-        #zzz201029.1100, je dois mettre mon labels
+        #zzz201029.1100, c'est ici que je dois mettre mon labels
+        labels:
+          deploymentconfig: ansible-runner
+        #zzz
         namespace: {{ ansible_oc_namespace }}
       spec:
-        #zzz201029.1100, et là, une affinity
+        #zzz201029.1100, et là, une affinity        
+        affinity:
+          podAntiAffinity: #... Ce pod ne préfère pas...
+            # ... être alloué ... (il s'en moque pendant l'exécution)
+            requiredDuringSchedulingIgnoredDuringExecution:
+              # ... sur le même hostname...
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  # ... qu'un autre pod...
+                  matchExpressions:
+                    # ... dont le label deploymentconfig...
+                    - key: deploymentconfig
+                      # ... est dans la liste...
+                      operator: In
+                      values:
+                        # ... ansible-runner
+                        - ansible-runner
+        #zzz
         # Run as this user for historical compatibility reasons; see
         # comments in the inline Dockerfile in k8s-builds.yml
         securityContext:
