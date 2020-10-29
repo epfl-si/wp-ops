@@ -91,13 +91,13 @@ class _OnDiskPrefixCache(object):
         return os.path.exists(self._key_path(key))
 
     def get(self, key):
-        with open(self._key_path(key)) as f:
+        with open(self._key_path(key), 'rb') as f:
             return pickle.load(f)
 
     def set(self, key, value):
         key_path = self._key_path(key)
         os.makedirs(os.path.dirname(key_path), exist_ok=True)
-        with open(key_path, 'w') as f:
+        with open(key_path, 'wb') as f:
             pickle.dump(value, f)
 
     def invalidate_prefix(self, key_prefix):
