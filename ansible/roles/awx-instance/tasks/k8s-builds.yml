@@ -48,6 +48,10 @@
        RUN curl https://patch-diff.githubusercontent.com/raw/ansible/ansible/pull/72131.patch | \
            patch -p2 -d /usr/lib/python3.6/site-packages/
 
+       # Work around https://github.com/ansible/awx/issues/8486
+       RUN curl https://patch-diff.githubusercontent.com/raw/epfl-si/awx/pull/1.patch | \
+           patch -p1 -d /var/lib/awx/venv/awx/lib/python3.6/site-packages/
+
        USER 1000
 
 - name: "Rebuild {{ awx_image_name }} now"
