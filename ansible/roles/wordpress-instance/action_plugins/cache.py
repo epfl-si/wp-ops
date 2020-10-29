@@ -2,19 +2,29 @@ from ansible.module_utils import six
 import collections
 import inspect
 import os
+import pprint
 import pickle
 import shutil
+import sys
 
 class _DecoratorCache(object):
     def __init__(self_, cache):
         self_.__cache = cache
+
+    def __diag(self_, hint, key_prefix):
+        if os.getenv("DECORATOR_CACHE_DEBUG"):
+            print("%s @ %s" % (hint, pprint.pformat(key_prefix)),
+                  file=sys.stderr)
 
     def by(self_, key_f):
         def decorator(f):
             def wrapped_f(self, *args, **kwargs):
                 cache_key = self_.__get_key(key_f, self, *args, **kwargs)
                 if not self_.__cache.has(cache_key):
+                    self_.__diag("MISS", cache_key)
                     self_.__cache.set(cache_key, f(self, *args, **kwargs))
+                else:
+                    self_.__diag("HIT", cache_key)
                 return self_.__cache.get(cache_key)
 
             wrapped_f.__name__ = f.__name__  # YAGNI?
@@ -24,7 +34,9 @@ class _DecoratorCache(object):
     def invalidate_by_prefix(self_, key_f):
         def decorator(f):
             def wrapped_f(self, *args, **kwargs):
-                self_.__cache.invalidate_prefix(self_.__get_key(key_f, self, *args, **kwargs))
+                cache_key_prefix = self_.__get_key(key_f, self, *args, **kwargs)
+                self_.__diag("INVALIDATE", cache_key_prefix)
+                self_.__cache.invalidate_prefix(cache_key_prefix)
                 return f(self, *args, **kwargs)
 
             wrapped_f.__name__ = f.__name__
