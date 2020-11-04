@@ -3,6 +3,13 @@
     - awx
     - awx.promote
 
+- name: "Persistent Volume Claim"
+  import_tasks: persistent-volume-claim.yml
+  delegate_to: localhost
+  tags:
+    - awx
+    - awx.pvc
+
 - name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
   when: "ansible_oc_namespace == awx_build_namespace"
   import_tasks: k8s-builds.yml
