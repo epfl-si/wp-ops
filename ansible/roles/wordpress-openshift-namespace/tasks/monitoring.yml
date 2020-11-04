@@ -200,49 +200,6 @@
   shell: "oc -n {{ openshift_namespace }} start-build --wait {{ monitoring_disk_usage_report_image_name }}"
   delegate_to: localhost
 
-- name: "Pushgateway service"
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: pushgateway
-      namespace: "{{ openshift_namespace }}"
-      labels:
-        app: pushgateway
-    spec:
-      ports:
-        - name: pushgateway
-          port: 9091
-      selector:
-        app: pushgateway
-
-- name: Pushgateway Deployment config
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: DeploymentConfig
-    metadata:
-      name: pushgateway
-      namespace: "{{ openshift_namespace }}"
-    spec:
-      replicas: 1
-      selector:
-        app: pushgateway
-      template:
-        metadata:
-          labels:
-            app: pushgateway
-        spec:
-          containers:
-            - name: pushgateway
-              image: prom/pushgateway
-              ports:
-              - containerPort: 9091
-                name: pushgateway
-      triggers:
-      - type: ConfigChange
-
 # OpenShift cron job to create a qdirstat-compatible report every morning.
 - name: BuildConfig for the customized Perl Docker image
   openshift:

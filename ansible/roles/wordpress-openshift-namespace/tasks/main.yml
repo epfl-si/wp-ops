@@ -62,5 +62,23 @@
 
 - name: "Monitoring and disk usage report microservice"
   when: openshift_namespace == "wwp"
-  include: monitoring.yml
-  tags: monitoring
+  include_tasks:
+    file: monitoring.yml
+    apply:
+      tags:
+        - monitoring
+  tags:
+    - monitoring
+    - monitoring.pushgateway
+
+- name: "Pushgateway"
+  when: openshift_namespace == "wwp"
+  include_tasks:
+    file: ../../../tasks/pushgateway.yml
+    apply:
+      tags:
+        - monitoring
+  tags:
+    - monitoring
+    - monitoring.pushgateway
+  
