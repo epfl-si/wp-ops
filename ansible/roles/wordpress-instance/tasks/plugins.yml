@@ -39,7 +39,9 @@
     chdir: "{{ wp_dir }}"
     cmd: wp plugin list --name=coming-soon --status=active --format=count
   changed_when: false
-  tags: wp.plugins.coming-soon
+  tags: 
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
   register: _coming_soon_plugin_was_active
 
 - name: Enable Coming Soon on new sites
@@ -91,8 +93,9 @@
 
 # Une fois que toute la flotte est mise à jour cad Plugin coming soon désintallé et EPFL Coming soon installé
 # on modifie le présent script ansible afin de gérer les nouveaux sites
-
-
+- debug:
+    msg: "Plugin coming soon installed and activated ? {{ _coming_soon_plugin_was_active }}"
+  tags: wp.plugins.coming-soon
 
 - name: Disable Coming Soon on sites where the plug-in was previously inactive
   wordpress_option: "{{ item }}"
