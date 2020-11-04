@@ -79,6 +79,39 @@
     from: wordpress.org/plugins
   tags: wp.plugins.coming-soon
 
+# Avant d'installer EPFL Plugin Soon, il faut définir les options correspondantes
+
+# Cas 1:
+# Si le plugin coming soon était désinstallé ou (installé mais désactivé) ou (installé, activé mais non armé)
+# Alors on installe le plugin EPFL coming soon, on l'active mais il doit être non armé
+
+# Cas 2:
+# Si le plugin coming soon était installé, activé et armé
+# Alors on installe le plugin EPFL coming soon, on l'active et il doit être armé
+
+# Une fois que toute la flotte est mise à jour cad Plugin coming soon désintallé et EPFL Coming soon installé
+# on modifie le présent script ansible afin de gérer les nouveaux sites
+
+
+
+- name: Disable Coming Soon on sites where the plug-in was previously inactive
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_coming_soon_options }}"
+  vars:
+    plugin_coming_soon_shall_be_enabled: false
+  when: >-
+    _active_plugins.stdout != "" and _coming_soon_plugin_was_active.stdout == "0"
+  tags: wp.plugins.coming-soon
+
+- name: EPFL Coming Soon plugin (always installed)
+  wordpress_plugin:
+    name: epfl-coming-soon
+    state:
+      - symlinked
+      - active
+    from: https://github.com/epfl-si/wp-plugin-epfl-coming-soon
+  tags: wp.plugins.epfl-coming-soon
+
 ##################### Must-use plugins ###########################
 
 - name: Custom editor menu (must-use plugin)
