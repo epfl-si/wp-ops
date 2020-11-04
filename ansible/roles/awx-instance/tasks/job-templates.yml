@@ -71,6 +71,6 @@
 
           with AnsibleGetOrCreate(Schedule, name="Backup nightly") as s:
                 s.unified_job_template = jt
-                s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T030303 RRULE:FREQ=DAILY;INTERVAL=1"
+                s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T222222 RRULE:FREQ=DAILY;INTERVAL=1"
 
   tags: awx.job-template.backups
