@@ -93,3 +93,13 @@
   tags:
     - awx
     - awx.job-template
+
+- name: "Pushgateway (for backup stats)"
+  when: ansible_oc_namespace == "wwp-infra"
+  delegate_to: localhost
+  vars:
+    openshift_namespace: "{{ ansible_oc_namespace }}"
+  import_tasks: ../../../tasks/pushgateway.yml
+  tags:
+    - awx
+    - awx.pushgateway
