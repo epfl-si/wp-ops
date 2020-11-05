@@ -11,6 +11,7 @@
 - name: WordPress instances
   hosts: all_wordpresses
   gather_facts: no   # But see ../roles/wordpress-instance/action_plugins/wordpress_facts.py
+  strategy: mitogen_linear
   roles:
     - role: ../roles/wordpress-instance
 
