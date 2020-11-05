@@ -79,6 +79,15 @@
     from: wordpress.org/plugins
   tags: wp.plugins.coming-soon
 
+- name: EPFL Coming Soon plugin (always installed)
+  wordpress_plugin:
+    name: epfl-coming-soon
+    state:
+      - symlinked
+      - active
+    from: https://github.com/epfl-si/wp-plugin-epfl-coming-soon
+  tags: wp.plugins.epfl-coming-soon
+
 ##################### Must-use plugins ###########################
 
 - name: Custom editor menu (must-use plugin)
