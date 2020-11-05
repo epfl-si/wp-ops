@@ -24,6 +24,8 @@
     - akismet
     - hello
 
+#GREG: Si aucun plugin est installé, il s'agit alors d'un nouveau site
+#GREG: _active_plugins.stdout == "" => NOUVEAU SITE
 - name: Enumerate active plugins
   shell:
     chdir: "{{ wp_dir }}"
@@ -33,6 +35,7 @@
   check_mode: no
   tags: always
 
+#GREG: _coming_soon_plugin_was_active porte bien son nom
 - name: Was “coming soon” plug-in active?
   check_mode: no   # That means yes
   shell:
@@ -44,6 +47,7 @@
     - wp.plugins.epfl-coming-soon
   register: _coming_soon_plugin_was_active
 
+#GREG: Si c'est un nouveau site alors on doit armer coming soon
 - name: Enable Coming Soon on new sites
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_coming_soon_options }}"
@@ -63,6 +67,9 @@
 # lingering in the wp_options table despite the plug-in having been
 # uninstalled). Once this task has run on the entire fleet, it ought
 # to be removed.
+
+#GREG: On désarme le plugin coming soon si le site existe deja (= le site a des plugins actifs)
+#GREG: et que le plugin coming soon est actif
 - name: Disable Coming Soon on sites where the plug-in was previously inactive
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_coming_soon_options }}"
@@ -72,6 +79,7 @@
     _active_plugins.stdout != "" and _coming_soon_plugin_was_active.stdout == "0"
   tags: wp.plugins.coming-soon
 
+#GREG: On installe et active le plugin coming soon dans tous les cas
 - name: Coming Soon plugin (always installed)
   wordpress_plugin:
     name: coming-soon
@@ -94,16 +102,18 @@
 # Une fois que toute la flotte est mise à jour cad Plugin coming soon désintallé et EPFL Coming soon installé
 # on modifie le présent script ansible afin de gérer les nouveaux sites
 - debug:
-    msg: "Plugin coming soon installed and activated ? {{ _coming_soon_plugin_was_active }}"
+    msg: "Plugin coming soon installé et actif ? {{ _coming_soon_plugin_was_active.stdout == \"1\" }}"
   tags: wp.plugins.coming-soon
 
-- name: Disable Coming Soon on sites where the plug-in was previously inactive
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_coming_soon_options }}"
-  vars:
-    plugin_coming_soon_shall_be_enabled: false
-  when: >-
-    _active_plugins.stdout != "" and _coming_soon_plugin_was_active.stdout == "0"
+- name: Coming soon was loaded ?
+  shell: |
+    {{ wp_cli_command }} option get seed_csp4_settings_content --format=json | jq '.status|tonumber'
+  changed_when: false
+  register: _coming_soon_is_loaded
+  tags: wp.plugins.coming-soon
+
+- debug:
+    msg: "Plugin coming soon armé ? {{ _coming_soon_is_loaded.stdout == \"1\" }}"
   tags: wp.plugins.coming-soon
 
 - name: EPFL Coming Soon plugin (always installed)
