@@ -18,19 +18,11 @@ RUN pip3 install awscli
 RUN pip3 install mitogen==0.2.9
 RUN mkdir /etc/ansible;                                                         \
     ( echo '[defaults]';                                                        \
-      echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy'; \
-      echo 'strategy = mitogen_linear')                                         \
-    > /etc/ansible/ansible.cfg
-
-RUN pip3 install mitogen==0.2.9
-RUN mkdir /etc/ansible;                                                         \
-    ( echo '[defaults]';                                                        \
-      echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy'; \
-      echo 'strategy = mitogen_linear')                                         \
+      echo 'strategy_plugins = /usr/local/lib/python3.6/site-packages/ansible_mitogen/plugins/strategy') \
     > /etc/ansible/ansible.cfg
 
 ARG RUNNER_PATCH_URLS=""
-ARG ANSIBLE_PATCH_URLS=""
+ARG ANSIBLE_PATCH_URLS="https://patch-diff.githubusercontent.com/raw/ansible/awx/pull/8487.patch"
 RUN set -e -x; yum -y install patch;                                        \
     for url in $RUNNER_PATCH_URLS; do                                       \
         curl $url |                                                         \
