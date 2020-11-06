@@ -79,6 +79,13 @@
     from: wordpress.org/plugins
   tags: wp.plugins.coming-soon
 
+- name: Disable EPFL Coming Soon on new sites
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_epfl_coming_soon_options }}"
+  vars:
+    plugin_epfl_coming_soon_shall_be_enabled: false
+  tags: wp.plugins.epfl-coming-soon
+
 - name: EPFL Coming Soon plugin (always installed)
   wordpress_plugin:
     name: epfl-coming-soon
