@@ -24,8 +24,8 @@
     - akismet
     - hello
 
-#GREG: Si aucun plugin est installé, il s'agit alors d'un nouveau site
-#GREG: _active_plugins.stdout == "" => NOUVEAU SITE
+# Si aucun plugin est installé, il s'agit alors d'un nouveau site
+# _active_plugins.stdout == "" => NOUVEAU SITE
 - name: Enumerate active plugins
   shell:
     chdir: "{{ wp_dir }}"
@@ -35,54 +35,61 @@
   check_mode: no
   tags: always
 
-# Avant d'installer EPFL Plugin Soon, il faut définir les options correspondantes
+# Cas n°1: Un site n'existe pas encore
+#
+# Il faut installer, activer et armer epfl-coming-soon
 
-# Cas 1:
-# Si le plugin coming soon était désinstallé ou (installé mais désactivé) ou (installé, activé mais non armé)
-# Alors on installe le plugin EPFL coming soon, on l'active mais il doit être non armé
+# Cas n°2: Le site existe et coming-soon est armé
+#
+# Attention! Pour déterminer que coming-soon armé il faut regarder la valeur de 2 options
+# 'seed_csp4_settings_content' et 'seedprod_settings'
+#
+# Il faut installer, activer et armer epfl-coming-soon
+# et désinstaller coming-soon
 
-# Cas 2:
-# Si le plugin coming soon était installé, activé et armé
-# Alors on installe le plugin EPFL coming soon, on l'active et il doit être armé
+# Cas n°3: Le site existe et coming-soon est désarmé
+#
+# Attention! Pour déterminer que coming-soon armé il faut regarder la valeur de 2 options
+# 'seed_csp4_settings_content' et 'seedprod_settings'
+#
+# Il faut installer, activer et désarmer epfl-coming-soon
+# et désinstaller coming-soon
 
-# Une fois que toute la flotte est mise à jour cad Plugin coming soon désintallé et EPFL Coming soon installé
-# on modifie le présent script ansible afin de gérer les nouveaux sites
-
-
-#GREG: on définit la variable _coming_soon_status
-- name: Coming soon status
+# on définit la variable _coming_soon_status_old
+- name: Coming soon status old
   shell: |
     {{ wp_cli_command }} option get seed_csp4_settings_content --format=json | jq '.status|tonumber'
   changed_when: false
-  register: _coming_soon_status
+  register: _coming_soon_status_old
   tags: 
     - wp.plugins.coming-soon
     - wp.plugins.epfl-coming-soon
 
-#GREG: on affiche _coming_soon_status
+# on définit la variable _coming_soon_status_new
+- name: Coming soon status new
+  shell: |
+    {{ wp_cli_command }} option get seedprod_settings | jq .enable_coming_soon_mode
+  changed_when: false
+  register: _coming_soon_status_new
+  tags: 
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
+
+# on affiche _coming_soon_status_old
 - debug:
-    msg: "Plugin coming soon armé ? {{ _coming_soon_status.stdout == \"1\" }}"
+    msg: "Plugin coming soon armé (old version) ? {{ _coming_soon_status_old.stdout }}"
   tags: 
     - wp.plugins.coming-soon
     - wp.plugins.epfl-coming-soon
 
-# - name: Must enable or disable epfl-coming-soon
-#   shell: |
-#     {{ _coming_soon_status.stdout == "1" }}
-#   changed_when: false
-#   register: _is_coming_soon_enable
-#   tags: 
-#     - wp.plugins.coming-soon
-#     - wp.plugins.epfl-coming-soon
+# on affiche _coming_soon_status_new
+- debug:
+    msg: "Plugin coming soon armé (new version) ? {{ _coming_soon_status_new.stdout }}"
+  tags: 
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
 
-#GREG: on affiche _coming_soon_status
-# - debug:
-#     msg: "Doit on armé epfl-coming-soon ? {{ _is_coming_soon_enable }}"
-#   tags: 
-#     - wp.plugins.coming-soon
-#     - wp.plugins.epfl-coming-soon
-
-#GREG: Si c'est un nouveau site alors on doit armer epfl coming soon
+# Si c'est un nouveau site alors on doit armer epfl coming soon
 - name: Enable EPFL Coming Soon on new sites
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_epfl_coming_soon_options }}"
@@ -92,14 +99,14 @@
     _active_plugins.stdout == ""
   tags: wp.plugins.epfl-coming-soon
 
-#GREG: Si c'est un site existant on doit configurer le statut dans le même état que le plugin coming soon
-- name: Enable epfl coming soon 
+# Si c'est un site existant on doit configurer le statut dans le même état que le plugin coming soon
+- name: Enable EPFL Coming Soon
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_epfl_coming_soon_options }}"
   vars:
     plugin_epfl_coming_soon_shall_be_enabled: true
   when: >-
-    _active_plugins.stdout != "" and _coming_soon_status.stdout == "1"
+    _active_plugins.stdout != "" and (_coming_soon_status_new.stdout == "true" or _coming_soon_status_old.stdout == "1")
   tags: wp.plugins.epfl-coming-soon
 
 - name: Disable epfl coming soon like coming soon
@@ -108,10 +115,10 @@
   vars:
     plugin_epfl_coming_soon_shall_be_enabled: false
   when: >-
-    _active_plugins.stdout != "" and _coming_soon_status.stdout != "1"
+    _active_plugins.stdout != "" and (_coming_soon_status_new.stdout == "false" or (_coming_soon_status_new.stdout == "" and _coming_soon_status_old.stdout == "0"))
   tags: wp.plugins.epfl-coming-soon
 
-#GREG: on définit la variable _epfl_coming_soon_status
+# on définit la variable _epfl_coming_soon_status
 - name: EPFL Coming soon status
   shell: |
     {{ wp_cli_command }} option get epfl_csp_options --format=json  | jq '.status'
@@ -119,12 +126,12 @@
   register: _epfl_coming_soon_status
   tags: wp.plugins.epfl-coming-soon
 
-#GREG: on affiche la variable _epfl_coming_soon_status
+# on affiche la variable _epfl_coming_soon_status
 - debug:
     msg: " EPFL Coming Soon status: {{ _epfl_coming_soon_status }}"
   tags: wp.plugins.epfl-coming-soon
 
-#GREG: on installe le plugin epfl coming soon
+# on installe le plugin epfl coming soon
 - name: EPFL Coming Soon plugin (always installed)
   wordpress_plugin:
     name: epfl-coming-soon
@@ -134,7 +141,7 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-coming-soon
   tags: wp.plugins.epfl-coming-soon
 
-#GREG: On désintalle plugin coming soon pour les sites existants
+# On désintalle plugin coming soon pour les sites existants
 # - name: Uninstall coming-soon plugin
 #   check_mode: no   # That means yes
 #   shell:
