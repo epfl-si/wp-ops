@@ -86,6 +86,17 @@
     plugin_epfl_coming_soon_shall_be_enabled: false
   tags: wp.plugins.epfl-coming-soon
 
+- name: EPFL Coming soon status
+  shell: |
+    {{ wp_cli_command }} option get epfl_csp_options --format=json
+  changed_when: false
+  register: _epfl_coming_soon_status
+  tags: wp.plugins.epfl-coming-soon
+
+- debug:
+    msg: " EPFL Coming Soon status: {{ _epfl_coming_soon_status }}"
+  tags: wp.plugins.epfl-coming-soon
+
 - name: EPFL Coming Soon plugin (always installed)
   wordpress_plugin:
     name: epfl-coming-soon
