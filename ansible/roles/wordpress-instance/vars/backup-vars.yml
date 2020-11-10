@@ -4,6 +4,8 @@ backup_restic_repo_base: >-
 backup_restic_repo_files: "{{ backup_restic_repo_base }}/files"
 backup_restic_repo_sql:   "{{ backup_restic_repo_base }}/sql"
 
+backup_has_monitoring: '{{ openshift_namespace == "wwp" }}'
+
 backup_restic_environment:
   AWS_ACCESS_KEY_ID:     '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_ACCESS_KEY_ID") }}'
   AWS_SECRET_ACCESS_KEY: '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_SECRET_ACCESS_KEY") }}'
