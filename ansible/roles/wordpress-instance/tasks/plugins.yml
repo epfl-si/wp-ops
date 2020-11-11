@@ -35,6 +35,17 @@
   check_mode: no
   tags: always
 
+- name: Was “coming soon” plug-in active?
+  check_mode: no   # That means yes
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: wp plugin list --name=coming-soon --status=active --format=count
+  changed_when: false
+  tags:
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
+  register: _coming_soon_plugin_was_active
+
 # Cas n°1: Un site n'existe pas encore
 #
 # Il faut installer, activer et armer epfl-coming-soon
@@ -146,9 +157,9 @@
   check_mode: no   # That means yes
   shell:
     chdir: "{{ wp_dir }}"
-    cmd: wp plugin uninstall coming-soon
+    cmd: wp plugin uninstall --deactivate coming-soon
   when: >-
-    _active_plugins.stdout == ""
+    _active_plugins.stdout != "" and _coming_soon_plugin_was_active.stdout == "1"
   tags: 
     - wp.plugins.epfl-coming-soon
 
