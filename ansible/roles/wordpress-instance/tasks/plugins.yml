@@ -142,15 +142,15 @@
   tags: wp.plugins.epfl-coming-soon
 
 # On désintalle plugin coming soon pour les sites existants
-# - name: Uninstall coming-soon plugin
-#   check_mode: no   # That means yes
-#   shell:
-#     chdir: "{{ wp_dir }}"
-#     cmd: wp plugin uninstall coming-soon
-#   when: >-
-#     _active_plugins.stdout == ""
-#   tags: 
-#     - wp.plugins.epfl-coming-soon
+- name: Uninstall coming-soon plugin
+  check_mode: no   # That means yes
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: wp plugin uninstall coming-soon
+  when: >-
+    _active_plugins.stdout == ""
+  tags: 
+    - wp.plugins.epfl-coming-soon
 
 ##################### Must-use plugins ###########################
 
