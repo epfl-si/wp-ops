@@ -142,6 +142,7 @@
     - wp.plugins.wp_media_folder_options
     - wp.plugins.epfl-coming-soon
     - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
     - wp.plugins.unknown
     - wp.plugins.polylang
     - wp.plugins.wpforms
