@@ -112,6 +112,28 @@
     msg: " EPFL Coming Soon status: {{ _epfl_coming_soon_status }}"
   tags: wp.plugins.epfl-coming-soon
 
+- name: Was “epfl coming soon” plug-in active?
+  check_mode: no   # That means yes
+  shell:
+    chdir: "{{ wp_dir }}"
+    cmd: wp plugin list --name=epfl-coming-soon --status=active --format=count
+  changed_when: false
+  tags:
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
+  register: _epfl_coming_soon_plugin_was_active
+
+- name: Coming Soon plugin (always installed)	
+  wordpress_plugin:	
+    name: coming-soon	
+    state:	
+      - symlinked	
+      - active	
+    from: wordpress.org/plugins	
+  tags: 
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
+
 - name: EPFL Coming Soon plugin (always installed)
   wordpress_plugin:
     name: epfl-coming-soon
@@ -119,6 +141,8 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-plugin-epfl-coming-soon
+  when: >-
+    _epfl_coming_soon_plugin_was_active.stdout == "0"
   tags: wp.plugins.epfl-coming-soon
 
 - name: Uninstall coming-soon plugin
