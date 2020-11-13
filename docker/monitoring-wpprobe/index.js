@@ -166,7 +166,7 @@ async function scrapeMenus(options, metrics) {
 
 async function scrapePageCount(options, metrics) {
   let totalPages = parseInt(
-    await fetchHeader(options, "wp-json/wp/v2/pages", "x-wp-total")
+    await fetchHeader(options, "wp-json/wp/v2/pages?context=embed", "x-wp-total")
   );
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
   if (totalPages && typeof totalPages == "number") {
