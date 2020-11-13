@@ -333,7 +333,7 @@ class Environment:
             whoami = cls._oc_whoami()
             if 'wwp-test' in whoami:
                 return ['wwp-test']
-            elif 'wwp' in whoami:
+            elif 'wwp' in whoami:  # Also includes the wwp-infra case
                 return ['wwp']
             else:
                 raise ValueError('Unknown service account %s' % whoami)

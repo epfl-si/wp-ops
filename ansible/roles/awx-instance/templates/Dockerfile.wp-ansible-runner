@@ -22,7 +22,7 @@ RUN mkdir /etc/ansible;                                                         
     > /etc/ansible/ansible.cfg
 
 ARG RUNNER_PATCH_URLS=""
-ARG ANSIBLE_PATCH_URLS=""
+ARG ANSIBLE_PATCH_URLS="https://patch-diff.githubusercontent.com/raw/ansible/awx/pull/8487.patch"
 RUN set -e -x; yum -y install patch;                                        \
     for url in $RUNNER_PATCH_URLS; do                                       \
         curl $url |                                                         \

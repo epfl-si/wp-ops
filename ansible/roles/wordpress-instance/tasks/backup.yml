@@ -21,8 +21,10 @@
     cmd: |
       {{ backup_bash_stop_on_any_errors }}
 
+      {% if backup_has_monitoring %}
       echo "restic_start{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" \
       | {{ backup_curl_to_pushgateway_cmd }}
+      {% endif %}
 
       for repo in "{{ backup_restic_repo_files }}" "{{ backup_restic_repo_sql }}"; do
         restic -r $repo init || true
@@ -65,6 +67,7 @@
       restic -r {{ backup_restic_repo_sql }} tag "$sql_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
 
+      {% if backup_has_monitoring %}
       echo "restic_success{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" | \
         {{ backup_curl_to_pushgateway_cmd }}
       # Collect additional stats to pushgateway.
@@ -89,6 +92,7 @@
         echo -n "s3_backup_sql_total_file_count{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} "; \
            {{ backup_aws_s3api_list_cmd }} --prefix {{ backup_aws_s3_prefix }}/sql | {{ backup_aws_s3api_jq_count_cmd }}
       ) | {{ backup_curl_to_pushgateway_cmd }}
+      {% endif %}
 
   changed_when: true
   ignore_errors: "{{ wp_ignore_backup_errors | default(false) }}"

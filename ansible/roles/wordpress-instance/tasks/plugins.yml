@@ -33,51 +33,47 @@
   check_mode: no
   tags: always
 
-- name: Was “coming soon” plug-in active?
+- name: Enable EPFL Coming Soon on new sites
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_epfl_coming_soon_options }}"
+  vars:
+    plugin_epfl_coming_soon_shall_be_enabled: true
+  when: >-
+    _active_plugins.stdout == ""
+  tags: wp.plugins.epfl-coming-soon
+
+- name: EPFL Coming soon status
+  shell: |
+    {{ wp_cli_command }} option get epfl_csp_options --format=json  | jq '.status'
+  changed_when: false
+  register: _epfl_coming_soon_status
+  tags: wp.plugins.epfl-coming-soon
+
+- debug:
+    msg: " EPFL Coming Soon status: {{ _epfl_coming_soon_status }}"
+  tags: wp.plugins.epfl-coming-soon
+
+- name: Was “epfl coming soon” plug-in active?
   check_mode: no   # That means yes
   shell:
     chdir: "{{ wp_dir }}"
-    cmd: wp plugin list --name=coming-soon --status=active --format=count
+    cmd: wp plugin list --name=epfl-coming-soon --status=active --format=count
   changed_when: false
-  tags: wp.plugins.coming-soon
-  register: _coming_soon_plugin_was_active
+  tags:
+    - wp.plugins.coming-soon
+    - wp.plugins.epfl-coming-soon
+  register: _epfl_coming_soon_plugin_was_active
 
-- name: Enable Coming Soon on new sites
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_coming_soon_options }}"
-  vars:
-    plugin_coming_soon_shall_be_enabled: true
-  when: >-
-    _active_plugins.stdout == ""
-  tags: wp.plugins.coming-soon
-
-# We changed the standard operating procedure around mid-2020
-# regarding Coming Soon's configuration management. Turning it off
-# through its configuration (as opposed to uninstalling the plug-in,
-# as we did before) empowers the user and lets them turn Coming Soon
-# mode back on at will. The following task is intended to migrate
-# WordPress sites to the new way of doing things, without turning
-# Coming Soon back on inadvertently (in case the old config was still
-# lingering in the wp_options table despite the plug-in having been
-# uninstalled). Once this task has run on the entire fleet, it ought
-# to be removed.
-- name: Disable Coming Soon on sites where the plug-in was previously inactive
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_coming_soon_options }}"
-  vars:
-    plugin_coming_soon_shall_be_enabled: false
-  when: >-
-    _active_plugins.stdout != "" and _coming_soon_plugin_was_active.stdout == "0"
-  tags: wp.plugins.coming-soon
-
-- name: Coming Soon plugin (always installed)
+- name: EPFL Coming Soon plugin (always installed)
   wordpress_plugin:
-    name: coming-soon
+    name: epfl-coming-soon
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
-  tags: wp.plugins.coming-soon
+    from: https://github.com/epfl-si/wp-plugin-epfl-coming-soon
+  when: >-
+    _epfl_coming_soon_plugin_was_active.stdout == "0"
+  tags: wp.plugins.epfl-coming-soon
 
 ##################### Must-use plugins ###########################
 
