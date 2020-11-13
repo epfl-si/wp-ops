@@ -166,7 +166,7 @@ async function scrapeMenus(options, metrics) {
 
 async function scrapePageCount(options, metrics) {
   let totalPages = parseInt(
-    await fetchHeader(options, "wp-json/wp/v2/pages", "x-wp-total")
+    await fetchHeader(options, "wp-json/wp/v2/pages?context=embed", "x-wp-total")
   );
   // TODO: count by languages etc. (requires some cooperation from the server, as Polylang's JSON API is not freeware)
   if (totalPages && typeof totalPages == "number") {
@@ -286,7 +286,7 @@ async function scrapeFMBlocks(options, metrics) {
   }
 }
 
-async function fetcher(options, path) {
+async function fetcher(options, path, method='GET') {
   const baseUrl = new URL(options.target);
   const origHostname = baseUrl.hostname;
   baseUrl.hostname = "httpd-" + options.wp_env;
@@ -301,6 +301,7 @@ async function fetcher(options, path) {
     );
   }
   return await fetch(apiUrl, {
+    method: method,
     headers: { Host: origHostname },
     agent,
   });
@@ -341,7 +342,7 @@ async function fetchJson(options, path) {
 }
 
 async function fetchHeader(options, path, header) {
-  let results = await fetcher(options, path);
+  let results = await fetcher(options, path, /*method=*/'HEAD');
   return results.headers.get(header);
 }
 
