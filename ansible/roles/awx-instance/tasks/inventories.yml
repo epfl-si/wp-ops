@@ -41,5 +41,6 @@
 
       with AnsibleGetOrCreate(Inventory, name="{{ awx_inventory_name }}") as inv:
         inv.organization = org
+        inv.save()
         inv.inventory_sources.set([inv_source])
         inv.instance_groups.set([instance_group])

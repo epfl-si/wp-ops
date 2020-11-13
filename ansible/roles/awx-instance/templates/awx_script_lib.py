@@ -77,6 +77,9 @@ def _is_same_value(a, b, decryption_key=None):
     return False
 
 class AnsibleGetOrCreate:
+    save_queue = []
+    nesting = 0
+
     def __init__(self, clazz, **get_or_create_kwargs):
         self._obj_class = clazz
         self._get_or_create_kwargs = get_or_create_kwargs
@@ -84,6 +87,7 @@ class AnsibleGetOrCreate:
     def __enter__(self):
         self._txn = transaction.atomic()
         self._txn.__enter__()
+        self.__class__.nesting += 1
 
         try:
             return self._begin()
@@ -92,17 +96,27 @@ class AnsibleGetOrCreate:
             raise e
 
     def __exit__(self, type, value, tb):
+        self.__class__.nesting -= 1
         try:
             if not tb:
                 self._commit_unless_check_mode()
             self._txn.__exit__(type, value, tb)
+            if self.__class__.nesting == 0:
+                for obj in reversed(self.__class__.save_queue):
+                    obj.save()
         except Exception as e:
             self._txn.__exit__(*sys.exc_info())
             raise e
 
     def _begin(self):
-        self._obj, self._created = self._obj_class.objects.get_or_create(
-            **self._get_or_create_kwargs)
+        try:
+            self._obj = self._obj_class.objects.get(
+                **self._get_or_create_kwargs)
+            self._created = False
+        except self._obj_class.DoesNotExist:
+            self._obj = self._obj_class(**self._get_or_create_kwargs)
+            self._created = True
+
         update_json_status(changed=self._created)
         return AnsibleDjangoObserver(self._obj)
 
@@ -111,4 +125,7 @@ class AnsibleGetOrCreate:
             if self._created:
                 self._obj.delete()
         else:
-            self._obj.save()
+            # We need to save objects in the same order they
+            # were created (otherwise foreign-key relationships
+            # will be unable to find new objects' IDs)
+            self.__class__.save_queue.append(self._obj)
