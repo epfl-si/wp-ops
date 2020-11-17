@@ -5,11 +5,17 @@
 
 - name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
   when: "ansible_oc_namespace == awx_build_namespace"
-  import_tasks: k8s-builds.yml
-  connection: local
+  include_tasks:
+    file: k8s-builds.yml
+    apply:
+      connection: local
+      tags:
+        - awx
+        - awx.build
   tags:
     - awx
     - awx.build
+    - awx.build.awx
 
 - name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
   when: "ansible_oc_namespace != awx_build_namespace"
