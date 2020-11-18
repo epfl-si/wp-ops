@@ -63,8 +63,8 @@
   register: _migrate
   changed_when: >-
     "stdout" in _migrate and "No migrations to apply" not in _migrate.stdout
-  tags: 
-    - awx
+  tags:
+    - never
     - awx.migrate
 
 - name: "Ansible Tower front-end authentication"
