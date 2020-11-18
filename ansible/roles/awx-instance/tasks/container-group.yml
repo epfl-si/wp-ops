@@ -30,8 +30,8 @@
           cred.inputs = dict(
               host="https://kubernetes.default.svc/",
               verify_ssl=True,
-              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}").read() + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
-              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip()
+              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}", 'rb').read().decode("utf-8") + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
+              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip().decode("utf-8")
           )
 
 - name: "Set up {{ awx_elastic_container_group_name }} container group"
