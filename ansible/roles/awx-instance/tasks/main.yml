@@ -98,6 +98,12 @@
     - awx
     - awx.inventory
 
+- name: Configure notification templates
+  import_tasks: notification-templates.yml
+  tags:
+    - awx
+    - awx.notification-templates
+
 - name: Configure job templates
   import_tasks: job-templates.yml
   tags:
