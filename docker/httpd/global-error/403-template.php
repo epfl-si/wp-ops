@@ -6,9 +6,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Access Denied - EPFL</title>
+  <title>Access denied - EPFL</title>
   <meta charset="utf-8" />
-  <meta name="description" content="Access Denied - EPFL" />
+  <meta name="description" content="Access denied - EPFL" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ff0000">
@@ -71,7 +71,7 @@
             </svg>
           </a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">Access Denied</li>
+        <li class="breadcrumb-item active" aria-current="page">Access denied</li>
       </ol>
     </nav>
   </div>
@@ -79,7 +79,7 @@
   <div class="main-container">
     <p class="w-100 pb-5">
       <main id="main" class="content container">
-        <h1 class="mb-5">Forbidden</h1>
+        <h1 class="mb-5">Access denied</h1>
         <p>
             <?php include ("403-{$error_type}.php") ?>
         </p>
