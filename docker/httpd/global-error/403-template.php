@@ -1,121 +1,165 @@
 <?php
 
-  // Template for the 403 error page.
+// Template for the 403 error page.
 
 ?>
 <!doctype html>
-<!--[if lt IE 7]><html lang="en" class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7"><![endif]-->
-<!--[if IE 7]><html lang="en" class="no-js ie7 lt-ie10 lt-ie9 lt-ie8"><![endif]-->
-<!--[if IE 8]><html lang="en" class="no-js ie8 lt-ie10 lt-ie9"><![endif]-->
-<!--[if IE 9]><html lang="en" class="no-js ie9 lt-ie10"><![endif]-->
-<!--[if !IE]><!--><html xmlns="http://www.w3.org/1999/xhtml" lang="en" class="no-js"><!--<![endif]-->
+<html lang="en">
 <head>
-  <title>Access Denied</title>
+  <title>Access Denied - EPFL</title>
   <meta charset="utf-8" />
-  <meta name="description" content="" />
+  <meta name="description" content="Access Denied - EPFL" />
 
-  <!-- include http://static.epfl.ch/latest/includes/head-links.html -->
-  <!-- build:remove:release -->
-    
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" data-header-version="0.26.1" />
-  <link rel="shortcut icon" type="image/x-icon" href="//static.epfl.ch/v0.29.0/favicon.ico" />
-  <link rel="icon" type="image/png" href="//static.epfl.ch/v0.29.0/favicon.png" />
-  <link rel="stylesheet" href="//static.epfl.ch/v0.26.1/styles/epfl-built.css">
-  <!-- /build -->
-  
-  <!-- include http://static.epfl.ch/latest/includes/head-scripts.html -->
-  <!-- build:remove:release -->
-        <!--[if lt IE 9]>
-  <link id="respond-proxy" rel="respond-proxy" href="//static.epfl.ch/v0.26.1/includes/respond-proxy.html" />
-  <script src="//static.epfl.ch/v0.26.1/scripts/ie-built.js"></script>
-  <![endif]-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ff0000">
 
-  
-  <!-- /build -->
-  
+  <link rel="shortcut icon" type="image/x-icon" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="//staging-web2018.epfl.ch/5.0.2/icons/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="//staging-web2018.epfl.ch/5.0.2/css/elements.min.css">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-4833294-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-4833294-1', { 'anonymize_ip': true });
+  </script>
+
 </head>
 <body>
+<div class="site d-flex flex-column min-vh-100">
 
-  <div id="page" class="site site-wrapper" itemscope itemtype="http://schema.org/WebPage">
+  <nav class="access-nav" aria-label="Navigation shortcuts">
+    <ul>
+      <li>
+        <a class="btn btn-primary" href="/" title="[ALT + 1]" accesskey="1">Homepage of the site</a>
+      </li>
+      <li>
+        <a class="btn btn-primary" href="#main" title="[ALT + 2]" accesskey="2">Skip to content</a>
+      </li>
+      <li>
+        <a class="btn btn-primary" href="#main-navigation" title="[ALT + 3]" accesskey="3">Skip to main navigation</a>
+      </li>
+      <li>
+        <a class="btn btn-primary" href="#nav-aside" title="[ALT + 4]" accesskey="4">Skip to side navigation</a>
+      </li>
+      <li>
+        <a class="btn btn-primary" href="#q" title="[ALT + 5]" accesskey="5">Skip to search</a>
+      </li>
+      <li>
+        <a class="btn btn-primary" href="mailto:1234@epfl.ch" title="[ALT + 6]" accesskey="6">Contact us</a>
+      </li>
+    </ul>
+  </nav>
 
-    <!-- The minimal EPFL header -->
-    <header id="epfl-header" class="site-header epfl" role="banner" aria-label="Global EPFL banner" data-ajax-header="//static.epfl.ch/v0.26.1/includes/epfl-header.en.html">
+  <header class="header">
+    <a class="logo" href="/">
+      <img src="//staging-web2018.epfl.ch/5.0.2/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
+    </a>
+  </header>
 
-      <!-- The EPFL logo -->
-      <div class="logo">
-        <a href="http://www.epfl.ch">
-          <span class="visuallyhidden">EPFL Homepage</span>
-          <object type="image/svg+xml" class="logo-object" data="//static.epfl.ch/v0.26.1/images/logo.svg">
-            <img alt="EPFL Logo" width="95" height="46" src="//static.epfl.ch/v0.26.1/images/logo.png" />
-          </object>
-        </a>
-      </div>
+  <div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="breadcrumb-wrapper" id="breadcrumb-wrapper">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="//www.epfl.ch" title="Home" aria-label="Home">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-home"></use>
+            </svg>
+          </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Access Denied</li>
+      </ol>
+    </nav>
+  </div>
 
-    </header>
-
-    <!-- The page content -->
-    <main id="content" role="main" class="site-content page page-wrapper" itemprop="mainEntityOfPage">
-
-     <!-- The main column -->
-      <div class="g-span-2_3 g-span-s-1_1">
-
-        <!-- The page header -->
-        <header class="page-header">
-          <h1 class="page-title">Access Denied</h1>
-        </header>
-
-        <!-- The page content -->
-        <div class="page-content">
-          <?php include ("403-{$error_type}.php") ?>
-        </div>
-
+  <div class="main-container">
+    <p class="w-100 pb-5">
+      <main id="main" class="content container">
+        <h1 class="mb-5">Forbidden</h1>
+        <p>
+            <?php include ("403-{$error_type}.php") ?>
+        </p>
         <!-- The debug informations -->
-        <div style:"padding-top:5em">
-          <?php include ("403-debug.php") ?>
+        <?php include ("403-debug.php") ?>
+    </main>
+  </div>
+</div>
+
+<div class="bg-gray-100 pt-5 mt-auto">
+  <div class="container">
+    <footer class="footer-light">
+      <div class="row">
+        <div class="col-6 mx-auto mx-md-0 mb-4 col-md-3 col-lg-2">
+          <a href="//www.epfl.ch">
+            <img src="//staging-web2018.epfl.ch/5.0.2/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
+          </a>
         </div>
-
-      </div>
-
-      </main>
-
-        <!-- The site footer -->
-    <footer id="footer" class="site-footer" role="contentinfo">
-      <div class="g-span-1_1">
-        <nav class="nav nav-inline" role="navigation" aria-label="Footer links">
-          <ul class="nav-list">
-            <li class="nav-item">
-              <a class="nav-link" href="mailto:1234@epfl.ch" accesskey="9">Help desk</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://static.epfl.ch/latest/accessibility.en.html" accesskey="0"><meta itemprop="accessibilityAPI" content="ARIA"/>Accessibility</a>
-            </li>
-            <li class="nav-item secondary-content"> &copy; <span itemprop="copyrightHolder">EPFL</span> <span itemprop="copyrightYear">2018</span></li>
-          </ul>
-        </nav>
+        <div class="col-md-9 col-lg-10 mb-4">
+          <div class="ml-md-2 ml-lg-5">
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item">Contact</li>
+              <li class="list-inline-item text-muted pl-3"><small>EPFL  CH-1015 Lausanne</small></li>
+              <li class="list-inline-item text-muted pl-3"><small>+41 21 693 11 11</small></li>
+            </ul>
+            <p class="footer-light-socials">
+              <small>Follow the pulses of EPFL on social networks</small>
+              <span>
+                    <a href="https://www.facebook.com/epflcampus" class="social-icon social-icon-facebook social-icon-negative" rel="noopener" target="_blank">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-facebook"></use></svg>
+                      <span class="sr-only">Follow us on Facebook.</span>
+                    </a>
+                    <a href="https://twitter.com/epfl_en" class="social-icon social-icon-twitter social-icon-negative" rel="noopener" target="_blank">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-twitter"></use></svg>
+                      <span class="sr-only">Follow us on Twitter.</span>
+                    </a>
+                    <a href="https://instagram.com/epflcampus" class="social-icon social-icon-instagram social-icon-negative" rel="noopener" target="_blank">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-instagram"></use></svg>
+                      <span class="sr-only">Follow us on Instagram.</span>
+                    </a>
+                    <a href="https://www.youtube.com/user/epflnews" class="social-icon social-icon-youtube social-icon-negative" rel="noopener" target="_blank">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-youtube"></use></svg>
+                      <span class="sr-only">Follow us on Youtube.</span>
+                    </a>
+                    <a href="https://www.linkedin.com/school/epfl/" class="social-icon social-icon-linkedin social-icon-negative" rel="noopener" target="_blank">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-linkedin"></use></svg>
+                      <span class="sr-only">Follow us on LinkedIn.</span>
+                    </a>
+                  </span>
+            </p>
+            <div class="footer-legal">
+              <div class="footer-legal-links">
+                <a href="//www.epfl.ch/accessibility.en.shtml">Accessibility</a>
+                <a href="//www.epfl.ch/about/overview/overview/regulations-and-guidelines/">Legal notice</a>
+              </div>
+              <div>
+                <p>&copy; 2020 EPFL, all rights reserved</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
 
+    <button id="back-to-top" class="btn btn-primary btn-back-to-top">
+      <span class="sr-only">Back to top</span>
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-chevron-top"></use>
+      </svg>
+    </button>
   </div>
+</div>
 
-  <!-- Footer scripts -->
-  <!-- include http://static.epfl.ch/latest/includes/foot-scripts.html -->
-  <!-- build:remove:release -->
-    
-  <script src="//static.epfl.ch/v0.26.1/scripts/epfl-jquery-built.js"></script>
-  <!-- /build -->
-  <script>
-    require(["epfl-jquery"], function($){
-      "use strict";
+</div>
 
-      // Custom scripts
+<script>
+  svgPath = 'https://staging-web2018.epfl.ch/5.0.2/icons/icons.svg';
+  featherSvgPath = 'https://staging-web2018.epfl.ch/5.0.2/icons/feather-sprite.svg';
+</script>
 
-      $(function() {
-        // Custom scripts to execute after the document has fully loaded
-      });
-
-    });
-  </script>
-
+<script src="//staging-web2018.epfl.ch/5.0.2/js/elements.min.js"></script>
 </body>
 </html>
-

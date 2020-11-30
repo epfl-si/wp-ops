@@ -6,7 +6,7 @@
 
  ?>
 
- <table style="margin-top:10em">
+ <table style="margin-top:2em; margin-bottom:2em;">
    <tr><th>Request ID</th><td><?php echo $request_id ?></td></tr>
    <tr><th>Request URI</th><td><?php echo htmlentities($request_uri) ?></td></tr>
    <tr><th>Remote IP</th><td><?php echo $ip_info ?></td></tr>
