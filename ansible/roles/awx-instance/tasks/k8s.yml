@@ -42,6 +42,28 @@
       redis_conf: "{{ lookup('template', 'redis.conf') }}"
   notify: Restart AWX pod
 
+- name: mysql-super-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysql-super-credentials
+      namespace: "{{ ansible_oc_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_mysql_super_credentials | base64_values }}"
+
+- name: backup-rw-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: backup-rw-credentials
+      namespace: "{{ ansible_oc_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_restic_backup_credentials | base64_values }}"
+
 - name: Ansible Tower secret (awx-secrets)
   openshift:
     state: latest

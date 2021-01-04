@@ -3,6 +3,13 @@
     - awx
     - awx.promote
 
+# - name: "Persistent Volume Claim"
+#   import_tasks: persistent-volume-claim.yml
+#   delegate_to: localhost
+#   tags:
+#     - awx
+#     - awx.pvc
+
 - name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
   when: "ansible_oc_namespace == awx_build_namespace"
   include_tasks:
@@ -56,6 +63,16 @@
     - awx.dump
     - awx.restore
 
+- name: Run django migrate cmd
+  shell: >-
+    awx-manage migrate
+  register: _migrate
+  changed_when: >-
+    "stdout" in _migrate and "No migrations to apply" not in _migrate.stdout
+  tags:
+    - never
+    - awx.migrate
+
 - name: "Ansible Tower front-end authentication"
   import_tasks: auth.yml
   tags:
@@ -87,8 +104,24 @@
     - awx
     - awx.inventory
 
+- name: Configure notification templates
+  import_tasks: notification-templates.yml
+  tags:
+    - awx
+    - awx.notification-templates
+
 - name: Configure job templates
   import_tasks: job-templates.yml
   tags:
     - awx
     - awx.job-template
+
+- name: "Pushgateway (for backup stats)"
+  when: ansible_oc_namespace == "wwp-infra"
+  delegate_to: localhost
+  vars:
+    openshift_namespace: "{{ ansible_oc_namespace }}"
+  import_tasks: ../../../tasks/pushgateway.yml
+  tags:
+    - awx
+    - awx.pushgateway

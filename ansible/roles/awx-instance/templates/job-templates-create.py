@@ -33,7 +33,7 @@ def get_or_create_job_template(
             jt.ask_limit_on_launch = True
             jt.ask_variables_on_launch = True
             jt.ask_job_type_on_launch = True  # i.e. --check or not
-
+            jt.save()
             if not jt.instance_groups.filter(name=container_group.name):
                   jt.instance_groups.add(container_group)
 

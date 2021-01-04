@@ -13,6 +13,8 @@
 
       for key, value in settings.items():
         with AnsibleGetOrCreate(Setting, key=key) as setting:
+          setting.save()
+          assert setting.pk is not None
           if settings_registry.is_setting_encrypted(setting.key):
             setting.value = encrypt_value(value, pk=setting.pk)
           else:

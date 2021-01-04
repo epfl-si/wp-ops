@@ -3,11 +3,22 @@
   shell:
     cmd: |
       set -e -x
-      oc -n {{ ansible_oc_namespace }} delete pod awx-0
+      result=$(oc -n {{ ansible_oc_namespace }} delete pod awx-0 2>&1 || true)
+      case "$result" in
+        *NotFound*|*deleted)
+          :
+      ;;
+      *)
+        echo $result >&2
+      exit 2
+      ;;
+      esac
       for wait in $(seq 1 60); do
         if oc -n {{ ansible_oc_namespace }} describe pod awx-0 |grep 'Status: *Running'; then
-          break
+          exit 0
         else
           sleep 2
         fi
       done
+      echo >&2 Timeout waiting for awx-0
+      exit 2

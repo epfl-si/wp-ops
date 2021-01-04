@@ -6,6 +6,7 @@ awx_base_image_full_name: "ansible/awx:{{ awx_version }}"
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch
+  wwp-infra: awx-wwp-infra.epfl.ch
 
 awx_runner_base_image_name: ansible-runner
 awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
