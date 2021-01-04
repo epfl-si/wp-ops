@@ -5,7 +5,7 @@ http:
       middlewares:
         - "basic-auth-middleware"
       entryPoints: ["web"]
-      rule: "Host(``)"
+      rule: "Host(`prometheus-wwp.epfl.ch`)"
   services:
     prometheus:
       loadBalancer:
