@@ -12,7 +12,7 @@ from wordpress_action_module import WordPressActionModule
 
 class ActionModule(WordPressActionModule):
     def run(self, tmp=None, task_vars=None):
-        
+
         self.result = super(ActionModule, self).run(tmp, task_vars)
 
         # Handling --check execution mode
@@ -26,7 +26,7 @@ class ActionModule(WordPressActionModule):
             self._set_protection_state()
 
         return self.result
-    
+
 
     def _plugin_is_installed(self):
         """
@@ -39,7 +39,7 @@ class ActionModule(WordPressActionModule):
             fields = line.split(',')
             if len(fields) < 2: continue
 
-            if fields[0] == 'epfl-intranet': 
+            if fields[0] == 'epfl-intranet':
                 return True
 
         return False
@@ -65,10 +65,8 @@ class ActionModule(WordPressActionModule):
                 restrict_to_groups_opt = "--restrict-to-groups={}".format(restrict_to_groups) if restrict_to_groups != "" else ""
 
                 self._run_wp_cli_change("epfl intranet update-protection {}".format(restrict_to_groups_opt))
-        
+
         # Protection needs to be disabled
         else:
-            
             if 'is enabled' in result['stdout']:
-                
                 self._run_wp_cli_change("plugin deactivate epfl-intranet")

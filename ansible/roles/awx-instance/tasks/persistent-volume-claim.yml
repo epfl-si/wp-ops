@@ -10,4 +10,4 @@
 #       accessModes:
 #       - ReadWriteMany
 #       volumeName: wordpress-volume
-    
+

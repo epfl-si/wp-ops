@@ -30,8 +30,6 @@ class ActionModule(WordPressPluginOrThemeActionModule):
                 bool(desired_activation_state) and
                 'active' in set([desired_activation_state]) - set([current_activation_state])
         ):
-            
-            
             self._do_activate_element()
 
         return self.result
