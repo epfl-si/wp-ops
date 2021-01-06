@@ -75,4 +75,3 @@
                 s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T222222 RRULE:FREQ=DAILY;INTERVAL=1"
 
   tags: awx.job-template.backups
-
