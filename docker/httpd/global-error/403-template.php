@@ -13,19 +13,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ff0000">
 
-  <link rel="shortcut icon" type="image/x-icon" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon-16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="//staging-web2018.epfl.ch/5.0.2/icons/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="//staging-web2018.epfl.ch/5.0.2/icons/apple-touch-icon.png">
+  <link rel="shortcut icon" type="image/x-icon" href="//web2018.epfl.ch/5.1.1/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="//web2018.epfl.ch/5.1.1/icons/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//web2018.epfl.ch/5.1.1/icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="//web2018.epfl.ch/5.1.1/icons/apple-touch-icon.png">
 
-  <link rel="stylesheet" href="//staging-web2018.epfl.ch/5.0.2/css/elements.min.css">
+  <link rel="stylesheet" href="//web2018.epfl.ch/5.1.1/css/elements.min.css">
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-4833294-1"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-4833294-1', { 'anonymize_ip': true });
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-4833294-1', { 'anonymize_ip': true });
   </script>
 
 </head>
@@ -57,7 +57,7 @@
 
   <header class="header">
     <a class="logo" href="/">
-      <img src="//staging-web2018.epfl.ch/5.0.2/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
+      <img src="//web2018.epfl.ch/5.1.1/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
     </a>
   </header>
 
@@ -85,29 +85,27 @@
         </p>
         <!-- The debug informations -->
         <?php include ("403-debug.php") ?>
-    </main>
-  </div>
-</div>
-
-<div class="bg-gray-100 pt-5 mt-auto">
-  <div class="container">
-    <footer class="footer-light">
-      <div class="row">
-        <div class="col-6 mx-auto mx-md-0 mb-4 col-md-3 col-lg-2">
-          <a href="//www.epfl.ch">
-            <img src="//staging-web2018.epfl.ch/5.0.2/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
-          </a>
-        </div>
-        <div class="col-md-9 col-lg-10 mb-4">
-          <div class="ml-md-2 ml-lg-5">
-            <ul class="list-inline list-unstyled">
-              <li class="list-inline-item">Contact</li>
-              <li class="list-inline-item text-muted pl-3"><small>EPFL  CH-1015 Lausanne</small></li>
-              <li class="list-inline-item text-muted pl-3"><small>+41 21 693 11 11</small></li>
-            </ul>
-            <p class="footer-light-socials">
-              <small>Follow the pulses of EPFL on social networks</small>
-              <span>
+      </main>
+    </div>
+    <div class="bg-gray-100 pt-5 mt-auto">
+        <div class="container">
+            <footer class="footer-light">
+                <div class="row">
+                    <div class="col-6 mx-auto mx-md-0 mb-4 col-md-3 col-lg-2">
+                        <a href="//www.epfl.ch">
+                            <img src="//web2018.epfl.ch/5.1.1/icons/epfl-logo.svg" alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
+                        </a>
+                    </div>
+                    <div class="col-md-9 col-lg-10 mb-4">
+                        <div class="ml-md-2 ml-lg-5">
+                            <ul class="list-inline list-unstyled">
+                                <li class="list-inline-item">Contact</li>
+                                <li class="list-inline-item text-muted pl-3"><small>EPFL  CH-1015 Lausanne</small></li>
+                                <li class="list-inline-item text-muted pl-3"><small>+41 21 693 11 11</small></li>
+                            </ul>
+                            <p class="footer-light-socials">
+                                <small>Follow the pulses of EPFL on social networks</small>
+                                <span>
                     <a href="https://www.facebook.com/epflcampus" class="social-icon social-icon-facebook social-icon-negative" rel="noopener" target="_blank">
                       <svg class="icon" aria-hidden="true"><use xlink:href="#icon-facebook"></use></svg>
                       <span class="sr-only">Follow us on Facebook.</span>
@@ -129,37 +127,38 @@
                       <span class="sr-only">Follow us on LinkedIn.</span>
                     </a>
                   </span>
-            </p>
-            <div class="footer-legal">
-              <div class="footer-legal-links">
-                <a href="//www.epfl.ch/accessibility.en.shtml">Accessibility</a>
-                <a href="//www.epfl.ch/about/overview/overview/regulations-and-guidelines/">Legal notice</a>
-              </div>
-              <div>
-                <p>&copy; 2020 EPFL, all rights reserved</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
+                            </p>
+                            <div class="footer-legal">
+                                <div class="footer-legal-links">
+                                    <a href="//www.epfl.ch/accessibility.en.shtml">Accessibility</a>
+                                    <a href="//www.epfl.ch/about/overview/overview/regulations-and-guidelines/">Legal notice</a>
+                                    <a href="//go.epfl.ch/privacy-policy/">Privacy Policy</a>
+                                </div>
+                                <div>
+                                    <p>&copy; 2021 EPFL, all rights reserved</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
 
-    <button id="back-to-top" class="btn btn-primary btn-back-to-top">
-      <span class="sr-only">Back to top</span>
-      <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-chevron-top"></use>
-      </svg>
-    </button>
+            <button id="back-to-top" class="btn btn-primary btn-back-to-top">
+                <span class="sr-only">Back to top</span>
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-chevron-top"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
   </div>
 </div>
 
-</div>
-
 <script>
-  svgPath = 'https://staging-web2018.epfl.ch/5.0.2/icons/icons.svg';
-  featherSvgPath = 'https://staging-web2018.epfl.ch/5.0.2/icons/feather-sprite.svg';
+    svgPath = 'https://web2018.epfl.ch/5.1.1/icons/icons.svg';
+    featherSvgPath = 'https://web2018.epfl.ch/5.1.1/icons/feather-sprite.svg';
 </script>
 
-<script src="//staging-web2018.epfl.ch/5.0.2/js/elements.min.js"></script>
+<script src="//web2018.epfl.ch/5.1.1/js/elements.min.js"></script>
 </body>
 </html>
