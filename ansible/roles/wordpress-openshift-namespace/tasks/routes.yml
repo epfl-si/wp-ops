@@ -7,7 +7,7 @@
   openshift:
     state: latest
     apiVersion: v1
-    kind: Route 
+    kind: Route
     metadata:
       name: "{{ item.name }}"
       namespace: "{{ openshift_namespace }}"

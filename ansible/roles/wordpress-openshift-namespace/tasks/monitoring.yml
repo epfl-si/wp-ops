@@ -285,7 +285,7 @@
                   imagePullPolicy: Always
                   command:
                     - node
-                    - -r 
+                    - -r
                     - ts-node/register
                     - index.ts
                     - -i
