@@ -275,6 +275,8 @@
 - name: Cache-Control options
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_cache_control_options }}"
+  tags:
+    - wp.plugins.cachecontrol
 
 - name: varnish-http-purge plugin
   wordpress_plugin:
