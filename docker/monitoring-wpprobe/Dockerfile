@@ -1,5 +1,5 @@
 # https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
-FROM node:13
+FROM public.ecr.aws/bitnami/node:13
 
 WORKDIR /usr/src/app
 
