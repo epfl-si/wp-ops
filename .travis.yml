@@ -29,7 +29,6 @@ script:
 # Build wp-base first (because other images depend on it)
 - |
   set -e -x
-  docker pull ubuntu:bionic
 
   wp_base_branch_build_arg=
   mgmt_build_args=
