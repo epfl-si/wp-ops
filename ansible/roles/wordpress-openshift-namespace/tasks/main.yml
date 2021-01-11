@@ -71,13 +71,10 @@
     - monitoring
     - monitoring.pushgateway
 
-- name: "Pushgateway"
+# A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
+- debug:
+    msg: "Please be sure to deploy the pushgateway on wwp-infra, `./ansible/wpsible -t awx.pushgateway -l awx-wwp-infra --prod`"
   when: openshift_namespace == "wwp"
-  include_tasks:
-    file: ../../../tasks/pushgateway.yml
-    apply:
-      tags:
-        - monitoring
   tags:
     - monitoring
     - monitoring.pushgateway
