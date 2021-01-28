@@ -44,7 +44,6 @@
       source:
         git:
           uri: "https://github.com/epfl-si/wp-ops"
-          ref: "add-sorry-server"
         contextDir: "ansible/roles/wordpress-openshift-namespace/templates/sorry-server"
       strategy:
         sourceStrategy:
