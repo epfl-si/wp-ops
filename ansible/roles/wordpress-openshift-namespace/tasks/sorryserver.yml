@@ -53,6 +53,7 @@
             name: 'httpd:2.4'
             namespace: openshift
       triggers:
+        # the github trigger will work only when github hooks can access the OC instance
         - type: GitHub
           github:
             secret: "{{ sorryserver_webhook_secret }}"
@@ -91,8 +92,8 @@
             deployment-config.name: httpd-sorryserver
         spec:
           containers:
-            - image: 'docker-registry.default.svc:5000/wwp-test/httpd-sorryserver'
-              imagePullPolicy: IfNotPresent
+            - image: 'docker-registry.default.svc:5000/wwp-test/httpd-sorryserver:latest'
+              imagePullPolicy: Always
               name: httpd-sorryserver
               resources: {}
               terminationMessagePath: /dev/termination-log
