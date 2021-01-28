@@ -71,6 +71,16 @@
     - monitoring
     - monitoring.pushgateway
 
+- name: "Sorry Server"
+  when: openshift_namespace == "wwp-test"
+  include_tasks:
+    file: sorryserver.yml
+    apply:
+      tags:
+        - sorryserver
+  tags:
+    - sorryserver
+
 # A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
 - debug:
     msg: "Please be sure to deploy the pushgateway on wwp-infra, `./ansible/wpsible -t awx.pushgateway -l awx-wwp-infra --prod`"
