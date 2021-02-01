@@ -51,6 +51,17 @@
             </Instance>
         </Plugin>
 
+- name: Varnish varnishkafka.conf
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: varnish-varnish-varnishkafka
+      namespace: "{{ openshift_namespace }}"
+    data:
+      varnishkafka.conf: "{{ lookup('template', 'varnishkafka.conf') }}"
+
 - name: Varnish StatefulSet
   delegate_to: localhost
   openshift:
