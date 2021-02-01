@@ -77,7 +77,7 @@
         matchLabels:
           app: varnish-varnish
       serviceName: varnish-varnish
-      replicas: 1
+      replicas: "{{ 1 if openshift_namespace == 'wwp' else 2 }}"
       template:
         metadata:
           labels:
