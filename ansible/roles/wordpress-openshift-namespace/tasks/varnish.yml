@@ -16,7 +16,7 @@
         matchLabels:
           app: varnish-varnish
       serviceName: varnish-varnish
-      replicas: 2
+      replicas: 1
       template:
         metadata:
           labels:
@@ -32,7 +32,7 @@
             - -n
             - varnishd
             - -s
-            - malloc,256m
+            - file,/var/lib/varnish/varnish_storage.bin,190G
             image: "{{ varnish_image }}"
             imagePullPolicy: IfNotPresent
             name: varnish
@@ -115,8 +115,9 @@
           volumes:
           - emptyDir: {}
             name: metrics-dir
-          - emptyDir: {}
-            name: varnish-runtime
+          - name: varnish-runtime
+            persistentVolumeClaim:
+              claimName: varnish-cache
           - configMap:
               defaultMode: 420
               name: varnish-varnish-collectd
