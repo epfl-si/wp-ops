@@ -1,6 +1,54 @@
 - include_vars: varnish-vars.yml
   tags: always
 
+- name: Varnish collectd.conf
+  openshift:
+    kind: ConfigMap
+    metadata:
+      name: varnish-varnish-collectd
+      namespace: "{{ openshift_namespace }}"
+    data:
+      collectd.conf: |
+        FQDNLookup false
+        CollectInternalStats true
+        WriteQueueLimitLow  5000
+        WriteQueueLimitHigh 5000
+        LoadPlugin log_logstash
+        <Plugin log_logstash>
+        	LogLevel info
+        	File stdout
+        </Plugin>
+        LoadPlugin unixsock
+        <Plugin unixsock>
+        	DeleteSocket true
+        	SocketGroup "nogroup"
+        </Plugin>
+        LoadPlugin write_prometheus
+        Hostname "varnish"
+        Interval 10
+        LoadPlugin "varnish"
+        <Plugin "varnish">
+            <Instance "varnishd">
+                CollectBackend     true
+                CollectBan         false
+                CollectCache       true
+                CollectConnections true
+                CollectESI         false
+                CollectFetch       true
+                CollectHCB         false
+                CollectObjects     true
+                CollectSession     true
+                CollectSHM         true
+                CollectSMS         false
+                CollectStruct      true
+                CollectTotals      true
+                CollectUptime      true
+                CollectVCL         false
+                CollectVSM         true
+                CollectWorkers     true
+            </Instance>
+        </Plugin>
+
 - name: Varnish StatefulSet
   delegate_to: localhost
   openshift:
