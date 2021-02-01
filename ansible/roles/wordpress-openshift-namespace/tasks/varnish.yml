@@ -32,7 +32,10 @@
             - -n
             - varnishd
             - -s
-            - file,/var/lib/varnish/varnish_storage.bin,190G
+            - >-
+              {{ "file,/var/lib/varnish/varnish_storage.bin,190G"
+                 if openshift_namespace == "wwp"
+                 else "malloc,256m" }}
             image: "{{ varnish_image }}"
             imagePullPolicy: IfNotPresent
             name: varnish
@@ -115,9 +118,8 @@
           volumes:
           - emptyDir: {}
             name: metrics-dir
-          - name: varnish-runtime
-            persistentVolumeClaim:
-              claimName: varnish-cache
+          - >-
+            {{ varnish_cache_volume_prod if openshift_namespace == "wwp" else varnish_cache_volume_test }}
           - configMap:
               defaultMode: 420
               name: varnish-varnish-collectd
@@ -135,6 +137,14 @@
           partition: 0
         type: RollingUpdate
   tags: varnish.statefulset
+  vars:
+    varnish_cache_volume_prod:
+      name: varnish-runtime
+      persistentVolumeClaim:
+        claimName: varnish-cache
+    varnish_cache_volume_test:
+      name: varnish-runtime
+      emptyDir: {}
 
 - name: Varnish service
   delegate_to: localhost
