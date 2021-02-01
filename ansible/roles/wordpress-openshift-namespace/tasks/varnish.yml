@@ -3,6 +3,8 @@
 
 - name: Varnish collectd.conf
   openshift:
+    state: latest
+    apiVersion: v1
     kind: ConfigMap
     metadata:
       name: varnish-varnish-collectd
