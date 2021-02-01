@@ -119,11 +119,7 @@
             name: varnish-runtime
           - configMap:
               defaultMode: 420
-              name: varnish-test-varnish-kafka-metrics-script
-            name: script-dir
-          - configMap:
-              defaultMode: 420
-              name: varnish-test-varnish-collectd
+              name: varnish-varnish-collectd
             name: collectd-config
           - configMap:
               defaultMode: 420
@@ -131,7 +127,7 @@
             name: varnish-config
           - configMap:
               defaultMode: 420
-              name: varnish-test-varnish-varnishkafka
+              name: varnish-varnish-varnishkafka
             name: varnish-kafka-config
       updateStrategy:
         rollingUpdate:
