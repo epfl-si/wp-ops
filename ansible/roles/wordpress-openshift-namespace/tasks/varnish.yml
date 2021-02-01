@@ -1,6 +1,67 @@
 - include_vars: varnish-vars.yml
   tags: always
 
+- name: Varnish collectd.conf
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: varnish-varnish-collectd
+      namespace: "{{ openshift_namespace }}"
+    data:
+      collectd.conf: |
+        FQDNLookup false
+        CollectInternalStats true
+        WriteQueueLimitLow  5000
+        WriteQueueLimitHigh 5000
+        LoadPlugin log_logstash
+        <Plugin log_logstash>
+        	LogLevel info
+        	File stdout
+        </Plugin>
+        LoadPlugin unixsock
+        <Plugin unixsock>
+        	DeleteSocket true
+        	SocketGroup "nogroup"
+        </Plugin>
+        LoadPlugin write_prometheus
+        Hostname "varnish"
+        Interval 10
+        LoadPlugin "varnish"
+        <Plugin "varnish">
+            <Instance "varnishd">
+                CollectBackend     true
+                CollectBan         false
+                CollectCache       true
+                CollectConnections true
+                CollectESI         false
+                CollectFetch       true
+                CollectHCB         false
+                CollectObjects     true
+                CollectSession     true
+                CollectSHM         true
+                CollectSMS         false
+                CollectStruct      true
+                CollectTotals      true
+                CollectUptime      true
+                CollectVCL         false
+                CollectVSM         true
+                CollectWorkers     true
+            </Instance>
+        </Plugin>
+
+- name: Varnish varnishkafka.conf
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: varnish-varnish-varnishkafka
+      namespace: "{{ openshift_namespace }}"
+    data:
+      varnishkafka.conf: "{{ lookup('template', 'varnishkafka.conf') }}"
+
 - name: Varnish StatefulSet
   delegate_to: localhost
   openshift:
@@ -16,7 +77,7 @@
         matchLabels:
           app: varnish-varnish
       serviceName: varnish-varnish
-      replicas: 1
+      replicas: "{{ 1 if openshift_namespace == 'wwp' else 2 }}"
       template:
         metadata:
           labels:
@@ -32,7 +93,10 @@
             - -n
             - varnishd
             - -s
-            - file,/var/lib/varnish/varnish_storage.bin,190G
+            - >-
+              {{ "file,/var/lib/varnish/varnish_storage.bin,190G"
+                 if openshift_namespace == "wwp"
+                 else "malloc,256m" }}
             image: "{{ varnish_image }}"
             imagePullPolicy: IfNotPresent
             name: varnish
@@ -115,9 +179,8 @@
           volumes:
           - emptyDir: {}
             name: metrics-dir
-          - name: varnish-runtime
-            persistentVolumeClaim:
-              claimName: varnish-cache
+          - >-
+            {{ varnish_cache_volume_prod if openshift_namespace == "wwp" else varnish_cache_volume_test }}
           - configMap:
               defaultMode: 420
               name: varnish-varnish-collectd
@@ -135,6 +198,14 @@
           partition: 0
         type: RollingUpdate
   tags: varnish.statefulset
+  vars:
+    varnish_cache_volume_prod:
+      name: varnish-runtime
+      persistentVolumeClaim:
+        claimName: varnish-cache
+    varnish_cache_volume_test:
+      name: varnish-runtime
+      emptyDir: {}
 
 - name: Varnish service
   delegate_to: localhost
