@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -o pipefail
 
 : ${WORDPRESS_VERSION:=5.5}
 
