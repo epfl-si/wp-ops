@@ -1,4 +1,4 @@
-FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ wp_base_image_name }}:latest
+FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ mgmt_image_name }}:latest
 FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_base_image_name }}:latest
 
 RUN yum -y update
@@ -11,7 +11,7 @@ RUN dnf module enable php:remi-7.4 -y
 
 RUN yum -y install yum-plugin-copr && yum -y copr enable copart/restic
 
-RUN yum -y install php-cli php-mysql python3 restic jq mysql
+RUN yum -y install php-cli php-mysql python3 restic jq mysql pwgen
 
 RUN pip3 install awscli
 
@@ -35,6 +35,7 @@ RUN set -e -x; yum -y install patch;                                        \
     yum -y history undo patch
 
 COPY --from=0 /usr/local/bin/wp /usr/local/bin/
+COPY --from=0 /usr/local/bin/new-wp-site /usr/local/bin/new-wp-site
 RUN mkdir /runner/.wp-cli
 COPY --from=0 /var/www/.wp-cli /runner/.wp-cli
 COPY --from=0 /wp /wp
