@@ -23,3 +23,6 @@ wipe_paths:
   - wp-settings.php
   - wp-signup.php
   - xmlrpc.php
+
+wipe_backup_data_in_pushgateway_cmd: >-
+  curl -X DELETE http://pushgateway.wwp-infra:9091/metrics/job/backup/instance/{{ inventory_hostname }}
