@@ -33,3 +33,7 @@
     state: absent
     path: "{{ wp_dir }}/{{ item }}"
   with_items: "{{ wipe_paths }}"
+
+- name: Delete pushgateway data
+  shell: "{{ wipe_backup_data_in_pushgateway_cmd }}"
+  ignore_errors: true
