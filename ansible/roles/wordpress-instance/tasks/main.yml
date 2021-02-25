@@ -59,6 +59,12 @@
     - never
     - wp.wipe
 
+- name: Update memento gutenberg blocks
+  import_tasks: "update-memento-blocks.yml"
+  tags:
+    - never
+    - wp.update_memento_block
+
 - wordpress_facts:
   tags: always
 
