@@ -33,8 +33,7 @@ class ActionModule(WordPressActionModule):
         """
         regex = '(<!-- {} .*? /-->)'.format(block_name)
         matching_reg = re.compile("{}".format(regex))
-        result = matching_reg.findall(page_content)
-        return result
+        return matching_reg.findall(page_content)
 
     def convert_category_to_categories(self, html_block):
         """
@@ -50,7 +49,6 @@ class ActionModule(WordPressActionModule):
         attributes = json.loads(json_attributes[0])
         category_id = str(attributes['categories'])
         category_label = self.get_memento_category_label(int(category_id))
-        #raise ValueError("category_id: {}, category_label: {}".format(category_id, category_label))
         attributes['categories'] = '[{"label":"' + category_label + '","value":' + category_id + "}]"
         return '<!-- wp:epfl/memento {' + json.dumps(attributes)[1:-1] + '} /-->'
 
@@ -63,16 +61,14 @@ class ActionModule(WordPressActionModule):
             self.result['skipped'] = True
             return self.result
 
-        tab_wp_cli_cmd = []
         pages_id = json.loads(self._query_wp_cli("post list --post_type=page --field=ID --format=json")["stdout"])
         for page_id in pages_id:
-            if page_id != 82:
-                continue
             page_content = self._query_wp_cli("post get {} --field=content".format(page_id))['stdout']
             if len(page_content) > 0:
                 html_blocks = self.find_blocks(page_content)
 
                 new_page_content = page_content
+                page_change = False
                 for html_block in html_blocks:
                     if "category" in html_block:
                         # Backup memento block
@@ -80,10 +76,11 @@ class ActionModule(WordPressActionModule):
                         # Convert attribut category to categorie of this memento block
                         after_html_block = self.convert_category_to_categories(html_block)
                         new_page_content = new_page_content.replace(before_html_block, after_html_block)
+                        page_change = True
 
-                # Update page with new content
-                cmd = "post update {} --post_content='{}'".format(page_id, new_page_content)
-                tab_wp_cli_cmd.append(cmd)
-                self._run_wp_cli_change(cmd)
+                if page_change:
+                    # Update page with new content
+                    cmd = "post update {} --post_content='{}'".format(page_id, new_page_content)
+                    self._run_wp_cli_change(cmd)
 
         return self.result

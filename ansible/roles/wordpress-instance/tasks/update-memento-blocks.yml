@@ -1,4 +1,3 @@
-- name: Enable EPFL Coming Soon on new sites
+- name: Update memento blocks
   wordpress_block_update:
-    state: present
   tags: wp.update_memento_block
