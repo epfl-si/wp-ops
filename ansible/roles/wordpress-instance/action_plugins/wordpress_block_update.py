@@ -64,6 +64,7 @@ class ActionModule(WordPressActionModule):
         pages_id = json.loads(self._query_wp_cli("post list --post_type=page --field=ID --format=json")["stdout"])
         for page_id in pages_id:
             page_content = self._query_wp_cli("post get {} --field=content".format(page_id))['stdout']
+
             if len(page_content) > 0:
                 html_blocks = self.find_blocks(page_content)
 
@@ -79,8 +80,12 @@ class ActionModule(WordPressActionModule):
                         page_change = True
 
                 if page_change:
-                    # Update page with new content
-                    cmd = "post update {} --post_content='{}'".format(page_id, new_page_content)
-                    self._run_wp_cli_change(cmd)
+                    try:
+                      # Update page with new content
+                      cmd = "post update {} --post_content='{}'".format(page_id, new_page_content)
+                      self._run_wp_cli_change(cmd)
+                    except:
+                      site = self._get_ansible_var("wp_hostname") + "/" + self._get_ansible_var("wp_path")
+                      print("WP_UPDATE_MEMENTO_BLOCK page_id: {} site: {}".format(page_id, site))
 
         return self.result
