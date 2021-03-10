@@ -178,7 +178,7 @@
                     fieldPath: status.podIP
           #####################################################
           - name: awx-redis
-            image: redis:latest
+            image: redis:6.0
             imagePullPolicy: Always
             args: ["redis-server", "/etc/redis/redis.conf"]
             ports:
