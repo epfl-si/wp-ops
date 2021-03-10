@@ -48,7 +48,7 @@ SQL_CREATE_USER
 
     contents_of_symlinked_index_php > index.php
 
-    if wp eval '1;' 2>&1 |grep "wp core install"; then
+    if ! $(wp core is-installed); then
         do_wp_core_install
     fi
 
