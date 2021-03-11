@@ -222,18 +222,6 @@
   when: |-
     _polylang_languages_csv.stdout == ""
 
-- name: mainwp-child plugin
-  wordpress_plugin:
-    name: mainwp-child
-    state:
-      - symlinked
-      - active
-    from: wordpress.org/plugins
-
-- name: mainwp_child_uniqueId option
-  wordpress_option: "{{ item }}"
-  with_items: "{{ plugin_mainwp_child_options }}"
-
 - name: Tequila plugin
   wordpress_plugin:
     name: tequila
@@ -466,12 +454,6 @@
     name: epfl-courses-se
     state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-courses-se
-
-- name: MainWP plugin
-  wordpress_plugin:
-    name: mainwp
-    state: "{{ plugins_for_admin_category }}"
-    from: wordpress.org/plugins
 
 - name: WPForms plugin
   wordpress_plugin:

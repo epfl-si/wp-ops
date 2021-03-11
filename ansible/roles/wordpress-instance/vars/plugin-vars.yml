@@ -27,11 +27,6 @@ wp_is_managed: '{{ "Unmanaged" not in wp_site_categories }}'
 
 #### Plugins Configuration
 
-# Main-WP Child
-plugin_mainwp_child_options:
-  - name: mainwp_child_uniqueId
-    value: 'WinterIsComing'
-
 # Cache Control
 plugin_cache_control_options:
   - name: cache_control_front_page_max_age
