@@ -68,7 +68,7 @@ RUN su -s /bin/sh www-data -c " \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
+ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5 5.7"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
@@ -113,6 +113,7 @@ RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
 RUN set -e -x; for wp in /wp/*; do                                         \
   cd $wp;                                                                  \
   wpmajorminor="$(basename $wp | cut -d. -f1-2)";                          \
+  if [ $wpmajorminor = "5.7" ]; then wpmajorminor="5.6"; fi;          \
   curl -q https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json \
   | jq -r ".versions | to_entries                                          \
          | map(select (.key | startswith(\"$wpmajorminor\")))              \

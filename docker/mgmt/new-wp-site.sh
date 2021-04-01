@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-: ${WORDPRESS_VERSION:=5.5}
+: ${WORDPRESS_VERSION:=5.7}
 
 usage() {
     die <<USAGE
