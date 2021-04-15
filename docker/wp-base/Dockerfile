@@ -71,9 +71,9 @@ RUN su -s /bin/sh www-data -c " \
 ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
 RUN set -x;                                                              \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
-        version=$(curl https://api.wordpress.org/core/version-check/1.7/ \
-            | jq -r '.offers[].current                                   \
-                      | select(match("'${lineage}'"))'                   \
+        version=$(curl http://api.wordpress.org/core/stable-check/1.0/   \
+            | jq -r 'keys[]                                              \
+                      | select(match("^'${lineage}'"))'                  \
             |sort -n -r |head -1) ;                                      \
         mkdir -p /wp/$version ;                                          \
         wp --allow-root --path=/wp/$version                              \
