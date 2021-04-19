@@ -68,7 +68,7 @@ die () {
 }
 
 check_env() {
-    if [ -z "$MYSQL_SUPER_USER" -o -z "$MYSQL_SUPER_PASSWORD" ]; then
+    if [ -z "$MYSQL_SUPER_USER" ] || [ -z "$MYSQL_SUPER_PASSWORD" ]; then
         die <<MISSING_ENV
 Fatal: either MYSQL_SUPER_USER or MYSQL_SUPER_PASSWORD are unset.
 
@@ -112,6 +112,8 @@ do_mysql() {
 }
 
 do_wp_core_install () {
+    site_title_basename="$(basename "$(pwd)")"
+    site_title=${WP_SITE_TITLE:-$site_title_basename}
     wp_hostname="$(pwd | cut -d/ -f4)"
     wp_path="$(pwd | cut -d/ -f6-)"
 
@@ -124,7 +126,7 @@ do_wp_core_install () {
 
     ( set -e -x
       wp core install --url="$url" \
-         --title="$(basename "$(pwd)")" \
+         --title="$site_title" \
          --admin_user="$WP_ADMIN_USER" --admin_email="$WP_ADMIN_EMAIL" \
          --wpversion="$WORDPRESS_VERSION"
 
