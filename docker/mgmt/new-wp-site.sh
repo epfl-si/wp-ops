@@ -37,14 +37,17 @@ main() {
         )
     fi
 
-    ( set -x; wp db create --dbuser="$MYSQL_SUPER_USER" --dbpass="$MYSQL_SUPER_PASSWORD" ) || true
-
     echo "DROP USER '$db_user';" | do_mysql || true
     do_mysql <<SQL_CREATE_USER
 CREATE USER '$db_user'@'%' IDENTIFIED BY '$db_password';
+SQL_CREATE_USER
+
+    ( set -x; wp db create --dbuser="$MYSQL_SUPER_USER" --dbpass="$MYSQL_SUPER_PASSWORD" ) || true
+
+    do_mysql <<GRANT_PRIVILEGES
 GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%';
 FLUSH PRIVILEGES;
-SQL_CREATE_USER
+GRANT_PRIVILEGES
 
     contents_of_symlinked_index_php > index.php
 
