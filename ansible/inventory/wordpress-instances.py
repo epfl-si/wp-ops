@@ -10,11 +10,11 @@
 import sys
 import os
 
-suitcase_interpreter = os.path.join(os.path.dirname(__file__), os.path.pardir,
-                                    "ansible-deps-cache", "bin", "python3")
-if (os.path.exists(suitcase_interpreter) and
-    os.path.realpath(suitcase_interpreter) != os.path.realpath(sys.executable)):
-    os.execl(suitcase_interpreter, suitcase_interpreter, *sys.argv)
+ansible_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ansible_suitcase_python_lib = os.path.join(
+    ansible_dir, "ansible-deps-cache",
+    "/python-libs/lib/python3.8/site-packages" if os.uname().sysname == "Linux" else "python-libs/lib/python/site-packages")
+sys.path.insert(0, ansible_suitcase_python_lib)
 
 import subprocess
 import logging
