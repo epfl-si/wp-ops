@@ -35,7 +35,7 @@ Usage:
       --exclude <plugin-name>    Self-explanatory. Used to exclude proprietary
                                  plugins from Travis builds
 
-      --manifest-url             The URL to obtain the plugin manifest from;
+      --manifest-url <url>       The URL to obtain the plugin manifest from;
                                  default is %s
 
   install-plugins-and-themes.py <name> <URL>
