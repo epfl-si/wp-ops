@@ -223,16 +223,21 @@ class ZipPlugin(Plugin):
         rename_like_self -- Ignored - We always unzip to a subdirectory named
                             `self.name`
         """
-        zip = ZipFile(io.BytesIO(requests.get(self.url).content))
-
+        zipfd = io.BytesIO(requests.get(self.url).content)
         progress("Unzipping {}".format(self.url))
+        self.install_from_fd(self.name, zipfd, target_dir)
+
+    @classmethod
+    def install_from_fd(cls, name, fd, target_dir):
+        zip = ZipFile(fd)
+
         for member in zip.namelist():
             zipinfo = zip.getinfo(member)
             if zipinfo.filename[-1] == '/':
                 continue
 
             targetpathelts = os.path.normpath(zipinfo.filename).split('/')
-            targetpathelts[0] = self.name
+            targetpathelts[0] = name
 
             targetpath = os.path.join(target_dir, *targetpathelts)
 
