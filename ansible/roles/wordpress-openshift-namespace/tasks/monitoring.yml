@@ -1,7 +1,11 @@
 - include_vars: monitoring-vars.yml
+  tags: always
+
 - include_vars: secrets-wwp.yml
+  tags: always
 
 - name: Prometheus service
+  tags: monitoring.prometheus
   openshift:
     state: latest
     apiVersion: v1
@@ -19,6 +23,7 @@
         app: prometheus
 
 - name: Prometheus route (https://prometheus-wwp.epfl.ch/)
+  tags: monitoring.prometheus
   openshift:
     state: latest
     apiVersion: route.openshift.io/v1
@@ -37,6 +42,7 @@
         name: prometheus
 
 - name: Prometheus StatefulSet
+  tags: monitoring.prometheus
   openshift:
     state: latest
     apiVersion: apps/v1

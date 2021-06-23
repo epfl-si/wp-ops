@@ -75,6 +75,7 @@
         - monitoring
   tags:
     - monitoring
+    - monitoring.prometheus
     - monitoring.pushgateway
 
 - name: "Sorry Server"
