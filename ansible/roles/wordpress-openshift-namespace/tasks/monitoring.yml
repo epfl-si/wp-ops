@@ -43,6 +43,15 @@
 
 - name: Prometheus StatefulSet
   tags: monitoring.prometheus
+  vars:
+    # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
+    _openshift_image_triggers: >-
+      {{ [dict(from=
+                     dict(kind="ImageStreamTag",
+                          name=monitoring_prober_image_name + ":latest",
+                          namespace="wwp"),
+                   fieldPath='spec.template.spec.containers[?(@.name=="prober")].image'
+                  )] }}
   openshift:
     state: latest
     apiVersion: apps/v1
@@ -51,14 +60,11 @@
       name: prometheus
       namespace: "{{ openshift_namespace }}"
       annotations:
-        # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
+        # Note: *do not* snap definition of _openshift_image_triggers (above)
+        # into place (or if you do, reformat it first). Use git blame to
+        # figure out why.
         image.openshift.io/triggers: >-
-          {{ [dict(from=
-                     dict(kind="ImageStreamTag",
-                          name=monitoring_prober_image_name + ":latest",
-                          namespace="wwp"),
-                   fieldPath='spec.template.spec.containers[?(@.name=="prober")].image'
-                  )] | to_json }}
+          {{ _openshift_image_triggers | to_json }}
 
     spec:
       serviceName: prometheus  # Refs the service above, so that the pods get
