@@ -231,7 +231,7 @@ class Webhook {
 
   public async await(port?: number) {
     if (!port) port = 8080
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.server = http
         .createServer((_, res) => {
           this.response = res
