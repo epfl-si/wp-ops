@@ -4,3 +4,8 @@ monitoring_disk_usage_report_webhook_secret: >-
   {{ webhooks.github.monitoring_disk_usage_report | eyaml(eyaml_keys) }}
 
 prometheus_htpass: "\n{% for cred in prometheus.credentials %}\n          - \"{{ cred.user }}:{{ cred.pass | eyaml(eyaml_keys) | password_hash('bcrypt') }}\"\n{% endfor %}"
+
+monitoring_pushgateway_namespace: >-
+  {{ "wwp-infra" if openshift_namespace == "wwp"
+     else openshift_namespace }}
+monitoring_pushgateway_url: http://pushgateway.{{ monitoring_pushgateway_namespace }}:9091/

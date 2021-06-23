@@ -291,7 +291,7 @@
                     - -i
                     - /srv/batch/disk-usage-report/qdirstat.NEW
                     - -p
-                    - http://pushgateway:9091
+                    - "http://{{ monitoring_pushgateway_url }}"
                     - --webhook
                   volumeMounts:
                     - name: srv
