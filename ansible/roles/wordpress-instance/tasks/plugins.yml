@@ -325,7 +325,7 @@
     state:
       - symlinked
       - active
-    from: https://wp-manager.epfl.ch/resources/plugin-zip/wp-media-folder.zip
+    from: "s3://{{ build.s3_assets.bucket_name }}/wp-media-folder.5.3.18.zip"
 
 - name: wp-media-folder options
   tags:
@@ -459,7 +459,8 @@
   wordpress_plugin:
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
-    from: https://wp-manager.epfl.ch/resources/plugin-zip/wpforms.zip
+    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.6.1.2.zip"
+
   tags:
     - wp.plugins.wpforms
 

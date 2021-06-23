@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
     apt-get -qy install curl ca-certificates \
-               software-properties-common apt-transport-https gnupg && \
+               software-properties-common apt-transport-https gnupg awscli && \
     apt-get -qy autoremove && \
     apt-get clean
 

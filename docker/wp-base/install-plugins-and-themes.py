@@ -35,8 +35,18 @@ Usage:
       --exclude <plugin-name>    Self-explanatory. Used to exclude proprietary
                                  plugins from Travis builds
 
-      --manifest-url             The URL to obtain the plugin manifest from;
+      --manifest-url <url>       The URL to obtain the plugin manifest from;
                                  default is %s
+
+      --s3-endpoint-url <url>    The URL of the S3 server that holds the
+                                 purchased assets (plugins or other).
+      --s3-bucket <url>          The bucket name where the purchased assets reside
+      --s3-key-id <s3keyid>
+      --s3-secret <s3secret>     Credentials used to access the assets on S3
+                                 (those whose `from:` start with s3://).
+                                 You can alternatively set environment variables
+                                 AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (just
+                                 like `aws cp` expects).
 
   install-plugins-and-themes.py <name> <URL>
 
@@ -182,7 +192,7 @@ class Plugin(object):
 
     @staticmethod
     def subclasses():
-        return (ZipPlugin, GitHubPlugin, WordpressOfficialPlugin)
+        return (S3Plugin, ZipPlugin, GitHubPlugin, WordpressOfficialPlugin)
 
     @classmethod
     def _find_handler(cls, url):
@@ -223,16 +233,21 @@ class ZipPlugin(Plugin):
         rename_like_self -- Ignored - We always unzip to a subdirectory named
                             `self.name`
         """
-        zip = ZipFile(io.BytesIO(requests.get(self.url).content))
-
+        zipfd = io.BytesIO(requests.get(self.url).content)
         progress("Unzipping {}".format(self.url))
+        self.install_from_fd(self.name, zipfd, target_dir)
+
+    @classmethod
+    def install_from_fd(cls, name, fd, target_dir):
+        zip = ZipFile(fd)
+
         for member in zip.namelist():
             zipinfo = zip.getinfo(member)
             if zipinfo.filename[-1] == '/':
                 continue
 
             targetpathelts = os.path.normpath(zipinfo.filename).split('/')
-            targetpathelts[0] = self.name
+            targetpathelts[0] = name
 
             targetpath = os.path.join(target_dir, *targetpathelts)
 
@@ -264,6 +279,38 @@ class GitHubPlugin(Plugin):
         for git in self._gits:
             self._copytree_install(git.clone().source_path, target_dir,
                                    rename_dir=self.name if rename_like_self else None)
+
+
+class S3Plugin(Plugin):
+    """A plug-in to obtain from an S3 bucket."""
+
+    @classmethod
+    def handles(cls, url):
+        return url.startswith("s3://")
+
+    client = None
+
+    @classmethod
+    def set_client(cls, client):
+        cls.client = client
+
+    def __init__(self, name, urls):
+        super(S3Plugin, self).__init__(name, urls)
+        assert len(self.urls) == 1
+        self.url = self.urls[0]
+        assert self.handles(self.url)
+
+    def install(self, target_dir, rename_like_self=True):
+        """Unzip into `target_dir`.
+
+        Keyword arguments:
+        rename_like_self -- Ignored - We always unzip to a subdirectory named
+                            `self.name`
+        """
+        tmpzip = "/tmp/%s.zip" % self.name
+        self.client.run_command("cp", self.url, tmpzip)
+        ZipPlugin.install_from_fd(self.name, open(tmpzip, 'rb'), target_dir)
+        os.unlink(tmpzip)
 
 
 class WordpressOfficialPlugin(Plugin):
@@ -361,7 +408,9 @@ class Flags:
         self.auto = argv[0] == 'auto'
         if self.auto:
             try:
-                opts, args = getopt.getopt(argv[1:], "e:v", ["exclude=", "manifest-url="])
+                opts, args = getopt.getopt(argv[1:], "e:v", [
+                    "exclude=", "manifest-url=",
+                    "s3-endpoint-url=", "s3-bucket-name=", "s3-key-id=", "s3-secret="])
             except getopt.GetoptError:
                 usage()
                 sys.exit(1)
@@ -370,9 +419,40 @@ class Flags:
             for o, a in opts:
                 if o == "--manifest-url":
                     self.manifest_url = a
+
+            opts_dict = dict(opts)
+            if "--s3-endpoint-url" in opts_dict:
+                self.s3 = S3(opts_dict["--s3-endpoint-url"],  # Mandatory
+                             opts_dict["--s3-bucket-name"],
+                             # The other two default to the awscli-style
+                             # environment variables:
+                             opts_dict.get("--s3-key-id", None),
+                             opts_dict.get("--s3-secret", None))
+            else:
+                import pprint; pprint.pprint(opts_dict); exit(1)
+                # self.s3 = None
+                pass  # XXX
         else:
             self.name = argv[0]
             self.path = argv[1]
+
+class S3:
+    """Models an S3 bucket client."""
+    def __init__(self, endpoint, bucket_name, keyid, secret):
+        self.endpoint = endpoint
+        self.bucket_name = bucket_name
+        self.keyid = keyid   or os.environ["AWS_ACCESS_KEY_ID"]
+        self.secret = secret or os.environ["AWS_SECRET_ACCESS_KEY"]
+
+    def run_command(self, *args):
+        # Poor man's Jinja:
+        args = [re.sub('\{\{.*\}\}', self.bucket_name, arg)
+                for arg in args]
+        return run_cmd(["aws", "--endpoint-url=%s" % self.endpoint,
+                        "s3", *args],
+                       env=dict(
+                AWS_ACCESS_KEY_ID=self.keyid,
+                AWS_SECRET_ACCESS_KEY=self.secret))
 
 
 WP_INSTALL_DIR = './wp-content'
@@ -385,6 +465,8 @@ if __name__ == '__main__':
     flags = Flags()
 
     if flags.auto:
+        S3Plugin.set_client(flags.s3)
+
         manifest = WpOpsPlugins(flags.manifest_url)
         for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
             if not os.path.isdir(d):

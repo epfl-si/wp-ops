@@ -7,8 +7,11 @@
 
 - include_vars: ../../../vars/image-vars.yml
 
-- include_vars: ../../../vars/secrets-wwp-test.yml
-  when: openshift_namespace == 'wwp-test'
+- when: openshift_namespace == 'wwp-test'
+  include_vars: "{{ item }}"
+  with_items:
+    - secrets-wwp-test.yml
+    - ../../../vars/secrets-wwp-test.yml
 
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
@@ -32,6 +35,15 @@
               value: "{{ github_api_token.user }}"
             - name: GITHUB_API_TOKEN
               value: "{{ github_api_token.token | eyaml(eyaml_keys) }}"
+            - name: INSTALL_AUTO_FLAGS
+              value: >-
+                --s3-endpoint-url={{ build.s3_assets.endpoint_url }}
+                --s3-bucket-name={{  build.s3_assets.bucket_name }}
+                --s3-key-id={{       build.s3_assets.key_id }}
+                --s3-secret={{       build.s3_assets.secret | eyaml(eyaml_keys) }}
+                {%if images_build_branch is defined %}
+                --manifest-url=https://raw.githubusercontent.com/epfl-si/wp-ops/{{ images_build_branch }}/ansible/roles/wordpress-instance/tasks/plugins.yml
+                {%endif%}
     - name: "{{ httpd_image_name }}"
       git_path: docker/httpd
       from: "{{ wp_base_image_name }}"
