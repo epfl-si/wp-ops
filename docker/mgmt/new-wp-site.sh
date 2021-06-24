@@ -10,7 +10,9 @@ usage() {
 
 Create a symlinked WordPress site into the current directory.
 
-Usage: new-wp-site.sh
+Usage: new-wp-site.sh [--debug]
+
+    --debug     Activate debugging in wp-config.php
 
 USAGE
 
@@ -195,6 +197,26 @@ if (isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) &&
 define('ALLOW_UNFILTERED_UPLOADS', true);
 
 PHP
+
+    if [ -n "$debug" ]; then
+        cat <<"DEBUG"
+/**
+ * Enable DEBUGGING
+ * See https://wordpress.org/support/article/debugging-in-wordpress/
+**/
+define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_LOG', true );     // by default in wp-content/debug.log
+define( 'WP_DEBUG_DISPLAY', true ); // debug messages are shown inside the HTML of pages
+define( 'SCRIPT_DEBUG', true );     // unminified CSS and JS
+define( 'SAVEQUERIES', true );      // see $wpdb->queries
+
+DEBUG
+    fi
 }
 
+debug=
+if [ "$1" = "--debug" ]; then
+    echo >&2 "Debug enabled in wp-config.php"
+    debug="DEBUG"
+fi
 main
