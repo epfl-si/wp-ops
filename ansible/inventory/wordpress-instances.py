@@ -9,12 +9,15 @@
 
 import sys
 import os
+import glob
 
 ansible_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ansible_suitcase_python_lib = os.path.join(
-    ansible_dir, "ansible-deps-cache",
-    "/python-libs/lib/python3.8/site-packages" if os.uname().sysname == "Linux" else "python-libs/lib/python/site-packages")
-sys.path.insert(0, ansible_suitcase_python_lib)
+
+ansible_suitcase_python_libs = glob.glob(os.path.join(
+    ansible_dir, "ansible-deps-cache/python-libs/lib/*/site-packages"))
+
+if len(ansible_suitcase_python_libs) > 0:
+    sys.path.insert(0, ansible_suitcase_python_libs[0])
 
 import subprocess
 import logging
