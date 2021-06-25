@@ -208,13 +208,11 @@ class _LiveSite(_Site):
             raise subprocess.CalledProcessError(retcode, cmd)
 
     _excluded_patterns = ['wp-*', '.git', '*packages', 'jahia-data', 'ansible-backup-*']
-    _excluded_paths = []
 
     @classmethod
     def _prune_flags(cls):
         return reduce(lambda a,b: a + ['-o'] + b,
-                      [['-name', excl] for excl in cls._excluded_patterns] +
-                      [['-path', excl] for excl in cls._excluded_paths])
+                      [['-name', excl] for excl in cls._excluded_patterns])
 
     def __init__(self, path):
         parsed = re.match(r'/srv/([^/]*)/([^/]*)/htdocs/?(.*?)$', path)
@@ -232,7 +230,6 @@ class _LiveSite(_Site):
 
 class LiveTestSite(TestSiteTrait, _LiveSite):
     _find_in_dirs = '/srv/dev /srv/int'
-    _excluded_paths = ['/srv/int/jahia2wp/data/backups']
 
 
 class LiveProductionSite(ProdSiteTrait, _LiveSite):
