@@ -11,28 +11,29 @@
         msg: |
           You must update Ansible to at least 2.6 to use this playbook.
 
-- name: WordPress instances
-  hosts: |
-    {%- if _want_wordpress_inventory -%}
-    {# Note: we are twisting the Ansible concept of “hosts” in this play.
-     # An inventory entry in the all_wordpresses group is a WordPress
-     # instance, rather than a host in the “traditional” sysadmin sense.
-     #}
-    all_wordpresses
-    {%- else -%}
-    {# If no relevant tags are in use (including the implicit "all" tag when -t is not
-     # present on the command line), skip the whole role and save a big chunk of time:
-     #}
-    !all
-    {%- endif -%}
+- name: Lazy-load WordPress inventory now (according to Ansible tags)
+  # See explanations in ../inventory/lazy-wordpress-instances.yml
+  hosts: localhost
   gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/wordpress-instance
+  tasks:
+    # "[WARNING]: refresh_inventory task does not support when conditional"
+    - meta: end_play
+      when: not _want_wordpress_inventory
+    - meta: refresh_inventory
   vars:
     _want_wordpress_inventory: >-
           {{ ansible_run_tags | any_known_tag(_wordpress_instance_role_path) }}
     _wordpress_instance_role_path: >-
           {{ (playbook_dir | dirname) + "/roles/wordpress-instance" }}
+
+- name: WordPress instances
+  # Note: we are twisting the Ansible concept of “hosts” in this play.
+  # An inventory entry in the all_wordpresses group is a WordPress
+  # instance, rather than a host in the “traditional” sysadmin sense.
+  hosts: all_wordpresses
+  gather_facts: no    # Ansible facts are useless for this play
+  roles:
+    - role: ../roles/wordpress-instance
 
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift

@@ -1,0 +1,18 @@
+# When running wpsible interactively in ansible-playbook mode,
+# WordPress instances are only enumerated on-demand i.e. after the
+# playbook calls `meta: refresh_inventory`. This saves time and
+# resources when we won't be running anything on any WordPress
+# instances (given the set of tags passed to wpsible).
+plugin: lazy_inventory
+lazy_inventory:
+  # The first time around (i.e. at ansible-playbook initialization time),
+  # render an empty group for all_wordpresses, which will cause the
+  # entire roles/wordpress-instance to be optimized out (unless
+  # ../.interactive-playbooks/main.yml runs `meta: refresh_inventory` first):
+  literal:
+    all_wordpresses:
+      hosts: {}
+full_inventory:
+  # The second time around (i.e. after `meta: refresh_inventory`),
+  # jump to the "real" script:
+  script: wordpress-instances.py
