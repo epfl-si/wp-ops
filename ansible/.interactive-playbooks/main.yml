@@ -30,7 +30,8 @@
   # Note: we are twisting the Ansible concept of “hosts” in this play.
   # An inventory entry in the all_wordpresses group is a WordPress
   # instance, rather than a host in the “traditional” sysadmin sense.
-  hosts: all_wordpresses
+  hosts: all_wordpresses  # Will be an empty group, unless `- meta: refresh_inventory` above
+                          # ran
   gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/wordpress-instance
