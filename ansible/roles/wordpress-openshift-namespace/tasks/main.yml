@@ -2,13 +2,19 @@
 # tasks for WordPress OpenShift namespaces
 
 - name: "Images and builds"
-  import_tasks: images.yml
-  tags: images
+  include_tasks:
+    file: images.yml
+    # Because `include_tasks` is dynamic, tags don't auto-inherit:
+    apply:
+      tags:
+        - images
+  tags:
+    - images
+    - images.promote
 
 - name: "DeploymentConfigs (previously known as pods)"
   include_tasks:
     file: deploymentconfig-httpd.yml
-    # Because `include_tasks` is dynamic, tags don't auto-inherit.
     apply:
       tags: ["dc"]
   loop: "{{ DeploymentConfigs.httpd }}"
