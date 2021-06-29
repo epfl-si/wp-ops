@@ -62,6 +62,14 @@ RUN su -s /bin/sh www-data -c " \
     wp package install https://github.com/epfl-si/wp-cli/archive/master.zip;            \
     rm -f ~/.composer/auth.json"
 
+# Make symlinks under /var/www/.wp-cli relative (so that the
+# wp-awx-runner image may safely move that directory to /runner):
+RUN set -e -x; cd /var/www/.wp-cli; find . -type l | while read l; do     \
+        target="$(realpath "$l")";                                        \
+        rel="$(realpath --relative-to="$(dirname "$(realpath -s "$l")")"  \
+                        "$target")";                                      \
+        rm "$l"; ln -s "$rel" "$l";                                       \
+    done
 
 ######################################################################
 # Install and patch WordPresses
