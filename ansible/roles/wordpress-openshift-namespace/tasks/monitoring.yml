@@ -69,9 +69,6 @@
           containers:
             - name: prometheus
               image: prom/prometheus
-#              ports:
-#              - containerPort: 9090
-#                name: prometheus
               volumeMounts:
                 - name: storage
                   mountPath: /prometheus

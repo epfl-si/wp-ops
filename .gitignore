@@ -8,4 +8,5 @@ ansible/state
 *.pyc
 node_modules/
 k8s-backup/
+assets/
 
