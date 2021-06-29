@@ -6,6 +6,7 @@
 # See also continuous-integration.yml (which has its own set of images)
 
 - include_vars: ../../../vars/image-vars.yml
+  tags: always
 
 - when: openshift_namespace == 'wwp-test'
   include_vars: "{{ item }}"
@@ -63,3 +64,15 @@
   with_items:
     - name: "{{ httpd_image_name }}"
     - name: "{{ mgmt_image_name }}"
+
+- name: "Promote wwp-test images to wwp"
+  when: openshift_is_production
+  tags: images.promote
+  local_action:
+    module: shell
+    cmd: |
+      oc tag wwp-test/mgmt:latest wwp/mgmt:prod
+      oc tag wwp-test/mgmt:latest wwp-infra/mgmt:prod
+      oc tag wwp-test/httpd:latest wwp/httpd:prod
+      oc tag wwp-test/wp-ansible-runner:latest wwp/wp-ansible-runner:latest
+      oc tag wwp-test/cronjob:latest wwp-infra/cronjob:latest
