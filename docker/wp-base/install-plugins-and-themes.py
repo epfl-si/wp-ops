@@ -429,9 +429,7 @@ class Flags:
                              opts_dict.get("--s3-key-id", None),
                              opts_dict.get("--s3-secret", None))
             else:
-                import pprint; pprint.pprint(opts_dict); exit(1)
-                # self.s3 = None
-                pass  # XXX
+                self.s3 = None
         else:
             self.name = argv[0]
             self.path = argv[1]
