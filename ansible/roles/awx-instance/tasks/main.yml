@@ -94,6 +94,7 @@
             prj.scm_type = "git"
             prj.scm_url = "{{ awx_project_github_url }}"
             prj.scm_branch = "{{ git_current_branch }}"
+            prj.scm_update_on_launch = True
 
 - import_tasks: container-group.yml
   tags: awx
