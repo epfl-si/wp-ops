@@ -11,6 +11,7 @@
 - include_vars: "{{ item }}"
   with_items:
     - backup-vars.yml
+    - ../../wordpress-openshift-namespace/vars/monitoring-vars.yml
     - ../../../vars/env-secrets.yml                          # Used in backup-vars.yml
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
 
