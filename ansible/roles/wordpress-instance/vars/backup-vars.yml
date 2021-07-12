@@ -21,7 +21,7 @@ backup_aws_s3api_jq_count_cmd: >-
 backup_url_label: "{{ wp_base_url | ensure_trailing_slash }}"
 backup_curl_to_pushgateway_cmd: >-
   curl -X POST -H "Content-Type: text/plain" --data-binary @-
-  http://{{ monitoring_pushgateway_url }}/metrics/job/backup/instance/{{ inventory_hostname }}
+  {{ monitoring_pushgateway_url }}metrics/job/backup/instance/{{ inventory_hostname }}
 
 backup_bash_stop_on_any_errors: |
   set -o pipefail
