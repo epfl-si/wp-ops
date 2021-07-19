@@ -26,3 +26,15 @@ backup_curl_to_pushgateway_cmd: >-
 backup_bash_stop_on_any_errors: |
   set -o pipefail
   set -e -x
+
+# Used to be as simple as `{{ wp_cli_command }} db export -`, but then
+# someone made “improvements” in v2.5.0
+# (https://github.com/wp-cli/db-command/issues/195)...
+backup_db_to_stdout_command: >-
+  mysqldump --no-defaults --skip-column-statistics --no-tablespaces
+  --default-character-set=utf8
+  $(
+  {{ wp_cli_command }} config list --format=json |
+  jq -r 'from_entries | "\(.DB_NAME) --host=\(.DB_HOST)
+  --user=\(.DB_USER) --password=\(.DB_PASSWORD)"'
+  )
