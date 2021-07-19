@@ -35,6 +35,6 @@ backup_db_to_stdout_command: >-
   --default-character-set=utf8
   $(
   {{ wp_cli_command }} config list --format=json |
-  jq -r 'from_entries | "\(.DB_NAME) --host=\(.DB_HOST)
+  jq -r 'map(.key = .name | del(.name)) | from_entries | "\(.DB_NAME) --host=\(.DB_HOST)
   --user=\(.DB_USER) --password=\(.DB_PASSWORD)"'
   )
