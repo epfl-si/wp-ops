@@ -50,7 +50,7 @@ RUN chgrp -R {{ awx_unix_credentials.group }} /runner
 
 # Add dependencies
 RUN set -e -x; mkdir /tmp/install; \
-    curl -o /tmp/install/requirements.yml https://raw.githubusercontent.com/epfl-si/wp-ops/{{ git_current_branch }}/ansible/requirements.yml ; \
+    curl -o /tmp/install/requirements.yml https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml ; \
     ansible-galaxy install -i -r /tmp/install/requirements.yml ; \
     ansible-galaxy collection install -i -r /tmp/install/requirements.yml ; \
     rm /tmp/install/requirements.yml
