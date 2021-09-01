@@ -24,7 +24,7 @@
       export WP_ADMIN_USER=admin
       export WP_ADMIN_EMAIL=test@example.com
       export MYSQL_SUPER_PASSWORD='{{ lookup("env_secrets", "mysql_super_credentials", "MYSQL_SUPER_PASSWORD") }}'
-      export WP_SITE_TITLE='{{ lookup("wpveritas", "title") }}'
+      export WP_SITE_TITLE=''{{ lookup("wpveritas", "title") | quote }}''
       new-wp-site
   register: _new_wp_site
   changed_when: >-
