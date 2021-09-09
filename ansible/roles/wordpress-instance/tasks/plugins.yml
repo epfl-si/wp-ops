@@ -378,15 +378,14 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_enlighter_options }}"
 
-# As it is unavaiable at the moment, this should not be installed
-#- name: "'Find My Blocks' plugin"
-#  wordpress_plugin:
-#    name: find-my-blocks
-#    state:
-#      - symlinked
-#      - active
-#    from: wordpress.org/plugins
-#
+- name: "'Find My Blocks' plugin"
+  wordpress_plugin:
+    name: find-my-blocks
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
+
 ##################### Category-specific plugins ###########################
 
 - name: epfl-intranet plugin
