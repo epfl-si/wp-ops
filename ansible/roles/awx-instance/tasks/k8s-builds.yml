@@ -5,7 +5,7 @@
 - include_vars: k8s-vars.yml
   tags: always
 
-- name: "Pull {{ awx_runner_base_image_fullname }}"
+- name: "Pull {{ awx_runner_base_image_fullname }} into {{ awx_runner_base_image_mirrored_name }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
