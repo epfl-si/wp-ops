@@ -23,13 +23,13 @@ RUN mkdir /etc/ansible;                                                         
 
 ARG RUNNER_PATCH_URLS=""
 ARG ANSIBLE_PATCH_URLS=""
-RUN set -e -x; yum -y install patch;                                        \
+RUN set -o pipefail; set -e -x; yum -y install patch;                       \
     for url in $RUNNER_PATCH_URLS; do                                       \
-        curl $url |                                                         \
+        curl --fail $url |                                                  \
             patch -d /usr/lib/python3.6/site-packages/ansible_runner;       \
     done;                                                                   \
     for url in $ANSIBLE_PATCH_URLS; do                                      \
-        curl $url |                                                         \
+        curl --fail $url |                                                  \
             patch -d /usr/local/lib/python3.6/site-packages/ansible -p3 ;   \
     done;                                                                   \
     yum -y history undo patch
@@ -50,7 +50,7 @@ RUN chgrp -R {{ awx_unix_credentials.group }} /runner
 
 # Add dependencies
 RUN set -e -x; mkdir /tmp/install; \
-    curl -o /tmp/install/requirements.yml https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml ; \
+    curl --fail -o /tmp/install/requirements.yml https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml ; \
     ansible-galaxy install -i -r /tmp/install/requirements.yml ; \
     ansible-galaxy collection install -i -r /tmp/install/requirements.yml ; \
     rm /tmp/install/requirements.yml
