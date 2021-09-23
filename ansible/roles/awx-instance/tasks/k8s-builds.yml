@@ -5,7 +5,7 @@
 - include_vars: k8s-vars.yml
   tags: always
 
-- name: "Pull {{ awx_runner_base_image_fullname }}"
+- name: "Pull {{ awx_runner_base_image_fullname }} into {{ awx_runner_base_image_mirrored_name }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
@@ -21,6 +21,7 @@
     metadata:
       name: "{{ awx_runner_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
+    from: "{{ awx_runner_base_image_mirrored_name }}"
     dockerfile: "{{ lookup('template', 'Dockerfile.' + awx_runner_image_name) }}"
 
 - name: "Rebuild {{ awx_runner_image_name }} now"

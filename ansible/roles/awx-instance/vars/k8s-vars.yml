@@ -11,6 +11,7 @@ awx_web_hostnames:
 awx_runner_base_image_name: ansible-runner
 awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
 awx_runner_image_name: "wp-ansible-runner"
+awx_runner_base_image_mirrored_name: "docker-registry.default.svc:5000/wwp-test/{{ awx_runner_base_image_name }}"
 
 awx_inventory: "{{ awx_inventories[ansible_oc_namespace] }}"
 awx_inventories:
