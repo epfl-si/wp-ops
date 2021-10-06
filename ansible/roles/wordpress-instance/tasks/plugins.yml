@@ -222,7 +222,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-sti/wordpress.plugin.tequila/archive/vpsi.zip
+    from: https://github.com/epfl-si/wordpress.plugin.tequila
 
 - name: Replace WP login screen with redirect-to-Tequila flow
   wordpress_option:
@@ -240,7 +240,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/epfl-sti/wordpress.plugin.accred/archive/vpsi.zip
+    from: https://github.com/epfl-si/wordpress.plugin.accred
 
 - name: Accred options
   wordpress_option: "{{ item }}"
