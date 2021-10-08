@@ -1,4 +1,4 @@
-FROM docker-registry.default.svc:5000/wwp-test/mgmt
+FROM docker-registry.default.svc:5000/wwp-test/wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \
