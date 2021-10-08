@@ -1,4 +1,4 @@
-FROM epflsi/os-wp-base
+FROM docker-registry.default.svc:5000/wwp-test/mgmt
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     bash-completion \

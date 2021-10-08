@@ -1,4 +1,4 @@
-FROM epflsi/os-wp-base
+FROM docker-registry.default.svc:5000/wwp-test/wp-base
 
 RUN perl -i -pe 's/^# deb-src/deb-src/' /etc/apt/sources.list /etc/apt/sources.list.d/*.list
 
@@ -15,7 +15,7 @@ RUN set -e -x; mkdir /build; cd /build;                                     \
     cd msmtp*; dpkg-buildpackage -d;                                        \
     mkdir /deb; mv ../*.deb /deb
 
-FROM epflsi/os-wp-base
+FROM docker-registry.default.svc:5000/wwp-test/wp-base
 
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apache2 \
