@@ -1,5 +1,22 @@
 FROM epflsi/os-wp-base
 
+RUN perl -i -pe 's/^# deb-src/deb-src/' /etc/apt/sources.list /etc/apt/sources.list.d/*.list
+
+RUN apt -qy update && apt -qy install build-essential dpkg-dev debhelper wget && apt -qy build-dep msmtp
+
+ARG msmtp_url_base=https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/msmtp/1.8.11-2/msmtp_1.8.11
+ARG msmtp_patchlevel=2
+
+RUN set -e -x; mkdir /build; cd /build;                                     \
+    wget ${msmtp_url_base}-${msmtp_patchlevel}.dsc;                         \
+    wget ${msmtp_url_base}.orig.tar.xz;                                     \
+    wget ${msmtp_url_base}-${msmtp_patchlevel}.debian.tar.xz;               \
+    dpkg-source -x $(basename "${msmtp_url_base}")-${msmtp_patchlevel}.dsc; \
+    cd msmtp*; dpkg-buildpackage -d;                                        \
+    mkdir /deb; mv ../*.deb /deb
+
+FROM epflsi/os-wp-base
+
 RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apache2 \
     libapache2-mod-php${PHP_VERSION} \
@@ -7,11 +24,14 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     libcgi-pm-perl \
     libio-all-lwp-perl \
     libreadonly-perl \
-    msmtp \
-    msmtp-mta \
+    libsecret-1-0 \
+    libgsasl7 \
   && \
     apt-get -qy autoremove && \
     apt-get clean
+
+COPY --from=0 /deb/ /usr/local/msmtp/
+RUN dpkg -i /usr/local/msmtp/*
 
 COPY msmtprc /etc/msmtprc
 COPY php.ini /etc/php/95-epfl.ini
@@ -35,4 +55,3 @@ RUN chmod a+x /docker-entrypoint.sh /usr/lib/cgi-bin/health.cgi
 EXPOSE 8080 8443
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-
