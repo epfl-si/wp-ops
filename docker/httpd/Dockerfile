@@ -11,8 +11,14 @@ RUN set -e -x; mkdir /build; cd /build;                                     \
     wget ${msmtp_url_base}-${msmtp_patchlevel}.dsc;                         \
     wget ${msmtp_url_base}.orig.tar.xz;                                     \
     wget ${msmtp_url_base}-${msmtp_patchlevel}.debian.tar.xz;               \
-    dpkg-source -x $(basename "${msmtp_url_base}")-${msmtp_patchlevel}.dsc; \
-    cd msmtp*; dpkg-buildpackage -d;                                        \
+    dpkg-source -x $(basename "${msmtp_url_base}")-${msmtp_patchlevel}.dsc
+
+COPY log-to-stderr.patch /build/
+
+RUN set -e -x; cd /build/msmtp*;                         \
+    cp /build/log-to-stderr.patch debian/patches/;       \
+    echo log-to-stderr.patch >> debian/patches/series;   \
+    dpkg-buildpackage -d;                                \
     mkdir /deb; mv ../*.deb /deb
 
 FROM docker-registry.default.svc:5000/wwp-test/wp-base
