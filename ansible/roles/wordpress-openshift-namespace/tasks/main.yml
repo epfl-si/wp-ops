@@ -12,9 +12,9 @@
     - images
     - images.promote
 
-- name: "DeploymentConfigs (previously known as pods)"
+- name: "DeploymentConfigs (previously known as pods) and Services"
   include_tasks:
-    file: deploymentconfig-httpd.yml
+    file: k8s-objects-httpd.yml
     apply:
       tags: ["dc"]
   loop: "{{ DeploymentConfigs.httpd }}"

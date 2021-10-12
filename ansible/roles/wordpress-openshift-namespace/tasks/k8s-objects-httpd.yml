@@ -1,7 +1,41 @@
-# Set up one DeploymentConfig/httpd-* object, described by the
+# Set up one DeploymentConfig/httpd-* object and one Service/httpd-* object, described by the
 # {{ dc }} variable.
 
 - include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
+
+- name: "service/httpd-{{ dc.name }}"
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: "httpd-{{ dc.name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "httpd-{{ dc.name }}"
+    spec:
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: "httpd-{{ dc.name }}"
+        deploymentconfig: ~
+      ports:
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+        - name: https
+          port: 8443
+          protocol: TCP
+          targetPort: 8443
+        - name: websvcmetrics
+          port: 9980
+          protocol: TCP
+          targetPort: 9980
+        - name: collectd
+          port: 9103
+          protocol: TCP
+          targetPort: 9103
 
 - name: "dc/httpd-{{ dc.name }}"
   openshift:
