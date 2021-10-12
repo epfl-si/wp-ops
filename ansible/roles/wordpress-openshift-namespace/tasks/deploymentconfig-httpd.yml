@@ -115,11 +115,14 @@
 
       triggers:
       - type: ImageChange
-        imageChangeParams:
-           automatic: "{{ true if (dc.autopush | default(None)) else None }}"
-           containerNames:
-           - "httpd-{{ dc.name }}"
-           from:
-             kind: ImageStreamTag
-             name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
-             namespace: "{{ openshift_namespace }}"
+        imageChangeParams: >-
+          {{ _imageChangeParams
+          | combine({"automatic": True} if (dc.autopush | default(None)) else {}) }}
+  vars:
+    _imageChangeParams:
+      containerNames:
+      - "httpd-{{ dc.name }}"
+      from:
+        kind: ImageStreamTag
+        name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
+        namespace: "{{ openshift_namespace }}"
