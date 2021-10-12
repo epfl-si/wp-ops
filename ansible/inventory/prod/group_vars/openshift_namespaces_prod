@@ -12,41 +12,33 @@ DeploymentConfigs:
     replicaCount:
       httpd: 2
   httpd:
-    - name: cron
-      replicaCount: 1
+#    # ⚠ PersistentVolumeClaim is missing for this one! Need to either file a Camptocamp ticket, or delete the DC and service
+#    - name: cron
+#      replicaCount: 1
     - name: form
       replicaCount: 1
     - name: inside
     - name: labs
     - name: manager
-    - name: subdomains
     - name: sandbox
       autopush: true
+    - name: subdomains
+    - name: subdomains-lite
     - name: www
       replicaCount: 6
-    # TODO: Obtain the list of unmanaged deployments from wp-veritas
-    - name: unm-blockchain-school2019
+#    # TODO: Obtain the list of unmanaged deployments from wp-veritas
+    - name: unm-annualreportsti2019
     - name: unm-cmis2020
-    - name: unm-drosophoto
     - name: unm-eee
-    - name: unm-futureup
     - name: unm-hobelblog
-    - name: unm-icresearchday
     - name: unm-icrp
-    - name: unm-igluna
+    - name: unm-ips23
     - name: unm-journeeindustrie
-    - name: unm-lasur15
-    - name: unm-ldmblogs
-    - name: unm-library
-    - name: unm-ml
-    - name: unm-network-science
-    - name: unm-nmc2019
-    - name: unm-nrg2019
-    - name: unm-nss2019
+    - name: unm-modval17
+    - name: unm-neurosymposium
     - name: unm-phdsummit
     - name: unm-rapportannuel
     - name: unm-synuclein
-    - name: unm-wordpress
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
