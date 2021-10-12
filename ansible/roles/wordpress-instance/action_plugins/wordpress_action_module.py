@@ -132,11 +132,16 @@ class WordPressActionModule(ActionBase):
 
         :param from_piece: string describing plugin source.
         """
-        return (from_piece != "wordpress.org/plugins"
-                # check if match a github repo
-                and not re.match(r'^https:\/\/github\.com\/[\w-]+\/[\w-]+(\/)?$', from_piece)
-                and not from_piece.endswith(".zip"))
-
+        if re.match(r'^https:\/\/github\.com\/', from_piece):
+            # _is_filename should be true for URLs of files and (by extension)
+            # of directories that are to be “cherry-picked” (rather than
+            # cloned) out of a fraction of a repository. On the other hand,
+            # “other” things on GitHub (such as a whole repository, or a
+            # released .zip) should return false.
+            return re.search(r'/blob/', from_piece)
+        else:
+            return (from_piece != "wordpress.org/plugins"
+                    and not from_piece.endswith(".zip"))
 
     def _is_check_mode (self):
         return self._task_vars.get('ansible_check_mode', False)
