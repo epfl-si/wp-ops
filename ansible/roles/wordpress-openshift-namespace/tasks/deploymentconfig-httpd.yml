@@ -72,7 +72,7 @@
               name: "webservices-logs-{{ dc.name }}"
             - mountPath: /call_logs
               name: "call-logs-{{ dc.name }}"
-          - image: docker-registry.default.svc:5000/wwp-test/collectd:latest
+          - image: docker-registry.default.svc:5000/{{ openshift_namespace }}/collectd:latest
             imagePullPolicy: Always
             name: "collectd-{{ dc.name }}"
             ports:
@@ -86,7 +86,7 @@
               value: "{{ dc.name }}"
             - name: LINE
               value: test
-            image: docker-registry.default.svc:5000/wwp-test/filebeat-call-logs:latest
+            image: docker-registry.default.svc:5000/{{ openshift_namespace }}/filebeat-call-logs:latest
             imagePullPolicy: Always
             name: "filebeat-{{ dc.name }}"
             resources: {}
@@ -101,8 +101,8 @@
           restartPolicy: Always
           schedulerName: default-scheduler
           securityContext: {}
-          serviceAccount: wwp-test
-          serviceAccountName: wwp-test
+          serviceAccount: "{{ openshift_namespace }}"
+          serviceAccountName: "{{ openshift_namespace }}"
           terminationGracePeriodSeconds: 30
           volumes:
           - name: "volume-wordpress-{{ dc.name }}"
