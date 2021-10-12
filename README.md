@@ -2,7 +2,7 @@
   WordPress @ EPFL: DevOps Boogaloo
 </h1>
 
-[![Build Status](https://travis-ci.com/epfl-si/wp-ops.svg?branch=master)](https://travis-ci.com/epfl-si/wp-ops)
+[![Build Status](https://travis-ci.com/epfl-si/wp-ops.svg?branch=master)](https://app.travis-ci.com/github/epfl-si/wp-ops)
 
 In this repository you will find:
 
