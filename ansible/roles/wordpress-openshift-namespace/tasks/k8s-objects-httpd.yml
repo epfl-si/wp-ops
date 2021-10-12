@@ -36,6 +36,7 @@
           port: 9103
           protocol: TCP
           targetPort: 9103
+  tags: services
 
 - name: "dc/httpd-{{ dc.name }}"
   openshift:
@@ -160,3 +161,4 @@
         kind: ImageStreamTag
         name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
         namespace: "{{ openshift_namespace }}"
+  tags: dc

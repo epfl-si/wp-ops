@@ -15,12 +15,12 @@
 - name: "DeploymentConfigs (previously known as pods) and Services"
   include_tasks:
     file: k8s-objects-httpd.yml
-    apply:
-      tags: ["dc"]
   loop: "{{ DeploymentConfigs.httpd }}"
   loop_control:
     loop_var: dc
-  tags: dc
+  tags:
+    - dc
+    - services
 
 - name: "Varnish"
   include_tasks:
