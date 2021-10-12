@@ -2,6 +2,7 @@
 # {{ dc }} variable.
 
 - include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
+  tags: always
 
 - name: "service/httpd-{{ dc.name }}"
   openshift:
