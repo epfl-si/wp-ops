@@ -319,7 +319,7 @@
     state:
       - symlinked
       - active
-    from: "s3://{{ build.s3_assets.bucket_name }}/wp-media-folder.5.3.18.zip"
+    from: "s3://{{ build.s3_assets.bucket_name }}/wp-media-folder.5.3.21.zip"
 
 - name: wp-media-folder options
   tags:
