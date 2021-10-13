@@ -117,14 +117,17 @@ RUN set -e -x; for wp in /wp/*; do cd $wp ;                              \
     done
 
 # Special treatment for tinymce-advanced, whose version scheme follows
-# WordPress' starting at 5.2
+# WordPress' starting at 5.2... and ending at 5.6
 RUN set -e -x; for wp in /wp/*; do                                         \
   cd $wp;                                                                  \
   wpmajorminor="$(basename $wp | cut -d. -f1-2)";                          \
   curl -q https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json \
-  | jq -r ".versions | to_entries                                          \
-         | map(select (.key | startswith(\"$wpmajorminor\")))              \
-         | map(.value) | last"                                             \
+  | jq -r '.versions | to_entries as $versions | $versions                 \
+         | map(select (.key | startswith("'$wpmajorminor'"))) as $matches  \
+         | if ($matches | length) == 0 then                                \
+                $versions | map(select(.key | match("^[0-9.]+$")))         \
+           else $matches end                                               \
+         | map(.value) | last '                                            \
      | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
   rm -rf wp-content/plugins/tinymce-advanced;                              \
   (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
