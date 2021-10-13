@@ -1,3 +1,3 @@
-FROM epflsi/os-wp-mgmt
+FROM docker-registry.default.svc:5000/wwp-test/mgmt
 
 USER www-data
