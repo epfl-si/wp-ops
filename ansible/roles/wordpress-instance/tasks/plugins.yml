@@ -328,7 +328,7 @@
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_wpmf_options }}"
 
-- name: very-simple-meta-description pluginß
+- name: very-simple-meta-description plugin
   wordpress_plugin:
     name: very-simple-meta-description
     state:
