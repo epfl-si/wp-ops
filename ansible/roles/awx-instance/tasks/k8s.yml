@@ -100,6 +100,16 @@
       name: "{{ awx_service_account }}"
       namespace: "{{ ansible_oc_namespace }}"
 
+- name: "Pull redis image into {{ awx_redis_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: redis
+      namespace: "{{ ansible_oc_namespace }}"
+    from: "{{ awx_redis_image_mirrored_from }}"
+    tag: >-
+      {{ awx_redis_image_mirrored_from | regex_replace("^.*:", "") }}
+
 - name: Ansible Tower StatefulSet
   openshift:
     state: latest
@@ -178,7 +188,7 @@
                     fieldPath: status.podIP
           #####################################################
           - name: awx-redis
-            image: redis:6.0
+            image: "{{ awx_redis_image_mirrored_to }}"
             imagePullPolicy: Always
             args: ["redis-server", "/etc/redis/redis.conf"]
             ports:

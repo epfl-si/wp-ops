@@ -1,5 +1,5 @@
 FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ mgmt_image_name }}:latest
-FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_base_image_name }}:latest
+FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_ansible_runner_base_image_name }}:latest
 
 RUN yum -y update
 

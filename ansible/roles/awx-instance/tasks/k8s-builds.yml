@@ -5,13 +5,13 @@
 - include_vars: k8s-vars.yml
   tags: always
 
-- name: "Pull {{ awx_runner_base_image_fullname }} into {{ awx_runner_base_image_mirrored_name }}"
+- name: "Pull {{ awx_ansible_runner_base_image_mirrored_from }} into {{ awx_ansible_runner_base_image_mirrored_to }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
-      name: "{{ awx_runner_base_image_name }}"
+      name: "{{ awx_ansible_runner_base_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_runner_base_image_fullname }}"
+    from: "{{ awx_ansible_runner_base_image_mirrored_from }}"
     tag: latest
 
 - name: "Build {{ awx_runner_image_name }} in OpenShift"
@@ -21,7 +21,7 @@
     metadata:
       name: "{{ awx_runner_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_runner_base_image_mirrored_name }}"
+    from: "{{ awx_ansible_runner_base_image_mirrored_to }}"
     dockerfile: "{{ lookup('template', 'Dockerfile.' + awx_runner_image_name) }}"
 
 - name: "Rebuild {{ awx_runner_image_name }} now"
@@ -29,7 +29,16 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
 
-- name: "Patch {{ awx_base_image_full_name }} into {{ awx_image_name }}"
+- name: "Pull upstream awx image into {{ awx_redis_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: awx
+      namespace: "{{ ansible_oc_namespace }}"
+    from: "{{ awx_base_image_mirrored_from }}"
+    tag: "{{ awx_version }}"
+
+- name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_image_name }}"
   register: _awx_buildconfig
   delegate_to: localhost
   openshift_imagestream:
@@ -38,7 +47,7 @@
       name: "{{ awx_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
     dockerfile: |
-       FROM {{ awx_base_image_full_name }}
+       FROM {{ awx_base_image_mirrored_to }}
 
        USER 0
        RUN yum -y install patch && yum -y clean all

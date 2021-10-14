@@ -1,1 +1,2 @@
-varnish_image: camptocamp/varnish:20181129-1
+varnish_image_mirrored_from: docker.io/camptocamp/varnish:20181129-1
+varnish_image_mirrored_to: "docker-registry.default.svc:5000/{{ openshift_namespace }}/varnish:20181129-1"

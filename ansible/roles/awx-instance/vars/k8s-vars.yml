@@ -1,17 +1,22 @@
 awx_version: 15.0.1
 awx_image_name: wp-awx
+awx_base_image_mirrored_from: "docker.io/ansible/awx:{{ awx_version }}"
+awx_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx:{{ awx_version }}"
 awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
-awx_base_image_full_name: "ansible/awx:{{ awx_version }}"
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch
   wwp-infra: awx-wwp-infra.epfl.ch
 
-awx_runner_base_image_name: ansible-runner
-awx_runner_base_image_fullname: docker.io/ansible/ansible-runner:latest
+awx_ansible_runner_base_image_name: ansible-runner
+awx_ansible_runner_base_image_mirrored_from: quay.io/ansible/ansible-runner:latest
+awx_ansible_runner_base_image_mirrored_to : "docker-registry.default.svc:5000/wwp-test/{{ awx_ansible_runner_base_image_name }}"
+
+awx_redis_image_mirrored_from: redis:6.0
+awx_redis_image_mirrored_to: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/redis:6.0"
+
 awx_runner_image_name: "wp-ansible-runner"
-awx_runner_base_image_mirrored_name: "docker-registry.default.svc:5000/wwp-test/{{ awx_runner_base_image_name }}"
 
 awx_inventory: "{{ awx_inventories[ansible_oc_namespace] }}"
 awx_inventories:
