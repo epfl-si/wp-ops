@@ -8,39 +8,38 @@ ansible_connection: local  # Unless stipulated otherwise in a task
 openshift_namespace: wwp
 
 DeploymentConfigs:
+  defaults:
+    replicaCount:
+      httpd: 2
   httpd:
-    # TODO: Obtain from the truth source
-    - name: httpd-cron
-    - name: httpd-form
-    - name: httpd-inside
-    - name: httpd-labs
-    - name: httpd-manager
-    - name: httpd-subdomains
-    - name: httpd-sandbox
+#    # ⚠ PersistentVolumeClaim is missing for this one! Need to either file a Camptocamp ticket, or delete the DC and service
+#    - name: cron
+#      replicaCount: 1
+    - name: form
+      replicaCount: 1
+    - name: inside
+    - name: labs
+      replicaCount: 6
+    - name: manager
+    - name: sandbox
       autopush: true
-    - name: httpd-www
-    - name: httpd-unm-blockchain-school2019
-    - name: httpd-unm-cmis2020
-    - name: httpd-unm-drosophoto
-    - name: httpd-unm-eee
-    - name: httpd-unm-futureup
-    - name: httpd-unm-hobelblog
-    - name: httpd-unm-icresearchday
-    - name: httpd-unm-icrp
-    - name: httpd-unm-igluna
-    - name: httpd-unm-journeeindustrie
-    - name: httpd-unm-lasur15
-    - name: httpd-unm-ldmblogs
-    - name: httpd-unm-library
-    - name: httpd-unm-ml
-    - name: httpd-unm-network-science
-    - name: httpd-unm-nmc2019
-    - name: httpd-unm-nrg2019
-    - name: httpd-unm-nss2019
-    - name: httpd-unm-phdsummit
-    - name: httpd-unm-rapportannuel
-    - name: httpd-unm-synuclein
-    - name: httpd-unm-wordpress
+    - name: subdomains
+    - name: subdomains-lite
+    - name: www
+      replicaCount: 6
+#    # TODO: Obtain the list of unmanaged deployments from wp-veritas
+    - name: unm-annualreportsti2019
+    - name: unm-cmis2020
+    - name: unm-eee
+    - name: unm-hobelblog
+    - name: unm-icrp
+    - name: unm-ips23
+    - name: unm-journeeindustrie
+    - name: unm-modval17
+    - name: unm-neurosymposium
+    - name: unm-phdsummit
+    - name: unm-rapportannuel
+    - name: unm-synuclein
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"

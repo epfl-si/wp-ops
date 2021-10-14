@@ -1,17 +1,43 @@
-# Set up one DeploymentConfig/httpd-* object, described by the
+# Set up one DeploymentConfig/httpd-* object and one Service/httpd-* object, described by the
 # {{ dc }} variable.
 
 - include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
+  tags: always
 
-# Unfortunately, production DeploymentConfig's cannot safely be updated
-# using this configuration - The PersistentVolumeClaims don't match up,
-# and even if they did, the already-existing DeploymentConfig's use different
-# names for it. This is not something that can be fixed with `oc apply`;
-# one needs to tear down the whole DeploymentConfig and recreate it
-# (which would obviously cause an outage).
-- assert:
-    that: |
-      openshift_namespace == "wwp-test"
+- name: "service/httpd-{{ dc.name }}"
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: "httpd-{{ dc.name }}"
+      namespace: "{{ openshift_namespace }}"
+      labels:
+        app: "httpd-{{ dc.name }}"
+    spec:
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: "httpd-{{ dc.name }}"
+        deploymentconfig: ~
+      ports:
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+        - name: https
+          port: 8443
+          protocol: TCP
+          targetPort: 8443
+        - name: websvcmetrics
+          port: 9980
+          protocol: TCP
+          targetPort: 9980
+        - name: collectd
+          port: 9103
+          protocol: TCP
+          targetPort: 9103
+  tags: services
 
 - name: "dc/httpd-{{ dc.name }}"
   openshift:
@@ -82,7 +108,7 @@
               name: "webservices-logs-{{ dc.name }}"
             - mountPath: /call_logs
               name: "call-logs-{{ dc.name }}"
-          - image: docker-registry.default.svc:5000/wwp-test/collectd:latest
+          - image: docker-registry.default.svc:5000/{{ openshift_namespace }}/collectd:latest
             imagePullPolicy: Always
             name: "collectd-{{ dc.name }}"
             ports:
@@ -95,8 +121,10 @@
             - name: WP_ENV
               value: "{{ dc.name }}"
             - name: LINE
-              value: test
-            image: docker-registry.default.svc:5000/wwp-test/filebeat-call-logs:latest
+              value: >-
+                {{ "prod" if (openshift_namespace == "wwp") or (openshift_namespace == "wwp-int")
+                else "test" }}
+            image: docker-registry.default.svc:5000/{{ openshift_namespace }}/filebeat-call-logs:latest
             imagePullPolicy: Always
             name: "filebeat-{{ dc.name }}"
             resources: {}
@@ -111,8 +139,8 @@
           restartPolicy: Always
           schedulerName: default-scheduler
           securityContext: {}
-          serviceAccount: wwp-test
-          serviceAccountName: wwp-test
+          serviceAccount: "{{ openshift_namespace }}"
+          serviceAccountName: "{{ openshift_namespace }}"
           terminationGracePeriodSeconds: 30
           volumes:
           - name: "volume-wordpress-{{ dc.name }}"
@@ -125,11 +153,15 @@
 
       triggers:
       - type: ImageChange
-        imageChangeParams:
-           automatic: "{{ true if (dc.autopush | default(None)) else None }}"
-           containerNames:
-           - "httpd-{{ dc.name }}"
-           from:
-             kind: ImageStreamTag
-             name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
-             namespace: "{{ wwp_build_namespace }}"
+        imageChangeParams: >-
+          {{ _imageChangeParams
+          | combine({"automatic": True} if (dc.autopush | default(None)) else {}) }}
+  vars:
+    _imageChangeParams:
+      containerNames:
+      - "httpd-{{ dc.name }}"
+      from:
+        kind: ImageStreamTag
+        name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
+        namespace: "{{ openshift_namespace }}"
+  tags: dc
