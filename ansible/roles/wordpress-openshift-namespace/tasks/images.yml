@@ -66,7 +66,9 @@
     - name: "{{ mgmt_image_name }}"
 
 - name: "Promote wwp-test images to wwp"
-  when: openshift_is_production
+  when: >-
+    openshift_is_production and
+    ("images.promote" in ansible_run_tags)
   tags: images.promote
   local_action:
     module: shell
