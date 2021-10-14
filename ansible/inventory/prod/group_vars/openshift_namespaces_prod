@@ -19,6 +19,7 @@ DeploymentConfigs:
       replicaCount: 1
     - name: inside
     - name: labs
+      replicaCount: 6
     - name: manager
     - name: sandbox
       autopush: true
