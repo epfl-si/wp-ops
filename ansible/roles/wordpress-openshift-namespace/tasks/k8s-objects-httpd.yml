@@ -121,7 +121,9 @@
             - name: WP_ENV
               value: "{{ dc.name }}"
             - name: LINE
-              value: test
+              value: >-
+                {{ "prod" if (openshift_namespace == "wwp") or (openshift_namespace == "wwp-int")
+                else "test" }}
             image: docker-registry.default.svc:5000/{{ openshift_namespace }}/filebeat-call-logs:latest
             imagePullPolicy: Always
             name: "filebeat-{{ dc.name }}"
