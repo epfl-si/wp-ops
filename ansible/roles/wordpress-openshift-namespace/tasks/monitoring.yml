@@ -4,6 +4,16 @@
 - include_vars: secrets-wwp.yml
   tags: always
 
+- name: "Pull traefik image into {{ monitoring_traefik_base_image_mirrored_to }}"
+  delegate_to: localhost
+  tags: monitoring.prometheus
+  openshift_imagestream:
+    metadata:
+      name: traefik
+      namespace: "{{ openshift_namespace }}"
+    from: "{{ monitoring_traefik_base_image_mirrored_from }}"
+    tag: latest
+
 - name: Prometheus service
   tags: monitoring.prometheus
   openshift:
@@ -80,7 +90,7 @@
           terminationGracePeriodSeconds: 10
           containers:
             - name: prometheus
-              image: prom/prometheus
+              image: quay.io/prometheus/prometheus
               volumeMounts:
                 - name: storage
                   mountPath: /prometheus
@@ -96,7 +106,7 @@
                 - --web.console.libraries=/usr/share/prometheus/console_libraries
                 - --web.console.templates=/usr/share/prometheus/consoles/prometheus
             - name: traefik
-              image: traefik
+              image: "{{ monitoring_traefik_base_image_mirrored_to }}"
               ports:
               - containerPort: 9999
                 name: traefik
@@ -106,7 +116,7 @@
                 - name: traefik-config-dynamic
                   mountPath: /etc/traefik/dynamic
             - name: configurator
-              image: python:3.7-alpine
+              image: quay.io/ansible/python-base
               volumeMounts:
                 - name: dynamic-config
                   mountPath: /prometheus-config/dynamic
