@@ -138,7 +138,7 @@ class WordPressActionModule(ActionBase):
             # cloned) out of a fraction of a repository. On the other hand,
             # “other” things on GitHub (such as a whole repository, or a
             # released .zip) should return false.
-            return re.search(r'/blob/', from_piece)
+            return re.search(r'/(tree|blob)/', from_piece)
         else:
             return (from_piece != "wordpress.org/plugins"
                     and not from_piece.endswith(".zip"))
