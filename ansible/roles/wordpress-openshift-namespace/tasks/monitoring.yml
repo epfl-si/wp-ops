@@ -300,7 +300,7 @@
                     - -i
                     - /srv/batch/disk-usage-report/qdirstat.NEW
                     - -p
-                    - "http://{{ monitoring_pushgateway_url }}"
+                    - "{{ monitoring_pushgateway_url }}"
                     - --webhook
                   volumeMounts:
                     - name: srv
