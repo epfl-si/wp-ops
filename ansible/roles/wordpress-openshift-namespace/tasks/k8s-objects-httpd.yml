@@ -164,4 +164,17 @@
         kind: ImageStreamTag
         name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
         namespace: "{{ openshift_namespace }}"
+  register: _dc
   tags: dc
+
+- name: "Redeploy dc/httpd-{{ dc.name }}"
+  when: >-
+      ("dc.redeploy" in ansible_run_tags)
+      or
+      ( (_dc | default(False)) and (_dc is changed) )
+  local_action:
+    module: shell
+    cmd: "oc rollout latest dc/httpd-{{ dc.name }}"
+  tags:
+    - dc
+    - dc.redeploy
