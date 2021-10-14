@@ -41,7 +41,7 @@
         spec:
           containers:
             - name: pushgateway
-              image: prom/pushgateway
+              image: quay.io/prometheus/pushgateway
               ports:
               - containerPort: 9091
                 name: pushgateway

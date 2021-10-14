@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM public.ecr.aws/debian/debian:stretch
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     varnish \

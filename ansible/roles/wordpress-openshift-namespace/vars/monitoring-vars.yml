@@ -8,4 +8,8 @@ prometheus_htpass: "\n{% for cred in prometheus.credentials %}\n          - \"{{
 monitoring_pushgateway_namespace: >-
   {{ "wwp-infra" if openshift_namespace == "wwp"
      else openshift_namespace }}
-monitoring_pushgateway_url: http://pushgateway.{{ monitoring_pushgateway_namespace }}:9091/
+monitoring_pushgateway_hostport: "pushgateway.{{ monitoring_pushgateway_namespace }}.svc:9091"
+monitoring_pushgateway_url: "http://{{ monitoring_pushgateway_hostport }}/"
+
+monitoring_traefik_base_image_mirrored_from: docker.io/library/traefik
+monitoring_traefik_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ openshift_namespace }}/traefik"

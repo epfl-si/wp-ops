@@ -51,6 +51,16 @@
             </Instance>
         </Plugin>
 
+- name: "Pull upstream varnish image into {{ varnish_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: varnish
+      namespace: "{{ openshift_namespace }}"
+    from: "{{ varnish_image_mirrored_from }}"
+    tag: >-
+      {{ varnish_image_mirrored_from | regex_replace("^.*:", "") }}
+
 - name: Varnish varnishkafka.conf
   openshift:
     state: latest
@@ -94,7 +104,7 @@
             - varnishd
             - -s
             - malloc,256m
-            image: "{{ varnish_image }}"
+            image: "{{ varnish_image_mirrored_to }}"
             imagePullPolicy: IfNotPresent
             name: varnish
             ports:
@@ -114,7 +124,7 @@
             - -f
             - -C
             - /etc/collectd/collectd.conf
-            image: "{{ varnish_image }}"
+            image: "{{ varnish_image_mirrored_to }}"
             imagePullPolicy: IfNotPresent
             name: collectd
             ports:
@@ -138,7 +148,7 @@
               value: default.vcl
             - name: INSTANCE
               value: varnishd
-            image: "{{ varnish_image }}"
+            image: "{{ varnish_image_mirrored_to }}"
             imagePullPolicy: IfNotPresent
             name: varnish-reload
             resources: {}
@@ -155,7 +165,7 @@
             - /etc/varnishkafka/varnishkafka.conf
             - -n
             - varnishd
-            image: "{{ varnish_image }}"
+            image: "{{ varnish_image_mirrored_to }}"
             imagePullPolicy: IfNotPresent
             name: varnish-kafka
             resources: {}
