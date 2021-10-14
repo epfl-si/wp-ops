@@ -3,6 +3,7 @@ FROM docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_ansible_
 
 RUN yum -y update
 
+RUN rm -f /etc/yum.repos.d/epel*
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
