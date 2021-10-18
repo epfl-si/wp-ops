@@ -44,6 +44,10 @@
       version: "{{ awx_version }}"
     - name: "{{ awx_runner_image_name }}"
       version: latest
+  # 💡 Other image promotion tasks (for “core” WordPress serving and
+  # cron images) can be found in
+  # ../../wordpress-openshift-namespace/tasks/images.yml (under tag
+  # `-t images.promote`)
 
 - name: "Ansible Tower OpenShift objects"
   import_tasks: k8s.yml
