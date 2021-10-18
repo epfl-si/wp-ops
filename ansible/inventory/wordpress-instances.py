@@ -232,7 +232,7 @@ class _LiveSite(_Site):
 
 
 class LiveTestSite(TestSiteTrait, _LiveSite):
-    _find_in_dirs = '/srv/dev /srv/int'
+    _find_in_dirs = '/srv/int'
 
 
 class LiveProductionSite(ProdSiteTrait, _LiveSite):
