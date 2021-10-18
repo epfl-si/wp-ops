@@ -29,7 +29,7 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
 
-- name: "Pull upstream awx image into {{ awx_redis_image_mirrored_to }}"
+- name: "Pull upstream awx image into {{ awx_base_image_mirrored_to }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
