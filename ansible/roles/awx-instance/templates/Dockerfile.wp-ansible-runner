@@ -37,8 +37,8 @@ RUN set -o pipefail; set -e -x; yum -y install patch;                       \
 
 COPY --from=0 /usr/local/bin/wp /usr/local/bin/
 COPY --from=0 /usr/local/bin/new-wp-site /usr/local/bin/new-wp-site
-RUN mkdir /runner/.wp-cli
-COPY --from=0 /var/www/.wp-cli /runner/.wp-cli
+RUN mkdir /home/runner/.wp-cli
+COPY --from=0 /var/www/.wp-cli /home/runner/.wp-cli
 COPY --from=0 /wp /wp
 
 # We want to run as the credentials we have been using
@@ -46,8 +46,8 @@ COPY --from=0 /wp /wp
 # e.g. for file ownership on NFS.
 RUN groupdel $(getent group {{ awx_unix_credentials.uid }} |cut -d: -f1)
 RUN groupadd -g {{ awx_unix_credentials.gid }} {{ awx_unix_credentials.group }}
-RUN useradd -u {{ awx_unix_credentials.uid }} -g {{ awx_unix_credentials.gid }} -d /runner {{ awx_unix_credentials.user }}
-RUN chgrp -R {{ awx_unix_credentials.group }} /runner
+RUN useradd -u {{ awx_unix_credentials.uid }} -g {{ awx_unix_credentials.gid }} -d /home/runner {{ awx_unix_credentials.user }}
+RUN chgrp -R {{ awx_unix_credentials.group }} /home/runner
 
 # Add dependencies
 RUN set -e -x; mkdir /tmp/install; \
