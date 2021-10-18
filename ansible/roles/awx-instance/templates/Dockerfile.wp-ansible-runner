@@ -41,6 +41,11 @@ RUN mkdir /home/runner/.wp-cli
 COPY --from=0 /var/www/.wp-cli /home/runner/.wp-cli
 COPY --from=0 /wp /wp
 
+# AWX emits an executable inventory (that just prints whatever
+# inventory AWX came up with server-side), but (as of AWX version
+# 15.0.1) it will have a “#!/usr/bin/env python" header:
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 # We want to run as the credentials we have been using
 # historically in the mgmt image, and are therefore still in use
 # e.g. for file ownership on NFS.
