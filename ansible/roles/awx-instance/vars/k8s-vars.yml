@@ -24,6 +24,6 @@ awx_inventories:
   wwp-test: test
 
 awx_service_account: awx
-# wp-awx-runner must be privileged for now in order to run as an UID
+# wp-ansible-runner must be privileged for now in order to run as an UID
 # of our choice, until such time that we reorganize NFS permissions:
 awx_runner_service_account: useroot

@@ -63,7 +63,7 @@ RUN su -s /bin/sh www-data -c " \
     rm -f ~/.composer/auth.json"
 
 # Make symlinks under /var/www/.wp-cli relative (so that the
-# wp-awx-runner image may safely move that directory to /home/runner):
+# wp-ansible-runner image may safely move that directory to /home/runner):
 RUN set -e -x; cd /var/www/.wp-cli; find . -type l | while read l; do     \
         target="$(realpath "$l")";                                        \
         rel="$(realpath --relative-to="$(dirname "$(realpath -s "$l")")"  \
