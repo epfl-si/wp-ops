@@ -22,14 +22,14 @@
       name: "{{ awx_runner_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
     from: "{{ awx_ansible_runner_base_image_mirrored_to }}"
-    dockerfile: "{{ lookup('template', 'Dockerfile.' + awx_runner_image_name) }}"
+    dockerfile: "{{ lookup('template', 'Dockerfile.wp-ansible-runner') }}"
 
 - name: "Rebuild {{ awx_runner_image_name }} now"
   when: _awx_runner_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
   delegate_to: localhost
 
-- name: "Pull upstream awx image into {{ awx_redis_image_mirrored_to }}"
+- name: "Pull upstream awx image into {{ awx_base_image_mirrored_to }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
