@@ -53,6 +53,7 @@ RUN groupdel $(getent group {{ awx_unix_credentials.uid }} |cut -d: -f1)
 RUN groupadd -g {{ awx_unix_credentials.gid }} {{ awx_unix_credentials.group }}
 RUN useradd -u {{ awx_unix_credentials.uid }} -g {{ awx_unix_credentials.gid }} -d /home/runner {{ awx_unix_credentials.user }}
 RUN chgrp -R {{ awx_unix_credentials.group }} /home/runner
+RUN chmod g+w /home/runner/.??*
 
 # Add dependencies
 RUN set -e -x; mkdir /tmp/install; \
