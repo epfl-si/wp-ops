@@ -28,8 +28,8 @@
       {% endif %}
 
       for repo in "{{ backup_restic_repo_files }}" "{{ backup_restic_repo_sql }}"; do
-        restic -r $repo init || true
-        restic -r $repo unlock
+        {{ backup_restic_cmd }} -r $repo init || true
+        {{ backup_restic_cmd }} -r $repo unlock
       done
 
       cd {{ wp_dir }}
@@ -41,7 +41,7 @@
       done
       files_snapshot_id=$(
         {{ backup_bash_stop_on_any_errors }}
-        restic -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json . \
+        {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} backup "${excludes[@]}" --json . \
         | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
       )
 
@@ -50,7 +50,7 @@
       sql_snapshot_id=$(
         {{ backup_bash_stop_on_any_errors }}
         {{ backup_db_to_stdout_command }} \
-        | restic -r {{ backup_restic_repo_sql }} backup \
+        | {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} backup \
               --stdin --stdin-filename db-backup.sql \
               --json \
         | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
@@ -59,13 +59,13 @@
       # Move tags forward
       date_short="$(date +%Y%m%d)"
       date_full="$(date +%Y%m%d-%H%M%S)"
-      restic -r {{ backup_restic_repo_files }} tag \
+      {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} tag \
         --remove latest --remove "$date_short" --remove "$date_full"
-      restic -r {{ backup_restic_repo_sql }} tag \
+      {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag \
         --remove latest --remove "$date_short" --remove "$date_full"
-      restic -r {{ backup_restic_repo_files }} tag "$files_snapshot_id" \
+      {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} tag "$files_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
-      restic -r {{ backup_restic_repo_sql }} tag "$sql_snapshot_id" \
+      {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag "$sql_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
 
       {% if backup_has_monitoring %}
@@ -74,9 +74,9 @@
       # Collect additional stats to pushgateway.
       (
         {{ backup_bash_stop_on_any_errors }}
-        restic -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
+        {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
         | jq -r '. as $initial_data | keys | map(["restic_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
-        restic -r {{ backup_restic_repo_files }} stats --mode restore-size --json latest \
+        {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} stats --mode restore-size --json latest \
         | jq -r '. as $initial_data | keys | map(["restic_files_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
       ) | {{ backup_curl_to_pushgateway_cmd }}
 

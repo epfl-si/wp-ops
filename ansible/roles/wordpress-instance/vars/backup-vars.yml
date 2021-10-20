@@ -3,6 +3,7 @@ backup_restic_repo_base: >-
 # restic's tagging system is just bananas. Segregate the two backup streams entirely
 backup_restic_repo_files: "{{ backup_restic_repo_base }}/files"
 backup_restic_repo_sql:   "{{ backup_restic_repo_base }}/sql"
+backup_restic_cmd: "restic --no-cache"
 
 backup_has_monitoring: '{{ openshift_namespace == "wwp" }}'
 
