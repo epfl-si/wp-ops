@@ -1,4 +1,4 @@
-httpd_image_name: httpd
+nginx_image_name: nginx
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 backup_cron_image_name: cronjob
