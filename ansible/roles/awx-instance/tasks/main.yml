@@ -97,13 +97,8 @@
             prj.organization = org
             prj.scm_type = "git"
             prj.scm_url = "{{ awx_project_github_url }}"
-            prj.scm_branch = "{{ _awx_playbook_branch }}"
+            prj.scm_branch = "{{ awx_playbook_branch }}"
             prj.scm_update_on_launch = True
-  vars:
-    _awx_playbook_branch: >-
-      {{ awx_playbook_branch | default(
-      "master" if awx_is_production else git_current_branch)
-      }}
 
 - import_tasks: container-group.yml
   tags: awx

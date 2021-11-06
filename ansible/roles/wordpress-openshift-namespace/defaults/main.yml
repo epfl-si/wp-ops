@@ -1,2 +1,3 @@
 ---
-# defaults file for wordpress-openshift-namespace
+# defaults file for wordpress-openshift-namespace role
+images_build_branch: master
