@@ -1,4 +1,4 @@
-# Set up one DeploymentConfig/httpd-* object and one Service/httpd-* object, described by the
+# Set up one DeploymentConfig/nginx-* object and one Service/nginx-* object, described by the
 # {{ dc }} variable.
 
 - include_vars: "{{ item }}"
@@ -7,21 +7,21 @@
     - ../../../vars/image-vars.yml                        # For httpd_image_name
     - "../vars/secrets-{{ openshift_namespace }}.yml"
 
-- name: "service/httpd-{{ dc.name }}"
+- name: "service/nginx-{{ dc.name }}"
   openshift:
     state: latest
     apiVersion: v1
     kind: Service
     metadata:
-      name: "httpd-{{ dc.name }}"
+      name: "nginx-{{ dc.name }}"
       namespace: "{{ openshift_namespace }}"
       labels:
-        app: "httpd-{{ dc.name }}"
+        app: "nginx-{{ dc.name }}"
     spec:
       type: ClusterIP
       sessionAffinity: None
       selector:
-        app: "httpd-{{ dc.name }}"
+        app: "nginx-{{ dc.name }}"
         deploymentconfig: ~
       ports:
         - name: http
@@ -36,33 +36,28 @@
           port: 9980
           protocol: TCP
           targetPort: 9980
-        - name: collectd
-          port: 9103
-          protocol: TCP
-          targetPort: 9103
   tags: services
 
-- name: "dc/httpd-{{ dc.name }}"
+- name: "dc/nginx-{{ dc.name }}"
   openshift:
     state: latest
     apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
     metadata:
-      name: "httpd-{{ dc.name }}"
+      name: "nginx-{{ dc.name }}"
       namespace: "{{ openshift_namespace }}"
       labels:
-        app: "httpd-{{ dc.name }}"
-        serving_role: httpd
+        app: "nginx-{{ dc.name }}"
     spec:
-      replicas: "{{ dc.replicaCount | default(DeploymentConfigs.defaults.replicaCount.httpd) }}"
+      replicas: "{{ dc.replicaCount | default(DeploymentConfigs.defaults.replicaCount.nginx) }}"
       selector:
-        app: "httpd-{{ dc.name }}"
-        deploymentconfig: "httpd-{{ dc.name }}"
+        app: "nginx-{{ dc.name }}"
+        deploymentconfig: "nginx-{{ dc.name }}"
       template:
         metadata:
           labels:
-            app: "httpd-{{ dc.name }}"
-            deploymentconfig: "httpd-{{ dc.name }}"
+            app: "nginx-{{ dc.name }}"
+            deploymentconfig: "nginx-{{ dc.name }}"
         spec:
           affinity:
             podAntiAffinity:
@@ -74,7 +69,7 @@
                   - key: deploymentconfig
                     operator: In
                     values:
-                    - "httpd-{{ dc.name }}"
+                    - "nginx-{{ dc.name }}"
                 topologyKey: kubernetes.io/hostname
 
           containers:
@@ -84,7 +79,7 @@
 
             # image will be set from the imageStream
             imagePullPolicy: Always
-            name: "httpd-{{ dc.name }}"
+            name: "nginx-{{ dc.name }}"
             ports:
             - containerPort: 8080
               protocol: TCP
@@ -168,22 +163,22 @@
   vars:
     _imageChangeParams:
       containerNames:
-      - "httpd-{{ dc.name }}"
+      - "nginx-{{ dc.name }}"
       from:
         kind: ImageStreamTag
-        name: "{{ httpd_image_name }}:{{ openshift_registry_tag }}"
+        name: "{{ nginx_image_name }}:{{ openshift_registry_tag }}"
         namespace: "{{ openshift_namespace }}"
   register: _dc
   tags: dc
 
-- name: "Redeploy dc/httpd-{{ dc.name }}"
+- name: "Redeploy dc/nginx-{{ dc.name }}"
   when: >-
       ("dc.redeploy" in ansible_run_tags)
       or
       ( (_dc | default(False)) and (_dc is changed) )
   local_action:
     module: shell
-    cmd: "oc rollout latest dc/httpd-{{ dc.name }} --namespace {{ openshift_namespace }}"
+    cmd: "oc rollout latest dc/nginx-{{ dc.name }} --namespace {{ openshift_namespace }}"
   tags:
     - dc
     - dc.redeploy
