@@ -23,6 +23,10 @@ RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/apache2/conf.d
 RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^listen = .*|listen = /run/php-fpm.sock|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
+# directory for custom error pages
+RUN mkdir /var/www/global-error
+COPY global-error /var/www/global-error
+
 COPY docker-entrypoint.sh /
 RUN chmod a+x /docker-entrypoint.sh
 
