@@ -8,7 +8,7 @@ wp_base_base_image_manually_push_to: >-
    os-docker-registry.epfl.ch/{{ openshift_namespace
    }}/{{ wp_base_base_image.shortname }}:{{ wp_base_base_image.tag }}
 
-httpd_image_name: httpd
+nginx_image_name: nginx
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 backup_cron_image_name: cronjob

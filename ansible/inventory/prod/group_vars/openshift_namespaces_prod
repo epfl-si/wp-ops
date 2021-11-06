@@ -10,8 +10,8 @@ openshift_namespace: wwp
 DeploymentConfigs:
   defaults:
     replicaCount:
-      httpd: 2
-  httpd:
+      nginx: 2
+  nginx:
 #    # ⚠ PersistentVolumeClaim is missing for this one! Need to either file a Camptocamp ticket, or delete the DC and service
 #    - name: cron
 #      replicaCount: 1
@@ -19,7 +19,6 @@ DeploymentConfigs:
       replicaCount: 1
     - name: inside
     - name: labs
-      replicaCount: 6
     - name: manager
     - name: sandbox
       autopush: true

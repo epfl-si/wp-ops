@@ -151,8 +151,8 @@
                 --s3-key-id={{       build.s3_assets.key_id }}
                 --s3-secret={{       build.s3_assets.secret | eyaml(eyaml_keys) }}
                 --manifest-url=https://raw.githubusercontent.com/epfl-si/wp-ops/{{ images_build_branch }}/ansible/roles/wordpress-instance/tasks/plugins.yml
-    - name: "{{ httpd_image_name }}"
-      git_path: docker/httpd
+    - name: "{{ nginx_image_name }}"
+      git_path: docker/nginx
       from: "{{ wp_base_image_name }}"
       triggered_by: wp-base
     - name: "{{ mgmt_image_name }}"
@@ -188,7 +188,7 @@
     namespace: "{{ openshift_namespace }}"
     metadata: "{{ item.metadata | default({}) }}"
   with_items:
-    - name: "{{ httpd_image_name }}"
+    - name: "{{ nginx_image_name }}"
     - name: "{{ mgmt_image_name }}"
 
 - name: "Promote wwp-test images to wwp"
