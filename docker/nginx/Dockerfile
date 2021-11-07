@@ -27,10 +27,20 @@ RUN sed -i 's|^listen = .*|listen = /run/php-fpm.sock|' /etc/php/${PHP_VERSION}/
 RUN mkdir /var/www/global-error
 COPY global-error /var/www/global-error
 
+# Band-aid for running WordPress outside of its installation directory
+# nginx-entrypoint.php takes care of the setup legwork
+RUN set -e -x;                                                     \
+    for wp in $(find /wp/ -mindepth 1 -maxdepth 1 -type d          \
+                -regextype egrep -regex '.*/[0-9.]+');             \
+    do echo "<?php # This wp-config.php intentionally left blank"  \
+            > $wp/wp-config.php; done
+
 COPY docker-entrypoint.sh /
 RUN chmod a+x /docker-entrypoint.sh
 
 COPY nginx.conf /etc/nginx/nginx.conf.tmpl
+
+COPY nginx-entrypoint.php /wp/
 
 EXPOSE 8080 8443
 
