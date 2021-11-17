@@ -431,6 +431,13 @@
     state: "{{ plugins_for_restauration_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
+- name: epfl-restauration options
+  tags:
+    - wp.plugins.epfl-restauration_options
+    - plugins.epfl-restauration_options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_restauration_options }}"
+
 - name: Subscribe2 plugin
   wordpress_plugin:
     name: Subscribe2
