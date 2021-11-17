@@ -91,6 +91,17 @@
     type: Opaque
     data: "{{ env_secret_wp_plugin_wpforms | base64_values }}"
 
+- name: wp-plugin-restauration Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: wp-plugin-restauration
+      namespace: "{{ ansible_oc_namespace }}"
+    type: Opaque
+    data: "{{ env_secret_wp_plugin_restauration | base64_values }}"
+
 - name: awx service account
   openshift:
     state: latest

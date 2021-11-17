@@ -78,6 +78,8 @@
                   name: backup-rw-credentials
               - secretRef:
                   name: wp-plugin-wpforms
+              - secretRef:
+                  name: wp-plugin-restauration
             env:
               # Just to mute a stray error in /bin/entrypoint
               - name: CURRENT_UID
