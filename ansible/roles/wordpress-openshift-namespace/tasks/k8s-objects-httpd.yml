@@ -174,7 +174,7 @@
       ( (_dc | default(False)) and (_dc is changed) )
   local_action:
     module: shell
-    cmd: "oc rollout latest dc/httpd-{{ dc.name }}"
+    cmd: "oc rollout latest dc/httpd-{{ dc.name }} --namespace {{ openshift_namespace }}"
   tags:
     - dc
     - dc.redeploy
