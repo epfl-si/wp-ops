@@ -12,13 +12,8 @@ DeploymentConfigs:
     replicaCount:
       httpd: 1
   httpd:
-    - name: cburki
-    - name: dev
-    - name: gcharmier
     - name: int
       autopush: true
-    - name: lchaboudez
-    - name: lvenries
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
