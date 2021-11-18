@@ -159,6 +159,7 @@
     - wp.plugins.intranet
     - wp.plugins.intranet.htaccess
     - wp.plugins.pdf
+    - wp.plugins.restauration.options
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options

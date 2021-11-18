@@ -432,11 +432,16 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-restauration
 
 - name: epfl-restauration options
-  tags:
-    - wp.plugins.epfl-restauration_options
-    - plugins.epfl-restauration_options
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_restauration_options }}"
+  tags:
+    - wp.plugins.restauration.options
+
+- name: epfl-restauration API password
+  wordpress_option: "{{ plugin_restauration_api_password }}"
+  no_log: true
+  tags:
+    - wp.plugins.restauration.options
 
 - name: Subscribe2 plugin
   wordpress_plugin:
