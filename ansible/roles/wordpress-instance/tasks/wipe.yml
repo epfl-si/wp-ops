@@ -1,5 +1,8 @@
 # Delete a WordPress site
-- include_vars: wipe-vars.yml
+- include_vars: "{{ item }}"
+  with_items:
+    - wipe-vars.yml
+    - ../../wordpress-openshift-namespace/vars/monitoring-vars.yml
 
 - name: Deactivate mainwp-child
   shell: "{{ wp_cli_command }} plugin deactivate mainwp-child"
