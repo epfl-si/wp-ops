@@ -37,6 +37,29 @@
     path: "{{ wp_dir }}/{{ item }}"
   with_items: "{{ wipe_paths }}"
 
+- name: Does .htaccess still exist?
+  register: _stat_htaccess
+  stat:
+    path: "{{ wipe_htaccess_path }}"
+
+- name: Remove WordPress section in .htaccess
+  when: wipe_when_htaccess_still_exists
+  blockinfile:
+    path: "{{ wp_dir }}/.htaccess"
+    state: absent
+    marker: "# {mark} WordPress"
+
+- name: Delete .htaccess if empty
+  when: wipe_when_htaccess_still_exists
+  register: _delete_htaccess
+  shell:
+    cmd: |
+      if [ $(grep -vP '^\s*(#|$)' "{{ wipe_htaccess_path }}" | wc -l) -gt 0 ]; then exit 0; fi
+      echo WILL_DELETE
+      rm -f "{{ wipe_htaccess_path }}"
+  changed_when: |
+    "WILL_DELETE" in _delete_htaccess.stdout
+
 - name: Delete pushgateway data
   shell: "{{ wipe_backup_data_in_pushgateway_cmd }}"
   ignore_errors: true
