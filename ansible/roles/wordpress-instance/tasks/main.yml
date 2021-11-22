@@ -40,6 +40,10 @@
 # nothing if the user already took the matters in their own hands.
 
 - name: Backup
+  when: >-
+    (wp_do_backup | default(True) | bool)
+    or
+    ("wp.backup" in ansible_run_tags)
   tags:
     - never  # That is, skip unless "-t wp.wipe" or "-t wp.backup" is
              # passed on the command line
