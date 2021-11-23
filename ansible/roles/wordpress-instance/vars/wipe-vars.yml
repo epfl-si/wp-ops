@@ -4,7 +4,6 @@ wipe_paths:
   - wp
   - wp-admin
   - wp-includes
-  - .htaccess
   - index.php
   - license.txt
   - readme.html
@@ -25,4 +24,14 @@ wipe_paths:
   - xmlrpc.php
 
 wipe_backup_data_in_pushgateway_cmd: >-
-  curl -X DELETE http://{{ monitoring_pushgateway_url }}/metrics/job/backup/instance/{{ inventory_hostname }}
+  curl -X DELETE {{ monitoring_pushgateway_url }}metrics/job/backup/instance/{{ inventory_hostname }}
+
+wipe_htaccess_path: "{{ wp_dir }}/.htaccess"
+wipe_when_htaccess_still_exists: >-
+  {{
+  ( (_stat_htaccess | default({})).stat is defined )
+  and
+  _stat_htaccess.stat
+  and
+  "isreg" in _stat_htaccess.stat
+  }}

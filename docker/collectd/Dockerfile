@@ -6,7 +6,7 @@ RUN apt-get update && \
     libvarnishapi1 \
   && \
     apt-get -y autoremove && \
-    apt-get clean \\
+    apt-get clean \
   && \
     rm -rf /var/lib/apt/lists/*
 
