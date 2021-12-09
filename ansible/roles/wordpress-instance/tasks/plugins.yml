@@ -158,6 +158,15 @@
       - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-stats
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_stats_loader.php
 
+- name: Social Graph (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_Social_Graph
+    is_mu: yes
+    state:
+      - symlinked
+    from:
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/class-epfl-social-graph.php
+
 ##################### "2018" plugins ###########################
 
 - name: '"TinyMCE Advanced" plugin'
