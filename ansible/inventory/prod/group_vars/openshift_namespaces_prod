@@ -35,7 +35,6 @@ DeploymentConfigs:
     - name: unm-icrp
     - name: unm-ips23
     - name: unm-journeeindustrie
-    - name: unm-modval17
     - name: unm-neurosymposium
     - name: unm-phdsummit
     - name: unm-rapportannuel
