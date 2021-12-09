@@ -79,6 +79,8 @@
     from:
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-custom-editor-menu
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_custom_editor_menu_loader.php
+  tags:
+    - wp.plugins.mu
 
 - name: Blocks white-list (must-use plugin)
   wordpress_plugin:
@@ -86,6 +88,8 @@
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
+  tags:
+    - wp.plugins.mu
 
 - name: Disable comments (must-use plugin)
   wordpress_plugin:
@@ -93,6 +97,8 @@
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_disable_comments.php
+  tags:
+    - wp.plugins.mu
 
 - name: Enable automatic updates (must-use plugin)
   wordpress_plugin:
@@ -100,6 +106,8 @@
     is_mu: yes
     state: '{{ "absent" if wp_is_managed else "symlinked" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_enable_updates_automatic.php
+  tags:
+    - wp.plugins.mu
 
 - name: Disable automatic updates (must-use plugin)
   wordpress_plugin:
@@ -107,6 +115,8 @@
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_disable_updates_automatic.php
+  tags:
+    - wp.plugins.mu
 
 - name: Google Analytics hook (must-use plugin)
   wordpress_plugin:
@@ -115,6 +125,8 @@
     state:
       - symlinked
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_google_analytics_hook.php
+  tags:
+    - wp.plugins.mu
 
 - name: Locked installs (must-use plugin)
   wordpress_plugin:
@@ -122,6 +134,8 @@
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_installs_locked.php
+  tags:
+    - wp.plugins.mu
 
 - name: Jahia redirect tracker (must-use plugin)
   wordpress_plugin:
@@ -129,6 +143,8 @@
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_jahia_redirect.php
+  tags:
+    - wp.plugins.mu
 
 - name: EPFL functions (must-use plugin)
   wordpress_plugin:
@@ -137,6 +153,8 @@
     state:
       - symlinked
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-functions.php
+  tags:
+    - wp.plugins.mu
 
 - name: Quota (must-use plugin)
   wordpress_plugin:
@@ -147,6 +165,8 @@
     from:
       - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-quota
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_quota_loader.php
+  tags:
+    - wp.plugins.mu
 
 - name: Stats (must-use plugin)
   wordpress_plugin:
@@ -157,6 +177,8 @@
     from:
       - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-stats
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_stats_loader.php
+  tags:
+    - wp.plugins.mu
 
 - name: Social Graph (must-use plugin)
   wordpress_plugin:
@@ -166,6 +188,9 @@
       - symlinked
     from:
       - https://github.com/epfl-si/wp-mu-plugins/blob/master/class-epfl-social-graph.php
+  tags:
+    - wp.plugins.mu
+    - wp.plugins.mu.social-graph
 
 ##################### "2018" plugins ###########################
 

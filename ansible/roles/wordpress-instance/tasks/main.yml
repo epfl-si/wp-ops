@@ -164,6 +164,8 @@
     - wp.plugins.intranet.htaccess
     - wp.plugins.pdf
     - wp.plugins.restauration.options
+    - wp.plugins.mu
+    - wp.plugins.mu.social-graph
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options
