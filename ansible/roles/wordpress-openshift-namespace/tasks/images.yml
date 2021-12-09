@@ -31,6 +31,7 @@
       git_path: docker/wp-base
       strategy:
         dockerStrategy:
+          forcePull: true
           noCache: true
           buildArgs:
             - name: GITHUB_API_USER
