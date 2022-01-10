@@ -10,6 +10,7 @@ backup_has_monitoring: '{{ openshift_namespace == "wwp" }}'
 backup_restic_environment:
   AWS_ACCESS_KEY_ID:     '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_ACCESS_KEY_ID") }}'
   AWS_SECRET_ACCESS_KEY: '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_SECRET_ACCESS_KEY") }}'
+  AWS_DEFAULT_REGION:    '{{ lookup("env_secrets", "restic_backup_credentials", "AWS_DEFAULT_REGION") }}'
   RESTIC_PASSWORD:       '{{ lookup("env_secrets", "restic_backup_credentials", "RESTIC_PASSWORD") }}'
 
 backup_aws_s3api_list_cmd: "aws --endpoint-url=https://s3.epfl.ch s3api list-objects --bucket {{s3_backup.bucket_name}}"

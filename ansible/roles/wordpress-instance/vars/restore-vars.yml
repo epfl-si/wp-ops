@@ -25,4 +25,5 @@ restore_restic_repo_sql:   "{{ restore_restic_repo_base }}/sql"
 restore_restic_environment:
   AWS_ACCESS_KEY_ID:     '{{ restore_s3_backup.aws_access_keys.ro.id     | eyaml(eyaml_keys) }}'
   AWS_SECRET_ACCESS_KEY: '{{ restore_s3_backup.aws_access_keys.ro.secret | eyaml(eyaml_keys) }}'
+  AWS_DEFAULT_REGION:    '{{ restore_s3_backup.aws_access_keys.region }}'
   RESTIC_PASSWORD:       '{{ restore_s3_backup.restic_password           | eyaml(eyaml_keys) }}'
