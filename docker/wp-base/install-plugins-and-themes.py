@@ -40,6 +40,7 @@ Usage:
 
       --s3-endpoint-url <url>    The URL of the S3 server that holds the
                                  purchased assets (plugins or other).
+      --s3-region <region>       The S3 region to use
       --s3-bucket <url>          The bucket name where the purchased assets reside
       --s3-key-id <s3keyid>
       --s3-secret <s3secret>     Credentials used to access the assets on S3
@@ -410,7 +411,8 @@ class Flags:
             try:
                 opts, args = getopt.getopt(argv[1:], "e:v", [
                     "exclude=", "manifest-url=",
-                    "s3-endpoint-url=", "s3-bucket-name=", "s3-key-id=", "s3-secret="])
+                    "s3-endpoint-url=", "s3-region=", "s3-bucket-name=",
+                    "s3-key-id=", "s3-secret="])
             except getopt.GetoptError:
                 usage()
                 sys.exit(1)
@@ -423,6 +425,7 @@ class Flags:
             opts_dict = dict(opts)
             if "--s3-endpoint-url" in opts_dict:
                 self.s3 = S3(opts_dict["--s3-endpoint-url"],  # Mandatory
+                             opts_dict.get("--s3-region", None),
                              opts_dict["--s3-bucket-name"],
                              # The other two default to the awscli-style
                              # environment variables:
@@ -436,8 +439,9 @@ class Flags:
 
 class S3:
     """Models an S3 bucket client."""
-    def __init__(self, endpoint, bucket_name, keyid, secret):
+    def __init__(self, endpoint, region, bucket_name, keyid, secret):
         self.endpoint = endpoint
+        self.region = region
         self.bucket_name = bucket_name
         self.keyid = keyid   or os.environ["AWS_ACCESS_KEY_ID"]
         self.secret = secret or os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -446,9 +450,14 @@ class S3:
         # Poor man's Jinja:
         args = [re.sub('\{\{.*\}\}', self.bucket_name, arg)
                 for arg in args]
-        return run_cmd(["aws", "--endpoint-url=%s" % self.endpoint,
-                        "s3", *args],
-                       env=dict(
+        cmd = ["aws", "--endpoint-url=%s" % self.endpoint]
+        if self.region is not None:
+            cmd.append("--region=%s" % self.region)
+        cmd.append("s3")
+        cmd.extend(args)
+        return run_cmd(
+            cmd,
+            env=dict(
                 AWS_ACCESS_KEY_ID=self.keyid,
                 AWS_SECRET_ACCESS_KEY=self.secret))
 

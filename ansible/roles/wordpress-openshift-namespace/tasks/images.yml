@@ -41,6 +41,7 @@
             - name: INSTALL_AUTO_FLAGS
               value: >-
                 --s3-endpoint-url={{ build.s3_assets.endpoint_url }}
+                --s3-region={{       build.s3_assets.region }}
                 --s3-bucket-name={{  build.s3_assets.bucket_name }}
                 --s3-key-id={{       build.s3_assets.key_id }}
                 --s3-secret={{       build.s3_assets.secret | eyaml(eyaml_keys) }}

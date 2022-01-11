@@ -40,7 +40,7 @@ S3_ASSETS_BUCKET=svc0041-c1561ba80625465c2a53f01693922e7c
 
 define source_assets_secrets
 	. /keybase/team/epfl_wp_test/s3-assets-credentials.sh; \
-	export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+	export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
 endef
 
 .PHONY: assets
