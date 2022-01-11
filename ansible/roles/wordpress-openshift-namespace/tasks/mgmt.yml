@@ -19,6 +19,7 @@
       labels:
         app: mgmt
     data: "{{ mgmt_ssh_secret_contents }}"
+  tags: mgmt.secrets
 
 - name: new-wp-site-env ConfigMap
   openshift:
