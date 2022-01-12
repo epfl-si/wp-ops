@@ -8,23 +8,15 @@ mgmt_access_list:
   wwp-test: '{{ _mgmt_access_list_wwp_test_and_wwp + _mgmt_access_list_wwp_test_only }}'
 
 _mgmt_access_list_wwp_test_and_wwp:
-  - christophe.burki@camptocamp.com
-  - christian.kaenzig@camptocamp.com
-  - mathieu.bornoz@camptocamp.com
-  - diego.abelenda@camptocamp.com
   - luc.venries@epfl.ch
-  - gregory.charmier@epfl.ch
-  - lucien.chaboudez@epfl.ch
   - william.belle@epfl.ch
   - olivier.bieler@epfl.ch
   - dominique.quatravaux@epfl.ch
-  - laurent.durrer@epfl.ch
   - julien.delasoie@epfl.ch
-  - hugo.valente@epfl.ch
   - christian.zufferey@epfl.ch
-  - s.dubuis@epfl.ch
   - giovanni.cangiani@epfl.ch
   - nicolas.borboen@epfl.ch
+  - emilie.dorer@epfl.ch
 
 _mgmt_access_list_wwp_test_only:
   - mohamed.khadri@epfl.ch
