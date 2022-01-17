@@ -44,4 +44,4 @@
         AUTH_LDAP_USER_FLAGS_BY_GROUP:
           is_superuser:
             - cn=c2c,ou=groups,o=epfl,c=ch
-            - cn=idev-fsd-wordpress,ou=groups,o=epfl,c=ch
+            - cn=isas-fsd-wordpress,ou=groups,o=epfl,c=ch

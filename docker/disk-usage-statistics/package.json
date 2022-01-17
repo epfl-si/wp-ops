@@ -7,7 +7,7 @@
     "start": "node -r ts-node/register index.ts",
     "debug": "env DEBUG='*' node -r ts-node/register index.ts"
   },
-  "author": "EPFL IDEV-FSD <idev-fsd@groupes.epfl.ch>",
+  "author": "EPFL ISAS-FSD <isas-fsd@groupes.epfl.ch>",
   "license": "ISC",
   "devDependencies": {
     "@types/commander": "^2.12.2",

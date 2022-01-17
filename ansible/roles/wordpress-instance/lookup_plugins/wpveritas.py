@@ -1,4 +1,4 @@
-# (c) 2020, EPFL IDEV-FSD <idev-fsd@groupes.epfl.ch>
+# (c) 2020, EPFL ISAS-FSD <isas-fsd@groupes.epfl.ch>
 
 """Look up desired state in the wp-veritas database.
 
