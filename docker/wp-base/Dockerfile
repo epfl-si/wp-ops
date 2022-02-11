@@ -2,6 +2,7 @@ FROM public.ecr.aws/ubuntu/ubuntu:focal
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.4
+ENV NODE_VERSION_MAJOR=14
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -11,7 +12,7 @@ RUN apt-get -qy update && \
     apt-get -qy autoremove && \
     apt-get clean
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION_MAJOR}.x | bash -
 
 RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     composer \
@@ -77,7 +78,7 @@ RUN set -e -x; cd /var/www/.wp-cli; find . -type l | while read l; do     \
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
 ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
-RUN set -x;                                                              \
+RUN set -e -x;                                                           \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl http://api.wordpress.org/core/stable-check/1.0/   \
             | jq -r 'keys[]                                              \
@@ -131,6 +132,8 @@ RUN set -e -x; for wp in /wp/*; do                                         \
      | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
   rm -rf wp-content/plugins/tinymce-advanced;                              \
   (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
+  (cd wp-content/plugins/wp-gutenberg-epfl;                                \
+      rm -rf build; npm i; npm run build; rm -rf node_modules);            \
   rm tinymce-advanced.zip;                                                 \
   done
 
