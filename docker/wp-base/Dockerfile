@@ -2,6 +2,7 @@ FROM public.ecr.aws/ubuntu/ubuntu:focal
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.4
+ENV NODE_VERSION_MAJOR=14
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -11,7 +12,7 @@ RUN apt-get -qy update && \
     apt-get -qy autoremove && \
     apt-get clean
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION_MAJOR}.x | bash -
 
 RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
     composer \
