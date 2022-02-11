@@ -16,5 +16,5 @@ ISC
 Author Information
 ------------------
 
-IDEV-FSD team <idev-fsd@groupes.epfl.ch>
+ISAS-FSD team <isas-fsd@groupes.epfl.ch>
 
