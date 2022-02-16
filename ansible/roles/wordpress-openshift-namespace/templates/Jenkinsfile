@@ -34,6 +34,8 @@ pipeline {
     // except we use the declarative pipeline syntax
     // (https://github.com/jenkinsci/kubernetes-plugin/#declarative-pipeline)
     kubernetes {
+      // We run on this Jenkins cloud (the one that Camptocamp set up for us):
+      cloud 'openshift'
       // Label must be unique across the OpenShift namespace; slave pods
       // will be named after it
       label 'jenkins-slave-wwp'
@@ -42,7 +44,12 @@ pipeline {
       // (see "Jenkins infrastructure ImageStreams and builds" in
       // ../tasks/continuous-integration.yml)
       inheritFrom "{{ ci_jenkins_slave_image_name }}"
-      cloud 'openshift'
+      // Ideally we would want to not have a nodeSelector at all, but
+      // we can't
+      // (https://github.com/jenkinsci/kubernetes-plugin/pull/790).
+      // The next best thing is to stipulate a label that all nodes
+      // have (here, for an OpenShift 3.11 cluster running on Linux):
+      nodeSelector "beta.kubernetes.io/os=linux"
       // Using the "yaml" field, we can weave whichever "sidekick"
       // containers we like into the pod template. The main "jnlp"
       // container (not pictured in the YAML) comes from the parent
