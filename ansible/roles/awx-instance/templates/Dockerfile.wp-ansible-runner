@@ -35,6 +35,7 @@ RUN set -o pipefail; set -e -x; yum -y install patch;                       \
     done;                                                                   \
     yum -y history undo patch
 
+COPY --from=0 /usr/local/bin/oc /usr/local/bin/
 COPY --from=0 /usr/local/bin/wp /usr/local/bin/
 COPY --from=0 /usr/local/bin/new-wp-site /usr/local/bin/new-wp-site
 RUN mkdir /home/runner/.wp-cli
