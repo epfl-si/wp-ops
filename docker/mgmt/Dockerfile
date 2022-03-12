@@ -20,6 +20,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     tmux \
     software-properties-common \
     restic \
+    silversearcher-ag \
   && \
     apt-get -qy autoremove && \
     apt-get clean
