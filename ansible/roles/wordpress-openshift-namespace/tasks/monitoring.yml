@@ -14,6 +14,15 @@
     from: "{{ monitoring_traefik_base_image_mirrored_from }}"
     tag: latest
 
+- name: "Pull {{ monitoring_python_base_image_mirrored_from }} into {{ monitoring_python_base_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: '{{ monitoring_python_base_image | regex_replace(":.*$", "") }}'
+      namespace: "{{ openshift_namespace }}"
+    from: "{{ monitoring_python_base_image_mirrored_from }}"
+    tag: '{{ monitoring_python_base_image | regex_replace("^.*:", "") }}'
+
 - name: Prometheus service
   tags: monitoring.prometheus
   openshift:
@@ -116,7 +125,7 @@
                 - name: traefik-config-dynamic
                   mountPath: /etc/traefik/dynamic
             - name: configurator
-              image: quay.io/ansible/python-base
+              image: "{{ monitoring_python_base_image_mirrored_to }}"
               volumeMounts:
                 - name: dynamic-config
                   mountPath: /prometheus-config/dynamic
