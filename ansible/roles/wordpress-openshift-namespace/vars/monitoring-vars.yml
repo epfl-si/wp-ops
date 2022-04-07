@@ -13,3 +13,7 @@ monitoring_pushgateway_url: "http://{{ monitoring_pushgateway_hostport }}/"
 
 monitoring_traefik_base_image_mirrored_from: docker.io/library/traefik
 monitoring_traefik_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ openshift_namespace }}/traefik"
+
+monitoring_python_base_image: python:buster
+monitoring_python_base_image_mirrored_from: "docker.io/library/{{ monitoring_python_base_image }}"
+monitoring_python_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ openshift_namespace }}/{{ monitoring_python_base_image }}"
