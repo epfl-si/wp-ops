@@ -38,32 +38,27 @@
         # this ImageStream (and pass it to the Kubernetes plug-in):
         role: jenkins-slave
 
-- name: Jenkins services
-  with_items:
-    - name: jenkins
-      portName: web
-      servicePort: 80
-      targetPort: 8080
-    - name: jenkins-jnlp
-      portName: agent
-      servicePort: 5000
-      targetPort: 5000
+- name: Jenkins service
   openshift:
     state: latest
     apiVersion: v1
     kind: Service
     metadata:
-      name: "{{ item.name }}"
+      name: jenkins
       namespace: "{{ openshift_namespace }}"
       labels:
         app: jenkins
     spec:
       type: ClusterIP
       ports:
-        - name: "{{ item.portName }}"
-          port: "{{ item.servicePort }}"
+        - name: "web"
+          port: 80
+          targetPort: 8080
           protocol: TCP
-          targetPort: "{{ item.targetPort }}"
+        - name: "jnlp"
+          port: 5000
+          targetPort: 5000
+          protocol: TCP
       selector:
         app: jenkins
         deploymentconfig: jenkins
@@ -207,6 +202,8 @@
         app: jenkins
     spec:
       host: "{{ ci_jenkins_public_hostname }}"
+      port:
+        targetPort: web
       tls:
         insecureEdgeTerminationPolicy: Redirect
         termination: edge
