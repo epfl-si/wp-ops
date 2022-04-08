@@ -54,6 +54,7 @@ class Counter:
         self._counter += 1
         return retval
 
+# import sys; sys.path.append("/Users/quatrava/Library/Application Support/JetBrains/IntelliJIdea2021.1/plugins/python/pydevd-pycharm.egg"); import pydevd; pydevd.settrace('localhost', port=12477, stdoutToServer=True, stderrToServer=True)
 
 class InventoryModule(BaseInventoryPlugin):
     _execution_counter = Counter()
