@@ -1,0 +1,140 @@
+- include_vars: web2010-vars.yml
+  tags: always
+
+- name: "Pull {{ web2010_base_image_stage0_mirrored_from }} into {{ web2010_base_image_stage0_mirrored_to }}"
+  when: >-
+    openshift_namespace == "wwp-test"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: "{{ web2010_base_image_stage0_name }}"
+      namespace: "{{ openshift_namespace }}"
+    from: "{{ web2010_base_image_stage0_mirrored_from }}"
+    tag: "{{ web2010_base_image_stage0_tag | string }}"
+
+- name: "Pull {{ web2010_base_image_stage1_mirrored_from }} into {{ web2010_base_image_stage1_mirrored_to }}"
+  when: >-
+    openshift_namespace == "wwp-test"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: "{{ web2010_base_image_stage1_name }}"
+      namespace: "{{ openshift_namespace }}"
+    from: "{{ web2010_base_image_stage1_mirrored_from }}"
+    tag: "{{ web2010_base_image_stage1_tag }}"
+
+- name: Build Config and Image Stream
+  # Build in test only (and promote to production)
+  when: >-
+    openshift_namespace == "wwp-test"
+  openshift_imagestream:
+    state: latest
+    metadata:
+      namespace: "{{ openshift_namespace }}"
+      name: nginx-web2010
+    git:
+      repository: "{{ web2010_git_uri }}"
+    spec:
+      resources:
+        limits:
+          cpu: '1'
+          memory: 256M
+  register: _web2010_imagestream
+
+- name: web2010 Deployment Config
+  openshift:
+    state: latest
+    apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      name: nginx-web2010
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      replicas: 2
+      selector:
+        deployment-config.name: nginx-web2010
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            deployment-config.name: nginx-web2010
+        spec:
+          containers:
+            - image: 'docker-registry.default.svc:5000/{{openshift_namespace}}/nginx-web2010:{{ web2010_image_tag }}'
+              imagePullPolicy: Always
+              name: nginx-web2010
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              readinessProbe:
+                tcpSocket:
+                  port: 8080
+                initialDelaySeconds: 5
+                timeoutSeconds: 3
+              livenessProbe:
+                tcpSocket:
+                  port: 8080
+                initialDelaySeconds: 5
+                timeoutSeconds: 3
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: { }
+          terminationGracePeriodSeconds: 30
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - nginx-web2010
+            from:
+              kind: ImageStreamTag
+              name: 'nginx-web2010:{{ web2010_image_tag }}'
+              namespace: "{{ openshift_namespace }}"
+
+- name: (Re-)Build nginx-web2010 in OpenShift
+  shell:
+    cmd: "oc -n {{ openshift_namespace }} start-build --wait nginx-web2010"
+  when:
+    - >
+      ( (_web2010_imagestream | default({})) is changed )
+      or
+      "web2010.rebuild" in ansible_run_tags
+    - >-
+      openshift_namespace == "wwp-test"
+  tags:
+    - web2010.rebuild
+
+- name: web2010 Service
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: nginx-web2010
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+        - name: https
+          port: 8443
+          protocol: TCP
+          targetPort: 8443
+      selector:
+        deployment-config.name: nginx-web2010
+
+- name: "Promote wwp-test web2010 image to wwp"
+  when:
+    - >-
+      "web2010.image.promote" in ansible_run_tags
+    - >-
+      openshift_namespace == "wwp"
+  tags: web2010.image.promote
+  local_action:
+    module: shell
+    cmd: |
+      oc tag wwp-test/nginx-web2010:latest wwp/nginx-web2010:prod
