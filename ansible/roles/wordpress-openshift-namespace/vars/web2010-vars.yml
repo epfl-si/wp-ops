@@ -1,4 +1,5 @@
-web2010_image_tag : "{{ 'prod' if openshift_namespace == 'wwp' else 'latest' }}"
+web2010_image_tag: "{{ 'prod' if openshift_namespace == 'wwp' else 'latest' }}"
+web2010_image_os_path: "docker-registry.default.svc:5000/{{ openshift_namespace }}/nginx-web2010:{{ web2010_image_tag }}"
 web2010_git_uri: https://github.com/epfl-si/web2010
 web2010_base_image_stage0_name: ubuntu
 web2010_base_image_stage0_tag: 20.04

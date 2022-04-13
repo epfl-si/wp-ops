@@ -60,10 +60,9 @@
             deployment-config.name: nginx-web2010
         spec:
           containers:
-            - image: 'docker-registry.default.svc:5000/{{openshift_namespace}}/nginx-web2010:{{ web2010_image_tag }}'
+            - image: "{{ web2010_image_os_path }}"
               imagePullPolicy: Always
               name: nginx-web2010
-              resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               readinessProbe:
@@ -79,7 +78,6 @@
           dnsPolicy: ClusterFirst
           restartPolicy: Always
           schedulerName: default-scheduler
-          securityContext: { }
           terminationGracePeriodSeconds: 30
       triggers:
         - type: ImageChange
@@ -120,10 +118,6 @@
           port: 8080
           protocol: TCP
           targetPort: 8080
-        - name: https
-          port: 8443
-          protocol: TCP
-          targetPort: 8443
       selector:
         deployment-config.name: nginx-web2010
 
