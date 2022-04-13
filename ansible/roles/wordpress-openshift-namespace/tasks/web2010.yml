@@ -66,13 +66,17 @@
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               readinessProbe:
-                tcpSocket:
+                httpGet:
+                  path: /
                   port: 8080
+                  scheme: HTTP
                 initialDelaySeconds: 5
                 timeoutSeconds: 3
               livenessProbe:
-                tcpSocket:
+                httpGet:
+                  path: /
                   port: 8080
+                  scheme: HTTP
                 initialDelaySeconds: 5
                 timeoutSeconds: 3
           dnsPolicy: ClusterFirst
