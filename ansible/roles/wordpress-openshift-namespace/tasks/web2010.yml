@@ -63,8 +63,6 @@
             - image: "{{ web2010_image_os_path }}"
               imagePullPolicy: Always
               name: nginx-web2010
-              terminationMessagePath: /dev/termination-log
-              terminationMessagePolicy: File
               readinessProbe:
                 httpGet:
                   path: /
