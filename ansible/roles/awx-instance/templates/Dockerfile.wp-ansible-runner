@@ -62,6 +62,3 @@ RUN set -e -x; mkdir /tmp/install; \
     ansible-galaxy install -i -r /tmp/install/requirements.yml ; \
     ansible-galaxy collection install -i -r /tmp/install/requirements.yml ; \
     rm /tmp/install/requirements.yml
-
-# Activate cache in wordpress_plugin.py
-ENV WPSIBLE_WPCLI_CACHE_DIR=/tmp/wordpress_plugin-cache
