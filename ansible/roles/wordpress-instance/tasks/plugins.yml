@@ -222,7 +222,7 @@
 
 - name: Polylang for 5.5 plugin
   wordpress_plugin:
-    name: polylang
+    name: polylang_2_9_2
     state:
       - symlinked
       - active
@@ -230,7 +230,7 @@
 
 - name: Polylang plugin
   wordpress_plugin:
-    name: polylang_latest
+    name: polylang
     state:
       - symlinked
       - active
