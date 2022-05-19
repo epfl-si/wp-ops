@@ -77,7 +77,7 @@ RUN set -e -x; cd /var/www/.wp-cli; find . -type l | while read l; do     \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="5.4 5.5"
+ARG WORDPRESS_VERSION_LINEAGES="5.5 5.9"
 RUN set -e -x;                                                           \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl http://api.wordpress.org/core/stable-check/1.0/   \
@@ -95,15 +95,23 @@ RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
     /wp/*/setup-config.php /wp/*/wp-activate.php                         \
     /wp/*/wp-config-sample.php
 
-ADD wordpress-anywhere.patch /tmp/
+ADD wordpress-anywhere.patch.5.5 /tmp/
+ADD wordpress-anywhere.patch.5.8 /tmp/
 RUN set -e -x;                                                           \
     apt -qy install patch;                                               \
     for wp in /wp/*; do                                                  \
         cd $wp ;                                                         \
-        patch -p0 -F3 < /tmp/wordpress-anywhere.patch;                   \
+        major=$(echo ${wp#"/wp/"} |cut -d. -f1);                         \
+        minor=$(echo ${wp#"/wp/"}  |cut -d. -f2);                        \
+        if [ $((major)) -eq 5 ] && [ $((minor)) -lt 6 ]; then            \
+          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.5;             \
+        else                                                             \
+          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.8;             \
+        fi                                                               \
     done;                                                                \
     apt -qy remove --purge patch;                                        \
-    rm /tmp/wordpress-anywhere.patch
+    rm /tmp/wordpress-anywhere.patch.5.5;                                \
+    rm /tmp/wordpress-anywhere.patch.5.8;
 
 ######################################################################
 # Install and patch plugins and themes

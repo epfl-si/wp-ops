@@ -220,13 +220,21 @@
     - pdfjs-viewer-shortcode
   tags: wp.plugins.pdf
 
-- name: Polylang plugin
+- name: Polylang for 5.5 plugin
   wordpress_plugin:
     name: polylang
     state:
       - symlinked
       - active
     from: https://downloads.wordpress.org/plugin/polylang.2.9.2.zip
+
+- name: Polylang plugin
+  wordpress_plugin:
+    name: polylang_latest
+    state:
+      - symlinked
+      - active
+    from: wordpress.org/plugins
 
 - name: Count Polylang languages
   shell: |

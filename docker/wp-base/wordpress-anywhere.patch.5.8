@@ -1,0 +1,44 @@
+--- wp-load.php.orig	2022-01-25 10:24:29.419852166 +0100
++++ wp-load.php	2022-01-26 09:56:00.006749000 +0100
+@@ -44,6 +44,9 @@
+  *
+  * If neither set of conditions is true, initiate loading the setup process.
+  */
++
++$wp_config_loaded = TRUE;
++
+ if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
+
+ 	/** The config file resides in ABSPATH */
+@@ -56,6 +59,31 @@
+
+ } else {
+
++    $wp_config_loaded = FALSE;
++
++    // Look for wp-config.php up the directory tree, up to a depth of
++    // 5 e.g. for wp-content/plugins/myplugin/inc/foo.php
++    for ( $depth = 1; $depth <= 5 ; $depth++ ) {
++
++        $parentdir = dirname( $_SERVER["SCRIPT_FILENAME"], $depth );
++        if ( @file_exists($wp_config = "$parentdir/wp-config.php" ) ) {
++
++            require_once( $wp_config );
++            $wp_config_loaded = TRUE;
++            break;
++
++        } else if ( FALSE !== @lstat( "$parentdir/wp-content" ) ) {
++
++            // We appear to have reached a WordPress top-level
++            // directory; stop here
++            break;
++
++        }
++    }
++}
++
++if ( ! $wp_config_loaded ) {
++
+ 	// A config file doesn't exist.
+
+ 	define( 'WPINC', 'wp-includes' );
