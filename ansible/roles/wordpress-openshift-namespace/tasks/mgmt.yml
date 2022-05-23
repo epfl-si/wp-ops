@@ -34,7 +34,7 @@
       WP_ADMIN_EMAIL: test@example.com
       MYSQL_DB_HOST: "{{ mysql_super_credentials.host }}"
       MYSQL_SUPER_USER: "{{ mysql_super_credentials.user }}"
-      WP_VERSION: "{{ wp_version_lineage | string }}"
+      WORDPRESS_VERSION: "{{ wp_version_lineage | string }}"
 
 - name: mysql-super-credentials Secret
   openshift:
