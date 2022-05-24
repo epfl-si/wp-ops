@@ -17,8 +17,9 @@ plugins_for_library_category: '{{ [ "symlinked", "active" ] if "Library" in wp_s
 plugins_for_restauration_category: '{{ [ "symlinked", "active" ] if "Restauration" in wp_site_categories else "absent" }}'
 plugins_for_inside_category: '{{ ["symlinked", "active"] if "Inside" in wp_site_categories else "absent" }}'
 plugins_for_admin_category: '{{ [ "symlinked", "active" ] if "Admin" in wp_site_categories else "absent" }}'
-plugins_for_wpforms_category: '{{ [ "symlinked", "active" ] if ("WPForms" in wp_site_categories or "Payonline" in wp_site_categories) else "absent" }}'
-plugins_for_payonline_category: '{{ [ "symlinked", "active" ] if "Payonline" in wp_site_categories else "absent" }}'
+plugins_for_wpforms_category: '{{ [ "symlinked", "active" ] if ("WPForms" in wp_site_categories or "Payonline" in wp_site_categories or "Surveys" in wp_site_categories) else "absent" }}'
+plugins_for_payonline_category: '{{ [ "symlinked", "active" ] if ("Payonline" in wp_site_categories and "WPForms" in wp_site_categories) else "absent" }}'
+plugins_for_wpforms_surveys_polls_category: '{{ [ "symlinked", "active" ] if ("Surveys" in wp_site_categories and "WPForms" in wp_site_categories) else "absent" }}'
 plugins_for_subscribe2_category: '{{ [ "symlinked", "active" ] if "Subscribe2" in wp_site_categories else "absent" }}'
 
 # Defining if WP is managed or not
