@@ -156,6 +156,7 @@
     - wp.plugins.unknown
     - wp.plugins.polylang
     - wp.plugins.wpforms
+    - wp.plugins.wpforms-surveys-polls
     - wp.plugins.cachecontrol
     - wp.plugins.payonline
     - wp.plugins.ewww.optimize

@@ -500,9 +500,16 @@
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
     from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.6.1.2.zip"
-
   tags:
     - wp.plugins.wpforms
+
+- name: WPForms surveys & polls add-on
+  wordpress_plugin:
+    name: wpforms-surveys-polls
+    state: "{{ plugins_for_wpforms_surveys_polls_category }}"
+    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.6.0.zip"
+  tags:
+    - wp.plugins.wpforms-surveys-polls
 
 - name: WPForms options
   wordpress_option: "{{ item }}"
