@@ -134,7 +134,7 @@ RUN set -e -x; for wp in /wp/*; do                                         \
   rm -rf wp-content/plugins/tinymce-advanced;                              \
   (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
   (cd wp-content/plugins/wp-gutenberg-epfl;                                \
-      rm -rf build; npm i; npm run build; rm -rf node_modules);            \
+      rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules);  \
   rm tinymce-advanced.zip;                                                 \
   done
 
