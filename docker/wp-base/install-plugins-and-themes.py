@@ -16,6 +16,7 @@ import sys
 import tempfile
 import yaml
 from zipfile import ZipFile
+import operator
 
 AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
@@ -48,6 +49,8 @@ Usage:
                                  You can alternatively set environment variables
                                  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (just
                                  like `aws cp` expects).
+                                 
+      --wp-version               The wp version this install is running for
 
   install-plugins-and-themes.py <name> <URL>
 
@@ -349,16 +352,31 @@ class Themes:
 class WpOpsPlugins:
     """Models the plugins enumerated in the "wp-ops" Ansible configuration."""
 
-    def __init__(self, manifest_url=None):
+    # big up to "stack questions/31999444" for this
+    OPERATORS = {
+        '<': operator.lt,
+        '<=': operator.le,
+        '>': operator.gt,
+        '>=': operator.ge,
+        '==': operator.eq,
+        '!=': operator.ne,
+        # 'in' is using a lambda because of the opposite operator order
+        # 'in': (lambda item, container: operator.contains(container, item),
+        'in': (lambda item, container: item in container),
+        'contains': operator.contains,
+    }
+
+    def __init__(self, manifest_url=None, wp_version=None):
         if manifest_url is None:
             manifest_url = AUTO_MANIFEST_URL
-
         progress("Obtaining plug-in manifest from {}".format(manifest_url))
         req = requests.get(manifest_url)
         if req.status_code != 200:
             raise Exception('requests.get("{}") yielded status {}'.format(
                 manifest_url, req.status_code))
         self.plugins_yaml = req.content
+
+        self.wp_version = wp_version
 
     def _plugins_and_is_mu(self):
         for thing in yaml.load(self.plugins_yaml, yaml.FullLoader):
@@ -384,8 +402,22 @@ class WpOpsPlugins:
             if isinstance(urls, string_types):
                 urls = [urls]
 
-
-            yield (Plugin(name, urls), is_mu)
+            # here is the ansible 'when' directive managed. Used to
+            # filter by WP version, on the the 'wp_current_version' var
+            when = thing.get('when', '').strip()
+            if self.wp_version and when and 'wp_current_version' in when:
+                try:
+                    when_part = when.replace('wp_current_version', self.wp_version).split()
+                    assert len(when_part) == 3
+                except Exception as e:
+                    import pprint
+                    raise Exception(pprint.pformat(thing))
+                # install only if the 'when' condition is met
+                if self.OPERATORS[when_part[1]](when_part[0], when_part[2]):
+                    yield (Plugin(name, urls), is_mu)
+            else:
+                # go for it without any conditions !
+                yield (Plugin(name, urls), is_mu)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""
@@ -412,7 +444,7 @@ class Flags:
                 opts, args = getopt.getopt(argv[1:], "e:v", [
                     "exclude=", "manifest-url=",
                     "s3-endpoint-url=", "s3-region=", "s3-bucket-name=",
-                    "s3-key-id=", "s3-secret="])
+                    "s3-key-id=", "s3-secret=", "wp-version="])
             except getopt.GetoptError:
                 usage()
                 sys.exit(1)
@@ -421,7 +453,8 @@ class Flags:
             for o, a in opts:
                 if o == "--manifest-url":
                     self.manifest_url = a
-
+                elif o == "--wp-version":
+                    self.wp_version = a
             opts_dict = dict(opts)
             if "--s3-endpoint-url" in opts_dict:
                 self.s3 = S3(opts_dict["--s3-endpoint-url"],  # Mandatory
@@ -474,7 +507,7 @@ if __name__ == '__main__':
     if flags.auto:
         S3Plugin.set_client(flags.s3)
 
-        manifest = WpOpsPlugins(flags.manifest_url)
+        manifest = WpOpsPlugins(flags.manifest_url, flags.wp_version)
         for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
             if not os.path.isdir(d):
                 os.makedirs(d)
