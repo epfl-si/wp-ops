@@ -220,8 +220,8 @@
     - pdfjs-viewer-shortcode
   tags: wp.plugins.pdf
 
-- name: Polylang for 5.5 plugin
-  when: wp_version_lineage < 5.6
+- name: Polylang for WP 5.5 plugin
+  when: wp_current_version < 5.6
   wordpress_plugin:
     name: polylang
     state:
@@ -230,7 +230,7 @@
     from: https://downloads.wordpress.org/plugin/polylang.2.9.2.zip
 
 - name: Polylang plugin
-  when : wp_version_lineage >= 5.6
+  when : wp_current_version >= 5.6
   wordpress_plugin:
     name: polylang
     state:
