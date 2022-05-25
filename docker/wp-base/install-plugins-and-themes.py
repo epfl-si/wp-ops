@@ -17,6 +17,7 @@ import tempfile
 import yaml
 from zipfile import ZipFile
 import operator
+from distutils.version import LooseVersion
 
 AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
@@ -407,13 +408,15 @@ class WpOpsPlugins:
             when = thing.get('when', '').strip()
             if self.wp_version and when and 'wp_current_version' in when:
                 try:
-                    when_part = when.replace('wp_current_version', self.wp_version).split()
-                    assert len(when_part) == 3
+                    regex = r"version\(\s?['\"](.*)['\"]\s?,\s?['\"\s](.*)['\"]\s?\)\s?"
+                    groups = re.search(regex, when).groups()
+                    when_part_version = groups[0]
+                    when_part_operator = groups[1]
                 except Exception as e:
                     import pprint
                     raise Exception(pprint.pformat(thing))
                 # install only if the 'when' condition is met
-                if self.OPERATORS[when_part[1]](when_part[0], when_part[2]):
+                if self.OPERATORS[when_part_operator](LooseVersion(self.wp_version), LooseVersion(when_part_version)):
                     yield (Plugin(name, urls), is_mu)
             else:
                 # go for it without any conditions !
