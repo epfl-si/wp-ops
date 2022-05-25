@@ -221,7 +221,7 @@
   tags: wp.plugins.pdf
 
 - name: Polylang for WP 5.5 plugin
-  when: wp_current_version < 5.6
+  when: wp_current_version is version('5.6', '<')
   wordpress_plugin:
     name: polylang
     state:
@@ -230,7 +230,7 @@
     from: https://downloads.wordpress.org/plugin/polylang.2.9.2.zip
 
 - name: Polylang plugin
-  when : wp_current_version >= 5.6
+  when: wp_current_version is version('5.6', '>=')
   wordpress_plugin:
     name: polylang
     state:
@@ -506,7 +506,7 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-courses-se
 
 - name: WPForms plugin v1.6.x
-  when: wp_current_version < 5.6
+  when: wp_current_version is version('5.6', '<')
   wordpress_plugin:
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
@@ -515,7 +515,7 @@
     - wp.plugins.wpforms
 
 - name: WPForms plugin v1.7.x
-  when: wp_current_version >= 5.6
+  when: wp_current_version is version('5.6', '>=')
   wordpress_plugin:
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
@@ -524,7 +524,7 @@
     - wp.plugins.wpforms
 
 - name: WPForms surveys & polls add-on v1.6.0
-  when: wp_current_version < 5.6
+  when: wp_current_version is version('5.6', '<')
   wordpress_plugin:
     name: wpforms-surveys-polls
     state: "{{ plugins_for_wpforms_surveys_polls_category }}"
@@ -533,7 +533,7 @@
     - wp.plugins.wpforms-surveys-polls
 
 - name: WPForms surveys & polls add-on v1.7.0
-  when: wp_current_version >= 5.6
+  when: wp_current_version is version('5.6', '>=')
   wordpress_plugin:
     name: wpforms-surveys-polls
     state: "{{ plugins_for_wpforms_surveys_polls_category }}"
