@@ -141,9 +141,14 @@ RUN set -e -x; for wp in /wp/*; do                                         \
      | xargs -t -i curl -o tinymce-advanced.zip {} ;                       \
   rm -rf wp-content/plugins/tinymce-advanced;                              \
   (cd wp-content/plugins; unzip ../../tinymce-advanced.zip);               \
+  rm tinymce-advanced.zip;                                                 \
+  done
+
+# build wp-gutenberg-epfl
+RUN set -e -x; for wp in /wp/*; do                                         \
+  cd $wp;                                                                  \
   (cd wp-content/plugins/wp-gutenberg-epfl;                                \
       rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules);  \
-  rm tinymce-advanced.zip;                                                 \
   done
 
 RUN set -e -x; for wp in /wp/*; do                                       \
