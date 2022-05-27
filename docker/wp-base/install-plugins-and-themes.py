@@ -122,7 +122,7 @@ class GitHubCheckout:
     @classmethod
     def _parse(cls, url):
         for parse_re in (
-                'https://github.com/([^/]*)/([^/]*)/(?:tree|blob)/((?:(?:feature|bugfix)/)?[^/]+)(?:$|/(.*))',
+                'https://github.com/([^/]*)/([^/]*)/(?:tree|blob)/((?:(?:feature|bugfix|update)/)?[^/]+)(?:$|/(.*))',
                 'https://github.com/([^/]*)/([^/]*)$'):
             matched = re.match(parse_re, url)
             if matched:
