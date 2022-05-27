@@ -74,6 +74,9 @@
   local_action:
     module: shell
     cmd: |
+      oc tag wwp-test/wp-base:latest wwp-test/wp-base:{{ wp_version_lineage }}
+      oc tag wwp-test/mgmt:latest wwp-test/mgmt:{{ wp_version_lineage }}
+      oc tag wwp-test/httpd:latest wp-test/httpd:{{ wp_version_lineage }}
       oc tag wwp-test/mgmt:latest wwp/mgmt:prod
       oc tag wwp-test/mgmt:latest wwp-infra/mgmt:prod
       oc tag wwp-test/httpd:latest wwp/httpd:prod
