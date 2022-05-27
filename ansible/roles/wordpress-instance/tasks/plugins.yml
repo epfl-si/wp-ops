@@ -83,11 +83,22 @@
     - wp.plugins.mu
 
 - name: Blocks white-list (must-use plugin)
+  when: wp_current_version is version('5.6', '<')
   wordpress_plugin:
     name: EPFL_block_white_list
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
+  tags:
+    - wp.plugins.mu
+
+- name: Blocks white-list (must-use plugin)
+  when: wp_current_version is version('5.6', '>=')
+  wordpress_plugin:
+    name: EPFL_block_white_list
+    is_mu: yes
+    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
+    from: https://github.com/epfl-si/wp-mu-plugins/tree/update/5.9
   tags:
     - wp.plugins.mu
 
@@ -341,12 +352,22 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-remote-content
 
 - name: EPFL Gutenberg plugin
+  when: wp_current_version is version('5.6', '<')
   wordpress_plugin:
     name: wp-gutenberg-epfl
     state:
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
+
+- name: EPFL Gutenberg plugin
+  when: wp_current_version is version('5.6', '>=')
+  wordpress_plugin:
+    name: wp-gutenberg-epfl
+    state:
+      - symlinked
+      - active
+    from: https://github.com/epfl-si/wp-gutenberg-epfl/tree/update/5.9
 
 - name: EPFL Menus plugin
   wordpress_plugin:
