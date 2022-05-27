@@ -98,7 +98,7 @@
     name: EPFL_block_white_list
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
-    from: https://github.com/epfl-si/wp-mu-plugins/tree/update/5.9
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/update/5.9/EPFL_block_white_list.php
   tags:
     - wp.plugins.mu
 
