@@ -37,7 +37,8 @@ class ActionModule(WordPressActionModule):
 
         facts = {
             'wp_is_installed': wp_is_installed,
-            'wp_is_symlinked': wp_is_symlinked
+            'wp_is_symlinked': wp_is_symlinked,
+            'wp_version': None
         }
         self.result['ansible_facts'] = { 'ansible_local': facts }
 
@@ -49,6 +50,11 @@ class ActionModule(WordPressActionModule):
                 except:
                     pass
 
+            try:
+                facts['wp_version'] = self._get_wp_version()
+            except:
+                pass
+
         return self.result
 
     def _is_wp_installed (self):
@@ -58,6 +64,14 @@ class ActionModule(WordPressActionModule):
     def _is_wp_symlinked (self):
         stat = self._stat('wp-admin')
         return not (('stat' in stat) and stat['stat'] and 'isdir' in stat['stat'] and (stat['stat']['isdir']))
+
+    def _get_wp_version (self):
+        wp_cli_result = self._query_wp_cli('core version')
+
+        if wp_cli_result['rc'] == 0:
+            return wp_cli_result['stdout']
+        else:
+            return
 
     def _stat (self, relpath):
         return self._subaction.query('stat', {

@@ -1,4 +1,1 @@
 wp_version_lineage: 5.5
-# The version of the current site:
-wp_current_version: >-
-  lookup("pipe", "wp core version")

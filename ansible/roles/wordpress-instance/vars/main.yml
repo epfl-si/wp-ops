@@ -24,6 +24,9 @@ wp_cli_command: "wp --path={{ wp_dir }}"
 # For faster command, it may be nice to not load all Wordpress stack
 wp_cli_command_with_skip: "{{ wp_cli_command }} --skip-packages --skip-themes --skip-plugins"
 
+# The version of the current site:
+wp_current_version: "{{ ansible_facts.ansible_local.wp_version }}"
+
 # The public-facing URL of this instance
 _wp_base_url: "https://{{ wp_hostname }}/{{ wp_path }}"
 wp_base_url: "{{ _wp_base_url | ensure_trailing_slash }}"
