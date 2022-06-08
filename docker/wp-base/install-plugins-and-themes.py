@@ -404,9 +404,9 @@ class WpOpsPlugins:
                 urls = [urls]
 
             # here is the ansible 'when' directive managed. Used to
-            # filter by WP version, on the the 'wp_current_version' var
+            # filter by WP version, on the the 'wp_version_lineage' var
             when = thing.get('when', '').strip()
-            if self.wp_version and when and 'wp_current_version' in when:
+            if self.wp_version and when and 'wp_version_lineage' in when:
                 try:
                     regex = r"version\(\s?['\"](.*)['\"]\s?,\s?['\"\s](.*)['\"]\s?\)\s?"
                     groups = re.search(regex, when).groups()
