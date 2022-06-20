@@ -34,7 +34,7 @@ class ActionModule(WordPressActionModule):
         if language not in self.locales:
             raise AnsibleError('Unknown language {}'.format(language))
 
-        current_languages = [lang['slug'] for lang in self._get_wp_json("pll lang list --format=json")]
+        current_languages = self._get_wp_json("pll lang list --field=slug --format=json")
 
         if expected_state == 'present' and language not in current_languages:
             self._do_create_language(language)
