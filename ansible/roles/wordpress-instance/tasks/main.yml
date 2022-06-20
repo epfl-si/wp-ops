@@ -167,6 +167,7 @@
     - wp.plugins.restauration.options
     - wp.plugins.mu
     - wp.plugins.mu.social-graph
+    - wp.plugins.wp-gutenberg
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options

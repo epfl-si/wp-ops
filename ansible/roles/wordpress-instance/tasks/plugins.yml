@@ -353,6 +353,8 @@
 
 - name: EPFL Gutenberg plugin
   when: wp_version_lineage is version('5.6', '<')
+  tags:
+    - wp.plugins.wp-gutenberg
   wordpress_plugin:
     name: wp-gutenberg-epfl
     state:
@@ -362,6 +364,8 @@
 
 - name: EPFL Gutenberg plugin
   when: wp_version_lineage is version('5.6', '>=')
+  tags:
+    - wp.plugins.wp-gutenberg
   wordpress_plugin:
     name: wp-gutenberg-epfl
     state:
