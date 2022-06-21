@@ -164,10 +164,13 @@ class GitHubCheckout:
             else:
                 tmp = Tempdir()
                 progress("Cloning {}".format(self.clone_url))
-                run_cmd(["git", "clone", self.clone_url], cwd=str(tmp))
-                self._git_topdir = os.path.join(str(tmp), self.github_project)
+                git_clone_cmd = ["git", "clone", "--single-branch"]
                 if self.branch is not None:
-                    run_cmd(["git", "checkout", self.branch], cwd=self._git_topdir)
+                    git_clone_cmd.extend(["-b", self.branch, self.clone_url])
+                else:
+                    git_clone_cmd.extend([self.clone_url])
+                run_cmd(git_clone_cmd, cwd=str(tmp))
+                self._git_topdir = os.path.join(str(tmp), self.github_project)
                 self._clone_cache[(self.clone_url, self.branch)] = self._git_topdir
 
         return self  # For chaining
