@@ -103,7 +103,7 @@ class Tempdir:
 class GitHubCheckout:
     """A subdirectory found on GitHub, designated by its URL."""
 
-    def __init__(self, url):
+    def __init__(self, url, branch=None):
         """Class constructor.
 
         @param url The URL to `git clone` from. Shall start with
@@ -112,6 +112,7 @@ class GitHubCheckout:
         subdirectory (e.g. `https://github.com/foo/bar/tree/mybranch/sub/dir`)
         """
         self.url = url
+        self._branch = branch
         self._parsed = self._parse(url)
         assert self._parsed
 
@@ -138,10 +139,13 @@ class GitHubCheckout:
 
     @property
     def branch(self):
-        try:
-            return self._parsed.group(3)
-        except IndexError:
-            return None
+        if self._branch:
+            return self._branch
+        else:
+            try:
+                return self._parsed.group(3)
+            except IndexError:
+                return None
 
     @property
     def path_under_git_root(self):
@@ -186,16 +190,16 @@ class GitHubCheckout:
 class Plugin(object):
     """A WordPress plug-in or theme."""
 
-    def __init__(self, name, urls, **unused_kwargs):
+    def __init__(self, name, urls, **uncommon_kwargs):
         self.name = name
         self.urls = urls
 
-    def __new__(cls, name, urls):
+    def __new__(cls, name, urls, **uncommon_kwargs):
         if cls is Plugin:
             cls = cls._find_handler(urls[0])
 
         that = object.__new__(cls)
-        that.__init__(name, urls)
+        that.__init__(name, urls, **uncommon_kwargs)
         return that
 
     @staticmethod
@@ -228,8 +232,8 @@ class ZipPlugin(Plugin):
     def handles(cls, url):
         return url.endswith(".zip")
 
-    def __init__(self, name, urls):
-        super(ZipPlugin, self).__init__(name, urls)
+    def __init__(self, name, urls, **uncommon_kwargs):
+        super(ZipPlugin, self).__init__(name, urls, **uncommon_kwargs)
         assert len(self.urls) == 1
         self.url = self.urls[0]
         assert self.url.startswith("http")
@@ -273,8 +277,9 @@ class GitHubPlugin(Plugin):
     def handles(cls, url):
         return GitHubCheckout.is_valid(url)
 
-    def __init__(self, name, urls):
-        super(GitHubPlugin, self).__init__(name, urls)
+    def __init__(self, name, urls, **uncommon_kwargs):
+        super(GitHubPlugin, self).__init__(name, urls, **uncommon_kwargs)
+        self.branch = uncommon_kwargs.get('branch')
         self._gits = [GitHubCheckout(url) for url in self.urls]
 
     def install(self, target_dir, rename_like_self=True):
@@ -302,8 +307,8 @@ class S3Plugin(Plugin):
     def set_client(cls, client):
         cls.client = client
 
-    def __init__(self, name, urls):
-        super(S3Plugin, self).__init__(name, urls)
+    def __init__(self, name, urls, **uncommon_kwargs):
+        super(S3Plugin, self).__init__(name, urls, **uncommon_kwargs)
         assert len(self.urls) == 1
         self.url = self.urls[0]
         assert self.handles(self.url)
@@ -403,6 +408,9 @@ class WpOpsPlugins:
 
             name = options['name']
             urls = options['from']
+            uncommon_kwargs = {}  # the others entries, for some specific implementation
+            if options.get('branch'):
+                uncommon_kwargs['branch'] = options['branch']
             if isinstance(urls, string_types):
                 urls = [urls]
 
@@ -420,10 +428,10 @@ class WpOpsPlugins:
                     raise Exception(pprint.pformat(thing))
                 # install only if the 'when' condition is met
                 if self.OPERATORS[when_part_operator](LooseVersion(self.wp_version), LooseVersion(when_part_version)):
-                    yield (Plugin(name, urls), is_mu)
+                    yield (Plugin(name, urls, **uncommon_kwargs), is_mu)
             else:
                 # go for it without any conditions !
-                yield (Plugin(name, urls), is_mu)
+                yield (Plugin(name, urls, **uncommon_kwargs), is_mu)
 
     def plugins(self):
         """Yield all the plug-ins to be installed according to the "ops" metadata."""

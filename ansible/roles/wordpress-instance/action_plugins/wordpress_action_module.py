@@ -136,9 +136,13 @@ class WordPressActionModule(ActionBase):
             # _is_filename should be true for URLs of files and (by extension)
             # of directories that are to be “cherry-picked” (rather than
             # cloned) out of a fraction of a repository. On the other hand,
-            # “other” things on GitHub (such as a whole repository, or a
-            # released .zip) should return false.
-            return re.search(r'/(tree|blob)/', from_piece)
+            # “other” things on GitHub (such as a whole repository, with or without a
+            # specified branch, or a released .zip) should return false.
+            # if it has a branch, it's a full repo with a tree in the url
+            if self._task.args.get('branch'):
+                return
+            else:
+                return re.search(r'/(tree|blob)/', from_piece)
         else:
             return (from_piece != "wordpress.org/plugins"
                     and not from_piece.endswith(".zip"))
