@@ -279,8 +279,8 @@ class GitHubPlugin(Plugin):
 
     def __init__(self, name, urls, **uncommon_kwargs):
         super(GitHubPlugin, self).__init__(name, urls, **uncommon_kwargs)
-        self.branch = uncommon_kwargs.get('branch')
-        self._gits = [GitHubCheckout(url) for url in self.urls]
+        branch = uncommon_kwargs.get('branch')
+        self._gits = [GitHubCheckout(url, branch) for url in self.urls]
 
     def install(self, target_dir, rename_like_self=True):
         """Install by copying into `target_dir`.
