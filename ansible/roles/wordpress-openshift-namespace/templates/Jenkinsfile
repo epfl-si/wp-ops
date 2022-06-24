@@ -96,7 +96,7 @@ spec:
 
               def wpBaseBuild = wpbase.startBuild()
               watchBuilds(wpBaseBuild)
-              def otherBuilds = getTriggeredBuilds(wpBaseBuild)
+              def otherBuilds = getTriggeredBuilds(wpbase)
               watchBuilds(otherBuilds)
             }  // openshift.withProject
           }  // openshift.withCluster
