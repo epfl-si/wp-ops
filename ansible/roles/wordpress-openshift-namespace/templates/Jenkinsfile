@@ -90,7 +90,11 @@ spec:
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              def wpBaseBuild = buildImage('bc/wp-base')
+              def wpbase = openshift.selector('bc/wp-base')
+              banner "Building bc/wp-base in namespace ${openshift.project()}:"
+              wpbase.describe()
+
+              def wpBaseBuild = wpbase.startBuild()
               watchBuilds(wpBaseBuild)
 
               def wpHttpdBuilds = []
@@ -159,14 +163,6 @@ spec:
   }  // post
 }  // pipeline
 
-def buildImage (bcSpec) {
-  banner "Building ${bcSpec} in namespace ${openshift.project()}"
-  def bc = openshift.selector(bcSpec)
-  bc.describe()
-  def buildSelector = bc.startBuild()
-  buildSelector.describe()
-  return buildSelector
-}
 
 void watchBuilds(buildSelector) {
   // Coerce to selector
