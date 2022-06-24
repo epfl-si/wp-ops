@@ -91,6 +91,14 @@ spec:
           openshift.withCluster() {
             openshift.withProject() {
               def wpbase = openshift.selector('bc/wp-base')
+              setBuildBranch(wpbase, 'master')
+
+              def otherBuilds = getTriggeredBuildConfigs(wpbase)
+              banner(String.format(
+                "Resetting to master branch: %s",
+                otherBuilds.objects().collect { it.metadata.name }))
+              setBuildBranch(otherBuilds, 'master')
+
               banner "Building bc/wp-base in namespace ${openshift.project()}:"
               wpbase.describe()
 
@@ -155,6 +163,10 @@ spec:
   }  // post
 }  // pipeline
 
+def setBuildBranch (bc, gitBranch) {
+  def patch = """{"spec":{"source":{"git":{"ref": "${gitBranch}"}}}}"""
+  bc.patch("'${patch}'".toString())
+}
 
 void watchBuilds(buildSelector) {
   // Coerce to selector
@@ -213,6 +225,21 @@ void banner (msg) {
   def equals = "=" * length
   msg = [equals, msg, equals].join("\n")
   echo msg
+}
+
+void getTriggeredBuildConfigs(buildConfigSelector) {
+  def froms = buildConfigSelector.objects().collect {
+    // Groovy string interpolation is broken by design. Coerce from
+    // its wonky GString type, lest .contains() below do nothing:
+    "${it.metadata.name}:latest".toString()
+  }.toSet()
+  def triggered = openshift.selector('bc').objects().findResults {
+    def triggers = it.spec?.triggers ?: []
+    return (
+      triggers.find { froms.contains(it?.imageChange?.from?.name) }
+    ) ? it : null
+  }
+  return openshift.selector(triggered.collect { "bc/${it.metadata.name}" })
 }
 
 void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
