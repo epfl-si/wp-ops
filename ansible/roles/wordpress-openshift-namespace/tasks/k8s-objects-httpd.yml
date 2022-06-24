@@ -81,9 +81,6 @@
           - env:
             - name: WP_ENV
               value: "{{ dc.name }}"
-            envFrom:
-              - secretRef:
-                  name: smtp-password
 
             # image will be set from the imageStream
             imagePullPolicy: Always
@@ -115,6 +112,8 @@
               name: "webservices-logs-{{ dc.name }}"
             - mountPath: /call_logs
               name: "call-logs-{{ dc.name }}"
+            - mountPath: /mnt/smtp-secret
+              name: smtp-secret
           - image: docker-registry.default.svc:5000/{{ openshift_namespace }}/collectd:latest
             imagePullPolicy: Always
             name: "collectd-{{ dc.name }}"
@@ -157,6 +156,9 @@
             name: "webservices-logs-{{ dc.name }}"
           - emptyDir: {}
             name: "call-logs-{{ dc.name }}"
+          - name: smtp-secret
+            secret:
+              secretName: smtp-password   # Down below
 
       triggers:
       - type: ImageChange
