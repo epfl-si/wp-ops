@@ -21,6 +21,7 @@
   tags:
     - dc
     - dc.redeploy
+    - httpd.secrets
     - services
 
 - name: "Varnish"
