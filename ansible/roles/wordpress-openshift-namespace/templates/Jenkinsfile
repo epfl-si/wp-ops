@@ -96,17 +96,8 @@ spec:
 
               def wpBaseBuild = wpbase.startBuild()
               watchBuilds(wpBaseBuild)
-
-              def wpHttpdBuilds = []
-              timeout(time: 2, units: 'MINUTES') {
-                waitUntil {
-                  wpHttpdBuilds = getTriggeredBuilds(wpBaseBuild).findAll {
-                    it.metadata.name.startsWith('httpd') }
-                  return wpHttpdBuilds.size() == 1  // waitUntil condition
-                }  // waitUntil
-              } // timeout
-
-              watchBuilds(wpHttpdBuilds)
+              def otherBuilds = getTriggeredBuilds(wpBaseBuild)
+              watchBuilds(otherBuilds)
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
