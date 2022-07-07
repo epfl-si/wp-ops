@@ -9,4 +9,5 @@ ansible/state
 node_modules/
 k8s-backup/
 assets/
-
+tmp_data
+*.previous
