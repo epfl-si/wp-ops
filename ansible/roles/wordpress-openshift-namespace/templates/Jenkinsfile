@@ -177,7 +177,7 @@ void watchBuilds(buildSelector) {
 
   buildSelector.logs('-f')  // Waits for the build(s) to terminate
                             // (or mostly terminate - See below)
-  timeout(time: 1, units: 'MINUTES') {
+  timeout(time: 1, unit: 'MINUTES') {
     // Despite logs having run their course, experience shows that
     // some builds can still be in "Running" state Kubernetes-wise:
     buildSelector.withEach {
