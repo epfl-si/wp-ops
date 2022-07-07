@@ -20,6 +20,9 @@ fi
 /bin/mkdir -p /var/www/html/probes/ready
 echo "OK" > /var/www/html/probes/ready/index.html
 
+smtp_password=`cat /mnt/smtp-secret/SERVICE_WWP_NOREPLY_PASSWORD`
+sed -i 's/@@SERVICE_WWP_NOREPLY_PASSWORD@@/'${smtp_password}'/' /etc/msmtprc
+
 set -x
 # Change max upload size for http requests
 sed -i "s/upload_max_filesize = .*/upload_max_filesize = 300M/" /etc/php/${PHP_VERSION}/apache2/php.ini

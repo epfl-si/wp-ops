@@ -1,8 +1,11 @@
 # Set up one DeploymentConfig/httpd-* object and one Service/httpd-* object, described by the
 # {{ dc }} variable.
 
-- include_vars: ../../../vars/image-vars.yml              # For httpd_image_name
+- include_vars: "{{ item }}"
   tags: always
+  with_items:
+    - ../../../vars/image-vars.yml                        # For httpd_image_name
+    - "../vars/secrets-{{ openshift_namespace }}.yml"
 
 - name: "service/httpd-{{ dc.name }}"
   openshift:
@@ -78,6 +81,7 @@
           - env:
             - name: WP_ENV
               value: "{{ dc.name }}"
+
             # image will be set from the imageStream
             imagePullPolicy: Always
             name: "httpd-{{ dc.name }}"
@@ -108,6 +112,8 @@
               name: "webservices-logs-{{ dc.name }}"
             - mountPath: /call_logs
               name: "call-logs-{{ dc.name }}"
+            - mountPath: /mnt/smtp-secret
+              name: smtp-secret
           - image: docker-registry.default.svc:5000/{{ openshift_namespace }}/collectd:latest
             imagePullPolicy: Always
             name: "collectd-{{ dc.name }}"
@@ -150,6 +156,9 @@
             name: "webservices-logs-{{ dc.name }}"
           - emptyDir: {}
             name: "call-logs-{{ dc.name }}"
+          - name: smtp-secret
+            secret:
+              secretName: smtp-password   # Down below
 
       triggers:
       - type: ImageChange
@@ -178,3 +187,28 @@
   tags:
     - dc
     - dc.redeploy
+
+- debug:
+    msg: "{{ smtp.username }}"
+  tags: httpd.secrets
+
+- debug:
+    msg: "{{ smtp.password | eyaml(eyaml_keys) }}"
+  tags: httpd.secrets
+
+- debug:
+    msg: "{{ smtp.password | eyaml(eyaml_keys) | b64encode }}"
+  tags: httpd.secrets
+
+- name: "Secret SMTP password ({{ smtp.username }})"
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      name: "smtp-password"
+      namespace: "{{ openshift_namespace }}"
+    data:
+       SERVICE_WWP_NOREPLY_PASSWORD: "{{ smtp.password | eyaml(eyaml_keys) | b64encode }}"
+  tags: httpd.secrets
