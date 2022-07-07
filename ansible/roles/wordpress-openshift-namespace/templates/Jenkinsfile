@@ -96,8 +96,9 @@ spec:
 
               def wpBaseBuild = wpbase.startBuild()
               watchBuilds(wpBaseBuild)
-              def otherBuilds = getTriggeredBuilds(wpbase)
-              watchBuilds(otherBuilds)
+
+              banner "Watching dependent builds:"
+              watchBuilds(awaitTriggeredBuildsStarted(wpBaseBuild, 2))
             }  // openshift.withProject
           }  // openshift.withCluster
         }  // script
@@ -214,7 +215,7 @@ void banner (msg) {
   echo msg
 }
 
-void getTriggeredBuilds(buildSelector) {
+void awaitTriggeredBuildsStarted(buildSelector, expectedSize) {
   Set imageIDs = []
   buildSelector.withEach {
     def status = it.object().status
@@ -225,20 +226,26 @@ void getTriggeredBuilds(buildSelector) {
   }
 
   def triggeredBuilds = []
-  for (build in openshift.selector("build").objects()) {
-    if (build.spec && build.spec.triggeredBy) {
-      for (triggered in build.spec.triggeredBy) {
-        if (triggered.imageChangeBuild &&
-            triggered.imageChangeBuild.imageID &&
-            imageIDs.contains(
-              triggered.imageChangeBuild.imageID.replaceFirst('.*@', '')))
-        {
-          triggeredBuilds.add(build)
-        }
-      }  // for
-    }  // if
-  }  // for
 
-  def size = triggeredBuilds.size()
-  return triggeredBuilds
-}
+  timeout(2) {
+    for (build in openshift.selector("build").objects()) {
+      if (build.spec && build.spec.triggeredBy) {
+        for (triggered in build.spec.triggeredBy) {
+          if (triggered.imageChangeBuild &&
+              triggered.imageChangeBuild.imageID &&
+              imageIDs.contains(
+              triggered.imageChangeBuild.imageID.replaceFirst('.*@', '')))
+          {
+            triggeredBuilds.add("build/${build.metadata.name}")
+          }
+        }  // for
+      }  // if
+    }  // for
+
+    def size = triggeredBuilds.size()
+    echo "Found ${size} build(s) triggered by ${buildSelector}: ${triggeredBuilds}"
+    return size == expectedSize  // timeout() exit condition
+  }  // timeout
+
+  return openshift.selector(triggeredBuilds)
+}  // void awaitTriggeredBuildsStarted()
