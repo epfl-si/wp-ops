@@ -59,7 +59,6 @@ Big up to all the following people, without whom this project will not be
 ![@dabelenda avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/17007649?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
 ![@jaepetto avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/2668031?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
 ![@williambelle avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/2843501?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@dependabot[bot] avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/in/29110?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
 ![@multiscan avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/12849?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
 ![@JGodin-C2C avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/40758407?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
 ![@obieler avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/24526380?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
