@@ -39,33 +39,6 @@ feel free to skip this section.
 
 To be documented
 
-# Contributor list
-
-Big up to all the following people, without whom this project will not be
-
-<!-- start_contributors mode:bubble -->
-![@LuluTchab avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/11942430?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@ebreton avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/490665?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@GregLeBarbar avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/4997224?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@domq avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/1629585?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@jdelasoie avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/15261020?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@ponsfrilus avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/176002?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@MarceloMuriel avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/4720032?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@alinekeller avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/6631947?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@lvenries avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/29034311?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@lboatto avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/25363740?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@cburki avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/7870123?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@zuzu59 avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/15345233?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@dabelenda avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/17007649?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@jaepetto avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/2668031?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@williambelle avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/2843501?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@dependabot[bot] avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/in/29110?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@multiscan avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/12849?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@JGodin-C2C avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/40758407?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-![@obieler avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/24526380?v=4&h=84&w=84&fit=cover&mask=circle&maxage=7d)
-<!-- end_contributors -->
-
-
 [access to the test and/or production infrastructure]: https://sico.epfl.ch:8443/
 [Install Ansible]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 [Install the OpenShift command-line tools]: https://docs.openshift.com/container-platform/3.11/cli_reference/get_started_cli.html#installing-the-cli
