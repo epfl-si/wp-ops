@@ -437,17 +437,15 @@
     from: https://github.com/nosilver4u/ewww-image-optimizer/archive/refs/tags/v6.2.5.zip
   register: _plugin_ewww
 
-# This task is now a perma red and site normalization from wp-veritas always 
-# fail because of it — I'm commenting this out as a hot fix for the summer.
-# - name: Rebuild ewww-image-optimizer cache
-#   shell: "{{ wp_cli_command }} ewwwio optimize all --noprompt"
-#   tags:
-#     - wp.plugins.ewww
- #    - wp.plugins.ewww.optimize
-#   when: >-
-#     (_plugin_ewww is changed)
-#     or
-#     ("wp.plugins.ewww.optimize" in ansible_run_tags)
+- name: Rebuild ewww-image-optimizer cache
+  shell: "{{ wp_cli_command }} ewwwio optimize all --noprompt"
+  tags:
+    - wp.plugins.ewww
+    - wp.plugins.ewww.optimize
+  when: >-
+    ("wp.plugins.ewww.optimize" in ansible_run_tags)
+    or
+    (_plugin_ewww is changed)
 
 - name: ewww-image-optimizer configuration
   wordpress_option: "{{ item }}"
