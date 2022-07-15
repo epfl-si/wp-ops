@@ -434,7 +434,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/nosilver4u/ewww-image-optimizer/archive/refs/tags/v6.5.0.zip
+    from: https://github.com/nosilver4u/ewww-image-optimizer/archive/refs/tags/v6.2.5.zip
   register: _plugin_ewww
 
 # This task is now a perma red and site normalization from wp-veritas always 
