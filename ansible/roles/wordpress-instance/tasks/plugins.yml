@@ -5,6 +5,7 @@
   with_items:
     - plugin-vars.yml
     - accred-vars.yml
+    - ../../../vars/wordpress-vars.yml          # For wp_version_lineage
     - ../../../vars/env-secrets.yml
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"
 
