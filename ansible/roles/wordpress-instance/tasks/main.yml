@@ -159,6 +159,7 @@
     - wp.plugins.wpforms-surveys-polls
     - wp.plugins.cachecontrol
     - wp.plugins.payonline
+    - wp.plugins.ewww
     - wp.plugins.ewww.optimize
     - wp.plugins.ewww.configure
     - wp.plugins.intranet

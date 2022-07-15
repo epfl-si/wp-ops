@@ -417,6 +417,7 @@
 
 - name: ewww-image-optimizer plugin
   when: wp_version_lineage is version('5.6', '>=')
+  tags: wp.plugins.ewww
   wordpress_plugin:
     name: ewww-image-optimizer
     state:
@@ -427,6 +428,7 @@
 
 - name: ewww-image-optimizer plugin
   when: wp_version_lineage is version('5.6', '<')
+  tags: wp.plugins.ewww
   wordpress_plugin:
     name: ewww-image-optimizer
     state:
@@ -439,7 +441,9 @@
 # fail because of it — I'm commenting this out as a hot fix for the summer.
 # - name: Rebuild ewww-image-optimizer cache
 #   shell: "{{ wp_cli_command }} ewwwio optimize all --noprompt"
-#   tags: wp.plugins.ewww.optimize
+#   tags:
+#     - wp.plugins.ewww
+ #    - wp.plugins.ewww.optimize
 #   when: >-
 #     (_plugin_ewww is changed)
 #     or
@@ -448,7 +452,9 @@
 - name: ewww-image-optimizer configuration
   wordpress_option: "{{ item }}"
   with_items: "{{ plugin_ewww_image_optimizer_options }}"
-  tags: wp.plugins.ewww.configure
+  tags:
+    - wp.plugins.ewww
+    - wp.plugins.ewww.configure
 
 - name: enlighter plugin
   wordpress_plugin:
