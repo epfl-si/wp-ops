@@ -1,3 +1,4 @@
 cucumber-reports
 htmlpublisher
 email-ext
+configuration-as-code
