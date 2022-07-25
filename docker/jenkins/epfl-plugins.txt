@@ -1,4 +1,4 @@
 cucumber-reports
 htmlpublisher
-email-ext
-configuration-as-code
+email-ext:2.88
+configuration-as-code:1466.v2d4119502006
