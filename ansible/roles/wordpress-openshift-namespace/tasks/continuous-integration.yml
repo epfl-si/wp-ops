@@ -166,6 +166,9 @@
               - mountPath: /var/lib/jenkins/jobs
                 name: jenkins-data
                 subPath: jobs
+              - mountPath: /var/lib/jenkins/logs
+                name: jenkins-data
+                subPath: logs
           securityContext: {}
           serviceAccount: jenkins
           serviceAccountName: jenkins
