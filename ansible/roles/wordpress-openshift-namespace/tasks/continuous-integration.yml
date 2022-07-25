@@ -1,7 +1,7 @@
 # Kubernetes configuration for the continuous integration rig
 
 - include_vars: continuous-integration-vars.yml
-  tags: ci.jenkinsfile
+  tags: always
 
 # Inspired from
 # https://eleanordare.com/blog/2017/6/15/running-cucumber-tests-in-openshift-from-a-jenkins-pipeline
@@ -23,7 +23,7 @@
 - name: "Rebuild Jenkins images now"
   when: |
     (
-    _jenkins_build is changed
+    (_jenkins_build | default({})) is changed
     or
     ("ci.rebuild" in ansible_run_tags)
     )
