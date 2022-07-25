@@ -18,6 +18,15 @@
       git: "{{ ci_jenkins_master_git_build }}"
     - name: "{{ ci_jenkins_test_sidekick_image_name }}"
       git: "{{ ci_jenkins_test_sidekick_git_build }}"
+  register: _jenkins_build
+
+- name: "Rebuild Jenkins images now"
+  when: _jenkins_build is changed
+  shell: "oc -n {{ openshift_namespace }} start-build --wait {{ item }}"
+  delegate_to: localhost
+  with_items:
+    - "{{ ci_jenkins_master_image_name }}"
+    - "{{ ci_jenkins_test_sidekick_image_name }}"
 
 # This ImageStream is intended as a so-called "Kubernetes plug-in pod
 # template", that the Jenkinsfile can reference (or inheritFrom, in
