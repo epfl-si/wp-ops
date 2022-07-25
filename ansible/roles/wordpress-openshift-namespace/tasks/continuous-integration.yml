@@ -18,6 +18,21 @@
       git: "{{ ci_jenkins_master_git_build }}"
     - name: "{{ ci_jenkins_test_sidekick_image_name }}"
       git: "{{ ci_jenkins_test_sidekick_git_build }}"
+  register: _jenkins_build
+
+- name: "Rebuild Jenkins images now"
+  when: |
+    (
+    _jenkins_build is changed
+    or
+    ("ci.rebuild" in ansible_run_tags)
+    )
+  shell: "oc -n {{ openshift_namespace }} start-build --wait {{ item }}"
+  delegate_to: localhost
+  with_items:
+    - "{{ ci_jenkins_master_image_name }}"
+    - "{{ ci_jenkins_test_sidekick_image_name }}"
+  tags: ci.rebuild
 
 # This ImageStream is intended as a so-called "Kubernetes plug-in pod
 # template", that the Jenkinsfile can reference (or inheritFrom, in
@@ -56,8 +71,8 @@
           targetPort: 8080
           protocol: TCP
         - name: "jnlp"
-          port: 5000
-          targetPort: 5000
+          port: 50000
+          targetPort: 50000
           protocol: TCP
       selector:
         app: jenkins
@@ -148,8 +163,12 @@
                 limits:
                   memory: 2Gi
               volumeMounts:
-              - mountPath: /var/lib/jenkins
+              - mountPath: /var/lib/jenkins/jobs
                 name: jenkins-data
+                subPath: jobs
+              - mountPath: /var/lib/jenkins/logs
+                name: jenkins-data
+                subPath: logs
           securityContext: {}
           serviceAccount: jenkins
           serviceAccountName: jenkins

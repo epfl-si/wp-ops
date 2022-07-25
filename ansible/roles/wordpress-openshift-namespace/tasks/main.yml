@@ -55,6 +55,7 @@
   # Jenkinsfile inside
   tags:
     - ci
+    - ci.rebuild
     - ci.services
     - ci.jenkinsfile
 
