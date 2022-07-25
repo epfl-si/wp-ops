@@ -1,2 +1,3 @@
 cucumber-reports
 htmlpublisher
+email-ext
