@@ -157,8 +157,9 @@
                 limits:
                   memory: 2Gi
               volumeMounts:
-              - mountPath: /var/lib/jenkins
+              - mountPath: /var/lib/jenkins/jobs
                 name: jenkins-data
+                subPath: jobs
           securityContext: {}
           serviceAccount: jenkins
           serviceAccountName: jenkins
