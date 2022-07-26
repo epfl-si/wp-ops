@@ -8,7 +8,7 @@ In this repository you will find:
 
 - The Dockerfiles and build dependencies for all custom-made Docker images
 
-- Some Ansible code to manage state on-disk and inside the etcd store
+- Some Ansible code to manage state on-disk and inside the Kubernetes data store
 
 # Prerequisites and Tools
 
