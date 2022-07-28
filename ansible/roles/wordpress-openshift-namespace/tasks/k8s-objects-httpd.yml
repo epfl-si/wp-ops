@@ -188,18 +188,6 @@
     - dc
     - dc.redeploy
 
-- debug:
-    msg: "{{ smtp.username }}"
-  tags: httpd.secrets
-
-- debug:
-    msg: "{{ smtp.password | eyaml(eyaml_keys) }}"
-  tags: httpd.secrets
-
-- debug:
-    msg: "{{ smtp.password | eyaml(eyaml_keys) | b64encode }}"
-  tags: httpd.secrets
-
 - name: "Secret SMTP password ({{ smtp.username }})"
   openshift:
     state: latest

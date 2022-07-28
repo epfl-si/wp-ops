@@ -20,8 +20,13 @@ fi
 /bin/mkdir -p /var/www/html/probes/ready
 echo "OK" > /var/www/html/probes/ready/index.html
 
-smtp_password=`cat /mnt/smtp-secret/SERVICE_WWP_NOREPLY_PASSWORD`
-sed -i 's/@@SERVICE_WWP_NOREPLY_PASSWORD@@/'${smtp_password}'/' /etc/msmtprc
+smtp_password=`cat /mnt/smtp-secret/SERVICE_WWP_NOREPLY_PASSWORD || true`
+if [ -z ${smtp_password} ]; then
+    smtp_password=${SMTP_SECRET}
+fi
+if [ ! -z ${smtp_password} ]; then
+    sed -i 's/@@SERVICE_WWP_NOREPLY_PASSWORD@@/'${smtp_password}'/' /etc/msmtprc
+fi
 
 set -x
 # Change max upload size for http requests
