@@ -17,9 +17,9 @@ _mgmt_access_list_wwp_test_and_wwp:
   - giovanni.cangiani@epfl.ch
   - nicolas.borboen@epfl.ch
   - emilie.dorer@epfl.ch
+  - lindo.duratti@epfl.ch
 
-_mgmt_access_list_wwp_test_only:
-  - mohamed.khadri@epfl.ch
+_mgmt_access_list_wwp_test_only: []
 
 mgmt_ssh_secret_name: mgmt-ssh
 
