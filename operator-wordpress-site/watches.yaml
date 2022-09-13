@@ -3,5 +3,5 @@
 - version: v1alpha1
   group: wordpress.epfl.ch
   kind: WordpressSite
-  # FIXME: Specify the role or playbook for this resource.
+  role: wordpress-site
 #+kubebuilder:scaffold:watch
