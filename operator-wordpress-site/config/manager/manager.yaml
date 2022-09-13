@@ -37,7 +37,7 @@ spec:
       - args:
         - --leader-elect
         - --leader-election-id=operator-wordpress-site
-        image: controller:latest
+        image: operator-wordpress-site-controller:latest
         name: manager
         env:
         - name: ANSIBLE_GATHERING
