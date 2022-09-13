@@ -34,13 +34,13 @@
 #   roles:
 #     - role: ../roles/wordpress-instance
 
-- name: OpenShift namespaces
-  # Like above, members of the all_openshift_namespaces are OpenShift
+- name: TKGI namespaces
+  # Like above, members of the all_tkgi_namespaces are TKGI
   # namespaces, rather than hosts
-  hosts: all_openshift_namespaces
+  hosts: all_tkgi_namespaces
   gather_facts: no    # Ansible facts are useless for this play
   roles:
-    - role: ../roles/wordpress-openshift-namespace
+    - role: ../roles/wordpress-tkgi-namespace
 
 - name: Ansible Tower (AWX) instances
   hosts: awx_instances

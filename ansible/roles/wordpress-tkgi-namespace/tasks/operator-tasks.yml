@@ -1,0 +1,7 @@
+# Deploy the Kubernetes operator that manages sites onto TKGI
+- tags: always
+  include_vars: operator-vars.yml
+
+- name: Custom Resource Definition (CRD)
+  kubernetes.core.k8s:
+    definition: "{{ operator_crd_definition }}"

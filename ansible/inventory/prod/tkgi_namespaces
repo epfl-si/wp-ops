@@ -1,0 +1,5 @@
+[all_tkgi_namespaces:children]
+tkgi_namespaces_prod
+
+[tkgi_namespaces_prod]
+wordpress     nfs_path=nas-app-ma-nfs1:/si_test_openshift_wp_jahia_app/wordpress

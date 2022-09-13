@@ -1,0 +1,5 @@
+operator_src_dir: "{{ wpsible_ops_dir }}/operator-wordpress-site"
+operator_crd_file: "{{ operator_src_dir }}/config/crd/bases/wordpress.epfl.ch_wordpresssites.yaml"
+operator_crd_definition: >-
+  {{ lookup('pipe', 'cat "%s"' % operator_crd_file ) |
+  from_yaml }}

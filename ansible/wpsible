@@ -100,7 +100,7 @@ ensure_oc_login
 case "$mode" in
     ansible-playbook)
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
-                         -e "wpsible_cwd=$OLDPWD" \
+                         -e "wpsible_cwd=$OLDPWD" -e "wpsible_ops_dir=$(cd ..; /bin/pwd)" \
                          .interactive-playbooks/main.yml
         ;;
     ansible)

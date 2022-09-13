@@ -1,0 +1,7 @@
+- include_tasks:
+    file: operator-tasks.yml
+    # Because `include_tasks` is dynamic, tags don't auto-inherit:
+    apply:
+      tags:
+        - tkgi
+  tags: tkgi
