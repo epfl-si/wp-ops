@@ -1,0 +1,24 @@
+# permissions for end users to edit wordpresssites.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: wordpresssite-editor-role
+rules:
+- apiGroups:
+  - wordpress.epfl.ch
+  resources:
+  - wordpresssites
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - wordpress.epfl.ch
+  resources:
+  - wordpresssites/status
+  verbs:
+  - get

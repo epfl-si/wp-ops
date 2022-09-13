@@ -37,4 +37,21 @@ rules:
       - patch
       - update
       - watch
+  ##
+  ## Rules for wordpress.epfl.ch/v1alpha1, Kind: WordpressSite
+  ##
+  - apiGroups:
+      - wordpress.epfl.ch
+    resources:
+      - wordpresssites
+      - wordpresssites/status
+      - wordpresssites/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
 #+kubebuilder:scaffold:rules

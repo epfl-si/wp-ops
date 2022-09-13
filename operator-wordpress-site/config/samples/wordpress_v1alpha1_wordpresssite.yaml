@@ -1,0 +1,6 @@
+apiVersion: wordpress.epfl.ch/v1alpha1
+kind: WordpressSite
+metadata:
+  name: wordpresssite-sample
+spec:
+  # TODO(user): Add fields here
