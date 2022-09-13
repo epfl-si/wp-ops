@@ -2,6 +2,28 @@
 - tags: always
   include_vars: operator-vars.yml
 
+- name: '`harbor-robot-pull` Secret in {{ operator_namespace }} namespace'
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: harbor-robot-pull
+        namespace: '{{ operator_namespace }}'
+      type: kubernetes.io/dockerconfigjson
+      data:
+        .dockerconfigjson: '{{ _docker_cfg | to_json | b64encode }}'
+  vars:
+    _auth: >-
+      {{ operator_harbor_secrets.login }}:{{ operator_harbor_secrets.password }}
+    _docker_cfg:
+      auths:
+        vsissp-harbor-p.epfl.ch:
+          username: '{{ operator_harbor_secrets.login }}'
+          password: '{{ operator_harbor_secrets.password }}'
+          auth: '{{ _auth | b64encode }}'
+
 - name: Kubernetes objects for the operator
   kubernetes.core.k8s:
     definition: "{{ item }}"

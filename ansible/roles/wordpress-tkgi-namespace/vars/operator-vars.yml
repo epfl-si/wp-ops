@@ -6,3 +6,11 @@ operator_k8s_definitions: >-
   {{ lookup('kubernetes.core.kustomize',
   dir=operator_kustomize_config_dir
   ) | from_yaml_all }}
+
+operator_namespace: operator-wordpress-site-system
+
+operator_harbor_secrets_keybase_path: |
+  /keybase/team/epfl_wp_test/harbor-robot-secrets.yml
+operator_harbor_secrets: |
+  {{ lookup('pipe', 'keybase fs read ' + operator_harbor_secrets_keybase_path) | from_yaml }}
+
