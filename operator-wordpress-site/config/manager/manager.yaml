@@ -33,11 +33,14 @@ spec:
         # versions < 1.19 or on vendors versions which do NOT support this field by default (i.e. Openshift < 4.11 ).
         # seccompProfile:
         #   type: RuntimeDefault
+      imagePullSecrets:
+        - name: harbor-robot-pull
       containers:
       - args:
         - --leader-elect
         - --leader-election-id=operator-wordpress-site
-        image: operator-wordpress-site-controller:latest
+        # TODO: find a way to make the Harbor part an Ansible variable.
+        image: vsissp-harbor-p.epfl.ch/itsidevfsdt/operator-wordpress-site-controller:latest
         name: manager
         env:
         - name: ANSIBLE_GATHERING
