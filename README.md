@@ -51,7 +51,7 @@ feel free to skip this section.
 
 {% endnote %}
 
-To deploy the custom resource definition (CRD) into TKGI:
+To deploy the whole operator into TKGI (in test; see above for production):
 
 ```
 ./ansible/wpsible operator-wordpress-site -t tkgi

@@ -2,6 +2,7 @@
 - tags: always
   include_vars: operator-vars.yml
 
-- name: Custom Resource Definition (CRD)
+- name: Kubernetes objects for the operator
   kubernetes.core.k8s:
-    definition: "{{ operator_crd_definition }}"
+    definition: "{{ item }}"
+  with_items: "{{ operator_k8s_definitions }}"

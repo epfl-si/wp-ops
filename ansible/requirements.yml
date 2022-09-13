@@ -5,3 +5,4 @@ roles:
 collections:
 - name: epfl_si.actions
   version: 0.1.0
+- name: kubernetes.core

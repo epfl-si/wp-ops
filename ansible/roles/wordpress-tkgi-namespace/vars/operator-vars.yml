@@ -1,5 +1,8 @@
 operator_src_dir: "{{ wpsible_ops_dir }}/operator-wordpress-site"
-operator_crd_file: "{{ operator_src_dir }}/config/crd/bases/wordpress.epfl.ch_wordpresssites.yaml"
-operator_crd_definition: >-
-  {{ lookup('pipe', 'cat "%s"' % operator_crd_file ) |
-  from_yaml }}
+
+operator_kustomize_config_dir: "{{ operator_src_dir }}/config/default"
+
+operator_k8s_definitions: >-
+  {{ lookup('kubernetes.core.kustomize',
+  dir=operator_kustomize_config_dir
+  ) | from_yaml_all }}
