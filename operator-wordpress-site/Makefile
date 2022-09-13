@@ -47,7 +47,7 @@ ifeq ($(USE_IMAGE_DIGESTS), true)
 endif
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= vsissp-harbor-p.epfl.ch/itsidevfsdt/operator-wordpress-site-controller:latest
 
 .PHONY: all
 all: docker-build
