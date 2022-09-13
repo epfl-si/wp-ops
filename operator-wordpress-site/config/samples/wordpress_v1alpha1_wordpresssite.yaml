@@ -20,3 +20,8 @@ spec:
     #   - Payonline
   epfl:
     unit_id: 13030
+history:
+  createdBy:
+    serviceNow: INC01234567
+  comment: |
+    Site canari pour tester l'image

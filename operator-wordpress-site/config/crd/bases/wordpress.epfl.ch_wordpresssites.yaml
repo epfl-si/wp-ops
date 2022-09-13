@@ -33,6 +33,10 @@ spec:
             description: Spec defines the desired state of WordpressSite
             type: object
             x-kubernetes-preserve-unknown-fields: true
+          history:
+            description: History describes the organizational reasons why this WordpressSite exists.
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
           status:
             description: Status defines the observed state of WordpressSite
             type: object
