@@ -1,6 +1,22 @@
 apiVersion: wordpress.epfl.ch/v1alpha1
 kind: WordpressSite
 metadata:
-  name: wordpresssite-sample
+  name: canari
+  namespace: wordpress-test
 spec:
-  # TODO(user): Add fields here
+  hostname: www.epfl.ch
+  path: /campus/services/website/canari
+  visibility: public
+  kubernetes:
+    service: www
+  wordpress:
+    title: Test
+    tagline: Canari
+    theme: wp-theme-2018
+    languages:
+      - fr
+      - en
+    # features:
+    #   - Payonline
+  epfl:
+    unit_id: 13030
