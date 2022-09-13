@@ -10,6 +10,8 @@ spec:
     listKind: WordpressSiteList
     plural: wordpresssites
     singular: wordpresssite
+    shortNames:
+      - wp
   scope: Namespaced
   versions:
   - name: v1alpha1
