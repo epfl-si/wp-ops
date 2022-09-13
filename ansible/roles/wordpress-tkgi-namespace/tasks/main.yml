@@ -1,3 +1,6 @@
+- tags: always
+  include_vars: tkgi-vars.yml
+
 - include_tasks:
     file: operator-tasks.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit:
