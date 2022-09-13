@@ -3,30 +3,6 @@
 # What to do to install and configure a WordPress instance
 #
 
-- name: Backup
-  when: >-
-    (wp_do_backup | default(True) | bool)
-    or
-    ("wp.backup" in ansible_run_tags)
-  tags:
-    - never  # That is, skip unless "-t wp.wipe" or "-t wp.backup" is
-             # passed on the command line
-    - wp.wipe
-    - wp.backup
-  include_tasks:
-    file: "backup.yml"
-    apply:
-      # Tags don't auto-inherit with `include_tasks`:
-      tags:
-        - wp.wipe
-        - wp.backup
-
-- name: Wipe
-  import_tasks: "wipe.yml"
-  tags:
-    - never
-    - wp.wipe
-
 - name: Update memento gutenberg blocks
   import_tasks: "update-memento-blocks.yml"
   tags:
@@ -35,20 +11,6 @@
 
 - wordpress_facts:
   tags: always
-
-- name: "{{ 'Recreate' if 'wp.wipe' in ansible_run_tags else 'Create' }}"
-  when: site_is_not_deleted_in_wpveritas
-  tags:
-    - wp
-    - wp.restore
-    - wp.create
-  include_tasks:
-    file: "create.yml"
-    apply:
-      tags:
-        - wp
-        - wp.create
-        - wp.restore
 
 - name: Per site route
   tags:
@@ -59,18 +21,6 @@
     apply:
       tags:
         - wp.route
-
-- name: Restore
-  include_tasks:
-    file: "restore.yml"
-    apply:
-      tags:
-        - wp.restore
-  tags:
-    - never
-    - wp.restore
-    - wp.restore.files
-    - wp.restore.sql
 
 - name: Configure
   when: site_is_not_deleted_in_wpveritas
