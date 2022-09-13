@@ -34,7 +34,7 @@ fatal () {
     exit 1
 }
 
-platform_check () {
+ensure_ansible () {
     if ! test -f ansible-deps-cache/.versions 2>/dev/null; then
         curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/install.sh | \
             SUITCASE_DIR=$PWD/ansible-deps-cache SUITCASE_ANSIBLE_REQUIREMENTS=requirements.yml \
@@ -46,11 +46,9 @@ platform_check () {
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
     export ANSIBLE_COLLECTIONS_PATHS="$PWD/ansible-deps-cache"
-
-    oc_check
 }
 
-oc_check () {
+ensure_oc_login () {
   if ! oc projects >/dev/null 2>&1; then
     echo "Please login to openshift:"
     oc login
@@ -98,7 +96,8 @@ esac
 
 set -e
 
-platform_check
+ensure_ansible
+ensure_oc_login
 case "$mode" in
     ansible-playbook)
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
