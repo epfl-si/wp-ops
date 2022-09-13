@@ -11,25 +11,28 @@
         msg: |
           You must update Ansible to at least 2.6 to use this playbook.
 
-- name: WordPress instances
-  hosts: |
-    {%- if (ansible_run_tags |
-                          any_known_tag((playbook_dir | dirname) +
-                                        "/roles/wordpress-instance")) -%}
-    {# Note: we are twisting the Ansible concept of “hosts” in this play.
-     # An inventory entry in the all_wordpresses group is a WordPress
-     # instance, rather than a host in the “traditional” sysadmin sense.
-     #}
-    all_wordpresses
-    {%- else -%}
-    {# If no relevant tags are in use (including the implicit "all" tag when -t is not
-     # present on the command line), skip the whole role and save a big chunk of time:
-     #}
-    !all
-    {%- endif -%}
-  gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/wordpress-instance
+## TODO: restore ability for operator to run things on WordPress sites directly.
+## This requires splitting the role so that the `backup`, `restore` and `wipe`
+## tasks have a home outside of the operator.
+# - name: WordPress sites
+#   hosts: |
+#     {%- if (ansible_run_tags |
+#                           any_known_tag((playbook_dir | dirname) +
+#                                         "/roles/wordpress-instance")) -%}
+#     {# Note: we are twisting the Ansible concept of “hosts” in this play.
+#      # An inventory entry in the all_wordpresses group is a WordPress
+#      # instance, rather than a host in the “traditional” sysadmin sense.
+#      #}
+#     all_wordpresses
+#     {%- else -%}
+#     {# If no relevant tags are in use (including the implicit "all" tag when -t is not
+#      # present on the command line), skip the whole role and save a big chunk of time:
+#      #}
+#     !all
+#     {%- endif -%}
+#   gather_facts: no    # Ansible facts are useless for this play
+#   roles:
+#     - role: ../roles/wordpress-instance
 
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift
