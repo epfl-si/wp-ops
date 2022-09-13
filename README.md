@@ -41,6 +41,30 @@ feel free to skip this section.
 
 💡 Don't worry, this won't touch production. (We are *not* documenting what flag to use so as to enable the production inventory.)
 
+# Development Tasks
+
+## 🆕 Develop the `operator-wordpress-site`
+
+{% note %}
+
+**Details are subject to change.** In the future:
+- instructions will be added to stop the actual operator before running it from one's workstation;
+- installing the “static” parts of the operator (i.e. the CRD, RBAC, and `Service` objects) will be handled by “regular” Ansible.
+
+{% endnote %}
+
+To run the operator on your workstation:
+
+```
+./ansible/wpsible operator-wordpress-site run
+```
+
+To run other tasks out of the [operator Makefile](operator-wordpress-site/Makefile), e.g. to deploy the modified [CRD](operator-wordpress-site/config/crd/bases/wordpress.epfl.ch_wordpresssites.yaml), just treat `./ansible/wpsible operator-wordpress-site` as if it were `make`, e.g.
+
+```
+./ansible/wpsible operator-wordpress-site install
+```
+
 # Contributor list
 
 Big up to all the following people, without whom this project will not be
