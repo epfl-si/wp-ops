@@ -19,10 +19,6 @@ oc login
 oc get pods -n wwp-test
 </pre>
 
-## Ansible
-
-[Install Ansible] and familiarize yourself with how it works.
-
 ## Keybase and eyaml
 
 These are required to (re)deploy QA and production secrets.
@@ -37,7 +33,13 @@ feel free to skip this section.
 
 # Operations
 
-To be documented
+## Run Ansible through its [suitcase](https://github.com/epfl-si/ansible.suitcase) installer/wrapper
+
+```
+./ansible/wpsible
+```
+
+💡 Don't worry, this won't touch production. (We are *not* documenting what flag to use so as to enable the production inventory.)
 
 # Contributor list
 
