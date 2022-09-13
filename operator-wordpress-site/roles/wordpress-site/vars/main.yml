@@ -13,6 +13,15 @@
 # files in this directory need to be imported explicitly using the
 # include_vars task.
 
+# The “environment” (short name of the Kubernetes service) that this
+# WordPress site lives on:
+wp_env: "{{ kubernetes.service }}"  # Where `kubernetes` comes from
+                                    # the WordpressSite CR's `spec`
+
+# The DNS hostname and URI prefix this WordPress site is available at:
+wp_hostname: "{{ hostname }}" # `hostname` comes from the `spec`, see above
+wp_path: "{{ path }}"         # Ditto `path`
+
 # The top-level directory of this WordPress instance
 wp_dir: "/srv/{{ wp_env }}/{{ wp_hostname }}/htdocs/{{ wp_path }}"
 

@@ -3,12 +3,8 @@
 # TODO: These should be computed from wp-veritas state
 plugins_locked: true                # TODO: should be false for unmanaged sites
 
-# TODO: Likewise, these should be computed from wp-veritas state. We
-# set them to true out of an abundance of caution, and refrain from
-# managing their active / inactive state.
-# We use information recovered by inventory to determine site category
-# https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
-wp_site_categories: '{{ lookup("wpveritas", "categories") }}'
+# `wordpress` comes from the WordpressSite's `spec`.
+wp_site_categories: '{{ wordpress.features | default([]) }}'
 
 # Defining plugin state for each category
 plugins_for_cdhshs_category: '{{ [ "symlinked", "active" ] if "CDHSHS" in wp_site_categories else "absent" }}'
