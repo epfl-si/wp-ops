@@ -1,1 +1,2 @@
 tkgi_namespace: "{{ inventory_hostname }}"
+harbor_robot_pull_secret_name: harbor-robot-pull

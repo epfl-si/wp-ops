@@ -1,4 +1,3 @@
----
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -9,22 +8,26 @@ spec:
     kind: WordpressSite
     listKind: WordpressSiteList
     plural: wordpresssites
-    singular: wordpresssite
     shortNames:
-      - wp
+    - wp
+    singular: wordpresssite
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: WordpressSite is the Schema for the wordpresssites API
-        type: object
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
+          history:
+            description: History describes the organizational reasons why this WordpressSite
+              exists.
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
           kind:
             description: 'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
@@ -34,79 +37,77 @@ spec:
             type: object
           spec:
             description: Spec defines the desired state of WordpressSite
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
             properties:
-              hostname:
-                description: Hostname of the desired WordpressSite
-                type: string
-                pattern: ^www.epfl.ch$
-                default: www.epfl.ch
-              path:
-                description: Path to the WordpressSite
-                type: string
-                pattern: ^/(.*)
-              visibility:
-                description: Set the visitiblity of the WordpressSite (public / internal)
-                type: string
-                pattern: ^(public|internal)$
-              kubernetes:
-                description: WordpressSite's k8s related properties
-                type: object
-                properties:
-                  service:
-                    description: Defines which service WordpressSite will be deployed to (ex-environment)
-                    type: string
-              wordpress:
-                description: WordpressSite's own specs
-                type: object
-                properties:
-                  title:
-                    description: WordpressSite's title
-                    type: string
-                    pattern: ^[a-zA-Z]{3}(.*)$
-                  tagline:
-                    description: WordpressSite's tagline
-                    type: string
-                    pattern: ^[a-zA-Z]{3}(.*)$
-                  theme:
-                    description: WordpressSite's theme
-                    type: string
-                    pattern: ^(wp-theme-2018|wp-theme-light|epfl-master|epfl-blank)$
-                  languages:
-                    description: WordpressSite's languages
-                    type: array
-                    items:
-                      type: string
-                      pattern: ^[a-z]{2}$
-                required:
-                  - title
-                  - tagline
-                  - theme
-                  - languages
               epfl:
                 description: WordpressSite's EPFL related specs
-                type: object
                 properties:
                   unit_id:
                     description: WordpressSite's EPFL unit ID
-                    type: integer
                     pattern: ^\d{5}$
+                    type: integer
+                type: object
+              hostname:
+                default: www.epfl.ch
+                description: Hostname of the desired WordpressSite
+                pattern: ^www.epfl.ch$
+                type: string
+              kubernetes:
+                description: WordpressSite's k8s related properties
+                properties:
+                  service:
+                    description: Defines which service WordpressSite will be deployed
+                      to (ex-environment)
+                    type: string
+                type: object
+              path:
+                description: Path to the WordpressSite
+                pattern: ^/(.*)
+                type: string
+              visibility:
+                description: Set the visitiblity of the WordpressSite (public / internal)
+                pattern: ^(public|internal)$
+                type: string
+              wordpress:
+                description: WordpressSite's own specs
+                properties:
+                  languages:
+                    description: WordpressSite's languages
+                    items:
+                      pattern: ^[a-z]{2}$
+                      type: string
+                    type: array
+                  tagline:
+                    description: WordpressSite's tagline
+                    pattern: ^[a-zA-Z]{3}(.*)$
+                    type: string
+                  theme:
+                    description: WordpressSite's theme
+                    pattern: ^(wp-theme-2018|wp-theme-light|epfl-master|epfl-blank)$
+                    type: string
+                  title:
+                    description: WordpressSite's title
+                    pattern: ^[a-zA-Z]{3}(.*)$
+                    type: string
+                required:
+                - title
+                - tagline
+                - theme
+                - languages
+                type: object
             required:
-              - hostname
-              - path
-              - visibility
-              - kubernetes
-              - wordpress
-              - epfl
-          history:
-            description: History describes the organizational reasons why this WordpressSite exists.
+            - hostname
+            - path
+            - visibility
+            - kubernetes
+            - wordpress
+            - epfl
             type: object
             x-kubernetes-preserve-unknown-fields: true
           status:
             description: Status defines the observed state of WordpressSite
             type: object
             x-kubernetes-preserve-unknown-fields: true
+        type: object
     served: true
     storage: true
     subresources:

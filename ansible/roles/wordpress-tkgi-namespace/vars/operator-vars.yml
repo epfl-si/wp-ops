@@ -1,16 +1,17 @@
 operator_src_dir: "{{ wpsible_ops_dir }}/operator-wordpress-site"
 
-operator_kustomize_config_dir: "{{ operator_src_dir }}/config/default"
-
-operator_k8s_definitions: >-
-  {{ lookup('kubernetes.core.kustomize',
-  dir=operator_kustomize_config_dir
-  ) | from_yaml_all }}
-
-operator_namespace: operator-wordpress-site-system
-
 operator_harbor_secrets_keybase_path: |
   /keybase/team/epfl_wp_test/harbor-robot-secrets.yml
 operator_harbor_secrets: |
   {{ lookup('pipe', 'keybase fs read ' + operator_harbor_secrets_keybase_path) | from_yaml }}
 
+operator_image: vsissp-harbor-p.epfl.ch/itsidevfsdt/operator-wordpress-site-controller:latest
+# Don't ask me what *that* is for:
+operator_kube_rbac_proxy_image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+# The namespace in which the operator does its job:
+operator_namespace: operator-wordpress-site-system
+# The service account it runs as:
+operator_serviceaccount_name: operator-wordpress-site-controller-manager
+# The name of the leader election “position” that the operator must acquire
+# before starting operations:
+operator_leader_election_resource_name: 811c9dc5.epfl.ch

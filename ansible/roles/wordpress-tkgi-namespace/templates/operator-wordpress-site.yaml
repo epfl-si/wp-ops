@@ -1,0 +1,304 @@
+# Kubernetes objects for the WordpressSite CRD and associated operator
+#
+# Initially obtained with
+#
+#   kubectl konfigure operator-wordpress-site/config/default
+#
+# and then refactored to add variables etc.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: {{ operator_namespace }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ operator_serviceaccount_name }}
+  namespace: {{ operator_namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: operator-wordpress-site-leader-election-role
+  namespace: {{ operator_namespace }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operator-wordpress-site-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - pods
+  - pods/exec
+  - pods/log
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - wordpress.epfl.ch
+  resources:
+  - wordpresssites
+  - wordpresssites/status
+  - wordpresssites/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operator-wordpress-site-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operator-wordpress-site-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: operator-wordpress-site-leader-election-rolebinding
+  namespace: {{ operator_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: operator-wordpress-site-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: {{ operator_serviceaccount_name }}
+  namespace: {{ operator_namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: operator-wordpress-site-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: operator-wordpress-site-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ operator_serviceaccount_name }}
+  namespace: {{ operator_namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: operator-wordpress-site-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: operator-wordpress-site-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: {{ operator_serviceaccount_name }}
+  namespace: {{ operator_namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: operator-wordpress-site-manager-config
+  namespace: {{ operator_namespace }}
+data:
+  controller_manager_config.yaml: |
+    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+    kind: ControllerManagerConfig
+    health:
+      healthProbeBindAddress: :6789
+    metrics:
+      bindAddress: 127.0.0.1:8080
+
+    leaderElection:
+      leaderElect: true
+      resourceName: {{ operator_leader_election_resource_name }}
+    # leaderElectionReleaseOnCancel defines if the leader should step down volume
+    # when the Manager ends. This requires the binary to immediately end when the
+    # Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
+    # speeds up voluntary leader transitions as the new leader don't have to wait
+    # LeaseDuration time first.
+    # In the default scaffold provided, the program ends immediately after
+    # the manager stops, so would be fine to enable this option. However,
+    # if you are doing or is intended to do any operation such as perform cleanups
+    # after the manager stops then its usage might be unsafe.
+    # leaderElectionReleaseOnCancel: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: operator-wordpress-site-controller-manager-metrics-service
+  namespace: {{ operator_namespace }}
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: operator-wordpress-site-controller-manager
+  namespace: {{ operator_namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=0
+        image: {{ operator_kube_rbac_proxy_image }}
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      - args:
+        - --health-probe-bind-address=:6789
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        - --leader-election-id=operator-wordpress-site
+        env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        image: {{ operator_image }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 6789
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 6789
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 768Mi
+          requests:
+            cpu: 10m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      imagePullSecrets:
+      - name: {{ harbor_robot_pull_secret_name }}
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: {{ operator_serviceaccount_name }}
+      terminationGracePeriodSeconds: 10
