@@ -12,6 +12,8 @@
 - wordpress_facts:
   tags: always
 
+- meta: end_play  # XXX As long as the rest stands no chance to work
+
 - name: Per site route
   tags:
     - wp
