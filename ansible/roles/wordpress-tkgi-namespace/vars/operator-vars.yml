@@ -14,4 +14,4 @@ operator_namespace: operator-wordpress-site-system
 operator_serviceaccount_name: operator-wordpress-site-controller-manager
 # The name of the leader election “position” that the operator must acquire
 # before starting operations:
-operator_leader_election_resource_name: 811c9dc5.epfl.ch
+operator_leader_election_resource_name: operator-leader.wordpress.epfl.ch
