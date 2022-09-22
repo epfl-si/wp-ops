@@ -6,7 +6,7 @@
   delegate_to: localhost
   openshift:
     state: "{{ 'latest' if site_exists else 'absent' }}"
-    apiVersion: v1
+    apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       name: "{{ route_name }}"
