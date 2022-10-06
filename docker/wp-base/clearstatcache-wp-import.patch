@@ -1,10 +1,10 @@
---- class-wp-import.php.ORIG	2020-08-11 11:36:29.000000000 +0200
-+++ class-wp-import.php	2020-08-11 11:36:35.000000000 +0200
-@@ -1047,6 +1047,7 @@
- 			return new WP_Error( 'import_file_error', __('Remote server did not respond', 'wordpress-importer') );
+--- a/src/class-wp-import.php	(revision b9f9b28d2c18507257c04ac3e4314f89c69b31cb)
++++ b/src/class-wp-import.php	(date 1665044974173)
+@@ -1125,6 +1125,7 @@
+ 			return new WP_Error( 'import_file_error', __( 'Remote server did not respond', 'wordpress-importer' ) );
  		}
- 
+
 +		clearstatcache();
  		$filesize = (int) filesize( $tmp_file_name );
- 
+
  		if ( 0 === $filesize ) {
