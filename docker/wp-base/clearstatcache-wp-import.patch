@@ -1,5 +1,5 @@
---- a/src/class-wp-import.php	(revision b9f9b28d2c18507257c04ac3e4314f89c69b31cb)
-+++ b/src/class-wp-import.php	(date 1665044974173)
+--- class-wp-import.php	(revision b9f9b28d2c18507257c04ac3e4314f89c69b31cb)
++++ class-wp-import.php	(date 1665044974173)
 @@ -1125,6 +1125,7 @@
  			return new WP_Error( 'import_file_error', __( 'Remote server did not respond', 'wordpress-importer' ) );
  		}
