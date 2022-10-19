@@ -1,5 +1,5 @@
-pipeline-stage-view
-cucumber-reports
-htmlpublisher
+pipeline-stage-view:2.27
+cucumber-reports:5.7.3
+htmlpublisher:1.31
 email-ext:2.88
 configuration-as-code:1466.v2d4119502006
