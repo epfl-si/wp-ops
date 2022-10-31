@@ -1,4 +1,10 @@
 # Read some data from sites and write report from it
+# Usage sample: ./ansible/wpsible -t wp.reports.options -l test_dev -e report_filename=foo.csv
+# File will be generated in ansible/.interactive-playbooks/foo.csv
+# Generation can be accelerated by:
+# 1. set wordpress_facts tags to never in ansible/roles/wordpress-instance/tasks/main.yml
+# 2. only use wp-veritas as data source by prefixing the command with 'env WWP_INVENTORY_SOURCES=wpveritas ./ansible/wpsible'
+
 - include_vars: reports-vars.yml
 
 - set_fact:
@@ -20,11 +26,11 @@
   tags:
     - wp.reports.options
 
-- name: Write collected data to "{{ report_sites_options_filename_relpath }}"
+- name: Write collected data to "{{ report_filename }}"
   run_once: true
   local_action:
     module: copy
-    dest: "{{ report_sites_options_filename_relpath }}"
+    dest: "{{ report_filename }}"
     # ansible_play_hosts is the loop variable, so that we only have
     # lines for WordPresses that succeeded on the previous task. In a
     # different template (e.g. JSON) we could also use
@@ -33,7 +39,7 @@
     content: |
       name,base_url,title,tagline,languages
       {% for host in ansible_play_hosts %}
-      {{ host }},{{ hostvars[host]['_wp_base_url_for_report'] }},{{ hostvars[host]['fetched_options'].results[0].stdout }},{{ hostvars[host]['fetched_options'].results[1].stdout }},"{{ hostvars[host]['fetched_options'].results[2].stdout_lines | join(', ') }}"
+      "{{ host }}","{{ hostvars[host]['_wp_base_url_for_report'] }}","{{ hostvars[host]['fetched_options'].results[0].stdout }}","{{ hostvars[host]['fetched_options'].results[1].stdout }}","{{ hostvars[host]['fetched_options'].results[2].stdout_lines | join(', ') }}"
       {% endfor %}
   tags:
     - wp.reports.options
@@ -47,11 +53,11 @@
   tags:
     - wp.reports.search_content
 
-- name: Write collected data to "{{ report_sites_options_filename_relpath }}"
+- name: Write collected data to "{{ report_filename }}"
   run_once: true
   local_action:
     module: copy
-    dest: "{{ report_sites_options_filename_relpath }}"
+    dest: "{{ report_filename }}"
     # ansible_play_hosts is the loop variable, so that we only have
     # lines for WordPresses that succeeded on the previous task. In a
     # different template (e.g. JSON) we could also use
