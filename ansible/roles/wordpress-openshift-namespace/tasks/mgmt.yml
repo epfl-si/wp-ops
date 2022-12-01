@@ -92,8 +92,6 @@
               mountPath: /srv
             - name: ssh
               mountPath: /var/lib/secrets/ssh
-            - name: backups
-              mountPath: /backups
             envFrom:
               - configMapRef:
                   name: new-wp-site-env
@@ -110,12 +108,6 @@
           - name: ssh
             secret:
               secretName: "{{ mgmt_ssh_secret_name }}"
-          - >-
-            {{ { "name": "backups",
-                 "persistentVolumeClaim": {"claimName": "backups-0"} }
-               if openshift_is_production
-               else { "name": "backups", "emptydir": {} }
-            }}
       triggers:
       - type: ConfigChange
       - type: ImageChange
