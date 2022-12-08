@@ -18,6 +18,7 @@ _mgmt_access_list_wwp_test_and_wwp:
   - nicolas.borboen@epfl.ch
   - emilie.dorer@epfl.ch
   - lindo.duratti@epfl.ch
+  - jean-francois.gonguet@epfl.ch
 
 _mgmt_access_list_wwp_test_only: []
 
