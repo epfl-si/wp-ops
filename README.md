@@ -14,10 +14,11 @@ In this repository you will find:
 
 ## OpenShift
 
-[Install the OpenShift command-line tools] and verify that you have access, e.g. <pre>
-oc login
-oc get pods -n wwp-test
-</pre>
+1. [Install the OpenShift command-line tools]
+1. Browse https://pub-os-exopge.epfl.ch/ and log in using your GASPAR credentials
+1. From the “you” menu in the top right, select Copy Login Command
+1. Paste into a terminal window
+1. Check your access, e.g. <pre>oc get pods -n wwp-test</pre>
 
 ## Ansible
 
