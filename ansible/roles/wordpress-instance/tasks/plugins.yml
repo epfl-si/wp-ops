@@ -149,15 +149,6 @@
   tags:
     - wp.plugins.mu
 
-- name: Jahia redirect tracker (must-use plugin)
-  wordpress_plugin:
-    name: EPFL_jahia_redirect
-    is_mu: yes
-    state: '{{ "symlinked" if wp_is_managed else "absent" }}'
-    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_jahia_redirect.php
-  tags:
-    - wp.plugins.mu
-
 - name: EPFL functions (must-use plugin)
   wordpress_plugin:
     name: epfl-functions
