@@ -9,7 +9,7 @@
  *
  * The job of this file is to figure out *which* instance of WordPress
  * should run the query; set up variables; and transfer control to
- * wp-blog-header.php.
+ * index.php.
  */
 
 function get_wordpress ($wp_env, $host, $uri) {
