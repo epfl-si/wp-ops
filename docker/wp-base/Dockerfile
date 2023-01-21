@@ -1,7 +1,7 @@
-FROM public.ecr.aws/ubuntu/ubuntu:focal
+FROM public.ecr.aws/ubuntu/ubuntu:jammy
 
 # Version pins are defined here:
-ENV PHP_VERSION=7.4
+ENV PHP_VERSION=8.1
 ENV NODE_VERSION_MAJOR=14
 
 ENV DEBIAN_FRONTEND=noninteractive
