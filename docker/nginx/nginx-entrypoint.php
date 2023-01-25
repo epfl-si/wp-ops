@@ -17,7 +17,8 @@ function get_wordpress ($wp_env, $host, $uri) {
     return array("host"    => "wp-httpd",
                  "wp_env"  => getenv("WP_ENV"),
                  "wp_version" => "5",
-                 "site_uri" => '/');
+                 "site_uri" => '/',
+                 "wp_debug" => FALSE);
 }
 
 function get_db_credentials ($site) {
