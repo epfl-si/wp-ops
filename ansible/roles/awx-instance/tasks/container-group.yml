@@ -51,6 +51,7 @@
       with AnsibleGetOrCreate(InstanceGroup,
                   name="{{ awx_elastic_container_group_name }}") as instance_group:
           instance_group.credential = cred
+          instance_group.policy_instance_minimum = 1
           instance_group.pod_spec_override = """
       apiVersion: v1
       kind: Pod
