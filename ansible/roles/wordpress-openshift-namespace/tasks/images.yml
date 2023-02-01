@@ -38,6 +38,27 @@
     _password: "{{ build.docker_hub.password | eyaml(eyaml_keys) }}"
   tags: images.secret
 
+- name: "`oc secrets link` into the {{ _builder_service_account }} service account"
+  shell:
+    cmd: |
+      set -e -x
+      case "$(oc -n {{ openshift_namespace }} get -o yaml \
+                 serviceaccount {{ _builder_service_account }})" in
+        *"- name: {{ _docker_hub_secret_name }}"*)
+          echo "ALREADY_LINKED"
+          exit 0;;
+        *)
+        oc -n {{ openshift_namespace }} secrets link {{ _builder_service_account }} {{ _docker_hub_secret_name }} --for=pull
+      esac
+  vars:
+    _docker_hub_secret_name: docker-hub-credentials   # See above
+    _builder_service_account: builder  # And not `default`, as incorrectly blogged about
+  register: _oc_secrets_link
+  changed_when: >-
+    _oc_secrets_link
+    and
+    ( "ALREADY_LINKED" not in _oc_secrets_link.stdout )
+
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
   openshift_imagestream:
