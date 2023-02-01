@@ -15,6 +15,29 @@
     - secrets-wwp-test.yml
     - ../../../vars/secrets-wwp-test.yml
 
+- name: "Docker Hub credentials"
+  when: not openshift_is_production
+  openshift:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: docker-hub-credentials
+      namespace: '{{ openshift_namespace }}'
+    type: kubernetes.io/dockerconfigjson
+    data:
+      .dockerconfigjson: "{{ _docker_auths_dict | to_json | b64encode }}"
+  vars:
+    _docker_auths_dict:
+      # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      auths:
+        "https://index.docker.io/v1/":
+          "auth": "{{ _loginpassword | b64encode }}"
+    _loginpassword: >-
+      {{ "%s:%s" % (_login, _password) }}
+    _login: "{{ build.docker_hub.username }}"
+    _password: "{{ build.docker_hub.password | eyaml(eyaml_keys) }}"
+  tags: images.secret
+
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
   openshift_imagestream:
