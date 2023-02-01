@@ -8,7 +8,8 @@
 - include_vars: ../../../vars/image-vars.yml
   tags: always
 
-- when: openshift_namespace == 'wwp-test'
+- tags: always
+  when: openshift_namespace == 'wwp-test'
   include_vars: "{{ item }}"
   with_items:
     - secrets-wwp-test.yml
