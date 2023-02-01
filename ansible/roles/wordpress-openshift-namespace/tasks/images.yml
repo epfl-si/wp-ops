@@ -58,6 +58,7 @@
     _oc_secrets_link
     and
     ( "ALREADY_LINKED" not in _oc_secrets_link.stdout )
+  tags: images.secret
 
 - name: "Testing ImageStreams and their build information"
   when: not openshift_is_production
