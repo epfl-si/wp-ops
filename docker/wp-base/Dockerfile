@@ -1,4 +1,4 @@
-FROM docker-registry.default.svc:5000/wwp-test/ubuntu:focal
+FROM ubuntu:focal
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.4
