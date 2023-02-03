@@ -1,4 +1,4 @@
-FROM public.ecr.aws/ubuntu/ubuntu:focal
+FROM ubuntu:focal
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.4

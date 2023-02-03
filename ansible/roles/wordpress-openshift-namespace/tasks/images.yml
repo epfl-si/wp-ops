@@ -116,7 +116,6 @@
     name: "{{ item.name }}"
     namespace: "{{ openshift_namespace }}"
     metadata: "{{ item.metadata | default({}) }}"
-    from: "{{ item.from | default(None) }}"
     git:
         repository: "{{ wp_ops_git_uri }}"
         path: "{{ item.git_path }}"
@@ -127,6 +126,10 @@
       git_path: docker/wp-base
       strategy:
         dockerStrategy:
+          # See above - We have our own mirror of `ubuntu:focal`
+          from:
+             kind: "ImageStreamTag"
+             name: "{{ wp_base_base_image.shortname }}:{{ wp_base_base_image.tag }}"
           forcePull: true
           noCache: true
           buildArgs:
