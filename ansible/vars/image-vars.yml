@@ -1,3 +1,13 @@
+openshift_local_images_base: "docker-registry.default.svc:5000/{{ openshift_namespace }}"
+
+wp_base_base_image: >-
+  {{ "ubuntu:focal" |
+  parse_external_docker_tag(mirrored_base=openshift_local_images_base) }}
+
+wp_base_base_image_manually_push_to: >-
+   os-docker-registry.epfl.ch/{{ openshift_namespace
+   }}/{{ wp_base_base_image.shortname }}:{{ wp_base_base_image.tag }}
+
 httpd_image_name: httpd
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
