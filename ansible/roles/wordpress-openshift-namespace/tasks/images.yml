@@ -62,24 +62,32 @@
 
 - name: "Pull upstream {{ wp_base_base_image.qualified }} image into {{ wp_base_base_image.mirrored }}"
   when: not openshift_is_production
-  openshift_imagestream:
+  openshift:
+    kind: ImageStream
+    apiVersion: image.openshift.io/v1
     metadata:
       name: "{{ wp_base_base_image.shortname }}"
       namespace: "{{ openshift_namespace }}"
-    from:
-      kind: DockerImage
-      name: "{{ wp_base_base_image.qualified }}"
-    tag: "{{ wp_base_base_image.tag }}"
+    spec:
+      tags:
+        - name: "{{ wp_base_base_image.tag }}"
+          from:
+            kind: DockerImage
+            name: "{{ wp_base_base_image.qualified }}"
+          importPolicy:
+            # Scheduled import doesn't work - See comment below:
+            scheduled: false
   tags: images.mirror
 
-# Unfortunately, that is not enough. `ubuntu:focal-20221130` is the
-# latest image in the `ubuntu:focal` lineage with an “old” (so-called
-# Docker v2) layer index; starting at `ubuntu:focal-20230126`, the
-# image is in OCI format, which only OpenShift versions 4.7 and above
-# can consume (see https://access.redhat.com/solutions/4933011). This
-# fact was checked today with a couple of curl API calls; see commit
-# message for details. The current workaround is below: use the
-# operator workstation to do a `docker pull` / `docker push` sequence.
+# Unfortunately, we can't let OpenShift handle the syncing anymore.
+# `ubuntu:focal-20221130` is the latest image in the `ubuntu:focal`
+# lineage with an “old” (so-called Docker v2) layer index; starting at
+# `ubuntu:focal-20230126`, the image is in OCI format, which only
+# OpenShift versions 4.7 and above can consume (see
+# https://access.redhat.com/solutions/4933011). This fact was checked
+# today with a couple of curl API calls; see commit message for
+# details. The current workaround is below: use the operator
+# workstation to do a `docker pull` / `docker push` sequence.
 
 - name: "`docker pull {{ wp_base_base_image.qualified }}`"
   connection: local
