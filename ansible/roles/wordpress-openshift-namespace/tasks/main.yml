@@ -13,6 +13,7 @@
     - images.secret
     - images.mirror
     - images.mirror.refresh
+    - images.build
     - images.promote
 
 - name: "DeploymentConfigs (previously known as pods) and Services"

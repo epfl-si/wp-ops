@@ -151,6 +151,7 @@
     - name: "{{ backup_cron_image_name }}"
       git_path: docker/cronjob
       from: "{{ mgmt_image_name }}"
+  tags: images.build
 
 - name: "Production ImageStreams"
   when: openshift_is_production
