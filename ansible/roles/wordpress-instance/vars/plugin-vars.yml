@@ -31,31 +31,31 @@ wp_is_managed: '{{ "Unmanaged" not in wp_site_categories }}'
 # Cache Control
 plugin_cache_control_options:
   - name: cache_control_front_page_max_age
-    value: 72000
+    value: 300
   - name: cache_control_pages_max_age
-    value: 72000
+    value: 300
   - name: cache_control_categories_max_age
-    value: 72000
+    value: 300
   - name: cache_control_singles_max_age
-    value: 72000
+    value: 300
   - name: cache_control_home_max_age
-    value: 72000
+    value: 300
   - name: cache_control_tags_max_age
-    value: 72000
+    value: 300
   - name: cache_control_authors_max_age
-    value: 72000
+    value: 300
   - name: cache_control_dates_max_age
-    value: 72000
+    value: 300
   - name: cache_control_feeds_max_age
-    value: 72000
+    value: 300
   - name: cache_control_attachment_max_age
-    value: 72000
+    value: 300
   - name: cache_control_search_max_age
-    value: 72000
+    value: 300
   - name: cache_control_notfound_max_age
-    value: 72000
+    value: 300
   - name: cache_control_redirect_permanent_max_age
-    value: 72000
+    value: 300
 
 # EPFL Coming Soon - Depends on template-supplied variable "plugin_epfl_coming_soon_shall_be_enabled"
 plugin_epfl_coming_soon_options:
