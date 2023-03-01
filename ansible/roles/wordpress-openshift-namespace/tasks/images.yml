@@ -165,6 +165,8 @@
       triggered_by: wp-base
     - name: "{{ backup_cron_image_name }}"
       git_path: docker/cronjob
+      from: "{{ mgmt_image_name }}"
+      triggered_by: mgmt
   vars:
     _triggers:
       wp-base:
@@ -174,6 +176,13 @@
             kind: ImageStreamTag
             namespace: "{{ openshift_namespace }}"
             name: "{{ wp_base_image_name }}:latest"
+      mgmt:
+        type: ImageChange
+        imageChange:
+          from:
+            kind: ImageStreamTag
+            namespace: "{{ openshift_namespace }}"
+            name: "{{ mgmt_image_name }}:latest"
   tags: images.build
 
 - name: "Production ImageStreams"
