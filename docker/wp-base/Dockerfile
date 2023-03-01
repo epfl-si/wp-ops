@@ -86,7 +86,7 @@ RUN set -e -x;                                                           \
             |sort -n -r |head -1) ;                                      \
         mkdir -p /wp/$version ;                                          \
         wp --allow-root --path=/wp/$version                              \
-           core download --version=$version --locale=fr_FR ;             \
+           core download --version=$version ;                            \
     done
 
 RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
