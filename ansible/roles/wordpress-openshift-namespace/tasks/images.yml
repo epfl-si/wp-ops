@@ -129,6 +129,8 @@
         path: "{{ item.git_path }}"
         ref: "{{ images_build_branch }}"
     strategy: "{{ item.strategy | default({}) }}"
+    triggers: >-
+      {{ [_wp_base_trigger] if (item.triggered_by_wp_base | default(False)) else [] }}
   with_items:
     - name: "{{ wp_base_image_name }}"
       git_path: docker/wp-base
@@ -156,12 +158,22 @@
     - name: "{{ httpd_image_name }}"
       git_path: docker/httpd
       from: "{{ wp_base_image_name }}"
+      triggered_by_wp_base: true
     - name: "{{ mgmt_image_name }}"
       git_path: docker/mgmt
       from: "{{ wp_base_image_name }}"
+      triggered_by_wp_base: true
     - name: "{{ backup_cron_image_name }}"
       git_path: docker/cronjob
       from: "{{ mgmt_image_name }}"
+  vars:
+    _wp_base_trigger:
+      type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          namespace: "{{ openshift_namespace }}"
+          name: "{{ wp_base_image_name }}:latest"
   tags: images.build
 
 - name: "Production ImageStreams"
