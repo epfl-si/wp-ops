@@ -19,6 +19,7 @@ _mgmt_access_list_wwp_test_and_wwp:
   - emilie.dorer@epfl.ch
   - lindo.duratti@epfl.ch
   - jean-francois.gonguet@epfl.ch
+  - jerome.cosandey@epfl.ch
 
 _mgmt_access_list_wwp_test_only: []
 
