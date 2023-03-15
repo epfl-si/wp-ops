@@ -540,39 +540,19 @@
     state: "{{ plugins_for_cdhshs_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-courses-se
 
-- name: WPForms plugin v1.6.x
-  when: wp_version_lineage is version('5.6', '<')
+- name: WPForms plugin
   wordpress_plugin:
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
-    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.6.1.2.zip"
+    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.8.0.2.zip"
   tags:
     - wp.plugins.wpforms
 
-- name: WPForms plugin v1.7.x
-  when: wp_version_lineage is version('5.6', '>=')
-  wordpress_plugin:
-    name: wpforms
-    state: "{{ plugins_for_wpforms_category }}"
-    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.7.4.1.zip"
-  tags:
-    - wp.plugins.wpforms
-
-- name: WPForms surveys & polls add-on v1.6.0
-  when: wp_version_lineage is version('5.6', '<')
+- name: WPForms surveys & polls add-on
   wordpress_plugin:
     name: wpforms-surveys-polls
     state: "{{ plugins_for_wpforms_surveys_polls_category }}"
     from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.6.0.zip"
-  tags:
-    - wp.plugins.wpforms-surveys-polls
-
-- name: WPForms surveys & polls add-on v1.7.0
-  when: wp_version_lineage is version('5.6', '>=')
-  wordpress_plugin:
-    name: wpforms-surveys-polls
-    state: "{{ plugins_for_wpforms_surveys_polls_category }}"
-    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.7.0.zip"
   tags:
     - wp.plugins.wpforms-surveys-polls
 
@@ -586,8 +566,7 @@
   wordpress_plugin:
     name: wpforms-epfl-payonline
     state: "{{ plugins_for_payonline_category }}"
-    from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/download/v1.5.0/wpforms-epfl-payonline.zip
-    #https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+    from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
   tags:
     - wp.plugins.wpforms
     - wp.plugins.payonline
