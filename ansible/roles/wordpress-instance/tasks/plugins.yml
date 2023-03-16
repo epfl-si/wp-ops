@@ -552,7 +552,7 @@
   wordpress_plugin:
     name: wpforms-surveys-polls
     state: "{{ plugins_for_wpforms_surveys_polls_category }}"
-    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.6.0.zip"
+    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.10.0.zip"
   tags:
     - wp.plugins.wpforms-surveys-polls
 
