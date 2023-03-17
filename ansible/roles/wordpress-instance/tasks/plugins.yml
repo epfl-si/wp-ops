@@ -89,7 +89,7 @@
     name: EPFL_block_white_list
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
-    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/5.5/EPFL_block_white_list.php
   tags:
     - wp.plugins.mu
 
@@ -99,7 +99,7 @@
     name: EPFL_block_white_list
     is_mu: yes
     state: '{{ "symlinked" if wp_is_managed else "absent" }}'
-    from: https://github.com/epfl-si/wp-mu-plugins/blob/update/5.9/EPFL_block_white_list.php
+    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_block_white_list.php
   tags:
     - wp.plugins.mu
 
@@ -363,6 +363,7 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
+    branch: static/5.5
 
 - name: EPFL Gutenberg plugin
   when: wp_version_lineage is version('5.6', '>=')
@@ -374,7 +375,6 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
-    branch: update/5.9
 
 - name: EPFL Menus plugin
   wordpress_plugin:
