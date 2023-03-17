@@ -155,7 +155,6 @@
     is_mu: yes
     state:
       - absent
-    from: https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_jahia_redirect.php
   tags:
     - wp.plugins.mu
 
