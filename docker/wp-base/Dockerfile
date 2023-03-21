@@ -15,6 +15,7 @@ RUN apt-get -qy update && \
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION_MAJOR}.x | bash -
 
 RUN apt-get -qy update && apt-get  -qy install --no-install-recommends \
+    bash-completion \
     composer \
     git \
     jq \
