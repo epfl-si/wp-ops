@@ -53,7 +53,7 @@ platform_check () {
 oc_check () {
   if ! oc projects >/dev/null 2>&1; then
     echo "Please login to openshift:"
-    oc login
+    oc login --username $USER
   fi
 }
 
