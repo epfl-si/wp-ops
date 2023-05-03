@@ -15,15 +15,15 @@
         nt.description = "Notifications by email to wwp devs"
         nt.organization = Organization.objects.get(name="{{ awx_organization_name }}")
         nt.notification_type = 'email'
-        nt.notification_configuration['username'] = "{{ awx_notifications.email.username }}"
-        nt.notification_configuration['password'] = "{{ awx_notifications.email.password | eyaml(eyaml_keys) }}"
+#        nt.notification_configuration['username'] = "{{ awx_notifications.email.username }}"
+#        nt.notification_configuration['password'] = "{{ awx_notifications.email.password | eyaml(eyaml_keys) }}"
         nt.notification_configuration['host'] = 'mail.epfl.ch'
-        nt.notification_configuration['recipients'] = ['nicolas.borboen@epfl.ch', 'gregory.charmier@epfl.ch']
-        nt.notification_configuration['sender'] = 'noreply+awx@epfl.ch'
-        nt.notification_configuration['port'] = 465
+        nt.notification_configuration['recipients'] = ['nicolas.borboen@epfl.ch']
+        nt.notification_configuration['sender'] = 'noreply+awx-notifications@epfl.ch'
+        nt.notification_configuration['port'] = 25
         nt.notification_configuration['timeout'] = 30
-        nt.notification_configuration['use_ssl'] = True
-        nt.notification_configuration['use_tls'] = False
+#        nt.notification_configuration['use_ssl'] = True
+#        nt.notification_configuration['use_tls'] = False
         nt.save()
 
   tags: awx.notification-templates
