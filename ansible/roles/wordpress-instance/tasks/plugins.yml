@@ -285,6 +285,11 @@
     name: plugin:epfl_tequila:has_dual_auth
     value: 0
 
+- name: Prevent messing with user SCIPERs
+  wordpress_option:
+    name: plugin:epfl_tequila:has_user_edit_sciper
+    value: 0
+
 - name: Whitelist of IPs for Tequila fetchAttributes request
   wordpress_option:
     name: plugin:epfl:tequila_allowed_request_hosts
