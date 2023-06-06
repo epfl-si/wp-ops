@@ -1,0 +1,46 @@
+--- wp-includes/js/tinymce/plugins/wordpress/plugin.js
++++ wp-includes/js/tinymce/plugins/wordpress/plugin.js
+@@ -790,12 +790,14 @@
+ 			currentSelection,
+ 			timeout,
+ 			container = editor.getContainer(),
++			editorContainer = document.querySelector(".interface-interface-skeleton__content"),
+ 			wpAdminbar = document.getElementById( 'wpadminbar' ),
+ 			mceIframe = document.getElementById( editor.id + '_ifr' ),
+ 			mceToolbar,
+ 			mceStatusbar,
+ 			wpStatusbar,
+-			cachedWinSize;
++			cachedWinSize,
++			cachedScrollPos;
+
+ 			if ( container ) {
+ 				mceToolbar = tinymce.$( '.mce-toolbar-grp', container )[0];
+@@ -1154,6 +1156,19 @@
+ 						}
+ 					}
+
++					if (event.type === 'scroll' || event.type === 'scrollwindow') {
++
++						if (cachedScrollPos) {
++							if (editorContainer.scrollLeft === cachedScrollPos.X && editorContainer.scrollTop === cachedScrollPos.Y) return
++						} else {
++							cachedScrollPos = {
++								X: editorContainer.scrollLeft,
++								Y: editorContainer.scrollTop,
++							}
++							return
++						}
++					}
++
+ 					clearTimeout( timeout );
+
+ 					timeout = setTimeout( function() {
+@@ -1165,6 +1180,7 @@
+
+ 					activeToolbar.scrolling = true;
+ 					activeToolbar.hide();
++					cachedScrollPos = null;
+ 				}
+ 			}
+ 		}
