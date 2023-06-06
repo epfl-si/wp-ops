@@ -98,21 +98,30 @@ RUN rm -rf /wp/*/wp-content/plugins/akismet                              \
 
 ADD wordpress-anywhere.patch.5.5 /tmp/
 ADD wordpress-anywhere.patch.5.8 /tmp/
-RUN set -e -x;                                                           \
-    apt -qy install patch;                                               \
-    for wp in /wp/*; do                                                  \
-        cd $wp ;                                                         \
-        major=$(echo ${wp#"/wp/"} |cut -d. -f1);                         \
-        minor=$(echo ${wp#"/wp/"}  |cut -d. -f2);                        \
-        if [ $((major)) -eq 5 ] && [ $((minor)) -lt 6 ]; then            \
-          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.5;             \
-        else                                                             \
-          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.8;             \
-        fi                                                               \
-    done;                                                                \
-    apt -qy remove --purge patch;                                        \
-    rm /tmp/wordpress-anywhere.patch.5.5;                                \
-    rm /tmp/wordpress-anywhere.patch.5.8;
+## this one fix https://core.trac.wordpress.org/ticket/57995
+## please remove after the wordpress core is updated
+ADD wordpress-TinyMCE-flickering-Firefox.patch.6 /tmp/
+RUN set -e -x;                                                               \
+    apt -qy install patch;                                                   \
+    for wp in /wp/*; do                                                      \
+        cd $wp ;                                                             \
+        major=$(echo ${wp#"/wp/"} |cut -d. -f1);                             \
+        minor=$(echo ${wp#"/wp/"}  |cut -d. -f2);                            \
+        if [ $((major)) -eq 5 ] && [ $((minor)) -lt 6 ]; then                \
+          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.5;                 \
+        else                                                                 \
+          patch -p0 -F3 < /tmp/wordpress-anywhere.patch.5.8;                 \
+        fi;                                                                  \
+        if [ $((major)) -eq 6 ]; then                                        \
+          patch -p0 -F3 < /tmp/wordpress-TinyMCE-flickering-Firefox.patch.6; \
+          cp $wp/wp-includes/js/tinymce/plugins/wordpress/plugin.js          \
+            $wp/wp-includes/js/tinymce/plugins/wordpress/plugin.min.js;      \
+        fi;                                                                  \
+    done;                                                                    \
+    apt -qy remove --purge patch;                                            \
+    rm /tmp/wordpress-anywhere.patch.5.5;                                    \
+    rm /tmp/wordpress-anywhere.patch.5.8;                                    \
+    rm /tmp/wordpress-TinyMCE-flickering-Firefox.patch.6;
 
 ######################################################################
 # Install and patch plugins and themes
