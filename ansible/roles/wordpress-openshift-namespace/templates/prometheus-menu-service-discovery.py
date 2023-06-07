@@ -16,7 +16,7 @@ class DynamicConfig:
 
     targetPath = "/prometheus-config/dynamic/targets.json"
 
-    def __init__(self, url="https://wp-veritas.epfl.ch/api/v1/sites", targetPath=None, frequency=60):
+    def __init__(self, url="https://wp-veritas.epfl.ch/api/v1/sites", targetPath=None, frequency=300):
         self.url = url
         if targetPath:
             self.targetPath = targetPath
