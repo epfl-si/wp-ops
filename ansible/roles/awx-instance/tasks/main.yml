@@ -19,6 +19,7 @@
       tags:
         - awx
         - awx.build
+        - awx.build.awx
   tags:
     - awx
     - awx.build
