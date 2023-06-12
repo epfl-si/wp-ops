@@ -1,6 +1,6 @@
-awx_version: 15.0.1
+awx_version: 22.3.0
 awx_image_name: wp-awx
-awx_base_image_mirrored_from: "docker.io/ansible/awx:{{ awx_version }}"
+awx_base_image_mirrored_from: "ghcr.io/ansible/awx:{{ awx_version }}"
 awx_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx:{{ awx_version }}"
 awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
 

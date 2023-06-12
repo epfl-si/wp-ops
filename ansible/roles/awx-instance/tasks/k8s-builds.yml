@@ -50,18 +50,7 @@
        FROM {{ awx_base_image_mirrored_to }}
 
        USER 0
-       RUN yum -y install patch && yum -y clean all
-       # Work around “NoneType has no attribute hostname” traceback
-       RUN curl https://github.com/ansible/awx/commit/79d7c6d9b3c80aba3f9e35a8dc076355223f9c2c.patch | \
-           patch -p1 -d /var/lib/awx/venv/awx/lib/python3.6/site-packages/
-
-       # Fix (same symptom as) https://github.com/ansible-collections/community.kubernetes/issues/250
-       RUN curl https://patch-diff.githubusercontent.com/raw/ansible/ansible/pull/72131.patch | \
-           patch -p2 -d /usr/lib/python3.6/site-packages/
-
-       # Make anti-affinity work
-       RUN curl https://patch-diff.githubusercontent.com/raw/ansible/awx/pull/8487.patch | \
-           patch -p1 -d /var/lib/awx/venv/awx/lib/python3.6/site-packages/
+       # Nothing here for now...
 
        USER 1000
   tags: awx.build.awx

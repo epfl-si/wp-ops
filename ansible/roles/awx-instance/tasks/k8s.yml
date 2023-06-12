@@ -40,6 +40,7 @@
       awx_settings: "{{ lookup('template', 'awx-settings.py') }}"
       nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
       redis_conf: "{{ lookup('template', 'redis.conf') }}"
+      uwsgi_ini: "{{ lookup('template', 'uwsgi.ini') }}"
   notify: Restart AWX pod
 
 - name: mysql-super-credentials Secret
@@ -75,7 +76,7 @@
     type: Opaque
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
-      credentials_py: "{{ lookup('template', 'credentials.py.j2') | b64encode }}"
+      database_py: "{{ lookup('template', 'database.py.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
   notify: Restart AWX pod
@@ -145,6 +146,8 @@
           #####################################################
           - name: awx-web
             image: "{{ awx_image_full_name }}"
+            command:
+            - /usr/bin/launch_awx_web.sh
             ports:
             - containerPort: 8052
               protocol: TCP
@@ -188,6 +191,14 @@
             - name: wp-nfs
               mountPath: "/srv"
               readOnly: true
+            # For some reason, awx-task insists on being able to
+            # constantly update /etc/receptor/receptor.conf, even
+            # though we don't need that in Kubernetes. Oh well, at
+            # least it gets the socket path right for receptor clients
+            # running inside the same container to read out of that
+            # same config file:
+            - name: receptor-bogus-conf
+              mountPath: /etc/receptor
             env:
               - name: MY_POD_UID
                 valueFrom:
@@ -231,6 +242,8 @@
               items:
               - key: awx_settings
                 path: settings.py
+              - key: uwsgi_ini
+                path: uwsgi.ini
           - name: awx-redis-config
             configMap:
               name: awx-config
@@ -242,8 +255,8 @@
             secret:
               defaultMode: 0644
               items:
-              - key: credentials_py
-                path: credentials.py
+              - key: database_py
+                path: database.py
               - key: django_secret_key
                 path: django_secret_key
               secretName: awx-secrets
@@ -256,6 +269,8 @@
           - name: awx-redis-socket
             emptyDir: {}
           - name: awx-memcached-socket
+            emptyDir: {}
+          - name: receptor-bogus-conf
             emptyDir: {}
   notify: Restart AWX pod
 
