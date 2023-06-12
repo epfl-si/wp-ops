@@ -70,15 +70,24 @@
     - awx.dump
     - awx.restore
 
-- name: Run django migrate cmd
-  shell: >-
+- name: Run Django magic to upgrade all the things
+  shell: |
+    set -e -x
     awx-manage migrate
+    awx-manage create_preload_data
+    awx-manage register_default_execution_environments
   register: _migrate
   changed_when: >-
-    "stdout" in _migrate and "No migrations to apply" not in _migrate.stdout
+    ("stdout" in _migrate)
+    and
+    (
+      ("No migrations to apply" not in _migrate.stdout)
+    or
+      ("changed: True" in _migrate.stdout)
+    )
   tags:
-    - never
     - awx.migrate
+    - awx.seed
 
 - name: "Ansible Tower front-end authentication"
   import_tasks: auth.yml
