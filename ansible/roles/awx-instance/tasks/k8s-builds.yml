@@ -60,3 +60,12 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   delegate_to: localhost
   tags: awx.build.awx
+
+- name: "Pull upstream receptor image into {{ awx_receptor_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: receptor
+      namespace: "{{ ansible_oc_namespace }}"
+    from: "{{ awx_receptor_image_mirrored_from }}"
+    tag: "{{ awx_receptor_version }}"

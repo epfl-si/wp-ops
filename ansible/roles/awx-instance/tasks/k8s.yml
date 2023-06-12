@@ -41,6 +41,7 @@
       nginx_conf: "{{ lookup('template', 'nginx.conf') }}"
       redis_conf: "{{ lookup('template', 'redis.conf') }}"
       uwsgi_ini: "{{ lookup('template', 'uwsgi.ini') }}"
+      receptor_conf: "{{ lookup('template', 'receptor.conf') }}"
   notify: Restart AWX pod
 
 - name: mysql-super-credentials Secret
@@ -199,6 +200,8 @@
             # same config file:
             - name: receptor-bogus-conf
               mountPath: /etc/receptor
+            - name: receptor-sock
+              mountPath: "{{ awx_receptor_socket_path | dirname }}"
             env:
               - name: MY_POD_UID
                 valueFrom:
@@ -208,6 +211,18 @@
                 valueFrom:
                   fieldRef:
                     fieldPath: status.podIP
+          #####################################################
+          - name: awx-receptor
+            image: "{{ awx_receptor_image_full_name }}"
+            command:
+            - receptor
+            - --config
+            - /etc/receptor/receptor.conf
+            volumeMounts:
+            - name: receptor-true-conf
+              mountPath: /etc/receptor
+            - name: receptor-sock
+              mountPath: "{{ awx_receptor_socket_path | dirname }}"
           #####################################################
           - name: awx-redis
             image: "{{ awx_redis_image_mirrored_to }}"
@@ -271,6 +286,15 @@
           - name: awx-memcached-socket
             emptyDir: {}
           - name: receptor-bogus-conf
+            emptyDir: {}
+          - name: receptor-true-conf
+            configMap:
+              name: awx-config
+              defaultMode: 0644
+              items:
+              - key: receptor_conf
+                path: receptor.conf
+          - name: receptor-sock
             emptyDir: {}
   notify: Restart AWX pod
 

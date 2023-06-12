@@ -4,6 +4,14 @@ awx_base_image_mirrored_from: "ghcr.io/ansible/awx:{{ awx_version }}"
 awx_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx:{{ awx_version }}"
 awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
 
+awx_receptor_version: v1.3.0
+awx_receptor_image_mirrored_from: "ghcr.io/ansible/receptor:{{ awx_receptor_version }}"
+awx_receptor_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/receptor:{{ awx_receptor_version }}"
+awx_receptor_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/receptor:{{ awx_receptor_version }}"
+# The following path is fixed by AWX (see
+# https://github.com/ansible/awx/blob/devel/awx/main/tasks/receptor.py#L640):
+awx_receptor_socket_path: /var/run/receptor/receptor.sock
+
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch

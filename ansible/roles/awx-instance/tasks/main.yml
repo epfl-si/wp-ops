@@ -43,6 +43,8 @@
   with_items:
     - name: "{{ awx_image_name }}"
       version: "{{ awx_version }}"
+    - name: "{{ awx_receptor_image_name }}"
+      version: "{{ awx_receptor_version }}"
     - name: "{{ awx_runner_image_name }}"
       version: latest
   # 💡 Other image promotion tasks (for “core” WordPress serving and
