@@ -15,3 +15,12 @@ INTERNAL_API_URL = 'http://127.0.0.1:8052'
 IS_K8S = True
 
 SECRET_KEY = open('/etc/tower/conf.d/django_secret_key', 'rb').read().strip()
+
+{% if awx_verbose | default(False) %}
+RECEPTOR_RELEASE_WORK = False
+
+LOG_AGGREGATOR_LEVEL = 'DEBUG'
+LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'
+LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()
+
+{% endif %}

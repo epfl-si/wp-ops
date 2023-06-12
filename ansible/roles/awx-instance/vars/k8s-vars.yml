@@ -4,6 +4,8 @@ awx_base_image_mirrored_from: "ghcr.io/ansible/awx:{{ awx_version }}"
 awx_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx:{{ awx_version }}"
 awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
 
+awx_verbose: true
+
 awx_receptor_version: v1.3.0
 awx_receptor_image_mirrored_from: "ghcr.io/ansible/receptor:{{ awx_receptor_version }}"
 awx_receptor_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/receptor:{{ awx_receptor_version }}"
