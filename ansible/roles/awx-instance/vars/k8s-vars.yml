@@ -14,19 +14,20 @@ awx_receptor_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_na
 # https://github.com/ansible/awx/blob/devel/awx/main/tasks/receptor.py#L640):
 awx_receptor_socket_path: /var/run/receptor/receptor.sock
 
+# AWX will spin up pods using this image when it has work to do.
+# 💡 Here “ee” means “execution environment”, not “enterprise edition”.
+awx_ee_version: "{{ awx_version }}"
+awx_ee_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
+awx_ee_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
+awx_ee_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/ee:{{ awx_ee_version }}"
+
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
   wwp-test: awx-poc-vpsi.epfl.ch
   wwp-infra: awx-wwp-infra.epfl.ch
 
-awx_ansible_runner_base_image_name: ansible-runner
-awx_ansible_runner_base_image_mirrored_from: quay.io/ansible/ansible-runner:latest
-awx_ansible_runner_base_image_mirrored_to : "docker-registry.default.svc:5000/wwp-test/{{ awx_ansible_runner_base_image_name }}"
-
 awx_redis_image_mirrored_from: redis:6.0
 awx_redis_image_mirrored_to: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/redis:6.0"
-
-awx_runner_image_name: "wp-ansible-runner"
 
 awx_inventory: "{{ awx_inventories[ansible_oc_namespace] }}"
 awx_inventories:
@@ -34,6 +35,3 @@ awx_inventories:
   wwp-test: test
 
 awx_service_account: awx
-# wp-ansible-runner must be privileged for now in order to run as an UID
-# of our choice, until such time that we reorganize NFS permissions:
-awx_runner_service_account: useroot

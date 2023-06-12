@@ -15,7 +15,7 @@ crontab-like basis, or interactively from the Ansible Tower Web UI.
 |------------------------------------|---------------------------------------------------------------------------------------------------------|
 | `wpsible`                          | The shell wrapper that the operator runs interactively. Always `cd`s to the `ansible` directory first.  |
 | `ansible.cfg`                      | The configuration file for `wpsible` - Unused by AWX                                                    |
-| `requirements.yml`                 | The general Ansible Galaxy requirements for `wpsible` - Used in the build process of `awx-runner` image |
+| `requirements.yml`                 | The general Ansible Galaxy requirements for `wpsible`                                                   |
 | `roles`                            | The Ansible roles, available to both `wpsible` and AWX                                                  |
 | `inventory`                        | The inventory files and executable inventory scripts for `wpsible`                                      |
 | `inventory/wordpress-instances.py` | This one script is automatically synced into AWX, and executed from there                               |

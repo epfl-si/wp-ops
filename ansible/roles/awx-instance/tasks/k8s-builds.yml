@@ -1,33 +1,8 @@
-# Custom runner image with the `wp` command-line tool and a WordPress layout in /wp
 - include_vars: ../../../vars/image-vars.yml
   tags: always
 
 - include_vars: k8s-vars.yml
   tags: always
-
-- name: "Pull {{ awx_ansible_runner_base_image_mirrored_from }} into {{ awx_ansible_runner_base_image_mirrored_to }}"
-  delegate_to: localhost
-  openshift_imagestream:
-    metadata:
-      name: "{{ awx_ansible_runner_base_image_name }}"
-      namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ansible_runner_base_image_mirrored_from }}"
-    tag: latest
-
-- name: "Build {{ awx_runner_image_name }} in OpenShift"
-  register: _awx_runner_buildconfig
-  delegate_to: localhost
-  openshift_imagestream:
-    metadata:
-      name: "{{ awx_runner_image_name }}"
-      namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ansible_runner_base_image_mirrored_to }}"
-    dockerfile: "{{ lookup('template', 'Dockerfile.wp-ansible-runner') }}"
-
-- name: "Rebuild {{ awx_runner_image_name }} now"
-  when: _awx_runner_buildconfig is changed
-  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
-  delegate_to: localhost
 
 - name: "Pull upstream awx image into {{ awx_base_image_mirrored_to }}"
   delegate_to: localhost
@@ -69,3 +44,12 @@
       namespace: "{{ ansible_oc_namespace }}"
     from: "{{ awx_receptor_image_mirrored_from }}"
     tag: "{{ awx_receptor_version }}"
+
+- name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: awx-ee
+      namespace: "{{ ansible_oc_namespace }}"
+    from: "{{ awx_ee_image_mirrored_from }}"
+    tag: "{{ awx_version }}"

@@ -16,6 +16,11 @@ IS_K8S = True
 
 SECRET_KEY = open('/etc/tower/conf.d/django_secret_key', 'rb').read().strip()
 
+# Use mirrored images for awx-ee ephemeral pods:
+GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE ({{ awx_ee_version }})', 'image': '{{ awx_ee_image_mirrored_to }}'}]
+CONTROL_PLANE_EXECUTION_ENVIRONMENT = '{{ awx_ee_image_mirrored_to }}'
+
+
 {% if awx_verbose | default(False) %}
 RECEPTOR_RELEASE_WORK = False
 
