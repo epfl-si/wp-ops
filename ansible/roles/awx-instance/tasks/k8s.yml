@@ -200,6 +200,10 @@
             # same config file:
             - name: receptor-bogus-conf
               mountPath: /etc/receptor
+            # Conversely, awx-task expects to “see” projects here
+            # after awx-receptor pulls them from SCM:
+            - name: var-lib-awx-projects
+              mountPath: /var/lib/awx/projects
             - name: receptor-sock
               mountPath: "{{ awx_receptor_socket_path | dirname }}"
             env:
@@ -223,6 +227,8 @@
               mountPath: /etc/receptor
             - name: receptor-sock
               mountPath: "{{ awx_receptor_socket_path | dirname }}"
+            - name: var-lib-awx-projects
+              mountPath: /var/lib/awx/projects
           #####################################################
           - name: awx-redis
             image: "{{ awx_redis_image_mirrored_to }}"
@@ -295,6 +301,8 @@
               - key: receptor_conf
                 path: receptor.conf
           - name: receptor-sock
+            emptyDir: {}
+          - name: var-lib-awx-projects
             emptyDir: {}
   notify: Restart AWX pod
 
