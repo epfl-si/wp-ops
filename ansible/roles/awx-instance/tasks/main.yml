@@ -19,8 +19,6 @@
       tags:
         - awx
         - awx.build
-        - awx.build.awx
-        - awx.build.receptor
   tags:
     - awx
     - awx.build
