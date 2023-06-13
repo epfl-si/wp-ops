@@ -3,6 +3,24 @@
 - tags: always
   include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
+- name: "Clean up obsolete objects (from AWX 15.0.1)"
+  awx_script:
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+      from awx.main.models.ha import InstanceGroup
+      from awx.main.models.inventory import CustomInventoryScript
+      from awx.main.models.credential import Credential
+
+      CustomInventoryScript.objects.all().delete()
+
+      for g in InstanceGroup.objects.all():
+        if g.name not in ('controlplane', 'default'):
+          g.delete()
+
+      for cred in Credential.objects.all():
+        if "wwp" in cred.name or "WWP" in cred.name:
+          cred.delete()
+
 - name: "`{{ awx_project_name }}` project"
   awx_script:
     supports_check_mode: yes
@@ -161,28 +179,3 @@
         # nt.notification_configuration['use_ssl'] = True
         # nt.notification_configuration['use_tls'] = False
         nt.save()
-
-- name: "K8S bearer token credential"
-  awx_script:
-    supports_check_mode: yes
-    script: |
-      {{ lookup("template", "awx_script_lib.py") }}
-
-      from awx.main.models.organization import Organization
-      from awx.main.models.credential import Credential, CredentialType
-
-      import subprocess
-
-      org = Organization.objects.get(name="{{ awx_organization_name }}")
-      with AnsibleGetOrCreate(Credential,
-                  name="{{ awx_selfk8s_credential_name }}",
-                  credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
-        ) as cred:
-          cred.organization = org
-          cred.description = "The K8S credentials of the service account awx itself is running under"
-          cred.inputs = dict(
-              host="https://kubernetes.default.svc/",
-              verify_ssl=True,
-              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}", 'rb').read().decode("utf-8") + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
-              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip().decode("utf-8")
-          )
