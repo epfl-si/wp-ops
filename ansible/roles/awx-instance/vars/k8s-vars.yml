@@ -6,10 +6,9 @@ awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }
 
 awx_verbose: true
 
-awx_receptor_version: v1.3.0
-awx_receptor_image_mirrored_from: "ghcr.io/ansible/receptor:{{ awx_receptor_version }}"
-awx_receptor_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/receptor:{{ awx_receptor_version }}"
-awx_receptor_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/receptor:{{ awx_receptor_version }}"
+awx_receptor_version: v1.4.1
+awx_receptor_image_name: wp-receptor
+awx_receptor_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_receptor_image_name }}:{{ awx_receptor_version }}"
 # The following path is fixed by AWX (see
 # https://github.com/ansible/awx/blob/devel/awx/main/tasks/receptor.py#L640):
 awx_receptor_socket_path: /var/run/receptor/receptor.sock
@@ -35,3 +34,10 @@ awx_inventories:
   wwp-test: test
 
 awx_service_account: awx
+
+# `curl` (and therefore) `dnf` and `yum` are broken on CentOS 9 +
+# OpenShift 3.11, but only during builds ☹
+# (https://github.com/moby/moby/issues/42680). Here is a workaround:
+shellmacro_poor_mans_curl: >-
+       pip3 install requests >&2 &&
+       python3 -c 'import requests; import sys; sys.stdout.buffer.write(requests.get(url = sys.argv[-1]).content)' --

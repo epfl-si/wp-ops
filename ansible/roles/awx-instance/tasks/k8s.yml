@@ -215,7 +215,7 @@
           - name: awx-receptor
             image: "{{ awx_receptor_image_full_name }}"
             command:
-            - receptor
+            - /usr/local/bin/receptor
             - --config
             - /etc/receptor/receptor.conf
             volumeMounts:

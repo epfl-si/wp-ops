@@ -20,10 +20,12 @@
         - awx
         - awx.build
         - awx.build.awx
+        - awx.build.receptor
   tags:
     - awx
     - awx.build
     - awx.build.awx
+    - awx.build.receptor
 
 - name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
   when: "ansible_oc_namespace != awx_build_namespace"

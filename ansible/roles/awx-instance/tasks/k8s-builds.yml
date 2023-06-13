@@ -36,14 +36,36 @@
   delegate_to: localhost
   tags: awx.build.awx
 
-- name: "Pull upstream receptor image into {{ awx_receptor_image_mirrored_to }}"
+- name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_receptor_image_name }}"
+  register: _awx_receptor_buildconfig
   delegate_to: localhost
   openshift_imagestream:
-    metadata:
-      name: receptor
-      namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_receptor_image_mirrored_from }}"
     tag: "{{ awx_receptor_version }}"
+    metadata:
+      name: "{{ awx_receptor_image_name }}"
+      namespace: "{{ ansible_oc_namespace }}"
+    dockerfile: |
+       FROM {{ awx_base_image_mirrored_to }}
+
+       USER 0
+       RUN pip3 install ansible ansible-runner
+       RUN set -e -x; \
+          {{ shellmacro_poor_mans_curl }} $({{ shellmacro_poor_mans_curl }} https://api.github.com/repos/ansible/receptor/releases \
+            | python3 -c \
+              "import sys; import json; import re; \
+               release = (r for r in json.load(sys.stdin) if r['name'] == '{{ awx_receptor_version }}').__next__(); \
+               asset = (a for a in release['assets'] if re.search('linux_amd64\.tar\.gz$', a['name'])).__next__(); \
+               print(asset['browser_download_url'])") \
+          | tar -C/usr/local/bin -zxvv receptor
+       USER 1000
+
+  tags: awx.build.receptor
+
+- name: "Rebuild {{ awx_receptor_image_name }} now"
+  when: _awx_receptor_buildconfig is changed
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
+  delegate_to: localhost
+  tags: awx.build.receptor
 
 - name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
   delegate_to: localhost
