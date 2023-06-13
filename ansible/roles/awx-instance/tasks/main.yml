@@ -1,7 +1,5 @@
-- include_vars: k8s-vars.yml
-  tags:
-    - awx
-    - awx.promote
+- tags: always
+  include_vars: k8s-vars.yml
 
 # - name: "Persistent Volume Claim"
 #   import_tasks: persistent-volume-claim.yml
@@ -86,6 +84,7 @@
       ("changed: True" in _migrate.stdout)
     )
   tags:
+    - awx
     - awx.migrate
     - awx.seed
 
