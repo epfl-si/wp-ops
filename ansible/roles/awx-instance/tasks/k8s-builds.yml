@@ -29,6 +29,7 @@
 
        USER 1000
   tags: awx.build.awx
+  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_image_name }} now"
   when: _awx_buildconfig is changed
@@ -60,6 +61,7 @@
        USER 1000
 
   tags: awx.build.receptor
+  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_receptor_image_name }} now"
   when: _awx_receptor_buildconfig is changed
