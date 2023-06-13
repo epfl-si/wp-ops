@@ -1,0 +1,189 @@
+# Set up Django objects used by AWX.
+
+- tags: always
+  include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
+
+- name: "Set up `{{ awx_project_name }}` project"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.projects import Project
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+          with AnsibleGetOrCreate(Project, name="{{ awx_project_name }}") as prj:
+            prj.organization = org
+            prj.scm_type = "git"
+            prj.scm_url = "{{ awx_project_github_url }}"
+            prj.scm_branch = "{{ awx_playbook_branch }}"
+            prj.scm_update_on_launch = True
+
+- name: "Set up `{{ awx_inventory_script_name }}` custom inventory script"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.inventory import CustomInventoryScript, InventorySource
+      from awx.main.models.organization import Organization
+
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+          with AnsibleGetOrCreate(CustomInventoryScript,
+                                  name="{{ awx_inventory_script_name }}"
+                                  ) as script:
+              script.script = script_text
+              script.organization = org
+              with AnsibleGetOrCreate(InventorySource,
+                                      name="{{ awx_inventory_source_name }}"
+                                     ) as src:
+                  src.source = 'custom'
+                  src.overwrite = True
+                  src.update_on_launch = True
+                  src.source_script = script
+    vars:
+      script_text: '{{ lookup("file", awx_inventory_script_path) }}'
+
+- name: "Set up {{ awx_inventory_name }} inventory"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.inventory import Inventory, InventorySource
+      from awx.main.models.ha import InstanceGroup
+
+      org = Organization.objects.get(name="{{ awx_organization_name }}")
+      inv_source = InventorySource.objects.get(name="{{ awx_inventory_source_name }}")
+      instance_group = InstanceGroup.objects.get(name="default")
+
+      with AnsibleGetOrCreate(Inventory, name="{{ awx_inventory_name }}") as inv:
+        inv.organization = org
+        inv.save()
+        inv.inventory_sources.set([inv_source])
+
+- name: "Preconfigure templates job"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      # Remove the Demo job template if found
+      from awx.main.models.jobs import JobTemplate
+      try:
+          jt = JobTemplate.objects.get(name="Demo Job Template")
+          jt.delete()
+          update_json_status(changed=True)
+      except JobTemplate.DoesNotExist:
+          update_json_status(changed=False)
+
+- name: "Set up templates job for theme selection"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "job-templates-create.py") }}
+
+      kwarg = dict(
+          job_name = "Set up theme to sites",
+          job_description = "Apply the theme defined in the inventory to sites",
+          job_tags = "themes",
+          job_type = "run",
+          job_schedule_name = "Set up the theme on WP sites every thursday",
+          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+      )
+
+      update_json_status(changed=get_or_create_job_template(**kwarg))
+
+- name: "Set up templates job for aligning sites"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "job-templates-create.py") }}
+
+      kwarg = dict(
+          job_name = "Align sites",
+          job_description = "Revert any changes manualy applied to sites that were not included as a standard",
+          job_tags = "config,plugins,symlink",
+          job_type = "run",
+          job_schedule_name = "Align sites during Wagon's day",
+          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+      )
+
+      update_json_status(changed=get_or_create_job_template(**kwarg))
+
+- name: "Set up job template for backups"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.jobs import JobTemplate
+      from awx.main.models.inventory import Inventory
+      from awx.main.models.projects import Project
+      from awx.main.models.ha import InstanceGroup
+      from awx.main.models.schedules import Schedule
+
+      with AnsibleGetOrCreate(JobTemplate, name="Backup") as jt:
+          jt.description = "Backup"
+          jt.job_type = "run"
+          jt.inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
+          jt.project = Project.objects.get(name="{{ awx_project_name }}")
+          jt.playbook = "ansible/playbooks/wordpress-main.yml"
+          jt.job_tags = "wp.backup"
+          jt.limit = "prod_wordpresses:!prod_sandbox" # Backup all wordpresses exclude sandbox (archive sites)
+          jt.save()
+          jt.instance_groups.set([InstanceGroup.objects.get(name="default")])
+
+          with AnsibleGetOrCreate(Schedule, name="Backup nightly") as s:
+                s.unified_job_template = jt
+                s.rrule = "DTSTART;TZID=Europe/Berlin:20201003T222222 RRULE:FREQ=DAILY;INTERVAL=1"
+
+# Set up notification templates in AWX.
+
+- name: "Set up job notification template (email)"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.notifications import NotificationTemplate
+      from awx.main.models.organization import Organization
+
+      with AnsibleGetOrCreate(NotificationTemplate, name="email-wwp-dev") as nt:
+        nt.description = "Notifications by email to wwp devs"
+        nt.organization = Organization.objects.get(name="{{ awx_organization_name }}")
+        # nt.notification_configuration['username'] = "{{ awx_notifications.email.username }}"
+        # nt.notification_configuration['password'] = "{{ awx_notifications.email.password | eyaml(eyaml_keys) }}"
+        nt.notification_type = 'email'
+        nt.notification_configuration['host'] = 'mail.epfl.ch'
+        nt.notification_configuration['recipients'] = ['nicolas.borboen@epfl.ch']
+        nt.notification_configuration['sender'] = 'noreply+awx-notifications@epfl.ch'
+        nt.notification_configuration['port'] = 25
+        nt.notification_configuration['timeout'] = 30
+        # nt.notification_configuration['use_ssl'] = True
+        # nt.notification_configuration['use_tls'] = False
+        nt.save()
+
+- name: "Set up K8S bearer token credential"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from awx.main.models.organization import Organization
+      from awx.main.models.credential import Credential, CredentialType
+
+      import subprocess
+
+      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
+        with AnsibleGetOrCreate(Credential,
+                  name="{{ awx_selfk8s_credential_name }}",
+                  credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
+        ) as cred:
+          cred.organization = org
+          cred.description = "The K8S credentials of the service account awx itself is running under"
+          cred.inputs = dict(
+              host="https://kubernetes.default.svc/",
+              verify_ssl=True,
+              ssl_ca_cert=open("{{ k8s_service_ca_crt_file }}", 'rb').read().decode("utf-8") + """{{ lookup("template", "quovadis-epfl-wildcard-cert-chain.pem") }}""",
+              bearer_token=subprocess.check_output(["oc", "whoami", "-t"]).strip().decode("utf-8")
+          )

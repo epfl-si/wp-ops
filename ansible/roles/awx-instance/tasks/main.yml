@@ -95,43 +95,11 @@
     - awx
     - awx.auth
 
-- name: "Set up `{{ awx_project_name }}` project"
-  tags: awx
-  awx_script:
-    supports_check_mode: yes
-    script: |
-      {{ lookup("template", "awx_script_lib.py") }}
-
-      from awx.main.models.organization import Organization
-      from awx.main.models.projects import Project
-      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
-          with AnsibleGetOrCreate(Project, name="{{ awx_project_name }}") as prj:
-            prj.organization = org
-            prj.scm_type = "git"
-            prj.scm_url = "{{ awx_project_github_url }}"
-            prj.scm_branch = "{{ awx_playbook_branch }}"
-            prj.scm_update_on_launch = True
-
-- import_tasks: container-group.yml
-  tags: awx
-
-- name: Configure inventories
-  import_tasks: inventories.yml
+- name: Set up Django objects used by AWX
+  import_tasks: awx-objects.yml
   tags:
     - awx
-    - awx.inventory
-
-- name: Configure notification templates
-  import_tasks: notification-templates.yml
-  tags:
-    - awx
-    - awx.notification-templates
-
-- name: Configure job templates
-  import_tasks: job-templates.yml
-  tags:
-    - awx
-    - awx.job-template
+    - awx.objects
 
 - name: "Pushgateway (for backup stats)"
   when: ansible_oc_namespace == "wwp-infra"
