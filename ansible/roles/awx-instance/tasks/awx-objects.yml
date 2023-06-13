@@ -11,6 +11,10 @@
       from awx.main.models.inventory import CustomInventoryScript
       from awx.main.models.credential import Credential
 
+      # Do *not* delete the “WWP” project! That would cascade into deleting
+      # the entire history. (Ask me how I know, or how said history got purged
+      # on the test instance...)
+
       CustomInventoryScript.objects.all().delete()
 
       for g in InstanceGroup.objects.all():
