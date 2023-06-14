@@ -18,7 +18,7 @@ def get_or_create_job_template(
 
       inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
       project = Project.objects.get(name="{{ awx_project_name }}")
-      container_group = InstanceGroup.objects.get(name="{{ awx_elastic_container_group_name }}")
+      container_group = InstanceGroup.objects.get(name="default")
 
 
       with AnsibleGetOrCreate(JobTemplate, name=job_name) as jt:

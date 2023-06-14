@@ -3,7 +3,7 @@
 - tags: always
   include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 
-- name: "Set up `{{ awx_project_name }}` project"
+- name: "`{{ awx_project_name }}` project"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -19,32 +19,26 @@
             prj.scm_branch = "{{ awx_playbook_branch }}"
             prj.scm_update_on_launch = True
 
-- name: "Set up `{{ awx_inventory_script_name }}` custom inventory script"
+- name: "`{{ awx_inventory_source_name }}` inventory source"
   awx_script:
     supports_check_mode: yes
     script: |
       {{ lookup("template", "awx_script_lib.py") }}
 
-      from awx.main.models.inventory import CustomInventoryScript, InventorySource
-      from awx.main.models.organization import Organization
+      from awx.main.models.inventory import InventorySource
+      from awx.main.models.projects import Project
 
-      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
-          with AnsibleGetOrCreate(CustomInventoryScript,
-                                  name="{{ awx_inventory_script_name }}"
-                                  ) as script:
-              script.script = script_text
-              script.organization = org
-              with AnsibleGetOrCreate(InventorySource,
+      project = Project.objects.get(name = "{{ awx_project_name }}")
+      with AnsibleGetOrCreate(InventorySource,
                                       name="{{ awx_inventory_source_name }}"
                                      ) as src:
-                  src.source = 'custom'
-                  src.overwrite = True
-                  src.update_on_launch = True
-                  src.source_script = script
-    vars:
-      script_text: '{{ lookup("file", awx_inventory_script_path) }}'
+          src.source = 'scm'
+          src.source_project = project
+          src.source_path = "{{ awx_inventory_source_path }}"
+          src.overwrite = True
+          src.update_on_launch = True
 
-- name: "Set up {{ awx_inventory_name }} inventory"
+- name: "`{{ awx_inventory_name }}` inventory"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -52,22 +46,19 @@
 
       from awx.main.models.organization import Organization
       from awx.main.models.inventory import Inventory, InventorySource
-      from awx.main.models.ha import InstanceGroup
 
       org = Organization.objects.get(name="{{ awx_organization_name }}")
       inv_source = InventorySource.objects.get(name="{{ awx_inventory_source_name }}")
-      instance_group = InstanceGroup.objects.get(name="default")
 
       with AnsibleGetOrCreate(Inventory, name="{{ awx_inventory_name }}") as inv:
         inv.organization = org
         inv.save()
         inv.inventory_sources.set([inv_source])
 
-- name: "Preconfigure templates job"
+- name: "Remove the “Demo Job Template” if found"
   awx_script:
     supports_check_mode: yes
     script: |
-      # Remove the Demo job template if found
       from awx.main.models.jobs import JobTemplate
       try:
           jt = JobTemplate.objects.get(name="Demo Job Template")
@@ -76,7 +67,7 @@
       except JobTemplate.DoesNotExist:
           update_json_status(changed=False)
 
-- name: "Set up templates job for theme selection"
+- name: "Job template for theme selection"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -93,7 +84,7 @@
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
 
-- name: "Set up templates job for aligning sites"
+- name: "Job template for aligning sites"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -110,7 +101,7 @@
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
 
-- name: "Set up job template for backups"
+- name: "job template for backups"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -122,6 +113,8 @@
       from awx.main.models.ha import InstanceGroup
       from awx.main.models.schedules import Schedule
 
+      default_instance_group = InstanceGroup.objects.get(name="default")
+
       with AnsibleGetOrCreate(JobTemplate, name="Backup") as jt:
           jt.description = "Backup"
           jt.job_type = "run"
@@ -131,7 +124,13 @@
           jt.job_tags = "wp.backup"
           jt.limit = "prod_wordpresses:!prod_sandbox" # Backup all wordpresses exclude sandbox (archive sites)
           jt.save()
-          jt.instance_groups.set([InstanceGroup.objects.get(name="default")])
+          # This used to be just
+          # `jt.instance_groups.set([default_instance_group])`, but
+          # that doesn't work anymore because
+          # https://github.com/ansible/awx/issues/14126 :
+          for ig in jt.instance_groups.all():
+              jt.instance_groups.remove(ig)
+          jt.instance_groups.add(default_instance_group)
 
           with AnsibleGetOrCreate(Schedule, name="Backup nightly") as s:
                 s.unified_job_template = jt
@@ -139,7 +138,7 @@
 
 # Set up notification templates in AWX.
 
-- name: "Set up job notification template (email)"
+- name: "Job notification template (email)"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -163,7 +162,7 @@
         # nt.notification_configuration['use_tls'] = False
         nt.save()
 
-- name: "Set up K8S bearer token credential"
+- name: "K8S bearer token credential"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -174,8 +173,8 @@
 
       import subprocess
 
-      with AnsibleGetOrCreate(Organization, name="{{ awx_organization_name }}") as org:
-        with AnsibleGetOrCreate(Credential,
+      org = Organization.objects.get(name="{{ awx_organization_name }}")
+      with AnsibleGetOrCreate(Credential,
                   name="{{ awx_selfk8s_credential_name }}",
                   credential_type=CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
         ) as cred:

@@ -1,14 +1,12 @@
 awx_organization_name: "WWP"
-awx_project_name: "WWP"
+awx_project_name: "wp-ops"
 awx_project_github_url: "https://github.com/epfl-si/wp-ops"
 
-awx_inventory_script_name: "WordPress instances"
-awx_inventory_script_path: "../../../inventory/wordpress-instances.py"
-awx_inventory_source_name: "WordPress instances"
+awx_inventory_source_path: "ansible/inventory/wordpress-instances.py"
+awx_inventory_source_name: "{{ awx_inventory_source_path | basename }}"
 awx_inventory_name: "WordPress instances"
 
 awx_selfk8s_credential_name: "oc wwp-test K8S bearer token"
-awx_elastic_container_group_name: "tower-elastic"
 
 k8s_service_ca_crt_file: "/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
 
