@@ -157,17 +157,22 @@
                 cpu: 250m
                 memory: 1Gi
             volumeMounts:
-            - name: awx-application-config
-              mountPath: /etc/tower
-              readOnly: true
-            - name: awx-application-credentials
-              mountPath: /etc/tower/conf.d/
-              readOnly: true
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf   # Just this file, Vasili
                                     # (nginx gets anxious if it is missing a
                                     # /etc/nginx/mime.types)
+              readOnly: true
+            - name: awx-application-config
+              mountPath: /etc/tower/settings.py
+              subPath: settings.py
+              readOnly: true
+            - name: awx-application-config
+              mountPath: /etc/tower/uwsgi.ini
+              subPath: uwsgi.ini
+              readOnly: true
+            - name: awx-application-credentials
+              mountPath: /etc/tower/conf.d/
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
@@ -182,8 +187,8 @@
                 memory: 2Gi
             volumeMounts:
             - name: awx-application-config
-              mountPath: /etc/tower
-              readOnly: true
+              mountPath: /etc/tower/settings.py
+              subPath: settings.py
             - name: awx-application-credentials
               mountPath: /etc/tower/conf.d/
               readOnly: true
