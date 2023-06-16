@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, VPSI, 2019
+# All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, VPSI, 2023
 #
 # Build an Ansible inventory from wp-veritas and/or the on-NFS state
 #
@@ -10,6 +10,7 @@
 import sys
 import os
 import glob
+import re
 
 ansible_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,10 +44,9 @@ class _Site:
             "openshift_namespace": self.k8s_namespace,
             "ansible_python_interpreter": '/usr/bin/python3'
         }
-        if Environment.is_awx():
+        if is_awx():
             hostvars.update({
                 'ansible_connection': 'local'
-                # No need for become; see runAsUser in the container spec
             })
         else:
             # TODO: at some point we will be forced to use oc instead of ssh.
@@ -193,7 +193,7 @@ class _LiveSite(_Site):
         cmd = ['bash', '-c',
                'find %s \( -type d \( %s \) -prune -false \) -o -name wp-config.php' %
                (cls._find_in_dirs, ' '.join(cls._prune_flags()))]
-        if not Environment.is_awx():
+        if not is_awx():
             cmd = ['oc', 'exec', '-n', cls.k8s_namespace,
                    K8sNamespace(cls.k8s_namespace).get_mgmt_pod_name(), '--'] + cmd
 
@@ -311,34 +311,40 @@ class K8sNamespace:
                 shell=True, encoding='utf-8').rstrip('\n')
 
 
-class Environment:
+def is_awx():
+    return Srv.is_mounted()
+
+class Srv:
+    """Models the /srv NFS mount point (or lack thereof)."""
     @classmethod
-    def is_awx(cls):
-        # We don't really have or need a situation in which we run the
-        # inventory on the cluster, except AWX.
-        return cls.__is_on_openshift()
+    def is_mounted(cls):
+        return cls._nfs_mountpoint() is not None
 
     @classmethod
-    def __is_on_openshift(cls):
-        return "system:serviceaccount:" in cls._oc_whoami()
+    def mounted_namespace(cls):
+        srv = cls._nfs_mountpoint()
+        if srv is None:
+            return None
+        elif "openshift_app_wwp" in srv:
+            if "test" in srv:
+                return "wwp-test"
+            else:
+                return "wwp"
+        else:
+            raise ValueError("Unknown NFS mount point: %s" % srv)
 
     @classmethod
     @cached
-    def _oc_whoami(cls):
-        return subprocess.run(["oc", "whoami"], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    def _nfs_mountpoint(cls):
+        try:
+            linux_mounts = open("/proc/mounts").read()
+            matched = re.search("(.*?) /srv nfs", linux_mounts)
+            if matched is not None:
+                return matched[1]
+        except FileNotFoundError:
+            pass
 
-    @classmethod
-    def required_inventory_namespaces(cls):
-        if cls.is_awx():
-            whoami = cls._oc_whoami()
-            if 'wwp-test' in whoami:
-                return ['wwp-test']
-            elif 'wwp' in whoami:  # Also includes the wwp-infra case
-                return ['wwp']
-            else:
-                raise ValueError('Unknown service account %s' % whoami)
-        else:
-            return os.environ.get('WWP_NAMESPACES', 'wwp-test').split(',')
+        return None
 
 
 def pairwise(iterable):
@@ -354,15 +360,21 @@ def pairwise(iterable):
 if __name__ == '__main__':
     inventory_kinds = os.environ.get('WWP_INVENTORY_SOURCES', 'wpveritas,nfs').split(',')
     inventory_classes = []
+
+    def want_to_scan(site_class):
+        if is_awx():
+            return site_class.k8s_namespace == Srv.mounted_namespace()
+        else:
+            return site_class.k8s_namespace in os.environ.get('WWP_NAMESPACES', 'wwp-test').split(',')
+
     if 'nfs' in inventory_kinds:
-        inventory_classes.extend([LiveProductionSite, LiveTestSite])
+        inventory_classes.extend(filter(want_to_scan, [LiveProductionSite, LiveTestSite]))
     # Sites from wp-veritas shadow sites found on NFS with the same .instance_name:
     if 'wpveritas' in inventory_kinds:
-        inventory_classes.extend([WpVeritasSite, WpVeritasTestSite])
+        inventory_classes.extend(filter(want_to_scan, [WpVeritasSite, WpVeritasTestSite]))
 
     sites = []
     for cls in inventory_classes:
-        if cls.k8s_namespace in Environment.required_inventory_namespaces():
-            sites.extend(cls.all())
+        sites.extend(cls.all())
 
     sys.stdout.write(Inventory(sites).to_json())
