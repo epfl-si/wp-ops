@@ -194,9 +194,6 @@
               readOnly: true
             - name: awx-redis-socket
               mountPath: "/var/run/redis"
-            - name: wp-nfs
-              mountPath: "/srv"
-              readOnly: true
             # For some reason, awx-task insists on being able to
             # constantly update /etc/receptor/receptor.conf, even
             # though we don't need that in Kubernetes. Oh well, at
@@ -258,9 +255,6 @@
           serviceAccountName: "{{ awx_service_account }}"
           terminationGracePeriodSeconds: 10
           volumes:
-          - name: wp-nfs
-            persistentVolumeClaim:
-              claimName: wordpress-0
           - name: awx-application-config
             configMap:
               name: awx-config

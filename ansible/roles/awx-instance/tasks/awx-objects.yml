@@ -123,6 +123,34 @@
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
 
+- name: "`default` InstanceGroup: provide /srv NFS volume to worker pods"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+      from awx.main.models.ha import InstanceGroup
+
+      # We *should not* create the InstanceGroup here - Rather, we
+      # want `-t awx.seed` to take care of that, so that it may put in
+      # all the required bells and whistles:
+      InstanceGroup.objects.get(name="default")
+
+      # Still, we want to use `AnsibleGetOrCreate` for its
+      # `supports_check_mode` goodness:
+      with AnsibleGetOrCreate(InstanceGroup, name="default") as grp:
+        grp.pod_spec_override = """
+      spec:
+        containers:
+          - name: worker
+            volumeMounts:
+            - name: wp-nfs
+              mountPath: "/srv"
+        volumes:
+          - name: wp-nfs
+            persistentVolumeClaim:
+              claimName: wordpress-0
+      """
+
 - name: "job template for backups"
   awx_script:
     supports_check_mode: yes
