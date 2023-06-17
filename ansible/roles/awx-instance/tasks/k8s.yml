@@ -208,15 +208,6 @@
               mountPath: /var/lib/awx/projects
             - name: receptor-sock
               mountPath: "{{ awx_receptor_socket_path | dirname }}"
-            env:
-              - name: MY_POD_UID
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.uid
-              - name: MY_POD_IP
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.podIP
           #####################################################
           - name: awx-receptor
             image: "{{ awx_receptor_image_full_name }}"
