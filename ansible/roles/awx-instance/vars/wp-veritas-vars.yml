@@ -1,0 +1,13 @@
+wp_veritas_build_namespace: "{{ awx_build_namespace }}"
+wp_veritas_base_image_mirrored_from: docker.io/library/ubuntu:focal
+wp_veritas_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ wp_veritas_build_namespace }}/ubuntu:focal"
+wp_veritas_image_name: wp-veritas
+wp_veritas_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ wp_veritas_image_name }}:latest"
+wp_veritas_github:
+  repository: epfl-si/wp-veritas
+  branch: master
+
+wp_veritas_frontend_hostname: "{{ _wp_veritas_frontend_hostnames_by_namespace[ansible_oc_namespace] }}"
+_wp_veritas_frontend_hostnames_by_namespace:
+  wwp-test: wp-veritas-test.epfl.ch
+  wwp: wp-veritas.epfl.ch

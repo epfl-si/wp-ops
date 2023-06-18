@@ -1,5 +1,8 @@
 - tags: always
-  include_vars: k8s-vars.yml
+  include_vars: "{{ item }}"
+  with_items:
+  - k8s-vars.yml
+  - wp-veritas-vars.yml
 
 # - name: "Persistent Volume Claim"
 #   import_tasks: persistent-volume-claim.yml
@@ -22,6 +25,21 @@
     - awx.build
     - awx.build.awx
     - awx.build.receptor
+
+- name: "wp-veritas images and build configs on {{ wp_veritas_build_namespace }}"
+  when: "ansible_oc_namespace == wp_veritas_build_namespace"
+  include_tasks:
+    file: wp-veritas-builds.yml
+    apply:
+      delegate_to: localhost
+      tags:
+        - wpveritas
+        - wp-veritas
+  tags:
+    - wpveritas
+    - wpveritas.build
+    - wp-veritas
+    - wp-veritas.build
 
 - name: "AWX images promoted from {{ awx_build_namespace }}"
   when: "ansible_oc_namespace != awx_build_namespace"
@@ -103,6 +121,24 @@
   tags:
     - awx
     - awx.objects
+
+- name: wp-veritas
+  when: >-
+    ansible_oc_namespace not in ("wwp-infra",)
+  include_tasks:
+    file: wp-veritas.yml
+    apply:
+      delegate_to: localhost
+      tags:
+      - wpveritas
+      - wp-veritas
+      - awx.wpveritas
+      - awx.wp-veritas
+  tags:
+    - wpveritas
+    - wp-veritas
+    - awx.wpveritas
+    - awx.wp-veritas
 
 - name: "Pushgateway (for backup stats)"
   when: ansible_oc_namespace == "wwp-infra"

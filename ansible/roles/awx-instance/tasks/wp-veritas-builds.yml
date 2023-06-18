@@ -1,0 +1,49 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - k8s-vars.yml
+    - wp-veritas-vars.yml
+
+- name: "Pull upstream {{ wp_veritas_base_image_mirrored_from }} into {{ wp_veritas_base_image_mirrored_to }}"
+  openshift_imagestream:
+    metadata:
+      name: ubuntu
+      namespace: "{{ ansible_oc_namespace }}"
+    tag: focal
+    from: "{{ wp_veritas_base_image_mirrored_from }}"
+
+- name: "Build {{ wp_veritas_image_full_name }} from {{ wp_veritas_base_image_mirrored_to }}"
+  openshift_imagestream:
+    metadata:
+      name: wp-veritas
+      namespace: "{{ ansible_oc_namespace }}"
+    # For multi-stage builds (even if all stages were to start FROM
+    # the same image, as is the case here), the usual `from` stanza
+    # won't work (best guess is that the *second* FROM line is left
+    # as-is and derails the process). Instead, we need to have a
+    # spec.source.images[] as documented at
+    # https://docs.openshift.com/container-platform/3.11/rest_api/build_openshift_io/buildconfig-build-openshift-io-v1.html :
+    spec:
+      source:
+        images:
+          - as: [ ubuntu:focal ]
+            from:
+              kind: ImageStreamTag
+              name: ubuntu:focal
+              namespace: "{{ wp_veritas_build_namespace }}"
+    git:
+      repository: "https://github.com/{{ wp_veritas_github.repository }}"
+      ref: "{{ wp_veritas_github.branch }}"
+  register: _wpveritas_buildconfig
+
+- name: "Rebuild {{ wp_veritas_image_full_name }} now"
+  when: >-
+    ( (_wpveritas_buildconfig | default({})) is changed )
+    or
+    ( "wpveritas.build" in ansible_run_tags )
+    or
+    ( "wp-veritas.build" in ansible_run_tags )
+  shell: "oc -n {{ wp_veritas_build_namespace }} start-build --wait {{ wp_veritas_image_name }}"
+  tags:
+    - wpveritas.build
+    - wp-veritas.build

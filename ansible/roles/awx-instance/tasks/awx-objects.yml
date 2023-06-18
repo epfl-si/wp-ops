@@ -106,19 +106,16 @@
 
       update_json_status(changed=get_or_create_job_template(**kwarg))
 
-- name: "Job template for aligning sites"
+- name: "Job template for the WP-Veritas “Normaliser le site” button"
   awx_script:
     supports_check_mode: yes
     script: |
       {{ lookup("template", "job-templates-create.py") }}
 
       kwarg = dict(
-          job_name = "Align sites",
-          job_description = "Revert any changes manualy applied to sites that were not included as a standard",
-          job_tags = "config,plugins,symlink",
-          job_type = "run",
-          job_schedule_name = "Align sites during Wagon's day",
-          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
+          job_name = "WP-Veritas - Create or align site",
+          job_description = "Create or normalize one site as per configuration-as-code",
+          job_type = "run"
       )
 
       update_json_status(changed=get_or_create_job_template(**kwarg))

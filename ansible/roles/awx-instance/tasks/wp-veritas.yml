@@ -1,0 +1,133 @@
+- tags: always
+  include_vars: wp-veritas-vars.yml
+
+- tags: always
+  include_vars:
+    file: "secrets-{{ ansible_oc_namespace }}.yml"
+    name: secrets
+
+- name: "`wp-veritas` secrets"
+  openshift:
+    apiVersion: v1
+    metadata:
+      name: wp-veritas
+      namespace: "{{ ansible_oc_namespace }}"
+    kind: Secret
+    type: Opaque
+    data: "{{ _env | base64_values }}"
+  vars:
+    _env:
+      METEOR_SETTINGS: >-
+        {{ _meteor_settings | to_json }}
+      WP_VERITAS_ALERTS_TELEGRAM_IDS: >-
+        {{ secrets["wp-veritas"]["telegram"]["recipient_ids"]
+           | map("string") | join(",") | string }}
+      WP_VERITAS_BOT_TOKEN: >-
+        {{ secrets["wp-veritas"]["telegram"]["bot_token"] | eyaml(eyaml_keys) }}
+      # TODO: figure this out from the AWX state
+      # TODO: have wp-veritas' `app/imports/api/methods/sites.js` actually
+      # read from that variable!
+      WP_VERITAS_AWX_URL: https://awx-poc-vpsi.epfl.ch/api/v2/job_templates/XXX/launch/
+      # and have wp-veritas read it from an env var.
+      WP_VERITAS_AWX_TOKEN: >-
+        {{ secrets["wp-veritas"]["awx_client"]["token"] | eyaml(eyaml_keys) }}
+      MONGO_URL: >-
+        mongodb://{{ _mongo.user }}:{{ _mongo.password }}@{{ _mongo.host }}/{{ _mongo.db }}
+    _meteor_settings:
+        accred_password: >-
+          {{ secrets["wp-veritas"]["accred"]["password"] | eyaml(eyaml_keys) }}
+    _mongo:
+      user: >-
+        {{ secrets["wp-veritas"]["mongodb"]["user"] }}
+      password: >-
+        {{ secrets["wp-veritas"]["mongodb"]["password"] | eyaml(eyaml_keys) }}
+      host: >-
+        {{ secrets["wp-veritas"]["mongodb"]["host"] }}
+      db: >-
+        {{ secrets["wp-veritas"]["mongodb"]["database"]  }}
+
+- name: "`wp-veritas` Deployment"
+  openshift:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      labels:
+        app: wp-veritas
+      annotations:
+        # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
+        image.openshift.io/triggers: >-
+          {{ [ _meteor_image_trigger ] | to_json }}
+      name: wp-veritas
+      namespace: "{{ ansible_oc_namespace }}"
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: wp-veritas
+      template:
+        metadata:
+          labels:
+            app: wp-veritas
+        spec:
+          containers:
+            - name: meteor
+              image: "{{ wp_veritas_image_full_name }}"
+              env:
+                - name: ROOT_URL
+                  value: 'https://{{ wp_veritas_frontend_hostname }}'
+                - name: PORT
+                  value: '3000'
+              envFrom:
+                - secretRef:
+                    name: wp-veritas
+              ports:
+                - containerPort: 3000
+                  protocol: TCP
+  vars:
+    _meteor_image_trigger:
+      from:
+        kind: ImageStreamTag
+        name: >-
+          wp-veritas:{{ "prod" if awx_is_production else "latest" }}
+      # Careful, the example fieldPath at
+      # https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#image-stream-kubernetes-resources
+      # is wrong! (As one can see by looking at the changes that `oc
+      # -n wwp-test set triggers deploy/wp-veritas
+      # --from-image=example:latest -c meteor` makes)
+      fieldPath: >-
+        spec.template.spec.containers[?(@.name=="meteor")].image
+
+- name: "`wp-veritas` Service"
+  openshift:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: wp-veritas
+      namespace: "{{ ansible_oc_namespace }}"
+    spec:
+      ports:
+        - name: 'http'
+          port: 80
+          protocol: TCP
+          targetPort: 3000
+      selector:
+        app: wp-veritas
+
+- name: "`wp-veritas` Route"
+  openshift:
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: wp-veritas
+      namespace: wwp-test
+      labels:
+        epfl.ch/visibility: public
+    spec:
+      host: "{{ wp_veritas_frontend_hostname }}"
+      port:
+        targetPort: 'http'
+      to:
+        kind: Service
+        name: wp-veritas
+      tls:
+        termination: edge
