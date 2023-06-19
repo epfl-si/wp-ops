@@ -114,7 +114,6 @@
       namespace: "{{ ansible_oc_namespace }}"
 
 - name: "Pull redis image into {{ awx_redis_image_mirrored_to }}"
-  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: redis

@@ -8,7 +8,6 @@
 # - promote_from_namespace
 
 - name: "Get current version of {{ promote_image_name }} in {{ ansible_oc_namespace }}"
-  delegate_to: localhost
   changed_when: false
   ignore_errors: yes
   shell:
@@ -22,7 +21,6 @@
       {{ (_promote_get_imagestream.stdout | imagestream_tag_map).get(promote_image_tag, "__NONE__") }}
 
 - name: "Promote {{ promote_image_name }} to {{ ansible_oc_namespace }}"
-  delegate_to: localhost
   shell:
     cmd: |
       oc tag  {{ promote_from_namespace }}/{{ promote_image_name }}:{{ promote_image_tag }} \

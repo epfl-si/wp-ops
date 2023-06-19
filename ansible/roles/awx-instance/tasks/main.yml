@@ -13,7 +13,7 @@
   include_tasks:
     file: k8s-builds.yml
     apply:
-      connection: local
+      delegate_to: localhost
       tags:
         - awx
         - awx.build
@@ -28,6 +28,7 @@
   include_tasks:
     file: _promote_image.yml
     apply:
+      delegate_to: localhost
       tags:
         - awx
         - awx.promote
@@ -59,7 +60,10 @@
     - awx.openshift
 
 - name: "Ansible Tower database operations"
-  include_tasks: ops.yml
+  include_tasks:
+    file: ops.yml
+    apply:
+      delegate_to: localhost
   # These tags are *not* auto-applied down, since we use an
   # include_tasks rather than an import_tasks or include directive.
   # This means that every task in awx-ops.yml must have its own

@@ -7,7 +7,6 @@
     - awx.restore
 
 - name: "Create {{ ops_state_dir }}"
-  delegate_to: localhost
   tags: awx.dump
   file:
     path: "{{ ops_state_dir }}"
@@ -27,7 +26,6 @@
 # Belt *and* suspenders:
 - name: Dump Ansible Tower database (Django dump)
   tags: awx.dump
-  delegate_to: localhost
   shell:
     cmd: |
       oc exec {{ ops_oc_exec_args }} -- \
@@ -36,7 +34,6 @@
 
 - name: Restore Ansible Tower database from the SQL dump
   tags: awx.restore
-  delegate_to: localhost
   # TODO: we would like to be able to restore from the Django dump
   # instead (or in addition); unfortunately the current data set
   # causes django.db.utils.IntegrityError (presumably because the

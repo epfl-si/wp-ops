@@ -5,7 +5,6 @@
   tags: always
 
 - name: "Pull upstream awx image into {{ awx_base_image_mirrored_to }}"
-  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: awx
@@ -15,7 +14,6 @@
 
 - name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_image_name }}"
   register: _awx_buildconfig
-  delegate_to: localhost
   openshift_imagestream:
     tag: "{{ awx_version }}"
     metadata:
@@ -34,12 +32,10 @@
 - name: "Rebuild {{ awx_image_name }} now"
   when: _awx_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
-  delegate_to: localhost
   tags: awx.build.awx
 
 - name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_receptor_image_name }}"
   register: _awx_receptor_buildconfig
-  delegate_to: localhost
   openshift_imagestream:
     tag: "{{ awx_receptor_version }}"
     metadata:
@@ -66,11 +62,9 @@
 - name: "Rebuild {{ awx_receptor_image_name }} now"
   when: _awx_receptor_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
-  delegate_to: localhost
   tags: awx.build.receptor
 
 - name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
-  delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: awx-ee
