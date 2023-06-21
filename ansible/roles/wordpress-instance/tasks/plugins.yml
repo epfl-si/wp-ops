@@ -204,6 +204,18 @@
     - wp.plugins.mu
     - wp.plugins.mu.social-graph
 
+- name: Last Page Changes (must-use plugin)
+  wordpress_plugin:
+    name: EPFL_Last_Page_Changes
+    is_mu: yes
+    state:
+      - symlinked
+    from:
+      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_last_page_changes.php
+  tags:
+    - wp.plugins.mu
+    - wp.plugins.mu.last-changes
+
 ##################### "2018" plugins ###########################
 
 - name: '"TinyMCE Advanced" plugin'
