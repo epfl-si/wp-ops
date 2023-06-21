@@ -11,7 +11,7 @@
 - name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
   when: "ansible_oc_namespace == awx_build_namespace"
   include_tasks:
-    file: k8s-builds.yml
+    file: awx-builds.yml
     apply:
       delegate_to: localhost
       tags:
