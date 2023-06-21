@@ -168,6 +168,7 @@
     - wp.plugins.restauration.options
     - wp.plugins.mu
     - wp.plugins.mu.social-graph
+    - wp.plugins.mu.last-changes
     - wp.plugins.wp-gutenberg
     # OBSOLETE aliases:
     - plugins
