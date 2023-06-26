@@ -21,6 +21,8 @@ _mgmt_access_list_wwp_test_and_wwp:
   - jean-francois.gonguet@epfl.ch
   - jerome.cosandey@epfl.ch
   - sami.panseri@epfl.ch
+  - gregory.daguerre@epfl.ch
+  - rosa.maggi@epfl.ch
 
 _mgmt_access_list_wwp_test_only: []
 
