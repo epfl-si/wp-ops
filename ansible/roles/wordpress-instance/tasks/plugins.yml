@@ -555,9 +555,9 @@
     state: "{{ plugins_for_library_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-library
 
-- name: epfl_diploma_verification plugin
+- name: epfl-diploma-verification plugin
   wordpress_plugin:
-    name: epfl_diploma_verification
+    name: epfl-diploma-verification
     state: "{{ plugins_for_diploma_verification_category }}"
     from: https://github.com/epfl-si/wp-plugin-epfl-diploma-verification
   tags:
