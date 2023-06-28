@@ -170,6 +170,7 @@
     - wp.plugins.mu.social-graph
     - wp.plugins.mu.last-changes
     - wp.plugins.wp-gutenberg
+    - wp.plugins.diploma-verification
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options
