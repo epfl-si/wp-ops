@@ -5,7 +5,7 @@
 - include_vars: "../../../vars/secrets-{{ ansible_oc_namespace }}.yml"
 - include_vars: ../../../vars/env-secrets.yml
 
-- name: Ansible Tower HTTP service
+- name: AWX HTTP service
   openshift:
     state: latest
     apiVersion: v1
@@ -66,7 +66,7 @@
     type: Opaque
     data: "{{ env_secret_restic_backup_credentials | base64_values }}"
 
-- name: Ansible Tower secret (awx-secrets)
+- name: AWX secret (awx-secrets)
   openshift:
     state: latest
     apiVersion: v1
@@ -122,7 +122,7 @@
     tag: >-
       {{ awx_redis_image_mirrored_from | regex_replace("^.*:", "") }}
 
-- name: Ansible Tower StatefulSet
+- name: AWX StatefulSet
   openshift:
     state: latest
     apiVersion: apps/v1
@@ -297,7 +297,7 @@
 
 - meta: flush_handlers
 
-- name: Ansible Tower route for the Web front-end
+- name: AWX route for the Web front-end
   openshift:
     state: latest
     apiVersion: route.openshift.io/v1

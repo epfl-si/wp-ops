@@ -1,15 +1,15 @@
-# Ansible and Ansible Tower (AWX)
+# Ansible and AWX
 
-This directory contains the support code for Ansible and Ansible Tower
-(aka AWX), which the WordPress uses extensively as its
-infrastructure-as-code.
+This directory contains the support code for Ansible and AWX
+(previously Ansible Tower), which the WordPress uses extensively as
+its infrastructure-as-code.
 
 Theoretically, the entire serving infrastructure can be brought up
 from a backup into an OpenShift namespace that the operator has access
 to (through `oc login`). This is done with the `wpsible` wrapper
-script. Additionnally, `wpsible` brings up Ansible Tower, which also
+script. Additionnally, `wpsible` brings up AWX, which also
 can perform the day-to-day subset of the same operations, either on a
-crontab-like basis, or interactively from the Ansible Tower Web UI.
+crontab-like basis, or interactively from the AWX Web UI.
 
 | Filename                           | Purpose                                                                                                 |
 |------------------------------------|---------------------------------------------------------------------------------------------------------|

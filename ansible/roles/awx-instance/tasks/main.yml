@@ -8,7 +8,7 @@
 #     - awx
 #     - awx.pvc
 
-- name: "Ansible Tower images and build configs on {{ awx_build_namespace }}"
+- name: "AWX images and build configs on {{ awx_build_namespace }}"
   when: "ansible_oc_namespace == awx_build_namespace"
   include_tasks:
     file: awx-builds.yml
@@ -23,7 +23,7 @@
     - awx.build.awx
     - awx.build.receptor
 
-- name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
+- name: "AWX images promoted from {{ awx_build_namespace }}"
   when: "ansible_oc_namespace != awx_build_namespace"
   include_tasks:
     file: _promote_image.yml
@@ -51,7 +51,7 @@
   # ../../wordpress-openshift-namespace/tasks/images.yml (under tag
   # `-t images.promote`)
 
-- name: "Ansible Tower OpenShift objects"
+- name: "AWX OpenShift objects"
   import_tasks: k8s.yml
   delegate_to: localhost
   tags:
@@ -59,7 +59,7 @@
     - awx.k8s
     - awx.openshift
 
-- name: "Ansible Tower database operations"
+- name: "AWX database operations"
   include_tasks:
     file: ops.yml
     apply:
@@ -92,7 +92,7 @@
     - awx.migrate
     - awx.seed
 
-- name: "Ansible Tower front-end authentication"
+- name: "AWX front-end authentication"
   import_tasks: auth.yml
   tags:
     - awx

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Run a script through Ansible Tower's python for AWX, with Django loaded.
+"""Run a script through AWX's python, with Django loaded.
 
 Django will be loaded before the script runs. The script may call
 exit_json() or throw an AnsibleError, much like an Ansible task would.

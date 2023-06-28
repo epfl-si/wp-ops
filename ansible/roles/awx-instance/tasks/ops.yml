@@ -12,7 +12,7 @@
     path: "{{ ops_state_dir }}"
     state: directory
 
-- name: Dump Ansible Tower database (SQL dump)
+- name: Dump AWX database (SQL dump)
   tags: awx.dump
   delegate_to: localhost
   shell:
@@ -24,7 +24,7 @@
       ' > {{ ops_sql_backup }}
 
 # Belt *and* suspenders:
-- name: Dump Ansible Tower database (Django dump)
+- name: Dump AWX database (Django dump)
   tags: awx.dump
   shell:
     cmd: |
@@ -32,7 +32,7 @@
          awx-manage dumpdata --indent=4 --natural-primary --natural-foreign \
          > {{ ops_django_backup }}
 
-- name: Restore Ansible Tower database from the SQL dump
+- name: Restore AWX database from the SQL dump
   tags: awx.restore
   # TODO: we would like to be able to restore from the Django dump
   # instead (or in addition); unfortunately the current data set

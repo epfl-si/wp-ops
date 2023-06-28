@@ -4,6 +4,6 @@ The variables in the table can be set from the wpsible command line to alter the
 
 | Variable              | Used in                                   | Explanation                                                                                                                                                            |
 |-----------------------|-------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `awx_playbook_branch` | ansible/roles/awx-instance/tasks/main.yml | Set this to override the branch that Ansible Tower (AWX) shall check out playbooks from (default is `master` in production, and the operator's current branch in test) |
+| `awx_playbook_branch` | ansible/roles/awx-instance/tasks/main.yml | Set this to override the branch that AWX (previously known as Ansible Tower) shall check out playbooks from (default is `master` in production, and the operator's current branch in test) |
 |                       |                                           |                                                                                                                                                                        |
 |                       |                                           |                                                                                                                                                                        |
