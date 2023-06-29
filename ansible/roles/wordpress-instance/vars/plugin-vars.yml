@@ -21,7 +21,7 @@ plugins_for_wpforms_category: '{{ [ "symlinked", "active" ] if ("WPForms" in wp_
 plugins_for_payonline_category: '{{ [ "symlinked", "active" ] if ("Payonline" in wp_site_categories and "WPForms" in wp_site_categories) else "absent" }}'
 plugins_for_wpforms_surveys_polls_category: '{{ [ "symlinked", "active" ] if ("Surveys" in wp_site_categories and "WPForms" in wp_site_categories) else "absent" }}'
 plugins_for_subscribe2_category: '{{ [ "symlinked", "active" ] if "Subscribe2" in wp_site_categories else "absent" }}'
-plugins_for_diploma_verification_category: '{{ [ "symlinked", "active" ] if "DiplomaVerification" in wp_site_categories else "absent" }}
+plugins_for_diploma_verification_category: '{{ [ "symlinked", "active" ] if "DiplomaVerification" in wp_site_categories else "absent" }}'
 
 # Defining if WP is managed or not
 wp_is_managed: '{{ "Unmanaged" not in wp_site_categories }}'
