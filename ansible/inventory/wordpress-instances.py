@@ -5,7 +5,7 @@
 # Build an Ansible inventory from wp-veritas and/or the on-NFS state
 #
 # Example invocation:
-#    env WWP_INVENTORY_SOURCES=wpveritas,nfs WWP_NAMESPACES=wwp-test,wwp wordpress-instances.py
+#    env WWP_INVENTORY_SOURCES=wpveritas,nfs WWP_NAMESPACES=wwp-test,wwp ./wordpress-instances.py
 
 import sys
 import os
