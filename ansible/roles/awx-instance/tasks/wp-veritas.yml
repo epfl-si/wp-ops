@@ -1,10 +1,32 @@
 - tags: always
-  include_vars: wp-veritas-vars.yml
+  include_vars: "{{ item }}"
+  with_items:
+    - wp-veritas-vars.yml
+    - k8s-vars.yml
 
 - tags: always
   include_vars:
     file: "secrets-{{ ansible_oc_namespace }}.yml"
     name: secrets
+
+- name: "Read API URL for wp-veritas from AWX"
+  delegate_to: ~
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      from awx.main.models.jobs import JobTemplate
+
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      def get_job_launch_api_url(jt):
+        return "https://%s/api/v2/job_templates/%d/launch/" % (
+          "{{ awx_web_hostnames[ansible_oc_namespace] }}",
+          jt.id)
+
+      jt = JobTemplate.objects.get(name="{{ wp_veritas_normalize_site_job_name }}")
+      update_json_status(changed=False, success=True,
+                         url=get_job_launch_api_url(jt))
+  register: _wpveritas_awx_normalize_api
 
 - name: "`wp-veritas` secrets"
   openshift:
@@ -24,11 +46,6 @@
            | map("string") | join(",") | string }}
       WP_VERITAS_BOT_TOKEN: >-
         {{ secrets["wp-veritas"]["telegram"]["bot_token"] | eyaml(eyaml_keys) }}
-      # TODO: figure this out from the AWX state
-      # TODO: have wp-veritas' `app/imports/api/methods/sites.js` actually
-      # read from that variable!
-      WP_VERITAS_AWX_URL: https://awx-poc-vpsi.epfl.ch/api/v2/job_templates/XXX/launch/
-      # and have wp-veritas read it from an env var.
       WP_VERITAS_AWX_TOKEN: >-
         {{ secrets["wp-veritas"]["awx_client"]["token"] | eyaml(eyaml_keys) }}
       MONGO_URL: >-
@@ -84,6 +101,8 @@
                   protocol: TCP
   vars:
     _common_env:
+      - name: WP_VERITAS_AWX_URL
+        value: "{{ _wpveritas_awx_normalize_api.url }}"
       - name: ROOT_URL
         value: 'https://{{ wp_veritas_frontend_hostname }}'
       - name: PORT
