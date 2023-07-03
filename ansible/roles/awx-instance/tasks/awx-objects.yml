@@ -113,15 +113,24 @@
   awx_script:
     supports_check_mode: yes
     script: |
-      {{ lookup("template", "job-templates-create.py") }}
+      from awx.main.models.inventory import Inventory
+      from awx.main.models.projects import Project
+      from awx.main.models.ha import InstanceGroup
 
-      kwarg = dict(
-          job_name = "{{ wp_veritas_normalize_site_job_name }}",
-          job_description = "Create or normalize one site as per configuration-as-code",
-          job_type = "run"
-      )
+      from awx.main.models.jobs import JobTemplate
 
-      update_json_status(changed=get_or_create_job_template(**kwarg))
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
+      project = Project.objects.get(name="{{ awx_project_name }}")
+      container_group = InstanceGroup.objects.get(name="default")
+
+      with AnsibleGetOrCreate(JobTemplate,
+                              name='{{ wp_veritas_normalize_site_job_name }}') as jt:
+        jt.description = "Create or normalize one or more sites as per configuration-as-code"
+        jt.project = project
+        jt.inventory = inventory
+        jt.playbook = '{{ awx_template_jobs_playbook }}'
 
 - name: "`default` InstanceGroup: provide /srv NFS volume to worker pods"
   awx_script:
