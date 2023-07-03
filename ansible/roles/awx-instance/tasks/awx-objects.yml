@@ -1,7 +1,10 @@
 # Set up Django objects used by AWX.
 
 - tags: always
-  include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
+  include_vars: "{{ item }}"
+  with_items:
+  - "wp-veritas-vars.yml"
+  - "secrets-{{ ansible_oc_namespace }}.yml"
 
 - name: "Clean up obsolete objects (from AWX 15.0.1)"
   awx_script:
@@ -113,7 +116,7 @@
       {{ lookup("template", "job-templates-create.py") }}
 
       kwarg = dict(
-          job_name = "WP-Veritas - Create or align site",
+          job_name = "{{ wp_veritas_normalize_site_job_name }}",
           job_description = "Create or normalize one site as per configuration-as-code",
           job_type = "run"
       )
@@ -163,7 +166,7 @@
       default_instance_group = InstanceGroup.objects.get(name="default")
 
       with AnsibleGetOrCreate(JobTemplate, name="Backup") as jt:
-          jt.description = "Backup"
+          jt.description = "{{ wp_veritas_backup_job_name }}"
           jt.job_type = "run"
           jt.inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
           jt.project = Project.objects.get(name="{{ awx_project_name }}")
