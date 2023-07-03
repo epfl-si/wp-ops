@@ -9,13 +9,14 @@
     file: "secrets-{{ ansible_oc_namespace }}.yml"
     name: secrets
 
-- name: "Read API URL for wp-veritas from AWX"
+- name: "Read wp-veritas API credentials from AWX"
   delegate_to: ~
   awx_script:
     supports_check_mode: yes
     script: |
       from awx.main.models.jobs import JobTemplate
       from django.contrib.auth.models import User
+      from awx.main.models.oauth import OAuth2AccessToken
 
       {{ lookup("template", "awx_script_lib.py") }}
 
@@ -25,8 +26,11 @@
           jt.id)
 
       jt = JobTemplate.objects.get(name="{{ wp_veritas_normalize_site_job_name }}")
+      wpveritas = User.objects.get(username="wp-veritas")
+      tok = OAuth2AccessToken.objects.filter(user=wpveritas).last()
       update_json_status(changed=False, success=True,
-                         url=get_job_launch_api_url(jt))
+                         url=get_job_launch_api_url(jt),
+                         token=tok.token)
   register: _wpveritas_awx_normalize_api
 
 - name: "`wp-veritas` secrets"
@@ -48,7 +52,7 @@
       WP_VERITAS_BOT_TOKEN: >-
         {{ secrets["wp-veritas"]["telegram"]["bot_token"] | eyaml(eyaml_keys) }}
       WP_VERITAS_AWX_TOKEN: >-
-        {{ secrets["wp-veritas"]["awx_client"]["token"] | eyaml(eyaml_keys) }}
+        {{ _wpveritas_awx_normalize_api.token }}
       MONGO_URL: >-
         mongodb://{{ _mongo.user }}:{{ _mongo.password }}@{{ _mongo.host }}/{{ _mongo.db }}
     _meteor_settings:
