@@ -72,11 +72,10 @@
           containers:
             - name: meteor
               image: "{{ wp_veritas_image_full_name }}"
-              env:
-                - name: ROOT_URL
-                  value: 'https://{{ wp_veritas_frontend_hostname }}'
-                - name: PORT
-                  value: '3000'
+              env: >
+                {{ _common_env +
+                ( [] if awx_is_production else _dev_env )
+                }}
               envFrom:
                 - secretRef:
                     name: wp-veritas
@@ -84,6 +83,14 @@
                 - containerPort: 3000
                   protocol: TCP
   vars:
+    _common_env:
+      - name: ROOT_URL
+        value: 'https://{{ wp_veritas_frontend_hostname }}'
+      - name: PORT
+        value: '3000'
+    _dev_env:
+      - name: DEBUG
+        value: '*'
     _meteor_image_trigger:
       from:
         kind: ImageStreamTag
