@@ -117,10 +117,17 @@
     - awx.auth
 
 - name: Set up Django objects used by AWX
-  import_tasks: awx-objects.yml
+  include_tasks:
+    file: awx-objects.yml
+    apply:
+      tags:
+      - awx
+      - awx.objects
   tags:
     - awx
     - awx.objects
+    - awx.objects.wpveritas
+    - awx.objects.wpveritas.renewtoken
 
 - name: wp-veritas
   when: >-

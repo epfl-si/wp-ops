@@ -203,3 +203,53 @@
         # nt.notification_configuration['use_ssl'] = True
         # nt.notification_configuration['use_tls'] = False
         nt.save()
+
+- name: "`wp-veritas` user, permissions and OAuth2 token"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      from django.contrib.auth.models import User
+      from awx.main.models.organization import Organization
+      from awx.main.models.oauth import OAuth2AccessToken
+      from awx.api.serializers import UserAuthorizedTokenSerializer
+
+      class MockRequest(object):
+        def __init__(self, user):
+          self.user = user
+
+      def mint_new_token(for_user):
+        # Although I'm not entirely sure what a “serializer” is
+        # supposed to be in Django and/or AWX (and we sure don't call
+        # this one to do any kind of serialization...), the code that
+        # sets proper default values for all the required fields (e.g.
+        # expiration, and of course the token itself) appears to live
+        # in that class:
+        return UserAuthorizedTokenSerializer(context={"request": MockRequest(for_user)}).create({})
+
+      execute_role = Organization.objects.get(name="{{ awx_organization_name }}").execute_role
+      with AnsibleGetOrCreate(User, username="wp-veritas") as wpveritas:
+        wpveritas.save()   # In case we just created it; required
+                           # before joining any of the N-to-many
+                           # relations below
+        if not wpveritas.roles.contains(execute_role):
+          wpveritas.roles.add(execute_role)
+          update_json_status(changed=True)
+
+        existing_tokens = wpveritas.main_oauth2accesstoken.all()
+        if {{ _do_renew_token }}:
+          (tokens_deleted, _) = existing_tokens.delete()
+          update_json_status(changed=(tokens_deleted != 0))
+          existing_tokens = []
+
+        if len(existing_tokens) == 0:
+          mint_new_token(AnsibleDjangoObserver.original_object(wpveritas))
+          update_json_status(changed=True)
+  tags:
+  - awx.objects.wpveritas
+  - awx.objects.wpveritas.renewtoken
+  vars:
+    _do_renew_token: >-
+      {{ "True" if "awx.objects.wpveritas.renewtoken" in ansible_run_tags
+      else "False" }}

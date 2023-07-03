@@ -15,6 +15,7 @@
     supports_check_mode: yes
     script: |
       from awx.main.models.jobs import JobTemplate
+      from django.contrib.auth.models import User
 
       {{ lookup("template", "awx_script_lib.py") }}
 

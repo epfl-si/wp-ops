@@ -8,6 +8,10 @@ class AnsibleDjangoObserver:
     def __init__(self, obj):
         self.__obj = obj
 
+    @staticmethod
+    def original_object(that):
+        return that.__obj
+
     def __getattr__(self, name):
         if name.endswith("__obj"):
             return object.__getattr__(self, name)
