@@ -80,58 +80,6 @@
         inv.save()
         inv.inventory_sources.set([inv_source])
 
-- name: "Remove the “Demo Job Template” if found"
-  awx_script:
-    supports_check_mode: yes
-    script: |
-      from awx.main.models.jobs import JobTemplate
-      try:
-          jt = JobTemplate.objects.get(name="Demo Job Template")
-          jt.delete()
-          update_json_status(changed=True)
-      except JobTemplate.DoesNotExist:
-          update_json_status(changed=False)
-
-- name: "Job template for theme selection"
-  awx_script:
-    supports_check_mode: yes
-    script: |
-      {{ lookup("template", "job-templates-create.py") }}
-
-      kwarg = dict(
-          job_name = "Set up theme to sites",
-          job_description = "Apply the theme defined in the inventory to sites",
-          job_tags = "themes",
-          job_type = "run",
-          job_schedule_name = "Set up the theme on WP sites every thursday",
-          job_schedule_rrule = "DTSTART:20220305T120829Z RRULE:FREQ=WEEKLY;BYDAY=TH",
-      )
-
-      update_json_status(changed=get_or_create_job_template(**kwarg))
-
-- name: "Job template for the WP-Veritas “Normaliser le site” button"
-  awx_script:
-    supports_check_mode: yes
-    script: |
-      from awx.main.models.inventory import Inventory
-      from awx.main.models.projects import Project
-      from awx.main.models.ha import InstanceGroup
-
-      from awx.main.models.jobs import JobTemplate
-
-      {{ lookup("template", "awx_script_lib.py") }}
-
-      inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
-      project = Project.objects.get(name="{{ awx_project_name }}")
-      container_group = InstanceGroup.objects.get(name="default")
-
-      with AnsibleGetOrCreate(JobTemplate,
-                              name='{{ wp_veritas_normalize_site_job_name }}') as jt:
-        jt.description = "Create or normalize one or more sites as per configuration-as-code"
-        jt.project = project
-        jt.inventory = inventory
-        jt.playbook = '{{ awx_template_jobs_playbook }}'
-
 - name: "`default` InstanceGroup: provide /srv NFS volume to worker pods"
   awx_script:
     supports_check_mode: yes
@@ -159,6 +107,41 @@
             persistentVolumeClaim:
               claimName: wordpress-0
       """
+
+- name: "Remove the “Demo Job Template” if found"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      from awx.main.models.jobs import JobTemplate
+      try:
+          jt = JobTemplate.objects.get(name="Demo Job Template")
+          jt.delete()
+          update_json_status(changed=True)
+      except JobTemplate.DoesNotExist:
+          update_json_status(changed=False)
+
+- name: "Job template for the WP-Veritas “Normaliser le site” button"
+  awx_script:
+    supports_check_mode: yes
+    script: |
+      from awx.main.models.inventory import Inventory
+      from awx.main.models.projects import Project
+      from awx.main.models.ha import InstanceGroup
+
+      from awx.main.models.jobs import JobTemplate
+
+      {{ lookup("template", "awx_script_lib.py") }}
+
+      inventory = Inventory.objects.get(name="{{ awx_inventory_name }}")
+      project = Project.objects.get(name="{{ awx_project_name }}")
+      container_group = InstanceGroup.objects.get(name="default")
+
+      with AnsibleGetOrCreate(JobTemplate,
+                              name='{{ wp_veritas_normalize_site_job_name }}') as jt:
+        jt.description = "Create or normalize one or more sites as per configuration-as-code"
+        jt.project = project
+        jt.inventory = inventory
+        jt.playbook = '{{ awx_template_jobs_playbook }}'
 
 - name: "job template for backups"
   awx_script:
