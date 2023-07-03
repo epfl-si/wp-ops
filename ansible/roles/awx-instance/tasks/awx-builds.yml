@@ -23,7 +23,44 @@
        FROM {{ awx_base_image_mirrored_to }}
 
        USER 0
-       # Nothing here for now...
+       {% if awx_remote_debug is defined %}
+       {# Support for pydevd remote debugging - NOT RECOMMENDED for
+        # production!
+        #
+        # Run Ansible with `-e awx_remote_debug=some-hostname-or-IP`
+        # to enable this. (Replace `some-hostname-or-IP` with the
+        # hostname or IP address of the relay VM, as described below.)
+        #
+        # You will need to be able to listen on port 12477 from a
+        # predictable IP address. The working¹ way to achieve that is
+        # as follows:
+        #
+        # 1. Select some VM in a suitable microsegmentation zone, that
+        # you enjoy root privileges on
+        #
+        # 2. Make sure that its `/etc/ssh/sshd_config` file contains
+        # the line
+        #
+        #       GatewayPorts clientspecified
+        #
+        # If not, edit that file so that it does, then issue the command
+        #
+        #       sudo service sshd restart
+        #
+        # 3. Connect to the VM with reverse port-forwarding enabled, e.g.
+        #
+        #       ssh -R 0.0.0.0:12477:127.0.0.1:12477 myvm
+        #
+        # ¹ If you insist on the not-working approach, which
+        # admittedly appears to be quite popular, take a look at
+        # https://github.com/omrikiei/ktunnel (and also
+        # https://github.com/omrikiei/ktunnel/pull/95 - Don't say I
+        # didn't warn you.)
+        #}
+       RUN /var/lib/awx/venv/awx/bin/pip3 install pydevd-pycharm~=231.9161.38
+       # As you can see below, setting up a breakpoint is a breeze (not):
+       RUN sed -i -e '369a\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ import pydevd_pycharm; pydevd_pycharm.settrace("{{ awx_remote_debug }}", port=12477, stdoutToServer=True, stderrToServer=True)' /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx/main/models/jobs.py
+       {% endif %}
 
        USER 1000
   tags: awx.build.awx
