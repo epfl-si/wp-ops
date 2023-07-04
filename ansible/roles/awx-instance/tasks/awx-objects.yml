@@ -6,13 +6,14 @@
   - "wp-veritas-vars.yml"
   - "secrets-{{ ansible_oc_namespace }}.yml"
 
-- name: "Clean up obsolete objects (from AWX 15.0.1)"
+- name: "Clean up obsolete or broken objects (from AWX 15.0.1)"
   awx_script:
     script: |
       {{ lookup("template", "awx_script_lib.py") }}
       from awx.main.models.ha import InstanceGroup
       from awx.main.models.inventory import CustomInventoryScript
       from awx.main.models.credential import Credential
+      from awx.main.models.jobs import JobTemplate
 
       # Do *not* delete the “WWP” project! That would cascade into deleting
       # the entire history. (Ask me how I know, or how said history got purged
@@ -27,6 +28,9 @@
       for cred in Credential.objects.all():
         if "wwp" in cred.name or "WWP" in cred.name:
           cred.delete()
+
+      # Was causing a 400 in the wp-veritas code path:
+      JobTemplate.objects.filter(name='').delete()
 
 - name: "`{{ awx_project_name }}` project"
   awx_script:
