@@ -1,7 +1,7 @@
 - include_vars: ../../../vars/image-vars.yml
   tags: always
 
-- include_vars: k8s-vars.yml
+- include_vars: awx-vars.yml
   tags: always
 
 - name: "Pull upstream awx image into {{ awx_base_image_mirrored_to }}"

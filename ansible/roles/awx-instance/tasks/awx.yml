@@ -1,6 +1,6 @@
 # Kubernetes (OpenShift) objects required to run AWX
 
-- include_vars: k8s-vars.yml
+- include_vars: awx-vars.yml
 - include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
 - include_vars: "../../../vars/secrets-{{ ansible_oc_namespace }}.yml"
 - include_vars: ../../../vars/env-secrets.yml

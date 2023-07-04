@@ -2,7 +2,7 @@
   include_vars: "{{ item }}"
   with_items:
     - wp-veritas-vars.yml
-    - k8s-vars.yml
+    - awx-vars.yml
 
 - tags: always
   include_vars:

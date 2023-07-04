@@ -1,7 +1,7 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
-    - k8s-vars.yml
+    - awx-vars.yml
     - wp-veritas-vars.yml
 
 - name: "Pull upstream {{ wp_veritas_base_image_mirrored_from }} into {{ wp_veritas_base_image_mirrored_to }}"

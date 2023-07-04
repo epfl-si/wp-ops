@@ -1,7 +1,7 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
-  - k8s-vars.yml
+  - awx-vars.yml
   - wp-veritas-vars.yml
 
 # - name: "Persistent Volume Claim"
@@ -69,13 +69,12 @@
   # ../../wordpress-openshift-namespace/tasks/images.yml (under tag
   # `-t images.promote`)
 
-- name: "AWX OpenShift objects"
-  import_tasks: k8s.yml
+- name: "AWX pods and related OpenShift objects"
+  import_tasks: awx.yml
   delegate_to: localhost
   tags:
     - awx
-    - awx.k8s
-    - awx.openshift
+    - awx.run
 
 - name: "AWX database operations"
   include_tasks:
