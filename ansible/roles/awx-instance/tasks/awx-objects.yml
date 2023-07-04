@@ -146,6 +146,7 @@
         jt.project = project
         jt.inventory = inventory
         jt.playbook = '{{ awx_template_jobs_playbook }}'
+        jt.ask_limit_on_launch = True
 
 - name: "job template for backups"
   awx_script:
