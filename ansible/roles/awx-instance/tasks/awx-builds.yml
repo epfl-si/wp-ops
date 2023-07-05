@@ -103,6 +103,9 @@
        FROM golang
        RUN apk add git
        RUN git clone --depth 1 --branch {{ awx_receptor_version}} https://github.com/ansible/receptor
+       # https://github.com/ansible/receptor/issues/446#issuecomment-1621404508 . SAD!
+       RUN sed -i -e 's/200 \* time.Millisecond/10000 * time.Millisecond/' \
+         receptor/pkg/workceptor/kubernetes.go
        RUN set -e -x; cd receptor; \
          CGO_ENABLED=0 GOFLAGS="-buildvcs=false" \
          go build -o receptor  -ldflags "-X 'github.com/ansible/receptor/internal/version.Version=v1.4.1+epfl'"  ./cmd/receptor-cl; \
@@ -113,6 +116,8 @@
        RUN pip3 install ansible ansible-runner
        COPY --from=0 /usr/local/bin/receptor /usr/local/bin/receptor
        USER 1000
+       # Issue 446 again
+       ENV RECEPTOR_KUBE_SUPPORT_RECONNECT=enabled
 
   tags: awx.build.receptor
   notify: Restart AWX pod
