@@ -71,6 +71,14 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   tags: awx.build.awx
 
+- name: "Pull upstream golang image into {{ awx_golang_build_image_mirrored_to }}"
+  openshift_imagestream:
+    metadata:
+      name: golang
+      namespace: "{{ awx_build_namespace }}"
+    from: "{{ awx_golang_build_image_mirrored_from }}"
+    tag: "{{ awx_golang_build_version }}"
+
 - name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_receptor_image_name }}"
   register: _awx_receptor_buildconfig
   openshift_imagestream:
@@ -78,19 +86,32 @@
     metadata:
       name: "{{ awx_receptor_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
+    spec:
+      source:
+        images:
+        - as: [ golang ]
+          from:
+            kind: ImageStreamTag
+            name: "golang:{{ awx_golang_build_version }}"
+            namespace: "{{ awx_build_namespace }}"
+        - as: [ awx ]
+          from:
+            kind: ImageStreamTag
+            name: "awx:{{ awx_version }}"
+            namespace: "{{ awx_build_namespace }}"
     dockerfile: |
-       FROM {{ awx_base_image_mirrored_to }}
+       FROM golang
+       RUN apk add git
+       RUN git clone --depth 1 --branch {{ awx_receptor_version}} https://github.com/ansible/receptor
+       RUN set -e -x; cd receptor; \
+         CGO_ENABLED=0 GOFLAGS="-buildvcs=false" \
+         go build -o receptor  -ldflags "-X 'github.com/ansible/receptor/internal/version.Version=v1.4.1+epfl'"  ./cmd/receptor-cl; \
+         cp receptor /usr/local/bin/
 
+       FROM awx
        USER 0
        RUN pip3 install ansible ansible-runner
-       RUN set -e -x; \
-          {{ shellmacro_poor_mans_curl }} $({{ shellmacro_poor_mans_curl }} https://api.github.com/repos/ansible/receptor/releases \
-            | python3 -c \
-              "import sys; import json; import re; \
-               release = (r for r in json.load(sys.stdin) if r['name'] == '{{ awx_receptor_version }}').__next__(); \
-               asset = (a for a in release['assets'] if re.search('linux_amd64\.tar\.gz$', a['name'])).__next__(); \
-               print(asset['browser_download_url'])") \
-          | tar -C/usr/local/bin -zxvv receptor
+       COPY --from=0 /usr/local/bin/receptor /usr/local/bin/receptor
        USER 1000
 
   tags: awx.build.receptor

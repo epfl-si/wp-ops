@@ -1,11 +1,17 @@
 awx_version: 22.4.0
 
+# The namespace we build in (and consume build images from).
+# ../tasks/k8s-build.yml is only applied in this namespace.
+awx_build_namespace: wwp-test
+
 awx_image_name: wp-awx
 awx_base_image_mirrored_from: "ghcr.io/ansible/awx:{{ awx_version }}"
 awx_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx:{{ awx_version }}"
 awx_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/wp-awx:{{awx_version}}"
 
-awx_verbose: true
+awx_golang_build_version: 1.19-alpine
+awx_golang_build_image_mirrored_from: "docker.io/library/golang:{{ awx_golang_build_version }}"
+awx_golang_build_image_mirrored_to: "docker-registry.default.svc:5000/{{ awx_build_namespace }}/golang:{{ awx_golang_build_version }}"
 
 awx_receptor_version: v1.4.1
 awx_receptor_image_name: wp-receptor
@@ -20,6 +26,8 @@ awx_receptor_socket_path: /var/run/receptor/receptor.sock
 # “enterprise edition”.
 awx_runner_image_name: wp-awx-ee
 awx_runner_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest"
+
+awx_verbose: true
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
@@ -56,10 +64,6 @@ awx_selfk8s_credential_name: "oc wwp-test K8S bearer token"
 awx_template_jobs_slice_count: 10
 awx_template_jobs_playbook: "ansible/playbooks/wordpress-main.yml"
 awx_template_jobs_verbosity: 0
-
-# The namespace we build in (and consume build images from).
-# ../tasks/k8s-build.yml is only applied in this namespace.
-awx_build_namespace: wwp-test
 
 # The UID and GID to use when running tasks such as wp-cli, creating files on NFS etc.
 awx_unix_credentials:
