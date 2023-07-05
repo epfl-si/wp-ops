@@ -101,10 +101,30 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
   tags: awx.build.receptor
 
-- name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
+- name: "Build {{ awx_runner_image_name }}"
+  register: _awx_runner_buildconfig
   openshift_imagestream:
+    tag: latest
     metadata:
-      name: awx-ee
+      name: "{{ awx_runner_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ee_image_mirrored_from }}"
-    tag: "{{ awx_version }}"
+    from: 
+      kind: ImageStreamTag
+      name: "mgmt:latest"
+      namespace: "{{ awx_build_namespace }}"
+    dockerfile: |
+       FROM mgmt
+       RUN pip3 install ansible ansible-runner
+       RUN mkdir -m 1777 /runner /.ansible
+       RUN (echo "#!/bin/bash"; echo 'exec "$@"') > /docker-entrypoint.sh
+       RUN set -e -x; \
+         {{ shellmacro_poor_mans_curl }} {{ awx_requirements_yml_url }} > /usr/local/lib/requirements.yml ; \
+         ansible-galaxy role install -r /usr/local/lib/requirements.yml \
+           --roles-path /usr/share/ansible/roles ; \
+         ansible-galaxy collection install -r /usr/local/lib/requirements.yml \
+           --collections-path /usr/local/lib/python3.*/dist-packages/ansible_collections
+
+- name: "Rebuild {{ awx_runner_image_name }} now"
+  when: _awx_runner_buildconfig.changed | default(True)
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_runner_image_name }}"
+  tags: awx.build.ee

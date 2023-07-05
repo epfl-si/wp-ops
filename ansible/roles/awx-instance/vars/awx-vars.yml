@@ -14,12 +14,12 @@ awx_receptor_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_na
 # https://github.com/ansible/awx/blob/devel/awx/main/tasks/receptor.py#L640):
 awx_receptor_socket_path: /var/run/receptor/receptor.sock
 
-# AWX will spin up pods using this image when it has work to do.
-# 💡 Here “ee” means “execution environment”, not “enterprise edition”.
-awx_ee_version: "{{ awx_version }}"
-awx_ee_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
-awx_ee_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
-awx_ee_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/ee:{{ awx_ee_version }}"
+# AWX will spin up pods using this image when it wants to perform
+# “data plane”-related work (e.g. running inventory scripts or
+# applying playbooks). 💡 Here “ee” means “execution environment”, not
+# “enterprise edition”.
+awx_runner_image_name: wp-awx-ee
+awx_runner_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_runner_image_name }}:latest"
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
@@ -34,8 +34,6 @@ awx_inventories:
   wwp: prod
   wwp-test: test
 
-awx_service_account: awx
-
 # `curl` (and therefore) `dnf` and `yum` are broken on CentOS 9 +
 # OpenShift 3.11, but only during builds ☹
 # (https://github.com/moby/moby/issues/42680). Here is a workaround:
@@ -46,6 +44,8 @@ shellmacro_poor_mans_curl: >-
 awx_organization_name: "WWP"
 awx_project_name: "wp-ops"
 awx_project_github_url: "https://github.com/epfl-si/wp-ops"
+
+awx_requirements_yml_url: "https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml"
 
 awx_inventory_source_path: "ansible/inventory/wordpress-instances.py"
 awx_inventory_source_name: "{{ awx_inventory_source_path | basename }}"
@@ -67,3 +67,12 @@ awx_unix_credentials:
   gid: 33
   user: www-data
   group: www-data
+# Setting UIDs and GIDs at will is a restricted capability on
+# OpenShift (see § “User ID (UID) and Namespaces” in
+# https://cloud.redhat.com/blog/a-guide-to-openshift-and-uids). In
+# order to run “back-office” containers such as Ansible (and also the
+# mgmt containers), Camptocamp granted the required permissions to one
+# service account per namespace, with the same name as said namespace
+# (see a detailed explanation at
+# https://jira.camptocamp.com/servicedesk/customer/portal/5/INF-5343):
+awx_service_account: "{{ ansible_oc_namespace }}"

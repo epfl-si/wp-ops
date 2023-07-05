@@ -25,6 +25,7 @@
     - awx.build
     - awx.build.awx
     - awx.build.receptor
+    - awx.build.ee
 
 - name: "wp-veritas images and build configs on {{ wp_veritas_build_namespace }}"
   when: "ansible_oc_namespace == wp_veritas_build_namespace"

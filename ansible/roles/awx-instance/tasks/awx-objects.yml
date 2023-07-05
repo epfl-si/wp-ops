@@ -84,7 +84,7 @@
         inv.save()
         inv.inventory_sources.set([inv_source])
 
-- name: "`default` InstanceGroup: provide /srv NFS volume to worker pods"
+- name: "`default` InstanceGroup: permissions and volumes for worker pods"
   awx_script:
     supports_check_mode: yes
     script: |
@@ -110,6 +110,10 @@
           - name: wp-nfs
             persistentVolumeClaim:
               claimName: wordpress-0
+        securityContext:
+          runAsUser: {{ awx_unix_credentials.uid }}
+          runAsGroup: {{ awx_unix_credentials.gid }}
+        serviceAccountName: {{ awx_service_account }}
       """
 
 - name: "Remove the “Demo Job Template” if found"
