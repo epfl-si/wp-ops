@@ -67,7 +67,7 @@
   notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_image_name }} now"
-  when: _awx_buildconfig is changed
+  when: _awx_buildconfig.changed | default(True)
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   tags: awx.build.awx
 
@@ -97,7 +97,7 @@
   notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_receptor_image_name }} now"
-  when: _awx_receptor_buildconfig is changed
+  when: _awx_receptor_buildconfig.changed | default(True)
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
   tags: awx.build.receptor
 
