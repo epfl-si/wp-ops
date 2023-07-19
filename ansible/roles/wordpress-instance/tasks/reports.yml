@@ -46,6 +46,7 @@
 
 - name: Search site db for ISA content
   command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_title != 'Auto Draft' AND post_content LIKE'%isa.epfl.ch/pe%'\" --skip-column-names"
+  # OR command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%isa.epfl.ch/pe%'\" --skip-column-names"
 
   register: fetched_pages
   changed_when: false
