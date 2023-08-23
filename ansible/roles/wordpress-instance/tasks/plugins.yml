@@ -546,12 +546,6 @@
   tags:
     - wp.plugins.restauration.options
 
-- name: Subscribe2 plugin
-  wordpress_plugin:
-    name: Subscribe2
-    state: "{{ plugins_for_subscribe2_category }}"
-    from: wordpress.org/plugins
-
 - name: EPFL-Library-Plugins plugin
   wordpress_plugin:
     name: EPFL-Library-Plugins
