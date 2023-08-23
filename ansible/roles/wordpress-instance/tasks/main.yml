@@ -171,6 +171,7 @@
     - wp.plugins.mu.last-changes
     - wp.plugins.wp-gutenberg
     - wp.plugins.diploma-verification
+    - wp.plugins.partner-universities
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options

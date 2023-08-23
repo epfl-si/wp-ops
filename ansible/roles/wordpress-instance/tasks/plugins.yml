@@ -564,6 +564,15 @@
     - wp.plugins
     - wp.plugins.diploma-verification
 
+- name: epfl-partner-universities plugin
+  wordpress_plugin:
+    name: epfl-partner-universities
+    state: "{{ plugins_for_partner_universities_category }}"
+    from: https://github.com/epfl-si/wp-plugin-epfl-partner-universities
+  tags:
+    - wp.plugins
+    - wp.plugins.partner-universities
+
 - name: epfl-courses-se plugin
   wordpress_plugin:
     name: epfl-courses-se
