@@ -232,7 +232,10 @@
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    # As the plugin has to be reviewed by the WP team, temporary get the direct plugin zip,
+    # please reset later to:
+    # from: wordpress.org/plugins
+    from: https://downloads.wordpress.org/plugin/flowpaper-lite-pdf-flipbook.zip
   tags: wp.plugins.pdf
 
 - name: Remove obsolete PDF plug-ins (one-shot action)
