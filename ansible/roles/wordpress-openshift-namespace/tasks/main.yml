@@ -85,6 +85,15 @@
     - monitoring.prometheus
     - monitoring.pushgateway
 
+- name: "Menu and breadcrumb microservice"
+  include_tasks:
+    file: menu-api.yml
+    apply:
+      tags:
+        - menu-api
+  tags:
+    - menu-api
+
 - name: "Sorry Server"
   when: openshift_namespace == "wwp-test"
   include_tasks:

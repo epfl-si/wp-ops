@@ -167,6 +167,10 @@
       git_path: docker/cronjob
       from: "{{ mgmt_image_name }}"
       triggered_by: mgmt
+    - name: "{{ menu_api_image_name }}"
+      git_path: docker/menu-api
+      from: "{{ mgmt_image_name }}"
+      triggered_by: mgmt
   vars:
     _triggers:
       wp-base:
@@ -206,6 +210,7 @@
       oc tag wwp-test/mgmt:latest wwp/mgmt:prod
       oc tag wwp-test/mgmt:latest wwp-infra/mgmt:prod
       oc tag wwp-test/httpd:latest wwp/httpd:prod
+      oc tag wwp-test/menu-api:latest wwp/menu-api:latest
       oc tag wwp-test/cronjob:latest wwp-infra/cronjob:latest
   # 💡 Other image promotion tasks (besides “core” WordPress) can be
   # found in ../../awx-instance/tasks/main.yml (under tag `-t
