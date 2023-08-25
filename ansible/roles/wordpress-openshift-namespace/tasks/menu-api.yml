@@ -1,0 +1,60 @@
+- name: Menu and breadcrumb API DeploymentConfig
+  openshift:
+    apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      name: menu-api
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      replicas: 1
+      selector:
+        deployment-config.name: menu-api
+      template:
+        metadata:
+          labels:
+            deployment-config.name: menu-api
+        spec:
+          containers:
+            - name: menu-api
+              image: 'docker-registry.default.svc:5000/{{ openshift_namespace }}/menu-api:latest'
+              imagePullPolicy: Always
+              volumeMounts:
+                - name: wp-nfs
+                  mountPath: /srv/menus
+                  subPath: "{{ _subpath }}"
+          volumes:
+            - name: wp-nfs
+              persistentVolumeClaim:
+                claimName: "wordpress-0"
+                readOnly: true
+      triggers:
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - menu-api
+          from:
+            kind: ImageStreamTag
+            name: 'menu-api:latest'
+            namespace: "{{ openshift_namespace }}"
+  vars:
+    _subpath: "{{ _subpaths[openshift_namespace] }}"
+    _subpaths:
+      wwp: www/www.epfl.ch/htdocs/menu-backups
+      wwp-test: .
+
+- name: Menu and breadcrumb API Service
+  openshift:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: menu-api
+      namespace: "{{ openshift_namespace }}"
+    spec:
+      type: ClusterIP
+      ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 3000
+      selector:
+        deployment-config.name: menu-api
