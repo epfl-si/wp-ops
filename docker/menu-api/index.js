@@ -16,5 +16,5 @@ app.get('/breadcrumb', (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`menu-api listening on port ${port}`)
 })
