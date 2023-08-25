@@ -5,5 +5,4 @@ COPY package.json /app
 COPY package-lock.json /app
 RUN npm i --no-fund
 COPY *.js /app
-COPY new-menu.json /app
 CMD ["npm", "start"]
