@@ -14,7 +14,7 @@ An express server that can serves WordPress menu.
 ### Test
 
 ```
-curl http://localhost:8888/breadcrumb\?blogname\=https://go.epfl.ch/tutu\&lang\=en
+curl http://localhost:8888/breadcrumb?lang=fr&url=https://www.epfl.ch/campus/services/website/
 ```
 or
 ```

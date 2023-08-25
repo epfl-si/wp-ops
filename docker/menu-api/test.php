@@ -1,5 +1,5 @@
 <?php 
-$res = file_get_contents('http://localhost:8888/breadcrumb?lang=fr&bloginfo=https://www.epfl.ch/campus/services/website');
+$res = file_get_contents('http://localhost:8888/breadcrumb?lang=fr&url=https://www.epfl.ch/campus/services/website/');
 $res = json_decode($res, false);
 $breadcrumb = '';
 foreach ($res->breadcrumb as $key => $val) {

@@ -2,36 +2,59 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const MENU_JSON = require('./new-menu.json')
-//console.log(MENU_JSON)
+const MENU_JSON = require('./epfl-full-top-fr-menu.json')
 
-const searchEntryByURL = (entry) => {
-  // console.debug("searchEntryByURL", entry)
-  let site = MENU_JSON.find(o => o.epfl_soa === entry);
-  // console.log(site)
-  return site
-}
+
 const searchEntryByID = (id) => {
-  // console.debug("searchEntryByID", id)
-  let parent = MENU_JSON.find(o => o.ID === id);
-  // console.log(parent)
+  const parent = MENU_JSON.find(o => o.ID === id)
   return parent
 }
-let currentSite = searchEntryByURL('https://www.epfl.ch/research/awards/')
-let parrent = searchEntryByID(currentSite.menu_item_parent)
+
+const searchEntryByURL = (entry) => {
+  const site = MENU_JSON.find(o => o.epfl_soa === entry)
+
+  if (site) {
+    return {
+      title: site.title,
+      url: site.url,
+      menu_item_parent: site.menu_item_parent,
+    }
+  }
+}
+
+const searchAllParentsEntriesByID = (entry) => {
+  const parentEntry = searchEntryByID(entry.menu_item_parent)
+
+  if (parentEntry &&
+    parentEntry.menu_item_parent &&
+    parentEntry.menu_item_parent !== '0') {
+    const parents = searchAllParentsEntriesByID(parentEntry)
+    return [...parents, parentEntry];
+  } else {
+    return [parentEntry];
+  }
+}
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
 app.get('/breadcrumb', (req, res) => {
-  const blogname = req.query.blogname,
+  const url = req.query.url,
         lang = req.query.lang;
-  res.json({ status: "OK", breadcrumb:
-             [{url: "https://example.com", title: "Toto"},
-              {url: "https://example.com", title: "Tutu"}] })
-})
 
+  const firstSite = url ? searchEntryByURL(url) : undefined
+
+  const breadcrumbForURL = firstSite !== undefined ? [
+    ...searchAllParentsEntriesByID(firstSite),
+    firstSite,
+    ] : []
+
+  res.json({
+    status: "OK",
+    breadcrumb: breadcrumbForURL
+  })
+})
 
 app.listen(port, () => {
   console.log(`menu-api listening on port ${port}`)
