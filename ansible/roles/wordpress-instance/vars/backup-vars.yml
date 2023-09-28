@@ -20,6 +20,8 @@ backup_aws_s3api_jq_sum_cmd: >-
 backup_aws_s3api_jq_count_cmd: >-
   jq '.Contents | length'
 
+backup_timeout_seconds: "{{ 8 * 3600 }}"  # 8 hours
+
 backup_url_label: "{{ wp_base_url | ensure_trailing_slash }}"
 backup_curl_to_pushgateway_cmd: >-
   curl -X POST -H "Content-Type: text/plain" --data-binary @-
