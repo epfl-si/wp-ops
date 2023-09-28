@@ -16,6 +16,7 @@
     - "../../../vars/secrets-{{ openshift_namespace }}.yml"  # Used in env-secrets.yml
 
 - name: Backup
+  timeout: "{{ backup_timeout_seconds }}"
   environment: "{{ backup_restic_environment }}"    # `-vv`-safe!
   shell:
     executable: /bin/bash
