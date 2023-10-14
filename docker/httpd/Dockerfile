@@ -31,7 +31,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     libio-all-lwp-perl \
     libreadonly-perl \
     libsecret-1-0 \
-    libgsasl7 \
+    libgsasl18 \
   && \
     apt-get -qy autoremove && \
     apt-get clean
