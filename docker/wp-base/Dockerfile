@@ -2,7 +2,7 @@ FROM ubuntu:focal
 
 # Version pins are defined here:
 ENV PHP_VERSION=7.4
-ENV NODE_VERSION_MAJOR=14
+ENV NODE_VERSION_MAJOR=20
 
 ENV DEBIAN_FRONTEND=noninteractive
 
