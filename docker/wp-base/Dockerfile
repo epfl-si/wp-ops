@@ -7,10 +7,14 @@ ENV NODE_VERSION_MAJOR=14
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update && \
-    apt-get -qy install curl ca-certificates \
+    apt-get -qy install ca-certificates \
                software-properties-common apt-transport-https gnupg awscli && \
     apt-get -qy autoremove && \
     apt-get clean
+
+# https://github.com/curl/curl/issues/3750
+RUN set -e -x; add-apt-repository ppa:savoury1/backports; \
+  apt-get -qy update; apt-get -qy install curl
 
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION_MAJOR}.x | bash -
 
