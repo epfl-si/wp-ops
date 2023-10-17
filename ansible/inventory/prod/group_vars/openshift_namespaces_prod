@@ -29,7 +29,6 @@ DeploymentConfigs:
       replicaCount: 6
 #    # TODO: Obtain the list of unmanaged deployments from wp-veritas
     - name: unm-annualreportsti2019
-    - name: unm-eee
     - name: unm-hobelblog
     - name: unm-icrp
     - name: unm-ips23
