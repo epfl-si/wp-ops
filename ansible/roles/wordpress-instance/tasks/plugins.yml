@@ -377,7 +377,7 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
-    branch: static/5.5-node20
+    branch: static/5.5
 
 - name: EPFL Gutenberg plugin
   when: wp_version_lineage is version('5.6', '>=')
@@ -389,7 +389,7 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-gutenberg-epfl
-    branch: upgrade/node-20.x
+    branch: master
 
 - name: EPFL Menus plugin
   wordpress_plugin:
