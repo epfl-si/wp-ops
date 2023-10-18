@@ -15,10 +15,12 @@
   },
   "devDependencies": {
     "@types/assert": "^1.5.7",
+    "@types/chai": "^4.3.9",
     "@types/express": "^4.17.19",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.6",
     "assert": "^2.1.0",
+    "chai": "^4.3.10",
     "mocha": "^10.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
