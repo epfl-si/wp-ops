@@ -1,5 +1,5 @@
 import 'mocha';
-import assert from "assert";
+import { assert } from "chai";
 import {SiteTree} from "../src/interfaces/siteTree";
 import {WpMenu} from "../src/interfaces/wpMenu";
 
@@ -31,7 +31,14 @@ describe("Site Tree", function() {
             const parent : WpMenu = {ID: 1, menu_item_parent: 0, ...bogusWpMenu},
                 child : WpMenu = {ID: 2, menu_item_parent: 1, ...bogusWpMenu};
             const siteTree = SiteTree([{ siteBaseUrl: "https://toto.com", entries: [parent, child] }]);
-            assert
+            assert.deepEqual(siteTree.getChildren(1), [child])
+        })
+        it("doesn't crash when parentID points nowhere", function() {
+            const parent : WpMenu = {ID: 1, menu_item_parent: 0, ...bogusWpMenu},
+                child : WpMenu = {ID: 2, menu_item_parent: 3, ...bogusWpMenu};
+            const siteTree = SiteTree([{ siteBaseUrl: "https://toto.com", entries: [parent, child] }]);
+            assert(siteTree.getParent(2) === undefined);
+            assert.deepEqual(siteTree.getChildren(1), []);
         })
     })
 });
