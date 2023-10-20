@@ -116,8 +116,8 @@ app.get('/breadcrumb', (req, res) => {
     const lang: string = req.query.lang as string;
 
     let breadcrumbForURL: WpMenu[] = [];
-    let brothers: WpMenu[] = [];
-
+    let sibling: WpMenu[] = [];
+//TODO test avec http://localhost:3000/breadcrumb?lang=fr&url=https://wp-httpd/campus/services/website/close-a-website/
     const siteArray: SiteTreeInstance = SiteTree(arrayMenus);
     let firstSite: { [urlInstance: string]: WpMenu } | undefined = siteArray.findItemByUrl(url);
     if (firstSite) {
@@ -126,14 +126,14 @@ app.get('/breadcrumb', (req, res) => {
             breadcrumbForURL = firstSite !== undefined ? [
                 ...searchAllParentsEntriesByID(firstSite[restUrl], restUrl, siteArray),
             ] : [];
-            brothers = siteArray.getBrothersAndSisters(restUrl,firstSite[restUrl].ID)
+            sibling = siteArray.getSiblings(restUrl,firstSite[restUrl].ID)
         }
     }
 
     res.json({
         status: "OK",
         breadcrumb: breadcrumbForURL,
-        brothers: brothers
+        sibling: sibling
     })
 });
 

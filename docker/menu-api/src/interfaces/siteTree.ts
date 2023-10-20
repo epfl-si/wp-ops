@@ -1,16 +1,16 @@
 import {WpMenu} from "./wpMenu";
 import {MenuAPIResult} from "./menuAPIResult";
 
-export type SiteTreeConstructor = (menus : { urlInstanceRestUrl: string, entries: WpMenu[] }[]) => SiteTreeInstance
-
 export interface SiteTreeInstance  {
     getParent : (urlInstanceRestUrl: string,  idChild: number) => { [urlInstance : string]: WpMenu } | undefined
     getChildren : (urlInstanceRestUrl: string, idParent: number) => WpMenu[]
     findExternalMenuByRestUrl : (urlInstanceRestUrl: string) => WpMenu | undefined
     findItemByRestUrlAndId: (urlInstanceRestUrl: string, idItem: number) => WpMenu | undefined
-    getBrothersAndSisters : (urlInstanceRestUrl: string, iditem: number) => WpMenu[]
+    getSiblings : (urlInstanceRestUrl: string, idItem: number) => WpMenu[]
     findItemByUrl: (pageURL: string) => { [urlInstance: string]: WpMenu } | undefined
 }
+
+export type SiteTreeConstructor = (menus : { urlInstanceRestUrl: string, entries: WpMenu[] }[]) => SiteTreeInstance
 
 export const SiteTree : SiteTreeConstructor = function(menus) {
     const itemsByID : { [urlInstanceRestUrl : string]: { [idItem : number]: WpMenu } } = {};
@@ -18,7 +18,6 @@ export const SiteTree : SiteTreeConstructor = function(menus) {
     const children: { [urlInstanceRestUrl : string]: { [idParent : number]: WpMenu[] } } = {};
 
     menus.forEach(menu =>{
-        console.log(menu.urlInstanceRestUrl);
         itemsByID[menu.urlInstanceRestUrl] = {};
         parents[menu.urlInstanceRestUrl] = {};
         children[menu.urlInstanceRestUrl] = {};
@@ -73,13 +72,13 @@ export const SiteTree : SiteTreeConstructor = function(menus) {
                 return child;//for normal menus or external not found menus
             });
         },
-        getBrothersAndSisters(urlInstanceRestUrl: string, iditem:number)  {
-            const parent = this.getParent(urlInstanceRestUrl,iditem);
+        getSiblings(urlInstanceRestUrl: string, idItem:number)  {
+            const parent = this.getParent(urlInstanceRestUrl,idItem);
             if (parent) {
                 const newUrl = Object.keys(parent)[0];
                 if (parent[newUrl]) {
                     const children = this.getChildren(newUrl,parent[newUrl].ID);
-                    return children.filter(menu => menu.ID!=iditem);
+                    return children.filter(menu => menu.ID!=idItem);
                 }else {
                     return [];
                 }

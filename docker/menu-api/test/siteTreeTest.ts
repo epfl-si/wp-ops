@@ -116,14 +116,33 @@ describe("Site Tree", function() {
             }
         })
         it("gets the correct instance child", function() {
-            const jsonCampus =  fs.readFileSync('./test/data/services.json', 'utf-8');
+            const jsoServices =  fs.readFileSync('./test/data/services.json', 'utf-8');
             const jsonWebSite =  fs.readFileSync('./test/data/website.json', 'utf-8');
-            const campusMenu: MenuAPIResult = JSON.parse(jsonCampus);
+            const servicesMenu: MenuAPIResult = JSON.parse(jsoServices);
             const websiteMenu: MenuAPIResult = JSON.parse(jsonWebSite);
-            const siteTree = SiteTree([{ urlInstanceRestUrl: "/campus/services/wp-json/epfl/v1/menus/top?lang=en", entries: campusMenu.items },
+            const siteTree = SiteTree([{ urlInstanceRestUrl: "/campus/services/wp-json/epfl/v1/menus/top?lang=en", entries: servicesMenu.items },
                 { urlInstanceRestUrl: "/campus/services/website/wp-json/epfl/v1/menus/top?lang=en", entries: websiteMenu.items }]);
             const children = siteTree.getChildren("/campus/services/wp-json/epfl/v1/menus/top?lang=en", 7119);
             assert(children.filter(item => item.ID ===15624 ).length == 1);
+        })
+        it("finds the correct item", function() {
+            const jsoServices =  fs.readFileSync('./test/data/services.json', 'utf-8');
+            const jsonWebSite =  fs.readFileSync('./test/data/website.json', 'utf-8');
+            const servicesMenu: MenuAPIResult = JSON.parse(jsoServices);
+            const websiteMenu: MenuAPIResult = JSON.parse(jsonWebSite);
+            const siteTree = SiteTree([{ urlInstanceRestUrl: "/campus/services/wp-json/epfl/v1/menus/top?lang=en", entries: servicesMenu.items },
+                { urlInstanceRestUrl: "/campus/services/website/wp-json/epfl/v1/menus/top?lang=en", entries: websiteMenu.items }]);
+            let firstSite: { [urlInstance: string]: WpMenu } | undefined = siteTree.findItemByUrl("https://wp-httpd/campus/services/website/close-a-website/");
+            if (firstSite) {
+                const restUrl = Object.keys(firstSite)[0];
+                if (firstSite[restUrl]) {
+                    assert(firstSite[restUrl].ID ===24813);
+                } else {
+                    assert.fail();
+                }
+            } else {
+                assert.fail();
+            }
         })
     })
 });
