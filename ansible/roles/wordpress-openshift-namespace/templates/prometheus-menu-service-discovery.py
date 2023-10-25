@@ -50,8 +50,6 @@ class DynamicConfig:
             if not s['wpInfra']:
                 continue
             wp_env = s['openshiftEnv']
-            if wp_env.startswith('unm'):
-                continue
 
             url = s['url'] if s['url'].endswith('/') else s['url'] + '/'
             targets_by_wp_env.setdefault(wp_env, []).append(url)

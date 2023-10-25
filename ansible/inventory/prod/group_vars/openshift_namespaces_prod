@@ -27,16 +27,6 @@ DeploymentConfigs:
     - name: subdomains-lite
     - name: www
       replicaCount: 6
-#    # TODO: Obtain the list of unmanaged deployments from wp-veritas
-    - name: unm-annualreportsti2019
-    - name: unm-hobelblog
-    - name: unm-icrp
-    - name: unm-ips23
-    - name: unm-journeeindustrie
-    - name: unm-neurosymposium
-    - name: unm-phdsummit
-    - name: unm-rapportannuel
-    - name: unm-synuclein
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
