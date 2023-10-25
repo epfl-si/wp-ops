@@ -143,10 +143,6 @@
           forcePull: true
           noCache: true
           buildArgs:
-            - name: GITHUB_API_USER
-              value: "{{ github_api_token.user }}"
-            - name: GITHUB_API_TOKEN
-              value: "{{ github_api_token.token | eyaml(eyaml_keys) }}"
             - name: INSTALL_AUTO_FLAGS
               value: >-
                 --s3-endpoint-url={{ build.s3_assets.endpoint_url }}
