@@ -12,8 +12,5 @@ class FilterModule(object):
 
     def route_name(self, site_url, openshift_env):
         site_name = urlparse(site_url).netloc.replace(".epfl.ch", "").replace(".", "-")
-        if openshift_env.startswith("unm-"):
-            route_name = f"httpd-unm-{site_name}"
-        else:
-            route_name = f"httpd-{site_name}"
+        route_name = f"httpd-{site_name}"
         return route_name

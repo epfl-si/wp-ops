@@ -65,7 +65,6 @@ class _Site:
 
     def _keep(self):
         if self.wwp_env == '' or \
-           self.wwp_env.startswith('unm-') or \
            self.wwp_env == 'manager':
             return False
         else:
