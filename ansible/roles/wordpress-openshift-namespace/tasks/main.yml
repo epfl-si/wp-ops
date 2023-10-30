@@ -85,7 +85,7 @@
     - monitoring.prometheus
     - monitoring.pushgateway
 
-- name: "Report URI"
+- name: "CSP Report URI"
   include_tasks:
     file: report-uri.yml
     apply:
