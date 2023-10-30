@@ -85,6 +85,17 @@
     - monitoring.prometheus
     - monitoring.pushgateway
 
+- name: "CSP Report URI"
+  include_tasks:
+    file: report-uri.yml
+    apply:
+      tags:
+        - report-uri
+  tags:
+    - report-uri
+    - report-uri.rebuild
+    - report-uri.image.promote
+
 - name: "Sorry Server"
   when: openshift_namespace == "wwp-test"
   include_tasks:

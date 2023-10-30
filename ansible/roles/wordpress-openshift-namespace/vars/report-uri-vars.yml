@@ -1,0 +1,8 @@
+report_uri_image_tag: "{{ 'prod' if openshift_namespace == 'wwp' else 'latest' }}"
+report_uri_image_os_path: "docker-registry.default.svc:5000/{{ openshift_namespace }}/report-uri:{{ report_uri_image_tag }}"
+report_uri_git_uri: https://github.com/epfl-si/report-uri
+report_uri_base_image_name: node
+report_uri_base_image_tag: 20-alpine
+report_uri_base_mirrored_from: docker.io/{{ report_uri_base_image_name }}:{{ report_uri_base_image_name }}
+report_uri_base_mirrored_to: docker-registry.default.svc:5000/wwp-test/{{ report_uri_base_image_name }}:{{ report_uri_base_image_name }}
+report_uri_hostname: "{{ 'report-uri' if openshift_namespace == 'wwp' else 'report-uri-test' }}.epfl.ch"
