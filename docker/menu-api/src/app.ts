@@ -14,21 +14,24 @@ headers.set('Accept', 'application/json');
 let openshiftEnv: string[] = [];
 let wpVeritasURL: string = '';
 let baseUrl: string = '';
-const restUrlEnd: string = 'wp-json/epfl/v1/menus/top?lang=en';
+const restUrlEnd: string = 'wp-json/epfl/v1/menus/top?lang=';
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let dev = true;
 if(dev) {
     openshiftEnv = ["rmaggi"];
     wpVeritasURL = 'https://wp-veritas-test.epfl.ch/api/v1/sites';
     baseUrl = 'https://wp-httpd'
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }else{
     openshiftEnv = ["labs", "www"];
     wpVeritasURL = 'https://wp-veritas.epfl.ch/api/v1/sites';
     baseUrl = 'https://www.epfl.ch'
 }
 
-let arrayMenus: { urlInstanceRestUrl: string, entries: WpMenu[] }[] = [];
+const arrayMenusFR: { urlInstanceRestUrl: string, entries: WpMenu[] }[] = [];
+const arrayMenusEN: { urlInstanceRestUrl: string, entries: WpMenu[] }[] = [];
+const arrayMenusDE: { urlInstanceRestUrl: string, entries: WpMenu[] }[] = [];
 
 function getSiteListFromWPVeritas(): Promise<Site[]> {
     const request: RequestInfo = new Request(wpVeritasURL, {
@@ -41,11 +44,11 @@ function getSiteListFromWPVeritas(): Promise<Site[]> {
     });
 }
 
-function getMenuForSite(siteURL: string): Promise<MenuAPIResult> {
+function getMenuForSite(siteURL: string, lang: string): Promise<MenuAPIResult> {
     if (dev){
         siteURL = siteURL.replace(".epfl.ch","");
     }
-    const siteMenuURL: string = siteURL.concat(restUrlEnd);
+    const siteMenuURL: string = siteURL.concat(restUrlEnd).concat(lang);
     const request: RequestInfo = new Request(siteMenuURL, {
         method: 'GET',
         headers: headers
@@ -59,7 +62,17 @@ function getMenuForSite(siteURL: string): Promise<MenuAPIResult> {
         fetch(request).then((res) => res.json()).then((res) => res as MenuAPIResult),
         timeoutPromise
     ]).then((result) => {
-        arrayMenus.push( { urlInstanceRestUrl: siteMenuURL.substring(baseUrl.length), entries: result.items } );
+        switch ( lang ) {
+            case "fr":
+                arrayMenusFR.push( { urlInstanceRestUrl: siteMenuURL.substring(baseUrl.length), entries: result.items } );
+                break;
+            case "de":
+                arrayMenusDE.push( { urlInstanceRestUrl: siteMenuURL.substring(baseUrl.length), entries: result.items } );
+                break;
+            default: //en
+                arrayMenusEN.push( { urlInstanceRestUrl: siteMenuURL.substring(baseUrl.length), entries: result.items } );
+                break;
+        }
         return result;
     }).catch ((error) => {
         let message: string = '';
@@ -68,14 +81,17 @@ function getMenuForSite(siteURL: string): Promise<MenuAPIResult> {
         } else if (error instanceof Error) {
             message = error.message;
         }
+        console.log(message);
         return new ErrorResult(siteMenuURL.concat(" - ").concat(message));
     });
 }
 
-async function parallel(sites: Site[], fn: (siteURL: string) => Promise<MenuAPIResult>, threads = 10): Promise<MenuAPIResult[]> {
+async function getMenuInParallel(sites: Site[], lang: string, fn: (siteURL: string, language: string) => Promise<MenuAPIResult>, threads = 10): Promise<MenuAPIResult[]> {
     const result: MenuAPIResult[][] = [];
-    while (sites.length) {
-        let subListOfSitesMenus: Promise<MenuAPIResult>[] = sites.splice(0, threads).map(x => fn(x.url));
+    const arr: Site[] = [];
+    sites.forEach(s => arr.push(s));
+    while (arr.length) {
+        let subListOfSitesMenus: Promise<MenuAPIResult>[] = arr.splice(0, threads).map(x => fn(x.url, lang));
         const res: MenuAPIResult[] = await Promise.all(subListOfSitesMenus);
         result.push(res);
     }
@@ -102,7 +118,9 @@ function refreshMenus() {
         const filteredListOfSites: Site[] = sites.filter(function (site){
             return openshiftEnv.includes(site.openshiftEnv);
         });
-        await parallel(filteredListOfSites, getMenuForSite, 10);
+        await getMenuInParallel(filteredListOfSites, "en", getMenuForSite, 10);
+        await getMenuInParallel(filteredListOfSites, "fr", getMenuForSite, 10);
+        await getMenuInParallel(filteredListOfSites, "de", getMenuForSite, 10);
     });
 }
 
@@ -117,8 +135,20 @@ app.get('/breadcrumb', (req, res) => {
 
     let breadcrumbForURL: WpMenu[] = [];
     let sibling: WpMenu[] = [];
-//TODO test avec http://localhost:3000/breadcrumb?lang=fr&url=https://wp-httpd/campus/services/website/close-a-website/
-    const siteArray: SiteTreeInstance = SiteTree(arrayMenus);
+
+    let siteArray: SiteTreeInstance;
+    switch ( lang ) {
+        case "fr":
+            siteArray = SiteTree(arrayMenusFR);
+            break;
+        case "de":
+            siteArray = SiteTree(arrayMenusDE);
+            break;
+        default: //en
+            siteArray = SiteTree(arrayMenusEN);
+            break;
+    }
+    console.log("url".concat(url));
     let firstSite: { [urlInstance: string]: WpMenu } | undefined = siteArray.findItemByUrl(url);
     if (firstSite) {
         const restUrl = Object.keys(firstSite)[0];
