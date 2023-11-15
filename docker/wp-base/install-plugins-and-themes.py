@@ -355,6 +355,9 @@ class Themes:
                    ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
                    ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light'])
+            # ,
+            # Plugin('wp-theme-breadcrumb',
+            #        ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-breadcrumb'])
         )
 
 
