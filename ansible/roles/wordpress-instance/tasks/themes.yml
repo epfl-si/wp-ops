@@ -10,3 +10,8 @@
   wordpress_theme:
     name: wp-theme-light
     state: '{{ [ "symlinked", "active" ] if theme_wp_theme_light_active else "symlinked" }}'
+
+- name: WordPress breadcrumb menu
+  wordpress_theme:
+    name: wp-theme-breadcrumb
+    state: '{{ [ "symlinked", "active" ] if theme_wp_theme_breadcrumb_active else "symlinked" }}'
