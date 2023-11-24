@@ -303,6 +303,23 @@ plugin_wpforms_options:
   # Set the WPForms license
   - name: wpforms_license
     value: 'a:6:{i:0;s:0:"";s:3:"key";s:32:"{{ lookup("env_secrets", "wp_plugin_wpforms", "WPFORMS_LICENSE") }}";s:4:"type";s:5:"elite";s:10:"is_expired";b:0;s:11:"is_disabled";b:0;s:10:"is_invalid";b:0;}'
+  # Saferpay secrets
+  - name: wpforms-epfl-payonline-saferpay-apiusername-test
+    value: "{{ saferpay.test.apiusername | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-apipassword-test
+    value: "{{ saferpay.test.apipassword | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-customerid-test
+    value: "{{ saferpay.test.customerid | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-terminalid-test
+    value: "{{ saferpay.test.terminalid | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-apiusername-prod
+    value: "{{ saferpay.prod.apiusername | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-apipassword-prod
+    value: "{{ saferpay.prod.apipassword | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-customerid-prod
+    value: "{{ saferpay.prod.customerid | eyaml(eyaml_keys) }}"
+  - name: wpforms-epfl-payonline-saferpay-terminalid-prod
+    value: "{{ saferpay.prod.terminalid | eyaml(eyaml_keys) }}"
 
 # WP Restauration
 plugin_restauration_options:
