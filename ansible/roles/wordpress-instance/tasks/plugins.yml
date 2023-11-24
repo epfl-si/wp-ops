@@ -581,7 +581,7 @@
   wordpress_plugin:
     name: wpforms
     state: "{{ plugins_for_wpforms_category }}"
-    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.8.0.2.zip"
+    from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.8.5.2.zip"
   tags:
     - wp.plugins.wpforms
 
