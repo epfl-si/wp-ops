@@ -92,7 +92,7 @@
               protocol: TCP
             - containerPort: 9980
               protocol: TCP
-            readinessProbe:
+            livenessProbe:
               failureThreshold: 3
               httpGet:
                 path: /ready
