@@ -53,11 +53,18 @@
   # `-t images.promote`)
 
 - name: "Ansible Tower OpenShift objects"
-  import_tasks: k8s.yml
-  delegate_to: localhost
+  include_tasks:
+    file: k8s.yml
+    apply:
+      delegate_to: localhost
+      tags:
+        - awx
+        - awx.k8s
+        - awx.openshift
   tags:
     - awx
     - awx.k8s
+    - awx.k8s.secrets
     - awx.openshift
 
 - name: "Ansible Tower database operations"

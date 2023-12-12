@@ -1,9 +1,12 @@
 # Kubernetes (OpenShift) objects required to run AWX
 
-- include_vars: k8s-vars.yml
-- include_vars: "secrets-{{ ansible_oc_namespace }}.yml"
-- include_vars: "../../../vars/secrets-{{ ansible_oc_namespace }}.yml"
-- include_vars: ../../../vars/env-secrets.yml
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - k8s-vars.yml
+    - "secrets-{{ ansible_oc_namespace }}.yml"
+    -  "../../../vars/secrets-{{ ansible_oc_namespace }}.yml"
+    -  ../../../vars/env-secrets.yml
 
 - name: Ansible Tower HTTP service
   openshift:
@@ -45,6 +48,7 @@
   notify: Restart AWX pod
 
 - name: mysql-super-credentials Secret
+  tags: awx.k8s.secrets
   openshift:
     state: latest
     apiVersion: v1
@@ -56,6 +60,7 @@
     data: "{{ env_secret_mysql_super_credentials | base64_values }}"
 
 - name: backup-rw-credentials Secret
+  tags: awx.k8s.secrets
   openshift:
     state: latest
     apiVersion: v1
@@ -67,6 +72,7 @@
     data: "{{ env_secret_restic_backup_credentials | base64_values }}"
 
 - name: Ansible Tower secret (awx-secrets)
+  tags: awx.k8s.secrets
   openshift:
     state: latest
     apiVersion: v1
@@ -78,6 +84,8 @@
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
       database_py: "{{ lookup('template', 'database.py.j2') | b64encode }}"
+      # For backward compatibility with AWX 15.0.x (still running in wwp-infra):
+      credentials_py: "{{ lookup('template', 'database.py.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
   notify: Restart AWX pod
