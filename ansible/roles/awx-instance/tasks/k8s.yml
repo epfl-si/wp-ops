@@ -84,6 +84,8 @@
     data:
       admin_password: "{{ awx_admin_password | eyaml(eyaml_keys)  | b64encode }}"
       database_py: "{{ lookup('template', 'database.py.j2') | b64encode }}"
+      # For backward compatibility with AWX 15.0.x (still running in wwp-infra):
+      credentials_py: "{{ lookup('template', 'database.py.j2') | b64encode }}"
       django_secret_key: "{{ django_secret_key | eyaml(eyaml_keys) | b64encode }}"
       pg_password: "{{ awx_postgresql_database['password'] | eyaml(eyaml_keys)  | b64encode }}"
   notify: Restart AWX pod
