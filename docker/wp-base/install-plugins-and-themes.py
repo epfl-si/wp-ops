@@ -354,10 +354,10 @@ class Themes:
             Plugin('wp-theme-2018',
                    ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-2018']),
             Plugin('wp-theme-light',
-                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light'])
-            # ,
-            # Plugin('wp-theme-breadcrumb',
-            #        ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-breadcrumb'])
+                   ['https://github.com/epfl-si/wp-theme-2018/tree/master/wp-theme-light']),
+            Plugin('wp-theme-breadcrumb',
+                   ['https://github.com/epfl-si/wp-theme-2018/tree/feature/newBreadcrumbTheme/wp-theme-breadcrumb'])
+            #TODO mettre le bon url de github  qui point sur master
         )
 
 
