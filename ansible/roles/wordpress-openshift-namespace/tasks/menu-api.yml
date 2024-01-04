@@ -22,6 +22,9 @@
                 - name: wp-nfs
                   mountPath: /srv/menus
                   subPath: "{{ _subpath }}"
+              envFrom:
+                - configMapRef:
+                    name: menu-api-configmap
           volumes:
             - name: wp-nfs
               persistentVolumeClaim:
@@ -58,3 +61,29 @@
           targetPort: 3000
       selector:
         deployment-config.name: menu-api
+
+- name: menu-api-configmap ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: menu-api-configmap
+    data:
+      OPENSHIFT_ENV: |
+        - "www"
+        - "labs"
+      WPVERITAS_URL: "https://wp-veritas.epfl.ch/api/v1/sites"
+      MENU_API_PROTOCOL_HOST_PORT: "https://www.epfl.ch"
+      SERVICE_PORT: "3001"
+      REFRESH_INTERVAL: "600000"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      REFRESH_INTERVAL_WITH_FILE: "600000"
+      REFRESH_FROM_FILE: "true"
+      PATH_REFRESH_FILE: "."
+      REST_URL_EDN: "wp-json/epfl/v1/menus/top?lang="
+      LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
+      LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
+      ASSOC_LINK_URL_FR: "https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/"
+      ASSOC_LINK_URL_EN: "https://www.epfl.ch/campus/associations/list/en/all-associations/"
+
