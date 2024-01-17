@@ -131,6 +131,16 @@
     - web2010.rebuild
     - web2010.image.promote
 
+- name: "Menu API"
+  include_tasks:
+    file: menu-api.yml
+    apply:
+      tags:
+        - menu_api
+  tags:
+    - menu_api
+    - menu_api.is
+
 # A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
 - debug:
     msg: "Please be sure to deploy the pushgateway on wwp-infra, `./ansible/wpsible -t awx.pushgateway -l awx-wwp-infra --prod`"
