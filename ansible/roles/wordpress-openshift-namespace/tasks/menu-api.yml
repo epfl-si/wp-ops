@@ -31,7 +31,7 @@
         REFRESH_INTERVAL_WITH_FILE: "600000"
         REFRESH_FROM_FILE: "true"
         PATH_REFRESH_FILE: "."
-        REST_URL_EDN: "wp-json/epfl/v1/menus/top?lang="
+        REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
         LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
         LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
         ASSOC_BREADCRUMB_EN: |
