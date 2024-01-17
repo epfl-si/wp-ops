@@ -1,3 +1,76 @@
+- name: "Testing ImageStreams and their build information for Menu API"
+  when: >-
+    openshift_namespace == "wwp-test"
+  openshift_imagestream:
+    metadata:
+      name: "menu-api"
+      namespace: "{{ openshift_namespace }}"
+    git:
+      repository: https://github.com/epfl-si/wp-menu-api.git
+      ref: "master"
+  tags: menu_api.is
+
+- name: menu-api-configmap ConfigMap
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: menu-api-configmap
+      namespace: "{{ openshift_namespace }}"
+    data:
+      menu-api-config.yaml: |
+        OPENSHIFT_ENV: |
+          - "www"
+          - "labs"
+        WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
+        MENU_API_PROTOCOL_HOST_PORT: "https://www.epfl.ch"
+        SERVICE_PORT: "3001"
+        REFRESH_INTERVAL: "600000"
+        NODE_TLS_REJECT_UNAUTHORIZED: "0"
+        REFRESH_INTERVAL_WITH_FILE: "600000"
+        REFRESH_FROM_FILE: "true"
+        PATH_REFRESH_FILE: "."
+        REST_URL_EDN: "wp-json/epfl/v1/menus/top?lang="
+        LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
+        LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
+        ASSOC_BREADCRUMB_EN: |
+          https://www.epfl.ch/campus/en/campusenglish/
+          https://www.epfl.ch/campus/associations/en/student-associations/
+          https://www.epfl.ch/campus/associations/list/en/all-associations/
+        ASSOC_BREADCRUMB_FR: |
+          https://www.epfl.ch/campus/fr/campus/
+          https://www.epfl.ch/campus/associations/fr/associations-detudiants/
+          https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/
+        MENU_BAR_LINKS_EN: |
+          https://www.epfl.ch/about/en/
+          https://www.epfl.ch/education/en/
+          https://www.epfl.ch/research/en/
+          https://www.epfl.ch/innovation/en/
+          https://www.epfl.ch/schools/en/
+          https://www.epfl.ch/campus/en/
+          https://www.epfl.ch/labs/en/
+        MENU_BAR_LINKS_FR: |
+          https://www.epfl.ch/about/fr/
+          https://www.epfl.ch/education/fr/
+          https://www.epfl.ch/research/fr/
+          https://www.epfl.ch/innovation/fr/
+          https://www.epfl.ch/schools/fr/
+          https://www.epfl.ch/campus/fr/
+          https://www.epfl.ch/labs/fr/
+        MENU_BAR_LINKS_DE: |
+          https://www.epfl.ch/about/de/
+          https://www.epfl.ch/education/de/
+          https://www.epfl.ch/research/de/
+          https://www.epfl.ch/innovation/de/
+          https://www.epfl.ch/schools/de/
+          https://www.epfl.ch/campus/de/
+          https://www.epfl.ch/labs/en/
+  vars:
+    _wp_veritas_base_url: >-
+      {{ "wp-veritas.epfl.ch" if openshift_namespace == "wwp"
+      else "wp-veritas-test.epfl.ch" }}
+
 - name: Menu and breadcrumb API DeploymentConfig
   openshift:
     apiVersion: apps.openshift.io/v1
@@ -19,17 +92,19 @@
               image: 'docker-registry.default.svc:5000/{{ openshift_namespace }}/menu-api:latest'
               imagePullPolicy: Always
               volumeMounts:
-                - name: wp-nfs
+                - name: wp-menu
                   mountPath: /srv/menus
                   subPath: "{{ _subpath }}"
-              envFrom:
-                - configMapRef:
-                    name: menu-api-configmap
+                - name: menu-api-config
+                  mountPath: /config/
           volumes:
-            - name: wp-nfs
+            - name: wp-menu
               persistentVolumeClaim:
                 claimName: "wordpress-0"
                 readOnly: true
+            - name: menu-api-config
+              configMap:
+                name: menu-api-configmap
       triggers:
       - type: ImageChange
         imageChangeParams:
@@ -43,7 +118,6 @@
   vars:
     _subpath: "{{ _subpaths[openshift_namespace] }}"
     _subpaths:
-      wwp: www/www.epfl.ch/htdocs/menu-backups
       wwp-test: .
 
 - name: Menu and breadcrumb API Service
@@ -61,29 +135,3 @@
           targetPort: 3000
       selector:
         deployment-config.name: menu-api
-
-- name: menu-api-configmap ConfigMap
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: menu-api-configmap
-    data:
-      OPENSHIFT_ENV: |
-        - "www"
-        - "labs"
-      WPVERITAS_URL: "https://wp-veritas.epfl.ch/api/v1/sites"
-      MENU_API_PROTOCOL_HOST_PORT: "https://www.epfl.ch"
-      SERVICE_PORT: "3001"
-      REFRESH_INTERVAL: "600000"
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"
-      REFRESH_INTERVAL_WITH_FILE: "600000"
-      REFRESH_FROM_FILE: "true"
-      PATH_REFRESH_FILE: "."
-      REST_URL_EDN: "wp-json/epfl/v1/menus/top?lang="
-      LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
-      LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
-      ASSOC_LINK_URL_FR: "https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/"
-      ASSOC_LINK_URL_EN: "https://www.epfl.ch/campus/associations/list/en/all-associations/"
-
