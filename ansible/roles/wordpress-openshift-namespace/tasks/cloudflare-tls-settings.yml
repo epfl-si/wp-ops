@@ -1,0 +1,63 @@
+- include_vars: cloudflare-vars.yml
+  tags: always
+
+- name: Cloudflare TLS settings - Verify API token
+  uri:
+    url: "{{ cloudflare_api_url }}/user/tokens/verify"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_tls_settings_token }}"
+  tags:
+    - cloudflare-tls-settings.verify-token
+
+- name: Cloudflare TLS settings - Get ciphers setting
+  uri:
+    url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/settings/ciphers"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_tls_settings_token }}"
+  register: ciphers_setting_response
+  tags:
+    - cloudflare-tls-settings.get-ciphers-setting
+
+- name: Cloudflare TLS settings - Print ciphers setting
+  debug:
+    var: ciphers_setting_response.json
+  tags:
+    - cloudflare-tls-settings.get-ciphers-setting
+
+- name: Cloudflare TLS settings - Change ciphers setting
+  uri:
+    url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/settings/ciphers"
+    method: PATCH
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_tls_settings_token }}"
+    body_format: json
+    body:
+      value:
+        - "ECDHE-ECDSA-AES256-GCM-SHA384"
+        - "ECDHE-ECDSA-AES128-GCM-SHA256"
+        - "ECDHE-ECDSA-CHACHA20-POLY1305"
+        - "ECDHE-RSA-AES256-GCM-SHA384"
+        - "ECDHE-RSA-AES128-GCM-SHA256"
+        - "ECDHE-RSA-CHACHA20-POLY1305"
+  tags:
+    - cloudflare-tls-settings.change-ciphers-setting
+
+- name: Cloudflare TLS settings - Reset ciphers setting
+  when: >-
+    "cloudflare-tls-settings.reset-ciphers-setting" in ansible_run_tags
+  uri:
+    url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/settings/ciphers"
+    method: PATCH
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_tls_settings_token }}"
+    body_format: json
+    body:
+      value: []
+  tags:
+    - cloudflare-tls-settings.reset-ciphers-setting
