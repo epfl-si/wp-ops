@@ -96,6 +96,20 @@
     - report-uri.rebuild
     - report-uri.image.promote
 
+- name: "Configure Cloudflare TLS ciphers (via API)"
+  when: openshift_namespace == "wwp"
+  include_tasks:
+    file: cloudflare-tls-settings.yml
+    apply:
+      tags:
+         - cloudflare-tls-settings
+  tags:
+    - cloudflare-tls-settings
+    - cloudflare-tls-settings.verify-token
+    - cloudflare-tls-settings.get-ciphers-setting
+    - cloudflare-tls-settings.change-ciphers-setting
+    - cloudflare-tls-settings.reset-ciphers-setting
+
 - name: "Sorry Server"
   when: openshift_namespace == "wwp-test"
   include_tasks:

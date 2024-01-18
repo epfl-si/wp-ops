@@ -1,0 +1,4 @@
+cloudflare_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_prod/cloudflare-secrets.yml') | from_yaml }}"
+cloudflare_api_url: "https://api.cloudflare.com/client/v4"
+cloudflare_api_zone_id: "{{ cloudflare_secrets.API_ZONE_ID }}"
+cloudflare_api_tls_settings_token: "{{ cloudflare_secrets.API_TLS_SETTINGS_TOKEN }}"
