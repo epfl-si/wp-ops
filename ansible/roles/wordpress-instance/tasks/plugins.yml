@@ -580,7 +580,9 @@
 - name: WPForms plugin
   wordpress_plugin:
     name: wpforms
-    state: "{{ plugins_for_wpforms_category }}"
+    state:
+      - installed
+      - active
     from: "s3://{{ build.s3_assets.bucket_name }}/wpforms.1.8.5.2.zip"
   tags:
     - wp.plugins.wpforms
@@ -591,6 +593,7 @@
     state: "{{ plugins_for_wpforms_surveys_polls_category }}"
     from: "s3://{{ build.s3_assets.bucket_name }}/wpforms-surveys-polls.1.10.0.zip"
   tags:
+    - wp.plugins.wpforms
     - wp.plugins.wpforms-surveys-polls
 
 - name: WPForms options
