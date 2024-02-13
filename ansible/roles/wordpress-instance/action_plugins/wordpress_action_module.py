@@ -175,86 +175,6 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
         return (installation_state, activation_state)
 
 
-    def _ensure_file_state (self, desired_state, basename):
-        """
-        Check if a given (mu-)plugin file/folder is at the desired state
-
-        :param desired_state: can be 'installed', 'symlinked', ...
-        :param basename: name of element to check (can be a file or folder)
-        """
-        current_state = set([self._get_current_file_state(basename)])
-        to_do = set([desired_state]) - current_state
-        to_undo = current_state - set([desired_state])
-
-        if not (to_do or to_undo):
-            return
-
-        if 'installed' in to_do:
-            self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
-
-        if 'symlinked' in to_undo or 'installed' in to_undo:
-            self._do_rimraf_file(basename)
-
-        if 'symlinked' in to_do:
-            self._do_symlink_file(basename)
-
-
-    def _do_symlink_file (self, basename):
-        """
-        Creates a symlink for a given plugin file/folder
-
-        :param basename: given plugin file/folder for which we have to create a symlink
-        """
-        return self._subaction.change(
-            'file',
-            {'state': 'link',
-            # Beware src / path inversion, as is customary with everything symlink:
-             'src': self._get_symlink_target(basename),
-             'path': self._get_symlink_path(basename)},
-            update_result=self.result)
-
-
-    def _do_rimraf_file (self, basename):
-        """
-        Remove a file/folder belonging to a plugin
-
-        :param basename: given plugin file/folder
-        """
-        return self._subaction.change(
-            'file',
-            {'state': 'absent',
-             'path': self._get_symlink_path(basename)},
-            update_result=self.result)
-
-
-    def _get_symlink_path (self, basename):
-        """
-        Returns symlink source path
-
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return self._make_element_path(self._get_wp_dir(), basename)
-
-
-    def _get_symlink_target (self, basename):
-        """
-        Returns a path to symlink target (mu-)plugin or theme file/folder
-
-        :param basename: given plugin file/folder for which we want the symlink target path
-        """
-        return self._make_element_path('../../wp', basename)
-
-
-    def _make_element_path (self, prefix, basename):
-        """
-        Generates an absolute (mu-)plugin or theme path.
-
-        :param prefix: string to add at the beginning of the path to have an absolute one
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
-
-
     def _ensure_all_files_state (self, desired_state):
         """
         Checks if all files/folder for a plugin are in the desired states (present, absent, ...)
@@ -273,33 +193,17 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             basenames = [self._get_name()]
 
         # Going through each files/folder for plugin
+
+        def query(task, args):
+            return self._subaction.query(task, args)
+
+        def change(task, args):
+            return self._subaction.change(task, args, update_result=self.result)
+
         for basename in basenames:
-            self._ensure_file_state(desired_state, basename)
-
-
-    def _get_current_file_state (self, basename):
-        """
-        Returns state of a given plugin file/folder.
-
-        :param basename: name of element to check (can be a file or folder)
-        """
-        path = self._get_symlink_path(basename)
-        plugin_stat = self._subaction.query('stat', { 'path': path })
-        if 'failed' in plugin_stat:
-            raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
-        file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
-        if not file_exists:
-            return 'absent'
-        if not plugin_stat['stat']:
-            return 'absent'
-        elif plugin_stat['stat']['islnk']:
-            if (plugin_stat['stat']['lnk_target'] ==
-                self._get_symlink_target(basename)):
-                return 'symlinked'
-            else:
-                return 'symlink_damaged'
-        else:
-            return 'installed'
+            AssetFile(wp_dir=self._get_wp_dir(),
+                      wp_subdir="wp-content/{}s".format(self._get_type()),
+                      basename=basename).ensure_state(query, change, desired_state)
 
 
     def _do_activate_element(self):
@@ -361,3 +265,115 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
             if len(fields) < 2: continue
             if fields[0] == self._get_name(): return fields[1]
         return 'inactive'
+
+
+class AssetFile(object):
+    def __init__(self, wp_dir, wp_subdir, basename):
+        """
+        Constructor
+
+        :param wp_dir: The path of the WordPress site this AssetFile belongs to
+        :param wp_subdir: The path this particular kind of AssetFile lives in, e.g. "wp_content/themes", "wp_content/plugins" or "wp_content/mu-plugins"
+        :param basename: file/folder of a plugin or theme
+        """
+        self.wp_dir = wp_dir
+        self.wp_subdir = wp_subdir
+        self.basename = basename
+
+
+    def _get_current_state (self, query):
+        """
+        Returns state of a given plugin file/folder.
+
+        :param query: A function that takes the name and parameters of an Ansible task, to be used to query the current state of the file
+        """
+        path = self._abspath
+        plugin_stat = query('stat', { 'path': path })
+        if 'failed' in plugin_stat:
+            raise AnsibleActionFail("Cannot stat() {} - Error: {}".format(path, plugin_stat))
+        file_exists = ('stat' in plugin_stat and plugin_stat['stat']['exists'])
+        if not file_exists:
+            return 'absent'
+        if not plugin_stat['stat']:
+            return 'absent'
+        elif plugin_stat['stat']['islnk']:
+            if (plugin_stat['stat']['lnk_target'] ==
+                self._get_symlink_target()):
+                return 'symlinked'
+            else:
+                return 'symlink_damaged'
+        else:
+            return 'installed'
+
+
+    def ensure_state (self, query, change, desired_state):
+        """
+        Check if a given (mu-)plugin file/folder is at the desired state
+
+        :param query: A function that takes the name and parameters of an Ansible task, to be used to query the current state of the file
+        :param change: A function that takes the name and parameters of an Ansible task, to be used to alter the state of the file (i.e. delete it or symlink it)
+        :param desired_state: can be 'installed', 'symlinked', ...
+        """
+        current_state = self._get_current_state(query)
+        if current_state == desired_state:
+            return
+
+        self._do_rimraf(change)
+
+        if desired_state == 'installed':
+            # TODO: refactor into wordpress_plugin.py
+            # Caller should make an attempt to install using the
+            # command line, and either we should only fail here,
+            # or we should copy the files out of /wp/ as a fallback.
+            self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
+        else:
+            self._do_symlink(change)
+
+
+    def _do_symlink (self, change):
+        """
+        Creates a symlink for this file asset.
+
+        :param change: A function that takes the name and parameters of an Ansible task, to be used to alter the state of the file (i.e. delete it or symlink it)
+        """
+        return change(
+            'file',
+            {'state': 'link',
+            # Beware src / path inversion, as is customary with everything symlink:
+             'src': self._get_symlink_target(),
+             'path': self._abspath})
+
+
+    def _do_rimraf (self, change):
+        """
+        Remove this file asset from disk.
+
+        :param change: A function that takes the name and parameters of an Ansible task, to be used to alter the state of the file (i.e. delete it or symlink it)
+        """
+        return change(
+            'file',
+            {'state': 'absent',
+             'path': self._abspath})
+
+    @property
+    def _abspath (self):
+        """
+        Returns symlink source path
+        """
+        return self._make_element_path(self.wp_dir)
+
+
+    def _get_symlink_target (self):
+        """
+        Returns a path that this asset should be symlinked to (if symlinking is desired)
+        """
+        return self._make_element_path('../../wp')
+
+
+    def _make_element_path (self, prefix):
+        """
+        Generates path for this file asset, relative to `prefix`.
+
+        :param prefix: The relative or absolute path that the returned path should start with.
+        """
+        return '{}/{}/{}'.format(prefix, self.wp_subdir, self.basename)
