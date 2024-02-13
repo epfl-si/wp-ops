@@ -321,11 +321,8 @@ class AssetFile(object):
         self._do_rimraf(change)
 
         if desired_state == 'installed':
-            # TODO: refactor into wordpress_plugin.py
-            # Caller should make an attempt to install using the
-            # command line, and either we should only fail here,
-            # or we should copy the files out of /wp/ as a fallback.
-            self._run_wp_cli_change('plugin install {}'.format(self._task.args.get('from')))
+            self._do_copy(change)
+
         else:
             self._do_symlink(change)
 
@@ -354,6 +351,26 @@ class AssetFile(object):
             'file',
             {'state': 'absent',
              'path': self._abspath})
+
+
+    def _do_copy (self, change):
+        """
+        Copy files out of /wp (via the symlink that is assumed to point to the correct WordPress version already).
+
+        If caller wants to manage files using e.g. `wp plugin
+        install` instead, it should do so before calling us, so
+        that `current_state == desired_state` by the time we
+        reach here.
+
+        :param change: A function that takes the name and parameters of an Ansible task, to be used to alter the state of the file (i.e. delete it or symlink it)
+        """
+        return change('copy',
+                      { 'remote_src': True,
+                        'src': '%s/wp/%s/%s' % (self.wp_dir, self.wp_subdir,
+                                                self.basename),
+                        'dest': '%s/%s' % (self.wp_dir, self.wp_subdir)
+                       })
+
 
     @property
     def _abspath (self):
