@@ -60,6 +60,23 @@
     data: "{{ env_secret_restic_backup_credentials | base64_values }}"
   tags: mgmt.secrets
 
+- name: asset-credentials Secret
+  openshift:
+    state: latest
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: backup-rw-credentials
+      namespace: "{{ openshift_namespace }}"
+    type: Opaque
+    stringData:
+      ASSETS_AWS_ACCESS_KEY_ID:     "{{ env_secret_assets_s3.AWS_ACCESS_KEY_ID }}"
+      ASSETS_AWS_SECRET_ACCESS_KEY: "{{ env_secret_assets_s3.AWS_SECRET_ACCESS_KEY }}"
+      ASSETS_AWS_DEFAULT_REGION:    "{{ env_secret_assets_s3.AWS_DEFAULT_REGION }}"
+
+ "{{ env_secret_restic_backup_credentials | base64_values }}"
+  tags: mgmt.secrets
+
 - name: mgmt DeploymentConfig
   openshift:
     state: latest
@@ -99,6 +116,8 @@
                   name: mysql-super-credentials
               - secretRef:
                   name: backup-rw-credentials
+              - secretRef:
+                  name: asset-credentials
           serviceAccount: "{{ mgmt_service_account }}"
           serviceAccountName: "{{ mgmt_service_account }}"
           volumes:
