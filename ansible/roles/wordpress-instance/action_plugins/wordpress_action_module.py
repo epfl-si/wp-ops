@@ -20,59 +20,6 @@ class WordPressActionModule(ActionBase):
 
         return super(WordPressActionModule, self).run(tmp, task_vars)
 
-    def _do_symlink_file (self, basename):
-        """
-        Creates a symlink for a given plugin file/folder
-
-        :param basename: given plugin file/folder for which we have to create a symlink
-        """
-        return self._subaction.change(
-            'file',
-            {'state': 'link',
-            # Beware src / path inversion, as is customary with everything symlink:
-             'src': self._get_symlink_target(basename),
-             'path': self._get_symlink_path(basename)},
-            update_result=self.result)
-
-    def _do_rimraf_file (self, basename):
-        """
-        Remove a file/folder belonging to a plugin
-
-        :param basename: given plugin file/folder
-        """
-        return self._subaction.change(
-            'file',
-            {'state': 'absent',
-             'path': self._get_symlink_path(basename)},
-            update_result=self.result)
-
-    def _get_symlink_path (self, basename):
-        """
-        Returns symlink source path
-
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return self._make_element_path(self._get_wp_dir(), basename)
-
-
-    def _get_symlink_target (self, basename):
-        """
-        Returns a path to symlink target (mu-)plugin or theme file/folder
-
-        :param basename: given plugin file/folder for which we want the symlink target path
-        """
-        return self._make_element_path('../../wp', basename)
-
-
-    def _make_element_path (self, prefix, basename):
-        """
-        Generates an absolute (mu-)plugin or theme path.
-
-        :param prefix: string to add at the beginning of the path to have an absolute one
-        :param basename: given plugin file/folder for which we want the symlink source path
-        """
-        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
-
     def _query_wp_cli (self, args):
         """
         Run WP-CLI to query state.
@@ -250,6 +197,62 @@ class WordPressPluginOrThemeActionModule(WordPressActionModule):
 
         if 'symlinked' in to_do:
             self._do_symlink_file(basename)
+
+
+    def _do_symlink_file (self, basename):
+        """
+        Creates a symlink for a given plugin file/folder
+
+        :param basename: given plugin file/folder for which we have to create a symlink
+        """
+        return self._subaction.change(
+            'file',
+            {'state': 'link',
+            # Beware src / path inversion, as is customary with everything symlink:
+             'src': self._get_symlink_target(basename),
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
+
+
+    def _do_rimraf_file (self, basename):
+        """
+        Remove a file/folder belonging to a plugin
+
+        :param basename: given plugin file/folder
+        """
+        return self._subaction.change(
+            'file',
+            {'state': 'absent',
+             'path': self._get_symlink_path(basename)},
+            update_result=self.result)
+
+
+    def _get_symlink_path (self, basename):
+        """
+        Returns symlink source path
+
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return self._make_element_path(self._get_wp_dir(), basename)
+
+
+    def _get_symlink_target (self, basename):
+        """
+        Returns a path to symlink target (mu-)plugin or theme file/folder
+
+        :param basename: given plugin file/folder for which we want the symlink target path
+        """
+        return self._make_element_path('../../wp', basename)
+
+
+    def _make_element_path (self, prefix, basename):
+        """
+        Generates an absolute (mu-)plugin or theme path.
+
+        :param prefix: string to add at the beginning of the path to have an absolute one
+        :param basename: given plugin file/folder for which we want the symlink source path
+        """
+        return '{}/wp-content/{}s/{}'.format(prefix, self._get_type(), basename)
 
 
     def _ensure_all_files_state (self, desired_state):
