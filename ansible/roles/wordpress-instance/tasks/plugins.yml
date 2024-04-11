@@ -263,7 +263,7 @@
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    from: https://downloads.wordpress.org/plugin/polylang.3.5.4.zip
 
 - name: Count Polylang languages
   shell: |
