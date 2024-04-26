@@ -237,4 +237,5 @@
     - never
     - wp.reports
     - wp.reports.options
-    - wp.reports.search_content
+    - wp.reports.search_content.isa_content
+    - wp.reports.search_content.infoscience_block

@@ -14,6 +14,8 @@
     - wp.reports.options
     - wp.reports.search_content
 
+######## Options
+
 - name: Get Wordpress options from site
   command: "{{ wp_cli_command_with_skip }} {{ item.command_name }}"
   with_items:
@@ -44,17 +46,21 @@
   tags:
     - wp.reports.options
 
+######## ISA content
+
+# Sample usage:
+# ./ansible/wpsible -t wp.reports.search_content.isa_content -e report_sites_options_filename_relpath=sites_with_isa_remote_content.csv -l prod_www --prod
 - name: Search site db for ISA content
   command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_title != 'Auto Draft' AND post_content LIKE'%isa.epfl.ch/pe%'\" --skip-column-names"
   # OR command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%isa.epfl.ch/pe%'\" --skip-column-names"
 
-  register: fetched_pages
+  register: isa_fetched_pages
   changed_when: false
   check_mode: no
   tags:
-    - wp.reports.search_content
+    - wp.reports.search_content.isa_content
 
-- name: Write collected data to "{{ report_filename }}"
+- name: Write collected data for ISA content to "{{ report_filename }}"
   run_once: true
   local_action:
     module: copy
@@ -67,7 +73,40 @@
     content: |
       base_url,result
       {% for host in ansible_play_hosts %}
-      {{ host }},"{{ hostvars[host]['fetched_pages'].stdout }}"
+      {{ host }},"{{ hostvars[host]['isa_fetched_pages'].stdout }}"
       {% endfor %}
   tags:
     - wp.reports.search_content
+
+######## Infoscience content
+
+# Sample usage:
+# env WWP_INVENTORY_SOURCES=wpveritas ./ansible/wpsible -t wp.reports.search_content.infoscience_block -e report_filename=sites_with_infoscience_block.csv --prod
+- name: Search site db for Infoscience blocks
+  command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name),ID FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%wp:epfl/infoscience-search%'\" --skip-column-names"
+
+  register: infoscience_fetched_pages
+  changed_when: false
+  check_mode: no
+  tags:
+    - wp.reports.search_content.infoscience_block
+
+- name: Write collected data for infoscience block to "{{ report_filename }}"
+  run_once: true
+  local_action:
+    module: copy
+    dest: "{{ report_filename }}"
+    # ansible_play_hosts is the loop variable, so that we only have
+    # lines for WordPresses that succeeded on the previous task. In a
+    # different template (e.g. JSON) we could also use
+    # `ansible_play_hosts_all` to also report on WordPress instances
+    # that had an error (e.g. due to unavailable DB)
+    content: |
+      post_url,post_id 
+      {% for host in ansible_play_hosts %}
+      {% if hostvars[host]['infoscience_fetched_pages'].stdout != '' %}
+      {{ hostvars[host]['infoscience_fetched_pages'].stdout | regex_replace('	', ',') }}
+      {% endif %}
+      {% endfor %}
+  tags:
+    - wp.reports.search_content.infoscience_block
