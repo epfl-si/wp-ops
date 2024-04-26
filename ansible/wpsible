@@ -63,6 +63,7 @@ inventories () {
     case "$inventory_mode" in
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
+        prod_only) echo "-i inventory/prod" ;;
     esac
 }
 
@@ -78,6 +79,10 @@ while [ "$#" -gt 0 ]; do
         --prod)
             inventory_mode="test_and_prod"
             WWP_NAMESPACES="wwp-test,wwp"
+            shift ;;
+        --prod-only)
+            inventory_mode="prod_only"
+            WWP_NAMESPACES="wwp"
             shift ;;
         --wp-veritas)
             # Ignored for backward compatibility
