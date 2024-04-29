@@ -439,7 +439,7 @@
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    from: https://downloads.wordpress.org/plugin/ewww-image-optimizer.7.5.0.zip
   register: _plugin_ewww
 
 - name: ewww-image-optimizer plugin
