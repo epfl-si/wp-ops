@@ -432,7 +432,7 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-404
 
 - name: ewww-image-optimizer plugin
-  when: wp_version_lineage is version('5.6', '>=')
+  when: wp_version_lineage is version('6.2', '>=')
   tags: wp.plugins.ewww
   wordpress_plugin:
     name: ewww-image-optimizer
@@ -443,14 +443,14 @@
   register: _plugin_ewww
 
 - name: ewww-image-optimizer plugin
-  when: wp_version_lineage is version('5.6', '<')
+  when: wp_version_lineage is version('6.2', '<')
   tags: wp.plugins.ewww
   wordpress_plugin:
     name: ewww-image-optimizer
     state:
       - symlinked
       - active
-    from: https://github.com/nosilver4u/ewww-image-optimizer/archive/refs/tags/v6.2.5.zip
+    from: https://downloads.wordpress.org/plugin/ewww-image-optimizer.7.5.0.zip
   register: _plugin_ewww
 
 - name: Rebuild ewww-image-optimizer cache
