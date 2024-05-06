@@ -80,17 +80,51 @@
 
 ######## Infoscience content
 
-# Sample usage:
-# env WWP_INVENTORY_SOURCES=wpveritas ./ansible/wpsible -t wp.reports.search_content.infoscience_block -e report_filename=sites_with_infoscience_block.csv --prod
 - name: Search site db for Infoscience blocks
-  command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name),ID FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%wp:epfl/infoscience-search%'\" --skip-column-names"
-
+  command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%wp:epfl/infoscience-search%'\" --skip-column-names"
   register: infoscience_fetched_pages
   changed_when: false
   check_mode: no
+  when: not lookup("wpveritas", "isDeleted")
   tags:
-    - wp.reports.search_content.infoscience_block
+    - wp.reports.search_content.infoscience_block.report
+    - wp.reports.search_content.infoscience_block.refresh_cache
 
+# Sample usage:
+# env WWP_INVENTORY_SOURCES=wpveritas ./ansible/wpsible -t wp.reports.search_content.infoscience_block.refresh_cache --prod-only
+- name: Refresh cache by trigger an HTTP GET from inside the pod, for all the pages that have an infoscience block
+  ansible.builtin.shell:
+    cmd: "curl -skL
+      -H 'Host: {{ hostvars[inventory_hostname]['wp_hostname'] }}'
+      {{ infoscience_fetched_pages.stdout_lines |
+       map('regex_replace', 'www.epfl.ch', 'httpd-'+hostvars[inventory_hostname]['wp_env']+':8443') |
+       join('?nocache=1 ') + '?nocache=1'
+      }} > /dev/null"
+  when: (infoscience_fetched_pages.stdout_lines| default([])) | length > 0
+  tags:
+    - wp.reports.search_content.infoscience_block.refresh_cache
+
+- name: Count the length of the cache table
+  command: "{{ wp_cli_command_with_skip }} db query \"SELECT COUNT(ID) FROM wp_epfl_infoscience_cache_db\" --skip-column-names"
+  register: infoscience_cache_entries_count
+  changed_when: false
+  check_mode: no
+  when: (infoscience_fetched_pages.stdout_lines| default([])) | length > 0 and 
+    not lookup("wpveritas", "isDeleted")
+  tags:
+    - wp.reports.search_content.infoscience_block.refresh_cache
+
+- name: Fail if the table is empty
+  ansible.builtin.fail:
+    msg: The cache table for Infoscience is empty ! It should not.
+  when: (infoscience_fetched_pages.stdout_lines| default([])) | length > 0 and 
+    not lookup("wpveritas", "isDeleted") and
+    infoscience_cache_entries_count | int > 0
+  tags:
+    - wp.reports.search_content.infoscience_block.refresh_cache
+
+# Sample usage:
+# env WWP_INVENTORY_SOURCES=wpveritas ./ansible/wpsible -t wp.reports.search_content.infoscience_block.report -e report_filename=sites_with_infoscience_block.csv --prod-only
 - name: Write collected data for infoscience block to "{{ report_filename }}"
   run_once: true
   local_action:
@@ -102,11 +136,11 @@
     # `ansible_play_hosts_all` to also report on WordPress instances
     # that had an error (e.g. due to unavailable DB)
     content: |
-      post_url,post_id 
+      post_url,post_id
       {% for host in ansible_play_hosts %}
       {% if hostvars[host]['infoscience_fetched_pages'].stdout != '' %}
       {{ hostvars[host]['infoscience_fetched_pages'].stdout | regex_replace('	', ',') }}
       {% endif %}
       {% endfor %}
   tags:
-    - wp.reports.search_content.infoscience_block
+    - wp.reports.search_content.infoscience_block.report

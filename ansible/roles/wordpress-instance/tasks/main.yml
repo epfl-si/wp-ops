@@ -238,4 +238,5 @@
     - wp.reports
     - wp.reports.options
     - wp.reports.search_content.isa_content
-    - wp.reports.search_content.infoscience_block
+    - wp.reports.search_content.infoscience_block.report
+    - wp.reports.search_content.infoscience_block.refresh_cache
