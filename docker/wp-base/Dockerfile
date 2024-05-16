@@ -188,11 +188,16 @@ RUN set -e -x; for wp in /wp/*; do                                       \
 # Home built Elements
 ######################################################################
 ARG ELEMENTS_GIT_REPOSITORY=""
-ARG ELEMENTS_GIT_REF=""
+ARG ELEMENTS_GIT_REF="dev"
 RUN set -e -x;   env; \
     if [ -z "$ELEMENTS_GIT_REPOSITORY" ]; then exit 0; fi; \
     rm -rf /wp/*/wp-content/themes/wp-theme-2018/assets; \
-    git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build
+    git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build; \
+    cd /tmp/elements_build; \
+    npm install --global yarn; \
+    yarn; yarn build; \
+    for wp in /wp/*; do cp -a dist/ $wp/wp-content/themes/wp-theme-2018/assets; done ; \
+    cd; rm -rf /tmp/elements_build
 
 ######################################################################
 # Symlinks in /wp
