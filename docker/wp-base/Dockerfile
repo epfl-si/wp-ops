@@ -185,6 +185,16 @@ RUN set -e -x; for wp in /wp/*; do                                       \
     done
 
 ######################################################################
+# Home built Elements
+######################################################################
+ARG ELEMENTS_GIT_REPOSITORY=""
+ARG ELEMENTS_GIT_REF=""
+RUN set -e -x;   env; \
+    if [ -z "$ELEMENTS_GIT_REPOSITORY" ]; then exit 0; fi; \
+    rm -rf /wp/*/wp-content/themes/wp-theme-2018/assets; \
+    git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build
+
+######################################################################
 # Symlinks in /wp
 ######################################################################
 # We do that last for simplicity, at a small cost in build time
