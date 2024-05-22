@@ -131,8 +131,8 @@
     spec:
       type: ClusterIP
       ports:
-        - port: 8080
+        - port: 3001
           protocol: TCP
-          targetPort: 3000
+          targetPort: 3001
       selector:
         deployment-config.name: menu-api
