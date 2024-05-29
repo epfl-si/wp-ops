@@ -12,6 +12,5 @@ httpd_image_name: httpd
 mgmt_image_name: mgmt
 wp_base_image_name: wp-base
 backup_cron_image_name: cronjob
-menu_api_image_name: menu-api
 
 wp_ops_git_uri: https://github.com/epfl-si/wp-ops

@@ -3,8 +3,9 @@
     openshift_namespace == "wwp-test"
   openshift_imagestream:
     metadata:
-      name: "menu-api"
+      name: "menu-api-siblings"
       namespace: "{{ openshift_namespace }}"
+    from: "{{ nodejs_base_image_mirrored_from }}"
     git:
       repository: https://github.com/epfl-si/wp-menu-api.git
       ref: "master"
@@ -24,10 +25,7 @@
         WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
         MENU_API_PROTOCOL_HOST_PORT: "https://www.epfl.ch"
         SERVICE_PORT: "3001"
-        REFRESH_INTERVAL: "600000"
         NODE_TLS_REJECT_UNAUTHORIZED: "0"
-        REFRESH_INTERVAL_WITH_FILE: "600000"
-        REFRESH_FROM_FILE: "true"
         PATH_REFRESH_FILE: "."
         REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
         LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
@@ -77,20 +75,20 @@
     apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
     metadata:
-      name: menu-api
+      name: menu-api-siblings
       namespace: "{{ openshift_namespace }}"
     spec:
       replicas: 1
       selector:
-        deployment-config.name: menu-api
+        deployment-config.name: menu-api-siblings
       template:
         metadata:
           labels:
-            deployment-config.name: menu-api
+            deployment-config.name: menu-api-siblings
         spec:
           containers:
-            - name: menu-api
-              image: 'docker-registry.default.svc:5000/{{ openshift_namespace }}/menu-api:latest'
+            - name: menu-api-siblings
+              image: 'docker-registry.default.svc:5000/{{ openshift_namespace }}/menu-api-siblings:latest'
               imagePullPolicy: Always
               volumeMounts:
                 - name: wp-menu
@@ -111,10 +109,10 @@
         imageChangeParams:
           automatic: true
           containerNames:
-          - menu-api
+          - menu-api-siblings
           from:
             kind: ImageStreamTag
-            name: 'menu-api:latest'
+            name: 'menu-api-siblings:latest'
             namespace: "{{ openshift_namespace }}"
   vars:
     _subpath: "{{ _subpaths[openshift_namespace] }}"
@@ -126,7 +124,7 @@
     apiVersion: v1
     kind: Service
     metadata:
-      name: menu-api
+      name: menu-api-siblings
       namespace: "{{ openshift_namespace }}"
     spec:
       type: ClusterIP
@@ -135,4 +133,4 @@
           protocol: TCP
           targetPort: 3001
       selector:
-        deployment-config.name: menu-api
+        deployment-config.name: menu-api-siblings
