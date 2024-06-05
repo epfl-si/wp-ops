@@ -27,6 +27,8 @@ DeploymentConfigs:
     - name: subdomains-lite
     - name: www
       replicaCount: 6
+    - name: www-canari
+      replicaCount: 1
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
