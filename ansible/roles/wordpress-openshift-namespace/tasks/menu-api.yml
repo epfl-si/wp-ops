@@ -118,6 +118,7 @@
     _subpath: "{{ _subpaths[openshift_namespace] }}"
     _subpaths:
       wwp-test: .
+      wwp: .
 
 - name: Menu and breadcrumb API Service
   openshift:
