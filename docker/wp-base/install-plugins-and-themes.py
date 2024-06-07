@@ -50,7 +50,7 @@ Usage:
                                  You can alternatively set environment variables
                                  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (just
                                  like `aws cp` expects).
-
+                                 
       --wp-version               The wp version this install is running for
 
   install-plugins-and-themes.py <name> <URL>
