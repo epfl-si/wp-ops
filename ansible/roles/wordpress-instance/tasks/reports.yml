@@ -81,7 +81,8 @@
 ######## Infoscience content
 
 - name: Search site db for Infoscience blocks
-  command: "{{ wp_cli_command_with_skip }} db query \"SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%wp:epfl/infoscience-search%'\" --skip-column-names"
+  command: >
+    {{ wp_cli_command_with_skip }} db query "SELECT CONCAT('{{ wp_base_url }}', post_name) FROM wp_posts WHERE post_type in ('page', 'post') AND post_status = 'publish' AND post_content LIKE'%wp:epfl/infoscience-search%'" --skip-column-names
   register: infoscience_fetched_pages
   changed_when: false
   check_mode: no
