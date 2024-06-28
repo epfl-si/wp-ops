@@ -136,9 +136,8 @@
     # `ansible_play_hosts_all` to also report on WordPress instances
     # that had an error (e.g. due to unavailable DB)
     content: |
-      post_url,post_id
       {% for host in ansible_play_hosts %}
-      {% if hostvars[host]['infoscience_fetched_pages'].stdout != '' %}
+      {% if hostvars[host]['infoscience_fetched_pages'].stdout| default('') != '' %}
       {{ hostvars[host]['infoscience_fetched_pages'].stdout | regex_replace('	', ',') }}
       {% endif %}
       {% endfor %}
