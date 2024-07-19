@@ -351,13 +351,15 @@
     from: https://github.com/epfl-si/wp-plugin-epfl-content-filter
 
 # TODO: we are not quite sure anymore whether this plugin is useful.
+# 19.07.24: The new version of this plugin is being reviewed by Wordpress team
+# and is unavailable at the moment. That's why it is a fixed zip version now.
 - name: SVG-support plugin
   wordpress_plugin:
     name: svg-support
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    from: https://downloads.wordpress.org/plugin/svg-support.2.5.5.zip
 
 - name: remote-content-shortcode plugin
   wordpress_plugin:
