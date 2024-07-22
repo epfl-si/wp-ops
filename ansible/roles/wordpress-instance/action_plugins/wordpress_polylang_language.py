@@ -52,12 +52,12 @@ class ActionModule(WordPressActionModule):
         self._run_wp_cli_change("pll lang delete {}".format(language))
 
     def _get_polylang_languages (self):
-        """Returns: A dict of `mo_id`s keyed by language slug."""
+        """Returns: A Set of language slugs."""
 
         def get_moids_by_slug():
-            get_cmd = 'pll lang list --format=json --fields=mo_id,slug'
-            return dict([(lang["slug"], lang["mo_id"])
-                         for lang in self._get_wp_json(get_cmd)])
+            get_cmd = 'pll lang list --format=json --fields=slug'
+            return set(lang["slug"]
+                       for lang in self._get_wp_json(get_cmd))
 
         retval = get_moids_by_slug()
         # mo_id's are created lazily:
