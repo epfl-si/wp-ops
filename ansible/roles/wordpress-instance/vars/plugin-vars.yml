@@ -329,5 +329,5 @@ plugin_restauration_options:
     value: 'https://nutrimenu.ch/nmapi/getMenu'
 
 plugin_restauration_api_password:
-  - name: epfl_restauration_api_password
+    name: epfl_restauration_api_password
     value: '{{ lookup("env_secrets", "wp_plugin_restauration", "RESTAURATION_API_PASSWORD") }}'
