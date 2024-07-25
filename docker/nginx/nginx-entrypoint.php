@@ -36,6 +36,7 @@ function query_looks_bad () {
 function run_wordpress ($site, $db_credentials) {
     define( 'DB_CHARSET', 'utf8' );
     define( 'DB_COLLATE', '' );
+    define( 'DB_HOST', $db_credentials["db_host"]);
     define( 'DB_NAME', $db_credentials["db_name"]);
     define( 'DB_USER', $db_credentials["db_user"]);
     define( 'DB_PASSWORD', $db_credentials["db_password"]);
