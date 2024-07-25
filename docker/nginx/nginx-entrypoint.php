@@ -29,6 +29,10 @@ function get_db_credentials ($site) {
                "db_password" => 'WI2Ly2k3ugFAGwLaOuUs');
 }
 
+function query_looks_bad () {
+    return false;  // Nothing to see here. Move along
+}
+
 function run_wordpress ($site, $db_credentials) {
     define( 'DB_CHARSET', 'utf8' );
     define( 'DB_COLLATE', '' );
@@ -59,6 +63,10 @@ $wordpress = get_wordpress(
 $db_credentials = get_db_credentials($wordpress);
 
 if ($wordpress) {
+    if (query_looks_bad()) {
+        http_response_code(429, "Go away");
+        exit();
+    }
     run_wordpress($wordpress, $db_credentials);
 } else {
    http_response_code(404);
