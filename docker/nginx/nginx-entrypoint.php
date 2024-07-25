@@ -16,7 +16,7 @@ function get_wordpress ($wp_env, $host, $uri) {
     // TODO: look these up from a JSON ConfigMap, maintained by the WordPress operator, tabulating all sites
     return array("host"    => "wp-httpd",
                  "wp_env"  => getenv("WP_ENV"),
-                 "wp_version" => "5",
+                 "wp_version" => "6",
                  "site_uri" => '/',
                  "wp_debug" => FALSE);
 }
