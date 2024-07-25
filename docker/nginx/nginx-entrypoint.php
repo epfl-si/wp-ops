@@ -41,6 +41,8 @@ function run_wordpress ($site, $db_credentials) {
     define( 'DB_USER', $db_credentials["db_user"]);
     define( 'DB_PASSWORD', $db_credentials["db_password"]);
 
+    global $table_prefix; $table_prefix = "wp_";
+
     // TODO: Read these up from another JSON Secret
     define( 'AUTH_KEY',         '_#yH+/R.)X%;`*(4u=gy|Jo5`d8Gj)/1FaU[haP9P$48;v]1Eg7&zk:]nspMKuA#' );
     define( 'SECURE_AUTH_KEY',  'c&%V:8FXis7@;>l+2+FSUGYS?wG01r@W?&jq!V0-z:79A_W{*5CfSYf5{F&3FR!a' );
