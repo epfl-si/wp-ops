@@ -13,7 +13,7 @@
  */
 
 function get_wordpress ($wp_env, $host, $uri) {
-    // TODO: look these up from a JSON ConfigMap tabulating all sites
+    // TODO: look these up from a JSON ConfigMap, maintained by the WordPress operator, tabulating all sites
     return array("host"    => "wp-httpd",
                  "wp_env"  => getenv("WP_ENV"),
                  "wp_version" => "5",
@@ -22,7 +22,7 @@ function get_wordpress ($wp_env, $host, $uri) {
 }
 
 function get_db_credentials ($site) {
-    // TODO: look these up from a JSON Secret tabulating all sites
+    // TODO: look these up from a JSON Secret, maintained by the WordPress operator, tabulating all sites
   return array("db_host" => "db",
                "db_name" => 'wp_suifar11gce97j1vaqi9z0srqkw7b',
                "db_user" => 'o9askjsukww3zj5a',
