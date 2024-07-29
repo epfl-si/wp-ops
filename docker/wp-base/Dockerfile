@@ -90,7 +90,7 @@ RUN set -e -x; cd /var/www/.wp-cli; find . -type l | while read l; do     \
 ######################################################################
 # Install multiple versions of WordPress into /wp/, and patch them to
 # support our symlink-based serving layout
-ARG WORDPRESS_VERSION_LINEAGES="5.5 6.1"
+ARG WORDPRESS_VERSION_LINEAGES="6.1"
 RUN set -e -x;                                                           \
     for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
         version=$(curl http://api.wordpress.org/core/stable-check/1.0/   \
