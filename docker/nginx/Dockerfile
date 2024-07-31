@@ -19,7 +19,7 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
 
 COPY msmtprc /etc/msmtprc
 COPY php.ini /etc/php/95-epfl.ini
-RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/apache2/conf.d
+RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/fpm/conf.d/
 RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^listen = .*|listen = /run/php-fpm.sock|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
@@ -45,4 +45,3 @@ COPY nginx-entrypoint.php /wp/
 EXPOSE 8080 8443
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-
