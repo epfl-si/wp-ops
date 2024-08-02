@@ -21,7 +21,12 @@ COPY msmtprc /etc/msmtprc
 COPY php.ini /etc/php/95-epfl.ini
 RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/fpm/conf.d/
 RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+RUN sed -i 's|^;log_level = .*|log_level = notice|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+RUN sed -i 's|^;log_limit = .*|log_limit = 4096|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+RUN sed -i 's|^error_log = .*|error_log = /proc/self/fd/2|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+
 RUN sed -i 's|^listen = .*|listen = /run/php-fpm.sock|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i 's|;access.log = .*|access.log = /proc/self/fd/2|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 # directory for custom error pages
 RUN mkdir /var/www/global-error
