@@ -13,7 +13,7 @@ RUN apt-get -qy update && \
     apt-get clean
 
 # https://github.com/curl/curl/issues/3750
-RUN set -e -x; add-apt-repository ppa:savoury1/curl34; \
+RUN set -e -x; add-apt-repository ppa:savoury1/backports; \
   apt-get -qy update; apt-get -qy install curl
 
 RUN mkdir -p /etc/apt/keyrings
