@@ -139,6 +139,7 @@
         - menu_api
   tags:
     - menu_api
+    - menu_api.cronjob
     - menu_api.is
 
 # A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
