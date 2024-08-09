@@ -23,7 +23,10 @@
       menu-api-config.yaml: |
         OPENSHIFT_ENV: {{ _openshift_environment }}
         WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
-        MENU_API_PROTOCOL_HOST_PORT: "https://www.epfl.ch"
+        WPVERITAS_HOSTNAME: "{{ _wp_veritas_base_url }}"
+        EPFL_HOSTNAME: "{{ _epfl_hostname }}"
+        POD_NAME: "httpd-{{ _pod_name_suffix }}"
+        MENU_API_PROTOCOL_HOST_PORT: "https://{{ _epfl_hostname }}"
         SERVICE_PORT: "3001"
         NODE_TLS_REJECT_UNAUTHORIZED: "0"
         PATH_REFRESH_FILE: "."
@@ -71,6 +74,12 @@
             www
             labs" if openshift_namespace == "wwp"
       else "int" }}
+    _pod_name_suffix: >-
+      {{ "www" if openshift_namespace == "wwp"
+      else "int" }}
+    _epfl_hostname: >-
+      {{ "www.epfl.ch" if openshift_namespace == "wwp"
+      else "migration-wp.epfl.ch" }}
 
 - name: Menu and breadcrumb API DeploymentConfig
   openshift:
