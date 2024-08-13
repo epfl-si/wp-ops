@@ -1,3 +1,6 @@
+- include_vars: menu-api-vars.yml
+  tags: always
+
 - name: "Testing ImageStreams and their build information for Menu API"
   when: >-
     openshift_namespace == "wwp-test"
@@ -5,11 +8,22 @@
     metadata:
       name: "menu-api-siblings"
       namespace: "{{ openshift_namespace }}"
-    from: "{{ nodejs_base_image_mirrored_from }}"
     git:
-      repository: https://github.com/epfl-si/wp-menu-api.git
+      repository: https://github.com/epfl-si/wp-menu-api
       ref: "master"
+    from: "{{ nodejs_base_image_mirrored_to }}"
+  register: _menu_api_build
   tags: menu_api.is
+
+- name: "Rebuild {{ menu_api_image_name }} now"
+  when: |
+    (
+    (_menu_api_build | default({})) is changed
+    or
+    ("menu_api.rebuild" in ansible_run_tags)
+    )
+  shell: "oc -n {{ openshift_namespace }} start-build --wait {{ menu_api_image_name }}"
+  tags: menu_api.rebuild
 
 - name: menu-api-configmap ConfigMap
   openshift:
@@ -28,7 +42,6 @@
         POD_NAME: "httpd-{{ _pod_name_suffix }}"
         MENU_API_PROTOCOL_HOST_PORT: "https://{{ _epfl_hostname }}"
         SERVICE_PORT: "3001"
-        NODE_TLS_REJECT_UNAUTHORIZED: "0"
         PATH_REFRESH_FILE: "."
         REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
         LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
@@ -80,6 +93,18 @@
     _epfl_hostname: >-
       {{ "www.epfl.ch" if openshift_namespace == "wwp"
       else "migration-wp.epfl.ch" }}
+  register: _menu_api_config_map
+
+- name: "Redeploy {{ menu_api_image_name }}"
+  when: >-
+    ("menu_api.redeploy" in ansible_run_tags)
+    or
+    ( (_menu_api_config_map | default()) is changed)
+  local_action:
+    module: shell
+    cmd: "oc rollout latest {{ menu_api_image_name }} --namespace {{ openshift_namespace }}"
+  tags:
+    - menu_api.redeploy
 
 - name: Menu and breadcrumb API DeploymentConfig
   openshift:

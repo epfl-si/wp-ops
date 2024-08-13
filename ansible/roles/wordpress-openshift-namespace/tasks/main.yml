@@ -141,6 +141,8 @@
     - menu_api
     - menu_api.cronjob
     - menu_api.is
+    - menu_api.rebuild
+    - menu_api.redeploy
 
 # A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
 - debug:
