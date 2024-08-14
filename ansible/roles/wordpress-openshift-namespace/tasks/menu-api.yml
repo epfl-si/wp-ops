@@ -22,6 +22,8 @@
     or
     ("menu_api.rebuild" in ansible_run_tags)
     )
+    and 
+    openshift_namespace == "wwp-test"
   shell: "oc -n {{ openshift_namespace }} start-build --wait {{ menu_api_image_name }}"
   tags: menu_api.rebuild
 
@@ -127,20 +129,14 @@
               image: 'docker-registry.default.svc:5000/{{ openshift_namespace }}/menu-api-siblings:latest'
               imagePullPolicy: Always
               volumeMounts:
-                - name: wp-menu
-                  mountPath: /srv/menus
-                  subPath: "{{ _subpath }}"
                 - name: menu-api-config
                   mountPath: /config/
           volumes:
-            - name: wp-menu
-              persistentVolumeClaim:
-                claimName: "wordpress-0"
-                readOnly: true
             - name: menu-api-config
               configMap:
                 name: menu-api-configmap
       triggers:
+      - type: ConfigChange
       - type: ImageChange
         imageChangeParams:
           automatic: true
@@ -198,3 +194,12 @@
               restartPolicy: Never
   tags:
     - menu_api.cronjob
+
+- name: "Promote menu-api-siblings images from wwp-test to wwp"
+  when: >-
+    openshift_is_production
+  tags: menu_api.promote
+  local_action:
+    module: shell
+    cmd: |
+      oc tag wwp-test/menu-api-siblings:latest wwp/menu-api-siblings:latest

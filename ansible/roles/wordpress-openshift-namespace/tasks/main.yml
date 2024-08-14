@@ -143,6 +143,7 @@
     - menu_api.is
     - menu_api.rebuild
     - menu_api.redeploy
+    - menu_api.promote
 
 # A reminder that monitoring pod on wwp is expecting a pushgateway on wwp-infra
 - debug:
