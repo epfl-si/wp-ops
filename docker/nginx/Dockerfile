@@ -43,9 +43,11 @@ RUN set -e -x;                                                     \
 COPY docker-entrypoint.sh /
 RUN chmod a+x /docker-entrypoint.sh
 
-COPY nginx.conf /etc/nginx/nginx.conf.tmpl
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY conf.d/nginx-wp.conf /etc/nginx/conf.d/nginx-wp.conf
 
-COPY nginx-entrypoint.php /wp/
+RUN mkdir -p /wp/nginx-entrypoint/
+COPY nginx-entrypoint.php /wp/nginx-entrypoint/nginx-entrypoint.php
 
 EXPOSE 8080 8443
 
