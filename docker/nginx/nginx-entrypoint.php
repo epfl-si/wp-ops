@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Sole entry point for all PHP code run by the wwp nginx container.
  *
@@ -54,10 +53,38 @@ function run_wordpress ($site, $db_credentials) {
     define( 'LOGGED_IN_SALT',   '{2Y,4WGBE6wT$gdOD.n)duoV5:Jm5d?L@p{`,^HorJ5`>zaprEqc;<]W|d7-T?zE' );
     define( 'NONCE_SALT',       'mVSh!um&7*qGB%sZ,gg6KDD!ko<s,e1Dj>X[CP+fR6<f(&iy[#?~y VBuS^${/&Q' );
 
+    // Enable WP_DEBUG mode
+    define( 'WP_DEBUG', true );
+
+    // Enable Debug logging to the /wp-content/debug.log file
+    //define( 'WP_DEBUG_LOG', true );
+    define( 'WP_DEBUG_LOG', '/dev/stdout' );
+
+    // Disable display of errors and warnings
+    define( 'WP_DEBUG_DISPLAY', true );
+    @ini_set( 'display_errors', on );
+
+    // Use dev versions of core JS and CSS files (only needed if you are modifying these core files)
+    define( 'SCRIPT_DEBUG', true );
+
+    // Get the requested URI without query string
+    $entrypoint_path = strtok($_SERVER["REQUEST_URI"], '?');
+
+    /** Absolute path to the WordPress directory. */
     define('ABSPATH', sprintf("/wp/%s/", $site["wp_version"]));
-    $_SERVER["SCRIPT_NAME"] = ABSPATH . "index.php";
-    include(ABSPATH . "wp-settings.php");
-    include($_SERVER["SCRIPT_NAME"]);
+
+    require_once(ABSPATH . 'wp-settings.php');
+    if ( substr($entrypoint_path, -4) !== '.php' ) {
+        if ( basename($entrypoint_path) === 'wp-admin' ) {
+            $entrypoint_path = 'wp-admin/index.php';
+        } else {
+            $entrypoint_path = 'index.php';
+        }
+    }
+    // @TODO: refactor run_wordpress to manage globals correctly
+    global $menu, $submenu, $menu, $_wp_real_parent_file, $_wp_submenu_nopriv,
+           $_registered_pages, $_parent_pages;
+    require_once(ABSPATH . $entrypoint_path);
 }
 
 $wordpress = get_wordpress(
@@ -75,5 +102,4 @@ if ($wordpress) {
 } else {
    http_response_code(404);
    print("404 citroen not found");
-   
 }
