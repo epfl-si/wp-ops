@@ -87,11 +87,23 @@ function setup_nonces ($wordpress) {
     define( 'NONCE_SALT',       'mVSh!um&7*qGB%sZ,gg6KDD!ko<s,e1Dj>X[CP+fR6<f(&iy[#?~y VBuS^${/&Q' );
 }
 
+function serve_404_and_exit () {
+    http_response_code(404);
+    print('406 citroen not found');
+    exit();
+}
+
+function serve_go_away_and_exit () {
+    http_response_code(429);
+    print('Go away');
+    exit();
+}
+
+
 ##########################################################################################
 
 if (query_looks_bad()) {
-    http_response_code(429, 'Go away');
-    exit();
+    serve_go_away_and_exit();
 }
 
 $wordpress = get_wordpress(
@@ -99,9 +111,7 @@ $wordpress = get_wordpress(
     $_SERVER['HTTP_HOST'],
     $_SERVER['DOCUMENT_URI']);
 if (! $wordpress) {
-    http_response_code(404);
-    print('404 citroen not found');
-    exit();
+    serve_404_and_exit();
 }
 
 /** Absolute path to the WordPress directory. */
@@ -109,8 +119,7 @@ define('ABSPATH', sprintf('/wp/%s/', $wordpress['wp_version']));
 
 $entrypoint_path = get_wp_entrypoint();
 if (! $entrypoint_path) {
-    http_response_code(429, 'Go away');
-    exit();
+    serve_go_away_and_exit();
 }
 setup_db($wordpress);
 
