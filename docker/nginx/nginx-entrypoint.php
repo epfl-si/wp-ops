@@ -64,6 +64,9 @@ function setup_db ($wordpress) {
  */
 function get_wp_entrypoint () {
     $entrypoint_path = strtok($_SERVER["REQUEST_URI"], '?');
+    if ( has_path_traversal($entrypoint_path) ) {
+        return null;
+    }
     if ( substr($entrypoint_path, -4) === '.php' ) {
         return $entrypoint_path;
     } elseif ( basename($entrypoint_path) === 'wp-admin' ) {
@@ -71,6 +74,16 @@ function get_wp_entrypoint () {
     } else {
         // This catch-all case also includes /wp-json/ etc.
         return 'index.php';
+    }
+}
+
+function has_path_traversal ($path) {
+    if ( substr($path, 1) === '.' ) {
+        return true;
+    } elseif (false !== strpos($path, '/.')) {
+        return true;
+    } else {
+        return false;
     }
 }
 
