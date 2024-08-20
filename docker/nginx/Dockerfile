@@ -26,7 +26,7 @@ RUN sed -i 's|^;log_limit = .*|log_limit = 4096|' /etc/php/${PHP_VERSION}/fpm/ph
 RUN sed -i 's|^error_log = .*|error_log = /proc/self/fd/2|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 
 RUN sed -i 's|^listen = .*|listen = /run/php-fpm.sock|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-RUN sed -i 's|;access.log = .*|access.log = /proc/self/fd/2|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i 's|;access.log = .*|access.log = /dev/null|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 # directory for custom error pages
 RUN mkdir /var/www/global-error
