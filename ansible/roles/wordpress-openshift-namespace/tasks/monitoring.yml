@@ -155,6 +155,7 @@
                 name: traefikdyna
 
 - name: Prometheus ConfigMap (configuration and sync scripts)
+  tags: monitoring.prometheus
   openshift:
     state: latest
     apiVersion: v1

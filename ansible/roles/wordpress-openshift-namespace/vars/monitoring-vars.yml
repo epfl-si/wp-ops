@@ -17,3 +17,6 @@ monitoring_traefik_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ 
 monitoring_python_base_image: python:buster
 monitoring_python_base_image_mirrored_from: "docker.io/library/{{ monitoring_python_base_image }}"
 monitoring_python_base_image_mirrored_to: "docker-registry.default.svc:5000/{{ openshift_namespace }}/{{ monitoring_python_base_image }}"
+
+menu_api_container_name: menu-api-siblings
+menu_api_container_port: 3001
