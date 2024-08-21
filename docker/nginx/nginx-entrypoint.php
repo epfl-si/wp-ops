@@ -11,6 +11,8 @@
  * index.php.
  */
 
+namespace __entrypoint;
+
 function get_wordpress ($wp_env, $host, $uri) {
     // TODO: look these up from a JSON ConfigMap, maintained by the WordPress operator, tabulating all sites
     return array('host'       => 'wp-httpd',
