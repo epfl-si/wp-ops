@@ -151,6 +151,11 @@ setup_nonces($wordpress);
 
 enable_wp_debug();
 
+$uri_path = uri_path();
+if (string_ends_with($uri_path, "/wp-admin") || string_has_substring($uri_path, "/wp-admin/")) {
+    define("WP_ADMIN", true);
+}
+
 require_once(ABSPATH . 'wp-settings.php');
 // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
 require_once(ABSPATH . $entrypoint_path);
