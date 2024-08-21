@@ -8,7 +8,7 @@
  *
  * The job of this file is to figure out *which* instance of WordPress
  * should run the query; set up variables; and transfer control to
- * index.php.
+ * WordPress' PHP code.
  */
 
 namespace __entrypoint;
@@ -70,7 +70,7 @@ function get_wp_entrypoint () {
         return null;
     }
     if ( substr($entrypoint_path, -4) === '.php' ) {
-        return $entrypoint_path;
+        return chop_leading_slashes($entrypoint_path);
     } elseif ( basename($entrypoint_path) === 'wp-admin' ) {
         return 'wp-admin/index.php';
     } else {
@@ -93,6 +93,17 @@ function string_ends_with ($haystack, $needle) {
 
 function uri_path () {
     return strtok($_SERVER["REQUEST_URI"], '?');
+}
+
+function chop_leading_slashes ($path) {
+    while (string_starts_with($path, "/")) {
+        $path = substr($path, 1);
+    }
+    return $path;
+}
+
+function path_has_component($path, $subpath) {
+    return false !== array_search($subpath, explode("/", $path));
 }
 
 function has_path_traversal ($path) {
@@ -125,6 +136,13 @@ function serve_go_away_and_exit () {
     exit();
 }
 
+function settings_before_wp_settings () {
+    if (path_has_component(uri_path(), "wp-admin")) {
+        // In the “normal” loading flow, all PHP scripts under `/wp-admin` ensure
+        // to `define("WP_ADMIN", true);` before loading settings:
+        define("WP_ADMIN", true);
+    }
+}
 
 ##########################################################################################
 
@@ -147,17 +165,18 @@ $entrypoint_path = get_wp_entrypoint();
 if (! $entrypoint_path) {
     serve_go_away_and_exit();
 }
+
 setup_db($wordpress);
 
 setup_nonces($wordpress);
 
 enable_wp_debug();
 
-$uri_path = uri_path();
-if (string_ends_with($uri_path, "/wp-admin") || string_has_substring($uri_path, "/wp-admin/")) {
-    define("WP_ADMIN", true);
-}
+// Initialize WordPress' constants. This is best done using
+// `wp-settings.php`, rather than `load.php` and `index.php` which
+// both insist on loading a `wp-config.php` file.
+settings_before_wp_settings();
+require(ABSPATH . 'wp-settings.php');
 
-require_once(ABSPATH . 'wp-settings.php');
 // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
-require_once(ABSPATH . $entrypoint_path);
+require(ABSPATH . $entrypoint_path);
