@@ -82,9 +82,6 @@
     _wp_veritas_base_url: >-
       {{ "wp-veritas.epfl.ch" if openshift_namespace == "wwp"
       else "wp-veritas-test.epfl.ch" }}
-    _epfl_hostname: >-
-      {{ "www.epfl.ch" if openshift_namespace == "wwp"
-      else "migration-wp.epfl.ch" }}
     _debug: >-
       {{ false if openshift_namespace == "wwp"
       else true }}
