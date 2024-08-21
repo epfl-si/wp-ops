@@ -63,7 +63,7 @@ function setup_db ($wordpress) {
  * Figure out which PHP file we need to hand over control to
  */
 function get_wp_entrypoint () {
-    $entrypoint_path = strtok($_SERVER["REQUEST_URI"], '?');
+    $entrypoint_path = uri_path();
     if ( has_path_traversal($entrypoint_path) ) {
         return null;
     }
@@ -77,14 +77,25 @@ function get_wp_entrypoint () {
     }
 }
 
+function string_has_substring ($haystack, $needle) {
+    return false !== strpos($haystack, $needle);
+}
+
+function string_starts_with ($haystack, $needle) {
+    return 0 === strpos($haystack, $needle);
+}
+
+function string_ends_with ($haystack, $needle) {
+    return substr($haystack, -strlen($needle)) === $needle;
+}
+
+function uri_path () {
+    return strtok($_SERVER["REQUEST_URI"], '?');
+}
+
 function has_path_traversal ($path) {
-    if ( substr($path, 1) === '.' ) {
-        return true;
-    } elseif (false !== strpos($path, '/.')) {
-        return true;
-    } else {
-        return false;
-    }
+    return ( string_starts_with($path, '.')  ||
+             string_has_substring($path, '/.') );
 }
 
 function setup_nonces ($wordpress) {
