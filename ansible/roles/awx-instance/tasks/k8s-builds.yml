@@ -69,11 +69,30 @@
   delegate_to: localhost
   tags: awx.build.receptor
 
-- name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
+- name: "Mirror upstream {{ awx_ee_base_image_mirrored_from }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: awx-ee
       namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ee_image_mirrored_from }}"
+    from: "{{ awx_ee_base_image_mirrored_from }}"
     tag: "{{ awx_version }}"
+
+- name: "Patch Ansible assets into {{ awx_ee_image_name }}"
+  delegate_to: localhost
+  openshift_imagestream:
+    metadata:
+      name: "{{ awx_ee_image_name }}"
+      namespace: "{{ ansible_oc_namespace }}"
+    dockerfile: |
+       FROM {{ awx_ee_base_image_mirrored_to }}
+
+       RUN true
+    tag: "{{ awx_version }}"
+  register: _awx_ee_buildconfig
+
+- name: "Rebuild {{ awx_ee_image_name }} now"
+  when: _awx_ee_buildconfig is changed
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_ee_image_name }}"
+  delegate_to: localhost
+  tags: awx.build.ee
