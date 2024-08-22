@@ -25,7 +25,7 @@
 - name: Pushgateway Deployment config
   openshift:
     state: latest
-    apiVersion: v1
+    apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
     metadata:
       name: pushgateway
