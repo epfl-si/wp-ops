@@ -37,15 +37,12 @@
       namespace: "{{ openshift_namespace }}"
     data:
       menu-api-config.yaml: |
-        OPENSHIFT_ENV: {{ _openshift_environment }}
         WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
-        WPVERITAS_HOSTNAME: "{{ _wp_veritas_base_url }}"
-        EPFL_HOSTNAME: "{{ _epfl_hostname }}"
         POD_NAME: "httpd-"
-        MENU_API_PROTOCOL_HOST_PORT: "https://{{ _epfl_hostname }}"
         SERVICE_PORT: "3001"
-        PATH_REFRESH_FILE: "."
+        PATH_REFRESH_FILE: "./data"
         DEBUG: {{ _debug }}
+        LOCAL_ENV: false
         REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
         LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
         LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
@@ -85,16 +82,6 @@
     _wp_veritas_base_url: >-
       {{ "wp-veritas.epfl.ch" if openshift_namespace == "wwp"
       else "wp-veritas-test.epfl.ch" }}
-    _openshift_environment: >-
-      {{ "|
-            www
-            labs
-            form" if openshift_namespace == "wwp"
-      else "|
-            int" }}
-    _epfl_hostname: >-
-      {{ "www.epfl.ch" if openshift_namespace == "wwp"
-      else "migration-wp.epfl.ch" }}
     _debug: >-
       {{ false if openshift_namespace == "wwp"
       else true }}
