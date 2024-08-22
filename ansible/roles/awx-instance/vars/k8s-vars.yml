@@ -19,6 +19,7 @@ awx_ee_version: "{{ awx_version }}"
 awx_ee_base_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
 awx_ee_base_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
 awx_ee_image_name: wp-awx-ee
+awx_ee_ansible_requirements_from_url: https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml
 awx_ee_image_for_pods: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_ee_image_name }}:{{ awx_ee_version }}"
 
 awx_web_hostnames:

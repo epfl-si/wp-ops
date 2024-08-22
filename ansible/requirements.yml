@@ -1,3 +1,6 @@
+# 💡 Whenever this file changes on Git, the `wp-awx-ee` image needs to
+# be rebuilt in the `wwp-test` namespace, then promoted (using
+# `wpsible --prof -t awx.promote) into the other namespaces.
 roles:
 - name: epfl_si.ansible-module-openshift
 - name: epfl_si.ansible-module-eyaml

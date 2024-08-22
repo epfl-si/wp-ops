@@ -85,7 +85,12 @@
     dockerfile: |
        FROM {{ awx_ee_base_image_mirrored_to }}
 
-       RUN true
+       RUN {{ shellmacros_poor_mans_curl_oneline }} ; \
+           poorcurl {{ awx_ee_ansible_requirements_from_url }} > requirements.yml
+       RUN set -e -x ; \
+           export HOME=/runner ; \
+           ansible-galaxy role install --force -i -r requirements.yml ; \
+           ansible-galaxy collection install --force -i -r requirements.yml
     tag: "{{ awx_version }}"
   register: _awx_ee_buildconfig
 
