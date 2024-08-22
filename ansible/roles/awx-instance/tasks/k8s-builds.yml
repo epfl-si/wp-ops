@@ -90,7 +90,10 @@
        RUN set -e -x ; \
            export HOME=/runner ; \
            ansible-galaxy role install --force -i -r requirements.yml ; \
-           ansible-galaxy collection install --force -i -r requirements.yml
+           ansible-galaxy collection install --force -i -r requirements.yml ; \
+           rm -rf .ansible/tmp; \
+           mkdir .ansible/tmp; \
+           chmod 0770 .ansible/tmp
     tag: "{{ awx_version }}"
   register: _awx_ee_buildconfig
 
