@@ -39,6 +39,8 @@ awx_service_account: awx
 # `curl` (and therefore) `dnf` and `yum` are broken on CentOS 9 +
 # OpenShift 3.11, but only during builds ☹
 # (https://github.com/moby/moby/issues/42680). Here is a workaround:
-shellmacro_poor_mans_curl: >-
-       pip3 install requests >&2 &&
-       python3 -c 'import requests; import sys; sys.stdout.buffer.write(requests.get(url = sys.argv[-1]).content)' --
+shellmacros_poor_mans_curl_oneline: >-
+  {{  lookup("template", "poor_mans_curl_lib.sh")
+  | regex_replace('\\[\r\n]', '')
+  | regex_replace('[\r\n]+', ' ')
+  | regex_replace('[ \t]+',' ') }}

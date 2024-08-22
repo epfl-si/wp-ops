@@ -51,15 +51,13 @@
        USER 0
        RUN pip3 install ansible ansible-runner
        RUN set -e -x; \
-          {{ shellmacro_poor_mans_curl }} $({{ shellmacro_poor_mans_curl }} https://api.github.com/repos/ansible/receptor/releases \
-            | python3 -c \
-              "import sys; import json; import re; \
-               release = (r for r in json.load(sys.stdin) if r['name'] == '{{ awx_receptor_version }}').__next__(); \
-               asset = (a for a in release['assets'] if re.search('linux_amd64\.tar\.gz$', a['name'])).__next__(); \
-               print(asset['browser_download_url'])") \
+           {{ shellmacros_poor_mans_curl_oneline }} ; \
+           install_it ; \
+           download_github_release ansible/receptor \
+             '{{ awx_receptor_version }}' \
+             linux_amd64.tar.gz \
           | tar -C/usr/local/bin -zxvv receptor
        USER 1000
-
   tags: awx.build.receptor
   notify: Restart AWX pod
 
