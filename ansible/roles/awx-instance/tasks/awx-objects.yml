@@ -146,6 +146,9 @@
             volumeMounts:
             - name: wp-nfs
               mountPath: "/srv"
+            envFrom:
+            - secretRef:
+                name: backup-rw-credentials
         volumes:
           - name: wp-nfs
             persistentVolumeClaim:
