@@ -18,7 +18,6 @@ awx_receptor_socket_path: /var/run/receptor/receptor.sock
 awx_ee_version: "{{ awx_version }}"
 awx_ee_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
 awx_ee_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
-awx_ee_image_full_name: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/ee:{{ awx_ee_version }}"
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
