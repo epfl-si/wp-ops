@@ -29,13 +29,13 @@
 
        USER 1000
   tags: awx.build.awx
-  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_image_name }} now"
   when: _awx_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   delegate_to: localhost
   tags: awx.build.awx
+  notify: Restart AWX pod
 
 - name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_receptor_image_name }}"
   register: _awx_receptor_buildconfig
@@ -59,13 +59,13 @@
           | tar -C/usr/local/bin -zxvv receptor
        USER 1000
   tags: awx.build.receptor
-  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_receptor_image_name }} now"
   when: _awx_receptor_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
   delegate_to: localhost
   tags: awx.build.receptor
+  notify: Restart AWX pod
 
 - name: "Mirror upstream {{ awx_ee_base_image_mirrored_from }}"
   delegate_to: localhost
@@ -113,3 +113,4 @@
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_ee_image_name }}"
   delegate_to: localhost
   tags: awx.build.ee
+  # Pods that use this image are ephemeral; thus, there is no need to `notify: Restart AWX pod`
