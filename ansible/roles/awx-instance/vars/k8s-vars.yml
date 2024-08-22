@@ -16,6 +16,7 @@ awx_receptor_socket_path: /var/run/receptor/receptor.sock
 # AWX will spin up pods using this image when it has work to do.
 # 💡 Here “ee” means “execution environment”, not “enterprise edition”.
 awx_ee_version: "{{ awx_version }}"
+awx_ee_image_name: awx-ee
 awx_ee_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
 awx_ee_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
 
