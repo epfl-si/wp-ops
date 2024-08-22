@@ -85,6 +85,17 @@
     dockerfile: |
        FROM {{ awx_ee_base_image_mirrored_to }}
 
+       USER 0
+       RUN set -e -x; {{ shellmacros_poor_mans_curl_oneline }} ; \
+           poorcurl {{ awx_ee_busybox_static_download_url }} > /usr/local/bin/busybox; \
+           chmod 755 /usr/local/bin/busybox; \
+           download_github_release restic/restic \
+             'restic {{ awx_ee_restic_version }}' \
+             'restic_{{ awx_ee_restic_version }}_linux_amd64.bz2' \
+             | busybox bzip2 -dc \
+             > /usr/local/bin/restic ; \
+          chmod 755 /usr/local/bin/restic
+       USER 1000
        RUN {{ shellmacros_poor_mans_curl_oneline }} ; \
            poorcurl {{ awx_ee_ansible_requirements_from_url }} > requirements.yml
        RUN set -e -x ; \

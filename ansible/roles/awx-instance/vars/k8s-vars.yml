@@ -37,6 +37,11 @@ awx_inventories:
 
 awx_service_account: awx
 
+awx_ee_busybox_static_download_url: >-
+  https://www.busybox.net/downloads/binaries/1.21.1/busybox-x86_64
+
+awx_ee_restic_version: 0.17.0
+
 # `curl` (and therefore) `dnf` and `yum` are broken on CentOS 9 +
 # OpenShift 3.11, but only during builds ☹
 # (https://github.com/moby/moby/issues/42680). Here is a workaround:
