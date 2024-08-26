@@ -67,15 +67,6 @@
   tags: awx.build.receptor
   notify: Restart AWX pod
 
-- name: "Mirror upstream {{ awx_ee_base_image_mirrored_from }}"
-  delegate_to: localhost
-  openshift_imagestream:
-    metadata:
-      name: awx-ee
-      namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ee_base_image_mirrored_from }}"
-    tag: "{{ awx_version }}"
-
 - name: "Patch Ansible assets into {{ awx_ee_image_name }}"
   delegate_to: localhost
   openshift_imagestream:
@@ -83,29 +74,55 @@
       name: "{{ awx_ee_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
     dockerfile: |
-       FROM {{ awx_ee_base_image_mirrored_to }}
+       # YAGNI?
+       FROM {{ awx_receptor_image_full_name }} as receptor
 
-       USER 0
-       RUN set -e -x; {{ shellmacros_poor_mans_curl_oneline }} ; \
-           poorcurl {{ awx_ee_busybox_static_download_url }} > /usr/local/bin/busybox; \
-           chmod 755 /usr/local/bin/busybox; \
-           download_github_release restic/restic \
-             'restic {{ awx_ee_restic_version }}' \
-             'restic_{{ awx_ee_restic_version }}_linux_amd64.bz2' \
-             | busybox bzip2 -dc \
-             > /usr/local/bin/restic ; \
-          chmod 755 /usr/local/bin/restic
+       FROM docker-registry.default.svc:5000/wwp-test/wp-base
+
+       # YAGNI?
+       COPY --from=receptor /usr/local/bin/receptor /usr/local/bin/receptor
+
+       RUN set -e -x; apt-get -qy update ; \
+           apt-get -qy install --no-install-recommends \
+             mysql-client python3-pip restic ; \
+           apt-get -qy clean
+
+       RUN pip3 install ansible ansible-runner
+
+       RUN set -e -x; \
+         curl {{ awx_ee_entrypoint_script_source }} > /entrypoint; \
+         chmod 755 /entrypoint
+       ENTRYPOINT ["/entrypoint"]
+
+       RUN set -e -x; mkdir /runner; \
+           echo "1000:x:1000:0:container user 1000:/runner:/bin/bash" >> /etc/passwd
+       # So that the entrypoint script may futz with it:
+       RUN chmod g+w /etc/passwd
+
+       # Unfortunately, OpenShift's `docker build` emulation is not smart
+       # enough to pick up the change to user 1000 on the fly. Ah well. We'll
+       # just fix it later.
+
+       RUN chmod 777 /runner
+
+       WORKDIR /runner
+
        USER 1000
-       RUN {{ shellmacros_poor_mans_curl_oneline }} ; \
-           poorcurl {{ awx_ee_ansible_requirements_from_url }} > requirements.yml
+       RUN curl {{ awx_ee_ansible_requirements_from_url }} > requirements.yml
+       ENV HOME=/runner
+
        RUN set -e -x ; \
-           export HOME=/runner ; \
            ansible-galaxy role install --force -i -r requirements.yml ; \
            ansible-galaxy collection install --force -i -r requirements.yml ; \
            rm -rf .ansible/tmp; \
            mkdir .ansible/tmp; \
            chmod 0770 .ansible/tmp
-    tag: "{{ awx_version }}"
+
+       # Undo overly permissive `/runner`; see above
+       USER 0
+       RUN  chmod 775 /runner
+       USER 1000
+
   tags: awx.build.ee
   register: _awx_ee_buildconfig
 

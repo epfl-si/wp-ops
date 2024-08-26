@@ -47,7 +47,7 @@
     - name: "{{ awx_receptor_image_name }}"
       version: "{{ awx_receptor_version }}"
     - name: "wp-awx-ee"
-      version: "{{ awx_ee_version }}"
+      version: latest
   # 💡 Other image promotion tasks (for “core” WordPress serving and
   # cron images) can be found in
   # ../../wordpress-openshift-namespace/tasks/images.yml (under tag
