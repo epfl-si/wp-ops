@@ -106,6 +106,7 @@
            mkdir .ansible/tmp; \
            chmod 0770 .ansible/tmp
     tag: "{{ awx_version }}"
+  tags: awx.build.ee
   register: _awx_ee_buildconfig
 
 - name: "Rebuild {{ awx_ee_image_name }} now"
