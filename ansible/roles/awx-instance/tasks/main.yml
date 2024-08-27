@@ -24,6 +24,7 @@
     - awx.build
     - awx.build.awx
     - awx.build.receptor
+    - awx.build.ee
 
 - name: "Ansible Tower images promoted from {{ awx_build_namespace }}"
   when: "ansible_oc_namespace != awx_build_namespace"
@@ -45,8 +46,8 @@
       version: "{{ awx_version }}"
     - name: "{{ awx_receptor_image_name }}"
       version: "{{ awx_receptor_version }}"
-    - name: "{{ awx_ee_image_name }}"
-      version: "{{ awx_ee_version }}"
+    - name: "wp-awx-ee"
+      version: latest
   # 💡 Other image promotion tasks (for “core” WordPress serving and
   # cron images) can be found in
   # ../../wordpress-openshift-namespace/tasks/images.yml (under tag

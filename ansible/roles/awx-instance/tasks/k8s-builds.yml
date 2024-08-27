@@ -29,13 +29,13 @@
 
        USER 1000
   tags: awx.build.awx
-  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_image_name }} now"
   when: _awx_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_image_name }}"
   delegate_to: localhost
   tags: awx.build.awx
+  notify: Restart AWX pod
 
 - name: "Patch {{ awx_base_image_mirrored_to }} into {{ awx_receptor_image_name }}"
   register: _awx_receptor_buildconfig
@@ -51,29 +51,84 @@
        USER 0
        RUN pip3 install ansible ansible-runner
        RUN set -e -x; \
-          {{ shellmacro_poor_mans_curl }} $({{ shellmacro_poor_mans_curl }} https://api.github.com/repos/ansible/receptor/releases \
-            | python3 -c \
-              "import sys; import json; import re; \
-               release = (r for r in json.load(sys.stdin) if r['name'] == '{{ awx_receptor_version }}').__next__(); \
-               asset = (a for a in release['assets'] if re.search('linux_amd64\.tar\.gz$', a['name'])).__next__(); \
-               print(asset['browser_download_url'])") \
+           {{ shellmacros_poor_mans_curl_oneline }} ; \
+           install_it ; \
+           download_github_release ansible/receptor \
+             '{{ awx_receptor_version }}' \
+             linux_amd64.tar.gz \
           | tar -C/usr/local/bin -zxvv receptor
        USER 1000
-
   tags: awx.build.receptor
-  notify: Restart AWX pod
 
 - name: "Rebuild {{ awx_receptor_image_name }} now"
   when: _awx_receptor_buildconfig is changed
   shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_receptor_image_name }}"
   delegate_to: localhost
   tags: awx.build.receptor
+  notify: Restart AWX pod
 
-- name: "Pull upstream awx-ee image into {{ awx_ee_image_mirrored_to }}"
+- name: "Patch Ansible assets into {{ awx_ee_image_name }}"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
-      name: awx-ee
+      name: "{{ awx_ee_image_name }}"
       namespace: "{{ ansible_oc_namespace }}"
-    from: "{{ awx_ee_image_mirrored_from }}"
-    tag: "{{ awx_version }}"
+    dockerfile: |
+       # YAGNI?
+       FROM {{ awx_receptor_image_full_name }} as receptor
+
+       FROM docker-registry.default.svc:5000/wwp-test/wp-base
+
+       # YAGNI?
+       COPY --from=receptor /usr/local/bin/receptor /usr/local/bin/receptor
+
+       RUN set -e -x; apt-get -qy update ; \
+           apt-get -qy install --no-install-recommends \
+             mysql-client python3-pip restic ; \
+           apt-get -qy clean
+
+       RUN pip3 install ansible ansible-runner
+
+       RUN set -e -x; \
+         curl {{ awx_ee_entrypoint_script_source }} > /entrypoint; \
+         chmod 755 /entrypoint
+       ENTRYPOINT ["/entrypoint"]
+
+       RUN set -e -x; mkdir /runner; \
+           echo "1000:x:1000:0:container user 1000:/runner:/bin/bash" >> /etc/passwd
+       # So that the entrypoint script may futz with it:
+       RUN chmod g+w /etc/passwd
+
+       # Unfortunately, OpenShift's `docker build` emulation is not smart
+       # enough to pick up the change to user 1000 on the fly. Ah well. We'll
+       # just fix it later.
+
+       RUN chmod 777 /runner
+
+       WORKDIR /runner
+
+       USER 1000
+       RUN curl {{ awx_ee_ansible_requirements_from_url }} > requirements.yml
+       ENV HOME=/runner
+
+       RUN set -e -x ; \
+           ansible-galaxy role install --force -i -r requirements.yml ; \
+           ansible-galaxy collection install --force -i -r requirements.yml ; \
+           rm -rf .ansible/tmp; \
+           mkdir .ansible/tmp; \
+           chmod 0770 .ansible/tmp
+
+       # Undo overly permissive `/runner`; see above
+       USER 0
+       RUN  chmod 775 /runner
+       USER 1000
+
+  tags: awx.build.ee
+  register: _awx_ee_buildconfig
+
+- name: "Rebuild {{ awx_ee_image_name }} now"
+  when: _awx_ee_buildconfig is changed
+  shell: "oc -n {{ awx_build_namespace }} start-build --wait {{ awx_ee_image_name }}"
+  delegate_to: localhost
+  tags: awx.build.ee
+  # Pods that use this image are ephemeral; thus, there is no need to `notify: Restart AWX pod`

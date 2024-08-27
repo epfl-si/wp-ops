@@ -15,9 +15,11 @@ awx_receptor_socket_path: /var/run/receptor/receptor.sock
 
 # AWX will spin up pods using this image when it has work to do.
 # 💡 Here “ee” means “execution environment”, not “enterprise edition”.
-awx_ee_version: "{{ awx_version }}"
-awx_ee_image_mirrored_from: "ghcr.io/ansible/awx-ee:{{ awx_ee_version }}"
-awx_ee_image_mirrored_to: "docker-registry.default.svc:5000/wwp-test/awx-ee:{{ awx_ee_version }}"
+awx_ee_image_name: wp-awx-ee
+awx_ee_ansible_requirements_from_url: https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/requirements.yml
+awx_ee_entrypoint_script_source: >-
+  https://raw.githubusercontent.com/ansible/ansible-builder/devel/src/ansible_builder/_target_scripts/entrypoint
+awx_ee_image_for_pods: "docker-registry.default.svc:5000/{{ ansible_oc_namespace }}/{{ awx_ee_image_name }}:latest"
 
 awx_web_hostnames:
   wwp: awx-wwp.epfl.ch
@@ -37,6 +39,8 @@ awx_service_account: awx
 # `curl` (and therefore) `dnf` and `yum` are broken on CentOS 9 +
 # OpenShift 3.11, but only during builds ☹
 # (https://github.com/moby/moby/issues/42680). Here is a workaround:
-shellmacro_poor_mans_curl: >-
-       pip3 install requests >&2 &&
-       python3 -c 'import requests; import sys; sys.stdout.buffer.write(requests.get(url = sys.argv[-1]).content)' --
+shellmacros_poor_mans_curl_oneline: >-
+  {{  lookup("template", "poor_mans_curl_lib.sh")
+  | regex_replace('\\[\r\n]', '')
+  | regex_replace('[\r\n]+', ' ')
+  | regex_replace('[ \t]+',' ') }}
