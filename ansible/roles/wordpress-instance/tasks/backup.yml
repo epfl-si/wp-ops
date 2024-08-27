@@ -48,26 +48,30 @@
 
       # Back up MySQL database to a distinct restic depot (making metadata
       # management that much simpler)
-      sql_snapshot_id=$(
-        {{ backup_bash_stop_on_any_errors }}
-        {{ backup_db_to_stdout_command }} \
-        | {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} backup \
-              --stdin --stdin-filename db-backup.sql \
-              --json \
-        | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
-      )
+      if [ -f wp-config.php ]; then
+        sql_snapshot_id=$(
+          {{ backup_bash_stop_on_any_errors }}
+          {{ backup_db_to_stdout_command }} \
+          | {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} backup \
+                --stdin --stdin-filename db-backup.sql \
+                --json \
+          | jq -r -s 'last(.[] | select(.message_type == "summary")) | .snapshot_id'
+        )
+      fi
 
       # Move tags forward
       date_short="$(date +%Y%m%d)"
       date_full="$(date +%Y%m%d-%H%M%S)"
       {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} tag \
         --remove latest --remove "$date_short" --remove "$date_full"
-      {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag \
-        --remove latest --remove "$date_short" --remove "$date_full"
       {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} tag "$files_snapshot_id" \
         --add latest --add "$date_short" --add "$date_full"
-      {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag "$sql_snapshot_id" \
-        --add latest --add "$date_short" --add "$date_full"
+      if [ -f wp-config.php ]; then
+        {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag \
+          --remove latest --remove "$date_short" --remove "$date_full"
+        {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} tag "$sql_snapshot_id" \
+          --add latest --add "$date_short" --add "$date_full"
+      fi
 
       {% if backup_has_monitoring %}
       echo "restic_success{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"} $(date +%s)" | \
@@ -75,10 +79,12 @@
       # Collect additional stats to pushgateway.
       (
         {{ backup_bash_stop_on_any_errors }}
-        {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
-        | jq -r '. as $initial_data | keys | map(["restic_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
         {{ backup_restic_cmd }} -r {{ backup_restic_repo_files }} stats --mode restore-size --json latest \
         | jq -r '. as $initial_data | keys | map(["restic_files_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        if [ -f wp-config.php ]; then
+          {{ backup_restic_cmd }} -r {{ backup_restic_repo_sql }} stats --mode restore-size --json latest \
+          | jq -r '. as $initial_data | keys | map(["restic_sql_" + . + "{url=\"{{ backup_url_label }}\", wp_env=\"{{ wp_env }}\"}", $initial_data[.]]) | .[] | @tsv'
+        fi
       ) | {{ backup_curl_to_pushgateway_cmd }}
 
       (
