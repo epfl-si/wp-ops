@@ -490,7 +490,7 @@
     state:
       - symlinked
       - active
-    from: https://github.com/morganhvidt/find-my-blocks/archive/refs/tags/v3.5.5.zip
+    from: "s3://{{ build.s3_assets.bucket_name }}/find-my-blocks-3.5.5.zip"
 
 ##################### Category-specific plugins ###########################
 
