@@ -490,7 +490,7 @@
     state:
       - symlinked
       - active
-    from: wordpress.org/plugins
+    from: https://github.com/morganhvidt/find-my-blocks/archive/refs/tags/v3.5.5.zip
 
 ##################### Category-specific plugins ###########################
 
