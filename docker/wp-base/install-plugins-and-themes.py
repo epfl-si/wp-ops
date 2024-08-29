@@ -61,12 +61,6 @@ Usage:
     subdirectory), or it can be the string "wordpress.org/plugins",
     meaning that the plug-in named <name> shall be downloaded
     from the WordPress plugin repository.
-
-Options:
-
-  --exclude <plugin-name>
-
-    Exclude that plugin when in "auto" mode
 """ % AUTO_MANIFEST_URL)
 
 
@@ -202,6 +196,10 @@ class Plugin(object):
         that.__init__(name, urls, **uncommon_kwargs)
         return that
 
+    def get_skip_reason(self, flags):
+        if self.name in flags.exclude:
+            return "as requested with --exclude command-line flag"
+
     @staticmethod
     def subclasses():
         return (S3Plugin, ZipPlugin, GitHubPlugin, WordpressOfficialPlugin)
@@ -304,8 +302,14 @@ class S3Plugin(Plugin):
     client = None
 
     @classmethod
-    def set_client(cls, client):
-        cls.client = client
+    def configure(cls, flags):
+        cls.client = flags.s3
+
+    def get_skip_reason(self, flags):
+        if not self.client:
+            return "S3 credentials missing on the command line"
+        else:
+            return super(S3Plugin, self).get_skip_reason(flags)
 
     def __init__(self, name, urls, **uncommon_kwargs):
         super(S3Plugin, self).__init__(name, urls, **uncommon_kwargs)
@@ -519,7 +523,7 @@ if __name__ == '__main__':
     flags = Flags()
 
     if flags.auto:
-        S3Plugin.set_client(flags.s3)
+        S3Plugin.configure(flags)
 
         manifest = WpOpsPlugins(flags.manifest_url, flags.wp_version)
         for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
@@ -530,7 +534,10 @@ if __name__ == '__main__':
                 progress("Installing mu-plugin {}".format(plugin.name))
                 plugin.install(WP_MU_PLUGINS_INSTALL_DIR, rename_like_self=False)
         for plugin in manifest.plugins():
-            if plugin.name not in flags.exclude:
+            skip_reason = plugin.get_skip_reason(flags)
+            if skip_reason:
+                progress("Skipping plugin {}: {}".format(plugin.name, skip_reason))
+            else:
                 progress("Installing plugin {}".format(plugin.name))
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
