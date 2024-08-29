@@ -302,8 +302,8 @@ class S3Plugin(Plugin):
     client = None
 
     @classmethod
-    def set_client(cls, client):
-        cls.client = client
+    def configure(cls, flags):
+        cls.client = flags.s3
 
     def __init__(self, name, urls, **uncommon_kwargs):
         super(S3Plugin, self).__init__(name, urls, **uncommon_kwargs)
@@ -517,7 +517,7 @@ if __name__ == '__main__':
     flags = Flags()
 
     if flags.auto:
-        S3Plugin.set_client(flags.s3)
+        S3Plugin.configure(flags)
 
         manifest = WpOpsPlugins(flags.manifest_url, flags.wp_version)
         for d in (WP_PLUGINS_INSTALL_DIR, WP_MU_PLUGINS_INSTALL_DIR):
