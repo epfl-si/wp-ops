@@ -196,6 +196,9 @@ class Plugin(object):
         that.__init__(name, urls, **uncommon_kwargs)
         return that
 
+    def is_to_be_installed(self, flags):
+        return self.name not in flags.exclude
+
     @staticmethod
     def subclasses():
         return (S3Plugin, ZipPlugin, GitHubPlugin, WordpressOfficialPlugin)
@@ -524,7 +527,7 @@ if __name__ == '__main__':
                 progress("Installing mu-plugin {}".format(plugin.name))
                 plugin.install(WP_MU_PLUGINS_INSTALL_DIR, rename_like_self=False)
         for plugin in manifest.plugins():
-            if plugin.name not in flags.exclude:
+            if plugin.is_to_be_installed(flags):
                 progress("Installing plugin {}".format(plugin.name))
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
