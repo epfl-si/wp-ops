@@ -198,7 +198,7 @@ class Plugin(object):
 
     def get_skip_reason(self, flags):
         if self.name in flags.exclude:
-            return "Skipped due to --exclude command-line flag"
+            return "as requested with --exclude command-line flag"
 
     @staticmethod
     def subclasses():
@@ -304,6 +304,12 @@ class S3Plugin(Plugin):
     @classmethod
     def configure(cls, flags):
         cls.client = flags.s3
+
+    def get_skip_reason(self, flags):
+        if not self.client:
+            return "S3 credentials missing on the command line"
+        else:
+            return super(S3Plugin, self).get_skip_reason(flags)
 
     def __init__(self, name, urls, **uncommon_kwargs):
         super(S3Plugin, self).__init__(name, urls, **uncommon_kwargs)
