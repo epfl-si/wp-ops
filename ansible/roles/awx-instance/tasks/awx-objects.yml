@@ -176,6 +176,7 @@
           jt.project = Project.objects.get(name="{{ awx_project_name }}")
           jt.playbook = "ansible/playbooks/wordpress-main.yml"
           jt.job_tags = "wp.backup"
+          jt.job_slice_count = {{ awx_backup_pods_count }}
           jt.limit = "prod_wordpresses:!prod_sandbox" # Backup all wordpresses exclude sandbox (archive sites)
           jt.save()
           # This used to be just

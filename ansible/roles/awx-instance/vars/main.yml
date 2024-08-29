@@ -14,6 +14,10 @@ awx_template_jobs_slice_count: 10
 awx_template_jobs_playbook: "ansible/playbooks/wordpress-main.yml"
 awx_template_jobs_verbosity: 0
 
+awx_backup_pods_count: >-
+  {{ 6 if ansible_oc_namespace == "wwp-infra"
+     else 1 }}
+
 # The namespace we build in (and consume build images from).
 # ../tasks/k8s-build.yml is only applied in this namespace.
 awx_build_namespace: wwp-test
