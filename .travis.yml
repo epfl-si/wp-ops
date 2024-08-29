@@ -39,7 +39,7 @@ script:
   docker build \
      --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"           \
      --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
-     --build-arg "INSTALL_AUTO_FLAGS=--exclude=wp-media-folder --exclude=wpforms --exclude=wpforms-surveys-polls $wp_base_branch_build_arg" \
+     --build-arg "INSTALL_AUTO_FLAGS=$wp_base_branch_build_arg" \
      -t docker-registry.default.svc:5000/wwp-test/wp-base docker/wp-base
   docker build $mgmt_build_args \
      -t docker-registry.default.svc:5000/wwp-test/mgmt docker/mgmt
