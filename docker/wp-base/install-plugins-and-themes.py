@@ -61,12 +61,6 @@ Usage:
     subdirectory), or it can be the string "wordpress.org/plugins",
     meaning that the plug-in named <name> shall be downloaded
     from the WordPress plugin repository.
-
-Options:
-
-  --exclude <plugin-name>
-
-    Exclude that plugin when in "auto" mode
 """ % AUTO_MANIFEST_URL)
 
 
