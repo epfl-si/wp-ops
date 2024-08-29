@@ -196,8 +196,9 @@ class Plugin(object):
         that.__init__(name, urls, **uncommon_kwargs)
         return that
 
-    def is_to_be_installed(self, flags):
-        return self.name not in flags.exclude
+    def get_skip_reason(self, flags):
+        if self.name in flags.exclude:
+            return "Skipped due to --exclude command-line flag"
 
     @staticmethod
     def subclasses():
@@ -527,7 +528,10 @@ if __name__ == '__main__':
                 progress("Installing mu-plugin {}".format(plugin.name))
                 plugin.install(WP_MU_PLUGINS_INSTALL_DIR, rename_like_self=False)
         for plugin in manifest.plugins():
-            if plugin.is_to_be_installed(flags):
+            skip_reason = plugin.get_skip_reason(flags)
+            if skip_reason:
+                progress("Skipping plugin {}: {}".format(plugin.name, skip_reason))
+            else:
                 progress("Installing plugin {}".format(plugin.name))
                 plugin.install(WP_PLUGINS_INSTALL_DIR)
         for theme in Themes.all():
