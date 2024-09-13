@@ -44,6 +44,7 @@ COPY docker-entrypoint.sh /
 RUN chmod a+x /docker-entrypoint.sh
 
 COPY nginx.conf /etc/nginx/nginx.conf
+RUN rm /etc/nginx/conf.d/*
 COPY conf.d/nginx-wp.conf /etc/nginx/conf.d/nginx-wp.conf
 
 RUN mkdir -p /wp/nginx-entrypoint/
