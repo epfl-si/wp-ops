@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wpn-nginx
+  namespace: wordpress-test
+spec:
+  containers:
+    - name: wpn-nginx
+      image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-002
+
+  imagePullSecrets:
+    - name: svc0041-rke2-puller-pull-secret
