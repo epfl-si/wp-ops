@@ -10,7 +10,6 @@
  * should run the query; set up variables; and transfer control to
  * WordPress' PHP code.
  */
-
 namespace __entrypoint;
 
 function get_wordpress ($wp_env, $host, $uri) {
@@ -24,10 +23,10 @@ function get_wordpress ($wp_env, $host, $uri) {
 
 function get_db_credentials ($wordpress) {
     // TODO: look these up from a JSON Secret, maintained by the WordPress operator, tabulating all sites
-    return array('db_host' => 'db',
-                 'db_name' => 'wp_slky5bbtzy4fojhlw7uiizqcvnn6b',
-                 'db_user' => 'eqwc3jfivcsucynj',
-                 'db_password' => 'ZKmWc8HoPGEyTW9bjIVQ');
+    return array('db_host' => 'mariadb-min',
+                 'db_name' => 'wordpress-test',
+                 'db_user' => 'wordpress',
+                 'db_password' => 'secret');
 }
 
 function query_looks_bad () {
