@@ -141,6 +141,12 @@ function settings_before_wp_settings () {
         // to `define("WP_ADMIN", true);` before loading settings:
         define("WP_ADMIN", true);
     }
+
+    // We don't really support running on an empty database, but we
+    // kind of do. Well sort of.
+    if (string_ends_with(uri_path(), "wp-admin/install.php")) {
+        define( 'WP_INSTALLING', true );
+    }
 }
 
 ##########################################################################################
