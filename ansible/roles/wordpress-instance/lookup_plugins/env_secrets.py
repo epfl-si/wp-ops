@@ -6,10 +6,10 @@ This is mainly intended for Ansible tasks that require wielding secrets, and
 that must also work on AWX / Ansible Tower / the mgmt pod (where Keybase is not
 available, for security reasons). For instance, the following piece of Jinja
 
-    lookup("env_secrets", "mysql_super_credentials", "MYSQL_SUPER_PASSWORD")
+    lookup("env_secrets", "mariadb_super_credentials", "MARIADB_SUPER_PASSWORD")
 
-is the same as `lookup("env", "MYSQL_SUPER_PASSWORD")` on AWX, and the same as
-`env_secret_mysql_super_credentials.MYSQL_SUPER_PASSWORD` on the operator's
+is the same as `lookup("env", "MARIADB_SUPER_PASSWORD")` on AWX, and the same as
+`env_secret_mysql_super_credentials.MARIADB_SUPER_PASSWORD` on the operator's
 workstation.
 
 Usage:
