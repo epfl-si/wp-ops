@@ -60,8 +60,8 @@ spec:
     - host: itswbhst0018.xaas.epfl.ch
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: /
             backend:
               service:
                 name: wpn-nginx-service
@@ -70,8 +70,19 @@ spec:
     - host: itswbhst0020.xaas.epfl.ch
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: wpn-nginx-service
+                port:
+                  number: 80
+    # Wildcard ? See https://stackoverflow.com/a/65866532/960623
+    - host: "mon-blog.wpn.fsd.team"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
             backend:
               service:
                 name: wpn-nginx-service
