@@ -55,39 +55,6 @@ metadata:
   namespace: wordpress-test
 spec:
   rules:
-    # We can access pod though any worker because of the RKE2 default
-    # configuration, which uses NGINX using a DaemonSet.
-    - host: itswbhst0018.xaas.epfl.ch
-      http:
-        paths:
-          - pathType: Prefix
-            path: /
-            backend:
-              service:
-                name: wpn-nginx-service
-                port:
-                  number: 80
-    - host: itswbhst0020.xaas.epfl.ch
-      http:
-        paths:
-          - pathType: Prefix
-            path: /
-            backend:
-              service:
-                name: wpn-nginx-service
-                port:
-                  number: 80
-    # Wildcard ? See https://stackoverflow.com/a/65866532/960623
-    - host: "mon-blog.wpn.fsd.team"
-      http:
-        paths:
-          - pathType: Prefix
-            path: /
-            backend:
-              service:
-                name: wpn-nginx-service
-                port:
-                  number: 80
     - host: "wpn.fsd.team"
       http:
         paths:
