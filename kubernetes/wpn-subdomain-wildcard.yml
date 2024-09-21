@@ -1,0 +1,20 @@
+---
+# https://stackoverflow.com/questions/52328483/kubernetes-ingress-rules-how-to-use-wildcard-and-specific-subdomain-together
+# https://kubernetes.io/docs/concepts/services-networking/ingress/#hostname-wildcards
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wildcard-host
+  namespace: wordpress-test
+spec:
+  rules:
+  - host: "*.wpn.fsd.team"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: wpn-nginx-service
+            port:
+              number: 80
