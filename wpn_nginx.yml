@@ -88,3 +88,13 @@ spec:
                 name: wpn-nginx-service
                 port:
                   number: 80
+    - host: "wpn.fsd.team"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: wpn-nginx-service
+                port:
+                  number: 80
