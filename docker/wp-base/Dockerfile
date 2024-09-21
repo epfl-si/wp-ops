@@ -16,6 +16,12 @@ RUN apt-get -qy update && \
 RUN set -e -x; add-apt-repository ppa:savoury1/backports; \
   apt-get -qy update; apt-get -qy install curl
 
+RUN if [ `arch` = "aarch64" ]; then \
+     ( echo "Package: git-man"; \
+       echo "Pin: release o=LP-PPA-savoury1-backports";  \
+       echo "Pin-Priority: -1" ) > /etc/apt/preferences; \
+    fi
+
 RUN mkdir -p /etc/apt/keyrings
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
