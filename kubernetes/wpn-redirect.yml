@@ -1,0 +1,26 @@
+---
+# https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#permanent-redirect
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://www.google.com
+  name: ingress-redirect
+  namespace: wordpress-test
+spec:
+  rules:
+    - host: google.wpn.fsd.team
+
+---
+# DCSL PoC
+# Redirect 302 https://dcsl.wpn.fsd.team/ to https://www.epfl.ch/labs/dcsl/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/temporal-redirect: https://www.epfl.ch/labs/dcsl/
+  name: ingress-redirect
+  namespace: wordpress-test
+spec:
+  rules:
+    - host: dcsl.wpn.fsd.team
