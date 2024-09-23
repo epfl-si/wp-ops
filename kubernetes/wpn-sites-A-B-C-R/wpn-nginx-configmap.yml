@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wpn-nginx
+  namespace: wordpress-test
+data:
+  get_wordpress.php: |
+    <?php
+    
+    namespace __entrypoint;
+    
+    function get_wordpress ($wp_env, $host, $uri) {
+    
+      if (string_starts_with($uri, '/site-A/site-C')) {
+        return array('host'       => 'wp-httpd',
+                     'wp_env'     => getenv('WP_ENV'),
+                     'wp_version' => '6',
+                     'site_uri'   => '/site-A/site-C/',
+                     'wp_debug'   => TRUE);
+      } else if (string_starts_with($uri, '/site-A')) {
+        return array('host'       => 'wp-httpd',
+                     'wp_env'     => getenv('WP_ENV'),
+                     'wp_version' => '6',
+                     'site_uri'   => '/site-A/',
+                     'wp_debug'   => TRUE);
+      } else if (string_starts_with($uri, '/site-R')) {
+          return array('host'       => 'wp-httpd',
+                       'wp_env'     => getenv('WP_ENV'),
+                       'wp_version' => '6',
+                       'site_uri'   => '/site-R/',
+                       'wp_debug'   => TRUE);
+      } else if (string_starts_with($uri, '/site-B')) {
+        return array('host'       => 'wp-httpd',
+                     'wp_env'     => getenv('WP_ENV'),
+                     'wp_version' => '6',
+                     'site_uri'   => '/site-B/',
+                     'wp_debug'   => TRUE);
+      } else {
+        return array('host'       => 'wp-httpd',
+                     'wp_env'     => getenv('WP_ENV'),
+                     'wp_version' => '6',
+                     'site_uri'   => '/',
+                     'wp_debug'   => TRUE);
+      }
+    }
