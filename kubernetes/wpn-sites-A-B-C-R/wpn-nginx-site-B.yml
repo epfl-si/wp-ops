@@ -1,24 +1,9 @@
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: MariaDB
-metadata:
-  name: mariadb-min
-  namespace: wordpress-test
-spec:
-  storage:
-    size: 2G
-  rootPasswordSecretKeyRef:
-    name: mariadb
-    key: root-password
-    generate: true
-  metrics:
-    enabled: true
-
 ---
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
+  name: wp-db-site-b
   namespace: wordpress-test
-  name: wordpress-test
 spec:
   # If you want the database to be created with a different name than the resource name
   # name: my-logical-database
@@ -32,7 +17,7 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: db-password
+  name: wp-db-password-site-b
   namespace: wordpress-test
 stringData:
   password: secret
@@ -41,13 +26,13 @@ stringData:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: User
 metadata:
-  name: wordpress
+  name: wp-db-user-b
   namespace: wordpress-test
 spec:
   mariaDbRef:
     name: mariadb-min
   passwordSecretKeyRef:
-    name: db-password
+    name: wp-db-password-site-b
     key: password
   host: "%"
   cleanupPolicy: Delete
@@ -56,15 +41,15 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: wordpress
+  name: wordpress-site-b
   namespace: wordpress-test
 spec:
   mariaDbRef:
     name: mariadb-min
   privileges:
     - "ALL PRIVILEGES"
-  database: "wordpress-test"
+  database: "wp-db-site-b"
   table: "*"
-  username: wordpress
+  username: wp-db-user-b
   grantOption: false
   host: "%"

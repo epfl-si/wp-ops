@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: wpn-nginx
-          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-006
+          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-009
           ports:
             - containerPort: 8080
               protocol: TCP
