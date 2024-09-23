@@ -19,13 +19,25 @@ spec:
     spec:
       containers:
         - name: wpn-nginx
-          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-009
+          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-013
           ports:
             - containerPort: 8080
               protocol: TCP
+          volumeMounts:
+            - name: php-configmap
+              mountPath: /wp/inventory/
+            - name: php-secret
+              mountPath: /wp/credentials/
       imagePullSecrets:
         - name: svc0041-rke2-puller-pull-secret
       restartPolicy: Always
+      volumes:
+        - name: php-configmap
+          configMap:
+            name: wpn-nginx
+        - name: php-secret
+          secret:
+            secretName: wpn-nginx
 
 ---
 apiVersion: v1

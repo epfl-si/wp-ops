@@ -12,23 +12,6 @@
  */
 namespace __entrypoint;
 
-function get_wordpress ($wp_env, $host, $uri) {
-    // TODO: look these up from a JSON ConfigMap, maintained by the WordPress operator, tabulating all sites
-    return array('host'       => 'wp-httpd',
-                 'wp_env'     => getenv('WP_ENV'),
-                 'wp_version' => '6',
-                 'site_uri'   => '/',
-                 'wp_debug'   => FALSE);
-}
-
-function get_db_credentials ($wordpress) {
-    // TODO: look these up from a JSON Secret, maintained by the WordPress operator, tabulating all sites
-    return array('db_host' => 'mariadb-min',
-                 'db_name' => 'wordpress-test',
-                 'db_user' => 'wordpress',
-                 'db_password' => 'secret');
-}
-
 function query_looks_bad () {
     return false;  // Nothing to see here. Move along
 }
@@ -155,6 +138,7 @@ if (query_looks_bad()) {
     serve_go_away_and_exit();
 }
 
+include '/wp/inventory/get_wordpress.php';
 $wordpress = get_wordpress(
     $_SERVER['WP_ENV'],
     $_SERVER['HTTP_HOST'],
@@ -171,6 +155,7 @@ if (! $entrypoint_path) {
     serve_go_away_and_exit();
 }
 
+include '/wp/credentials/get_db_credentials.php';
 setup_db($wordpress);
 
 setup_nonces($wordpress);
