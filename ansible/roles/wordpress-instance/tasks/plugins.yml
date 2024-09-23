@@ -424,6 +424,14 @@
       - symlinked
       - active
     from: wordpress.org/plugins
+  tags:
+    - wp.plugins.vsmd
+
+- name: very-simple-meta-description options
+  wordpress_option: "{{ item }}"
+  with_items: "{{ plugin_vsmd_options }}"
+  tags:
+    - wp.plugins.vsmd
 
 - name: epfl-404 plugin
   wordpress_plugin:

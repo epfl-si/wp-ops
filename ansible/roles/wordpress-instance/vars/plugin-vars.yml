@@ -331,3 +331,9 @@ plugin_restauration_options:
 plugin_restauration_api_password:
     name: epfl_restauration_api_password
     value: '{{ lookup("env_secrets", "wp_plugin_restauration", "RESTAURATION_API_PASSWORD") }}'
+
+# Very Simple Meta Description (VSMD)
+plugin_vsmd_options:
+  # Set the use post and page's excerpt as meta description.
+  - name: vsmd-setting-2
+    value: 'yes'
