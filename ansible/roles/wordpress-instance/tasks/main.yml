@@ -149,29 +149,30 @@
   tags:
     - wp
     - wp.plugins
-    - wp.plugins.wp_media_folder_options
-    - wp.plugins.epfl-coming-soon
-    - wp.plugins.coming-soon
-    - wp.plugins.epfl-coming-soon
-    - wp.plugins.unknown
-    - wp.plugins.polylang
-    - wp.plugins.wpforms
-    - wp.plugins.wpforms-surveys-polls
     - wp.plugins.cachecontrol
-    - wp.plugins.payonline
+    - wp.plugins.coming-soon
+    - wp.plugins.diploma-verification
+    - wp.plugins.epfl-coming-soon
+    - wp.plugins.epfl-coming-soon
     - wp.plugins.ewww
-    - wp.plugins.ewww.optimize
     - wp.plugins.ewww.configure
+    - wp.plugins.ewww.optimize
     - wp.plugins.intranet
     - wp.plugins.intranet.htaccess
-    - wp.plugins.pdf
-    - wp.plugins.restauration.options
     - wp.plugins.mu
-    - wp.plugins.mu.social-graph
     - wp.plugins.mu.last-changes
-    - wp.plugins.wp-gutenberg
-    - wp.plugins.diploma-verification
+    - wp.plugins.mu.social-graph
     - wp.plugins.partner-universities
+    - wp.plugins.payonline
+    - wp.plugins.pdf
+    - wp.plugins.polylang
+    - wp.plugins.restauration.options
+    - wp.plugins.unknown
+    - wp.plugins.vsmd
+    - wp.plugins.wp_media_folder_options
+    - wp.plugins.wp-gutenberg
+    - wp.plugins.wpforms
+    - wp.plugins.wpforms-surveys-polls
     # OBSOLETE aliases:
     - plugins
     - plugins.wp_media_folder_options
