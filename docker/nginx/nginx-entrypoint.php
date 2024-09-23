@@ -46,11 +46,19 @@ function setup_db ($wordpress) {
 /**
  * Figure out which PHP file we need to hand over control to
  */
-function get_wp_entrypoint () {
+function get_wp_entrypoint ($wordpress) {
     $entrypoint_path = uri_path();
     if ( has_path_traversal($entrypoint_path) ) {
         return null;
     }
+
+    $to_chop = $wordpress['site_uri'];
+    if (substr($entrypoint_path, 0, strlen($to_chop)) !== $to_chop) {
+        return null;
+    }
+
+    $entrypoint_path = substr($entrypoint_path, strlen($to_chop));
+
     if ( substr($entrypoint_path, -4) === '.php' ) {
         return chop_leading_slashes($entrypoint_path);
     } elseif ( basename($entrypoint_path) === 'wp-admin' ) {
@@ -150,7 +158,7 @@ if (! $wordpress) {
 /** Absolute path to the WordPress directory. */
 define('ABSPATH', sprintf('/wp/%s/', $wordpress['wp_version']));
 
-$entrypoint_path = get_wp_entrypoint();
+$entrypoint_path = get_wp_entrypoint($wordpress);
 if (! $entrypoint_path) {
     serve_go_away_and_exit();
 }
