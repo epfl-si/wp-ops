@@ -1,24 +1,21 @@
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: MariaDB
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: mariadb-min
+  annotations:
+    nginx.ingress.kubernetes.io/temporal-redirect: https://wpn.fsd.team/site-R/
+  name: wpn-nginx-site-r-redirect
   namespace: wordpress-test
 spec:
-  storage:
-    size: 2G
-  rootPasswordSecretKeyRef:
-    name: mariadb
-    key: root-password
-    generate: true
-  metrics:
-    enabled: true
+  rules:
+    - host: site-r.wpn.fsd.team
 
 ---
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
+  name: wp-db-site-r
   namespace: wordpress-test
-  name: wordpress-test
 spec:
   # If you want the database to be created with a different name than the resource name
   # name: my-logical-database
@@ -32,7 +29,7 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: db-password
+  name: wp-db-password-site-r
   namespace: wordpress-test
 stringData:
   password: secret
@@ -41,13 +38,13 @@ stringData:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: User
 metadata:
-  name: wordpress
+  name: wp-db-user-r
   namespace: wordpress-test
 spec:
   mariaDbRef:
     name: mariadb-min
   passwordSecretKeyRef:
-    name: db-password
+    name: wp-db-password-site-r
     key: password
   host: "%"
   cleanupPolicy: Delete
@@ -56,15 +53,15 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: wordpress
+  name: wordpress-site-r
   namespace: wordpress-test
 spec:
   mariaDbRef:
     name: mariadb-min
   privileges:
     - "ALL PRIVILEGES"
-  database: "wordpress-test"
+  database: "wp-db-site-r"
   table: "*"
-  username: wordpress
+  username: wp-db-user-r
   grantOption: false
   host: "%"
