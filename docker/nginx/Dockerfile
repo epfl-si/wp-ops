@@ -18,8 +18,6 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     apt-get clean
 
 COPY msmtprc /etc/msmtprc
-COPY php.ini /etc/php/95-epfl.ini
-RUN mv /etc/php/95-epfl.ini /etc/php/${PHP_VERSION}/fpm/conf.d/
 RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^;log_level = .*|log_level = notice|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^;log_limit = .*|log_limit = 4096|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
