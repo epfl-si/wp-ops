@@ -53,7 +53,7 @@ platform_check () {
 oc_check () {
   if ! oc projects >/dev/null 2>&1; then
     echo "Please login to openshift:"
-    oc login --username $USER
+    oc login https://pub-os-exopge.epfl.ch --username=$USER
   fi
 }
 
