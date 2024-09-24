@@ -23,7 +23,7 @@ main() {
 
     ( set -x; wp --path=. core symlink --path_to_version="/wp/$WORDPRESS_VERSION" )
 
-    db_host="${MYSQL_DB_HOST:-db}"
+    db_host="${MARIADB_DB_HOST:-db}"
     if [ -f wp-config.php ]; then
         # Retrieve DB credentials from wp-config.php
         eval "$(perl -ne 'm/(DB_(NAME|USER|PASSWORD)).*, '\''(.*)'\''/ && print lc($1) . "=$3\n";' < wp-config.php)"
@@ -44,7 +44,7 @@ main() {
 CREATE USER '$db_user'@'%' IDENTIFIED BY '$db_password';
 SQL_CREATE_USER
 
-    ( set -x; wp db create --dbuser="$MYSQL_SUPER_USER" --dbpass="$MYSQL_SUPER_PASSWORD" ) || true
+    ( set -x; wp db create --dbuser="$MARIADB_SUPER_USER" --dbpass="$MARIADB_SUPER_PASSWORD" ) || true
 
     do_mysql <<GRANT_PRIVILEGES
 GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%';
@@ -73,9 +73,9 @@ die () {
 }
 
 check_env() {
-    if [ -z "$MYSQL_SUPER_USER" ] || [ -z "$MYSQL_SUPER_PASSWORD" ]; then
+    if [ -z "$MARIADB_SUPER_USER" ] || [ -z "$MARIADB_SUPER_PASSWORD" ]; then
         die <<MISSING_ENV
-Fatal: either MYSQL_SUPER_USER or MYSQL_SUPER_PASSWORD are unset.
+Fatal: either MARIADB_SUPER_USER or MARIADB_SUPER_PASSWORD are unset.
 
 Please source the appropriate .env file and try again.
 
@@ -106,14 +106,14 @@ MESSAGE
 }
 
 check_env_prereqs() {
-    [ -n "$MYSQL_SUPER_USER" ] || whine_env "MYSQL_SUPER_USER"
-    [ -n "$MYSQL_SUPER_PASSWORD" ] || whine_env "MYSQL_SUPER_PASSWORD"
+    [ -n "$MARIADB_SUPER_USER" ] || whine_env "MARIADB_SUPER_USER"
+    [ -n "$MARIADB_SUPER_PASSWORD" ] || whine_env "MARIADB_SUPER_PASSWORD"
     [ -n "$WP_ADMIN_USER" ] || whine_env "WP_ADMIN_USER"
     [ -n "$WP_ADMIN_EMAIL" ] || whine_env "WP_ADMIN_EMAIL"
 }
 
 do_mysql() {
-    tee /dev/stderr | (set -x; mysql -h "${db_host}" -u "$MYSQL_SUPER_USER" -p"$MYSQL_SUPER_PASSWORD")
+    tee /dev/stderr | (set -x; mysql -h "${db_host}" -u "$MARIADB_SUPER_USER" -p"$MARIADB_SUPER_PASSWORD")
 }
 
 do_wp_core_install () {
