@@ -165,6 +165,7 @@
     state:
       - symlinked
     from: https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-functions.php
+    branch: feature/nginx
   tags:
     - wp.plugins.mu
 
