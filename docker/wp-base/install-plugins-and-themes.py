@@ -19,7 +19,7 @@ from zipfile import ZipFile
 import operator
 from distutils.version import LooseVersion
 
-AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/master/ansible/roles/wordpress-instance/tasks/plugins.yml'
+AUTO_MANIFEST_URL = 'https://raw.githubusercontent.com/epfl-si/wp-ops/feature/nginx/ansible/roles/wordpress-instance/tasks/plugins.yml'
 
 def usage():
     print("""
