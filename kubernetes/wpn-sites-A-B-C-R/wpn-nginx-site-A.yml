@@ -26,7 +26,7 @@ stringData:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: User
 metadata:
-  name: wp-db-user-a
+  name: wp-db-user-site-a
   namespace: wordpress-test
 spec:
   mariaDbRef:
@@ -41,7 +41,7 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: wordpress-site-a
+  name: wp-grant-db-user-site-a
   namespace: wordpress-test
 spec:
   mariaDbRef:
@@ -50,6 +50,6 @@ spec:
     - "ALL PRIVILEGES"
   database: "wp-db-site-a"
   table: "*"
-  username: wp-db-user-a
+  username: wp-db-user-site-a
   grantOption: false
   host: "%"
