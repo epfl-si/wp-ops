@@ -36,6 +36,12 @@ data:
                      'wp_version' => '6',
                      'site_uri'   => '/site-B/',
                      'wp_debug'   => TRUE);
+      } else if (string_starts_with($uri, '/site-E')) {
+        return array('host'       => 'wp-httpd',
+                     'wp_env'     => getenv('WP_ENV'),
+                     'wp_version' => '6',
+                     'site_uri'   => '/site-E/',
+                     'wp_debug'   => TRUE);
       } else {
         return array('host'       => 'wp-httpd',
                      'wp_env'     => getenv('WP_ENV'),
