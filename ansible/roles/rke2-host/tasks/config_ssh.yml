@@ -1,23 +1,10 @@
 ---
-- name: Debug SSH_KEYS
-  ansible.builtin.debug:
-    msg: "{{ item.github }}"
-  with_items: "{{ SSH_KEYS }}"
-
 # This will be already done in the base iso image
 - name: Ensure ssh keys for root
   ansible.posix.authorized_key:
     user: root
     state: "{{ item.state | default(present) }}"
     key: "https://github.com/{{ item.github }}.keys"
+    comment: "# ssh-import-id gh:{{ item.github }}"
   with_items: "{{ SSH_KEYS }}"
   become: true
-
-- name: Ensure ssh authorized keys for normal users
-  ansible.posix.authorized_key:
-    user: "{{ item.0.username }}"
-    state: "{{ item.1.state | default(present) }}"
-    key: "https://github.com/{{ item.1.github }}.keys"
-  with_items: 
-    - "{{ USERS | product(SSH_KEYS) }}"
-  

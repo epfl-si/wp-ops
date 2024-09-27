@@ -20,6 +20,8 @@
         - system.config
         - system.config.users
   with_items: "{{ USERS }}"
+  loop_control:
+    loop_var: user
 
 - name: Config ssh
   tags:
