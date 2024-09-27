@@ -2,10 +2,19 @@
 
 - name: Ensure users
   ansible.builtin.user:
-    name: "{{ item.username }}"
-    comment: " {{ item.comment }} "
+    name: "{{ user.username }}"
+    comment: " {{ user.comment }} "
     create_home: true
     shell: /bin/bash
-    home: "/home/{{ item.username }}"
-    uid: "{{ item.uid }}"
+    home: "/home/{{ user.username }}"
+    uid: "{{ user.uid }}"
   become: true
+
+- name: Ensure ssh authorized keys for normal users
+  ansible.posix.authorized_key:
+    user: "{{ user.username }}"
+    state: "{{ item.state | default(present) }}"
+    key: "https://github.com/{{ item.github }}.keys"
+    comment: "# ssh-import-id gh:{{ item.github }}"
+  with_items:
+    - "{{ SSH_KEYS }}"
