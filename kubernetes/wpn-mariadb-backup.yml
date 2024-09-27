@@ -2,15 +2,15 @@ apiVersion: k8s.mariadb.com/v1alpha1
 kind: Backup
 metadata:
   namespace: wordpress-test
-  name: scheduled-backup
+  name: scheduled-backup-site-a
 spec:
   mariaDbRef:
     name: mariadb-min
   databases:
     - wp-db-site-a
-#  schedule:
-#    cron: "*/1 * * * *"
-#    suspend: false
+  schedule:
+    cron: "*/1 * * * *"
+    suspend: false
   storage:
     persistentVolumeClaim:
       resources:
