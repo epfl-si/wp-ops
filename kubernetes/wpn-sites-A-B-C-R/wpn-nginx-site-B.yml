@@ -53,3 +53,25 @@ spec:
   username: wp-db-user-b
   grantOption: false
   host: "%"
+
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Backup
+metadata:
+  namespace: wordpress-test
+  name: scheduled-backup-site-b
+spec:
+  mariaDbRef:
+    name: mariadb-min
+  databases:
+    - wp-db-site-b
+  schedule:
+    cron: "0 4 * * *"
+    suspend: false
+  storage:
+    persistentVolumeClaim:
+      resources:
+        requests:
+          storage: 100Mi
+      accessModes:
+        - ReadWriteOnce
