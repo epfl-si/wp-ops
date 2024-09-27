@@ -51,6 +51,7 @@ platform_check () {
 }
 
 oc_check () {
+  if [[ "$inventory_mode" == rke2* ]] ; then return ; fi
   if ! oc projects >/dev/null 2>&1; then
     echo "Please login to openshift:"
     oc login https://pub-os-exopge.epfl.ch --username=$USER
@@ -64,6 +65,7 @@ inventories () {
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
         prod_only) echo "-i inventory/prod" ;;
+        rke2_test) echo "-i inventory/rke2/hosts-test.yml"
     esac
 }
 
@@ -72,7 +74,7 @@ inventories () {
 export WWP_NAMESPACES=wwp-test
 
 mode=ansible-playbook
-
+playbook=".interactive-playbooks/main.yml"
 declare -a ansible_args
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -89,6 +91,11 @@ while [ "$#" -gt 0 ]; do
             shift ;;
         --install-only)
             mode=install-only
+            shift ;;
+        --rke2_test)
+            inventory_mode="rke2_test"
+            WWP_NAMESPACES="wordpress-test"
+            playbook="playbooks/rke2.yml"
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
@@ -112,7 +119,7 @@ case "$mode" in
     ansible-playbook)
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
-                         .interactive-playbooks/main.yml
+                         $playbook
         ;;
     ansible)
         ansible $(inventories) $ansible_flags "${ansible_args[@]}"

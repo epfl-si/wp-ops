@@ -1,0 +1,17 @@
+- name: Base System
+  hosts: all
+  gather_facts: False
+  roles:
+    - name: setup base system requirements
+      role: ../roles/rke2-host
+      tags:
+        - system
+
+# - name: Kuberbetes association
+#   hosts: all
+#   gather_facts: False
+#   roles:
+#     - name: setup k8s cluster via rke2
+#       role: ../roles/k8s/rk2
+#       tags:
+#         - rk2
