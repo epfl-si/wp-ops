@@ -23,6 +23,7 @@ all:
     #   ansible_user: administrator
   vars:
     ansible_user: root
+    wpn_namespace: wordpress-test
     RUNENV: test
     RKE_INSTALL_SERVER: rancher-fsd.epfl.ch
     SSH_KEYS:
@@ -80,13 +81,13 @@ all:
 
 controls:
   hosts:
-    control1:
+    itswbhst0016:
       ansible_host: itswbhst0016.xaas.epfl.ch
       ansible_ip: 128.178.218.234
-    control2:
+    itswbhst0019:
       ansible_host: itswbhst0019.xaas.epfl.ch
       ansible_ip: 128.178.218.253
-    control3:
+    itswbhst0017:
       ansible_host: itswbhst0017.xaas.epfl.ch
       ansible_ip: 128.178.218.240
   vars:
@@ -94,10 +95,10 @@ controls:
 
 workers:
   hosts:
-    worker1:
+    itswbhst0018:
       ansible_host: itswbhst0018.xaas.epfl.ch
       ansible_ip: 128.178.218.233
-    worker2:
+    itswbhst0020:
       ansible_host: itswbhst0020.xaas.epfl.ch
       ansible_ip: 128.178.218.249
   vars:
