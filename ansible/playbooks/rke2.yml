@@ -7,11 +7,11 @@
       tags:
         - system
 
-# - name: Kuberbetes association
-#   hosts: all
-#   gather_facts: False
-#   roles:
-#     - name: setup k8s cluster via rke2
-#       role: ../roles/k8s/rk2
-#       tags:
-#         - rk2
+- name: Kuberbetes association
+  hosts: all
+  gather_facts: False
+  roles:
+    - name: setup rke2 cluster via rke2
+      role: ../roles/rke2-cluster
+      tags:
+        - rke2
