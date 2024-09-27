@@ -1,0 +1,11 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Restore
+metadata:
+  namespace: wordpress-test
+  name: restore
+spec:
+  mariaDbRef:
+    name: mariadb-min
+  backupRef:
+    name: scheduled-backup-site-a
+  targetRecoveryTime: 2024-09-27T08:51:23Z
