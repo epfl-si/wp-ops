@@ -1,0 +1,104 @@
+---
+all:
+  hosts:
+    # control1:
+    #   ansible_host: itswbhst0016.xaas.epfl.ch
+    #   ansible_ip: 128.178.218.234
+    #   ansible_user: administrator
+    # control2:
+    #   ansible_host: itswbhst0019.xaas.epfl.ch
+    #   ansible_ip: 128.178.218.253
+    #   ansible_user: administrator
+    # worker1:
+    #   ansible_host: itswbhst0018.xaas.epfl.ch
+    #   ansible_ip: 128.178.218.233
+    #   ansible_user: administrator
+    # worker2:
+    #   ansible_host: itswbhst0020.xaas.epfl.ch
+    #   ansible_ip: 128.178.218.249
+    #   ansible_user: administrator
+    # witness1:
+    #   ansible_host: itswbhst0017.xaas.epfl.ch
+    #   ansible_ip: 128.178.218.240
+    #   ansible_user: administrator
+  vars:
+    ansible_user: root
+    RUNENV: test
+    RKE_INSTALL_SERVER: rancher-fsd.epfl.ch
+    SSH_KEYS:
+      -
+        github: azecko
+        state: present
+      -
+        github: d4rkheart
+        state: present
+      -
+        github: domq
+        state: present
+      -
+        github: dragonleman
+        state: present
+      -
+        github: dwesh163
+        state: present
+      -
+        github: Jch4ipas
+        state: present
+      -
+        github: jdelasoie
+        state: present
+      -
+        github: lvenries
+        state: present
+      -
+        github: multiscan
+        state: present
+      -
+        github: obieler
+        state: present
+      -
+        github: ponsfrilus
+        state: present
+      -
+        github: rosamaggi
+        state: present
+      -
+        github: saskyapanchaud
+        state: present
+      -
+        github: williambelle
+        state: present
+      - # example of revoked key
+        github: crazylady2004
+        state: absent
+    USERS:
+      -
+        username: administrator
+        comment: default non root user
+        uid: 1000
+        # linger: true
+
+controls:
+  hosts:
+    control1:
+      ansible_host: itswbhst0016.xaas.epfl.ch
+      ansible_ip: 128.178.218.234
+    control2:
+      ansible_host: itswbhst0019.xaas.epfl.ch
+      ansible_ip: 128.178.218.253
+    control3:
+      ansible_host: itswbhst0017.xaas.epfl.ch
+      ansible_ip: 128.178.218.240
+  vars:
+    RKE_ROLE: control
+
+workers:
+  hosts:
+    worker1:
+      ansible_host: itswbhst0018.xaas.epfl.ch
+      ansible_ip: 128.178.218.233
+    worker2:
+      ansible_host: itswbhst0020.xaas.epfl.ch
+      ansible_ip: 128.178.218.249
+  vars:
+    RKE_ROLE: worker

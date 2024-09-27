@@ -1,0 +1,11 @@
+---
+
+- name: Ensure users
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    comment: " {{ item.comment }} "
+    create_home: true
+    shell: /bin/bash
+    home: "/home/{{ item.username }}"
+    uid: "{{ item.uid }}"
+  become: true

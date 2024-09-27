@@ -1,0 +1,25 @@
+---
+# Clickodrome in Rancher Cluster Manager (see https://docs.google.com/document/d/1moUEMafx47uvIth07j6PrihuqqZTrZKSuNarZDO7HEg/edit#heading=h.etvwv3116ua8): 
+# Copy the token and checksum strings into secrets.yml
+#  - 
+# run commands as root:
+# On workers:
+# CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" \
+#   curl -fL https://{{ RKE_INSTALL_SERVER }}/system-agent-install.sh | \
+#   CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" \
+#   sh -s - --server https://{{ RKE_INSTALL_SERVER }} \
+#   --label 'cattle.io/os=linux' \
+#   --token {{ _secrets.rk2_install_token }} \
+#   --ca-checksum {{ _secrets.rk2_ca_checksum }} \
+#   --worker
+# On controllers:
+# CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" \
+#   curl -fL https://{{ RKE_INSTALL_SERVER }}/system-agent-install.sh | \
+#   CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" \
+#   sh -s - --server https://{{ RKE_INSTALL_SERVER }} \
+#   --label 'cattle.io/os=linux' \
+#   --token {{ _secrets.rk2_install_token }} \
+#   --ca-checksum {{ _secrets.rk2_ca_checksum }} \
+#   --etcd --controlplane
+
+# 
