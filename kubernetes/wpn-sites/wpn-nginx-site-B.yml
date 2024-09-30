@@ -1,77 +1,19 @@
----
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: Database
+apiVersion: wordpress.epfl.ch/v1
+kind: WordpressSite
 metadata:
-  name: wp-db-site-b
+  name: site-b
   namespace: wordpress-test
 spec:
-  # If you want the database to be created with a different name than the resource name
-  # name: my-logical-database
-  mariaDbRef:
-    name: mariadb-min
-  characterSet: utf8
-  collate: utf8_general_ci
-
----
-apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: wp-db-password-site-b
-  namespace: wordpress-test
-stringData:
-  password: secret
-
----
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: User
-metadata:
-  name: wp-db-user-site-b
-  namespace: wordpress-test
-spec:
-  mariaDbRef:
-    name: mariadb-min
-  passwordSecretKeyRef:
-    name: wp-db-password-site-b
-    key: password
-  host: "%"
-  cleanupPolicy: Delete
-
----
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: Grant
-metadata:
-  name: wordpress-site-b
-  namespace: wordpress-test
-spec:
-  mariaDbRef:
-    name: mariadb-min
-  privileges:
-    - "ALL PRIVILEGES"
-  database: "wp-db-site-b"
-  table: "*"
-  username: wp-db-user-site-b
-  grantOption: false
-  host: "%"
-
----
-apiVersion: k8s.mariadb.com/v1alpha1
-kind: Backup
-metadata:
-  namespace: wordpress-test
-  name: scheduled-backup-site-b
-spec:
-  mariaDbRef:
-    name: mariadb-min
-  databases:
-    - wp-db-site-b
-  schedule:
-    cron: "0 4 * * *"
-    suspend: false
-  storage:
-    persistentVolumeClaim:
-      resources:
-        requests:
-          storage: 100Mi
-      accessModes:
-        - ReadWriteOnce
+  path: /site-B
+  visibility: public
+  kubernetes:
+    service: test
+  wordpress:
+    title: Super Site B
+    tagline: Super Site B tagline !
+    theme: wp-theme-2018
+    languages:
+      - fr
+      - en
+  epfl:
+    unit_id: 1906
