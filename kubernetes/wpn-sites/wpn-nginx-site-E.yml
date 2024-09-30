@@ -2,6 +2,7 @@ apiVersion: wordpress.epfl.ch/v1
 kind: WordpressSite
 metadata:
   name: site-e
+  namespace: wordpress-test
 spec:
   path: /site-E
   visibility: public
