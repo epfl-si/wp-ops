@@ -26,3 +26,12 @@
   when:
     - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
     - RKE_ROLE == "worker"
+
+- name: Install NFS for worker nodes
+  ansible.builtin.apt:
+    name: nfs-server
+    state:
+      present
+  when:
+    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
+    - RKE_ROLE == "worker"
