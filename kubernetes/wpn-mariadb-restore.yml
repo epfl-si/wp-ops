@@ -6,6 +6,15 @@ metadata:
 spec:
   mariaDbRef:
     name: mariadb-min
-  backupRef:
-    name: scheduled-backup-site-a
-  targetRecoveryTime: 2024-09-27T08:51:23Z
+  s3:
+    bucket: svc0041-b80382f4fba20c6c1d9dc1bebefc5583
+    prefix: backup/wpn/site-a
+    endpoint: s3.epfl.ch
+    accessKeyIdSecretKeyRef:
+      name: s3-backup-credentials
+      key: keyId
+    secretAccessKeySecretKeyRef:
+      name: s3-backup-credentials
+      key: accessSecret
+    tls:
+      enabled: true
