@@ -29,7 +29,7 @@
 
 - name: Install NFS for worker nodes
   ansible.builtin.apt:
-    name: nfs-server
+    name: nfs-common
     state:
       present
   when:
