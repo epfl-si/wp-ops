@@ -66,12 +66,19 @@ spec:
   databases:
     - wp-db-site-a
   schedule:
-    cron: "0 3 * * *"
+    cron: "40 * * * *"
     suspend: false
   storage:
-    persistentVolumeClaim:
-      resources:
-        requests:
-          storage: 100Mi
-      accessModes:
-        - ReadWriteOnce
+    s3:
+      bucket: svc0041-b80382f4fba20c6c1d9dc1bebefc5583
+      prefix: backup/wpn/site-a
+      endpoint: s3.epfl.ch
+      accessKeyIdSecretKeyRef:
+        name: s3-backup-credentials
+        key: keyId
+      secretAccessKeySecretKeyRef:
+        name: s3-backup-credentials
+        key: accessSecret
+      tls:
+        enabled: true
+
