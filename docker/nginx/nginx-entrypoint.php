@@ -16,7 +16,10 @@ function query_looks_bad () {
     return false;  // Nothing to see here. Move along
 }
 
-function enable_wp_debug () {
+function enable_wp_debug ($wordpress) {
+
+    if ( false === $wordpress['wp_debug'] ) return;
+
     // Enable WP_DEBUG mode
     define( 'WP_DEBUG', true );
 
@@ -168,7 +171,8 @@ setup_db($wordpress);
 
 setup_nonces($wordpress);
 
-enable_wp_debug();
+enable_wp_debug($wordpress);
+
 
 // Initialize WordPress' constants. This is best done using
 // `wp-settings.php`, rather than `load.php` and `index.php` which
