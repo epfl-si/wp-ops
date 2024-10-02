@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: wpn-nginx
-          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-018
+          image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-025
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -28,6 +28,9 @@ spec:
               mountPath: /wp/inventory/
             - name: php-secret
               mountPath: /wp/credentials/
+            - name: wp-uploads
+              mountPath: /data/
+              subPath: wp-uploads
       imagePullSecrets:
         - name: svc0041-rke2-puller-pull-secret
       restartPolicy: Always
@@ -38,6 +41,9 @@ spec:
         - name: php-secret
           secret:
             secretName: wpn-nginx
+        - name: wp-uploads
+          persistentVolumeClaim:
+            claimName: wp-uploads
 
 ---
 apiVersion: v1
@@ -77,3 +83,16 @@ spec:
                 name: wpn-nginx-service
                 port:
                   number: 80
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-uploads
+  namespace: wordpress-test
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
