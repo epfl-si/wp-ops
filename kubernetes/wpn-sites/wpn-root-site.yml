@@ -1,0 +1,19 @@
+apiVersion: wordpress.epfl.ch/v1
+kind: WordpressSite
+metadata:
+  name: www
+  namespace: wordpress-test
+spec:
+  path: /
+  visibility: public
+  kubernetes:
+    service: wpn-nginx
+  wordpress:
+    title: This is the Root Site
+    tagline: Root site is always needed
+    theme: wp-theme-2018
+    languages:
+      - fr
+      - en
+  epfl:
+    unit_id: 1906
