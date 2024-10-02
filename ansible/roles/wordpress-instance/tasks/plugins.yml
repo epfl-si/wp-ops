@@ -181,18 +181,6 @@
   tags:
     - wp.plugins.mu
 
-- name: Stats (must-use plugin)
-  wordpress_plugin:
-    name: EPFL_stats_loader
-    is_mu: yes
-    state:
-      - symlinked
-    from:
-      - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-stats
-      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_stats_loader.php
-  tags:
-    - wp.plugins.mu
-
 - name: Social Graph (must-use plugin)
   wordpress_plugin:
     name: EPFL_Social_Graph
