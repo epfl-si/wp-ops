@@ -169,18 +169,6 @@
   tags:
     - wp.plugins.mu
 
-- name: Quota (must-use plugin)
-  wordpress_plugin:
-    name: EPFL_quota_loader
-    is_mu: yes
-    state:
-      - symlinked
-    from:
-      - https://github.com/epfl-si/wp-mu-plugins/tree/master/epfl-quota
-      - https://github.com/epfl-si/wp-mu-plugins/blob/master/EPFL_quota_loader.php
-  tags:
-    - wp.plugins.mu
-
 - name: Social Graph (must-use plugin)
   wordpress_plugin:
     name: EPFL_Social_Graph
