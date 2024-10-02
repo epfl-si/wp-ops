@@ -10,10 +10,11 @@ data:
     namespace __entrypoint;
     
     function get_wordpress ($wp_env, $host, $uri) {
-        $common_values = ['host'       => 'wp-httpd',
-                          'wp_env'     => getenv('WP_ENV'), // why ?
-                          'wp_version' => '6'
-                         ];
+        $common_values = [
+            'host'       => 'wp-httpd',
+            'wp_env'     => getenv('WP_ENV'), // why ?
+            'wp_version' => '6'
+        ];
         $sites_values = [
             '/site-A/site-C' => [
                 'site_uri' => '/site-A/site-C/',
