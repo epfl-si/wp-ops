@@ -173,6 +173,12 @@ setup_nonces($wordpress);
 
 enable_wp_debug($wordpress);
 
+/**
+ * Define the EPFL_SITE_NAME
+ * This match the `site['metadata']['name']` to the 
+ * k8s's WordPress object.
+ */
+define('EPFL_SITE_NAME', $wordpress['site_name']);
 
 // Initialize WordPress' constants. This is best done using
 // `wp-settings.php`, rather than `load.php` and `index.php` which
