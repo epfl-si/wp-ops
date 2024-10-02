@@ -179,6 +179,9 @@ enable_wp_debug($wordpress);
  * k8s's WordPress object.
  */
 define('EPFL_SITE_NAME', $wordpress['site_name']);
+// Define the EPFL_WP_UPLOADS constant
+$site_upload_dir = '/data/' . EPFL_SITE_NAME . '/uploads';
+define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 
 // Initialize WordPress' constants. This is best done using
 // `wp-settings.php`, rather than `load.php` and `index.php` which
