@@ -13,6 +13,15 @@
     msg: "{{ node_list.resources | map(attribute='metadata.name') | join(',') }}"
   register: server_ip_list
 
+- name: Get clusters
+  shell:
+    cmd: "curl --location 'https://rancher-fsd.epfl.ch/v3/clusters' --header 'Authorization: Bearer token-dmpck:XXXX'"
+  register: clusters_info
+
+- name: debug clusters-info
+  debug:
+    msg: "{{clusters_info}}"
+
 - name: Configure control node
   ansible.builtin.shell:
     cmd: CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" curl --insecure -fL https://{{ RKE_INSTALL_SERVER }}/system-agent-install.sh | sudo CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" sh -s - --server https://{{ RKE_INSTALL_SERVER }} --label 'cattle.io/os=linux' --token {{ rancher_token }} --ca-checksum {{ rancher_checksum }} --etcd --controlplane
