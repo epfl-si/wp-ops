@@ -1,16 +1,16 @@
 apiVersion: wordpress.epfl.ch/v1
 kind: WordpressSite
 metadata:
-  name: test-site
+  name: site-s
   namespace: wordpress-test
 spec:
-  path: /test-site
+  path: /site-S
   visibility: public
   kubernetes:
-    service: wpn-nginx
+    service: test
   wordpress:
-    title: Super Test Site
-    tagline: Super Test Site tagline !
+    title: Le site de Sami
+    tagline: "Super Site Sami !"
     theme: wp-theme-2018
     languages:
       - fr
