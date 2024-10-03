@@ -15,5 +15,6 @@ spec:
     languages:
       - fr
       - en
+    debug: true # No effect because it's hard coded in the operator for now
   epfl:
     unit_id: 1906
