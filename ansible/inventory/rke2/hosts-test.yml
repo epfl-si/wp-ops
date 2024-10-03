@@ -79,27 +79,43 @@ all:
 #        uid: 1000
         # linger: true
 
-controls:
-  hosts:
-    itswbhst0016:
-      ansible_host: itswbhst0016.xaas.epfl.ch
-      ansible_ip: 128.178.218.234
-    itswbhst0019:
-      ansible_host: itswbhst0019.xaas.epfl.ch
-      ansible_ip: 128.178.218.253
-    itswbhst0017:
-      ansible_host: itswbhst0017.xaas.epfl.ch
-      ansible_ip: 128.178.218.240
+nodes:
   vars:
-    RKE_ROLE: control
+    ansible_rancher_url: https://rancher-fsd.epfl.ch
+    ansible_user: root
+    ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
+    ansible_rancher_cluster_name: wordpress-test
+  children:
+    controls:
+      hosts:
+        itswbhst0016:
+          ansible_host: itswbhst0016.xaas.epfl.ch
+          ansible_ip: 128.178.218.234
+        itswbhst0019:
+          ansible_host: itswbhst0019.xaas.epfl.ch
+          ansible_ip: 128.178.218.253
+        itswbhst0017:
+          ansible_host: itswbhst0017.xaas.epfl.ch
+          ansible_ip: 128.178.218.240
+      vars:
+        RKE_ROLE: control
 
-workers:
-  hosts:
-    itswbhst0018:
-      ansible_host: itswbhst0018.xaas.epfl.ch
-      ansible_ip: 128.178.218.233
-    itswbhst0020:
-      ansible_host: itswbhst0020.xaas.epfl.ch
-      ansible_ip: 128.178.218.249
-  vars:
-    RKE_ROLE: worker
+    workers:
+      hosts:
+        itswbhst0018:
+          ansible_host: itswbhst0018.xaas.epfl.ch
+          ansible_ip: 128.178.218.233
+        itswbhst0020:
+          ansible_host: itswbhst0020.xaas.epfl.ch
+          ansible_ip: 128.178.218.249
+      vars:
+        RKE_ROLE: worker
+
+clusters:
+  "hosts":
+    wordpress-test:
+      ansible_rancher_url: https://rancher-fsd.epfl.ch
+      ansible_user: root
+      ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
+      ansible_rancher_cluster_name: wordpress-test
+
