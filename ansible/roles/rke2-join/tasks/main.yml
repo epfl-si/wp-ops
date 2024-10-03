@@ -13,14 +13,23 @@
     msg: "{{ node_list.resources | map(attribute='metadata.name') | join(',') }}"
   register: server_ip_list
 
-- name: Get clusters
-  shell:
-    cmd: "curl --location 'https://rancher-fsd.epfl.ch/v3/clusters' --header 'Authorization: Bearer token-dmpck:XXXX'"
-  register: clusters_info
+- epfl_si.rancher.rancher_login:
+  delegate_to: wordpress-test
+  run_once: true
+  vars: # TODO ask to Dominique to correct it into epfl_si.rancher
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    ansible_connection: local
 
-- name: debug clusters-info
-  debug:
-    msg: "{{clusters_info}}"
+- epfl_si.rancher.rancher_registration:
+  register: _token_etc
+  delegate_to: wordpress-test
+  run_once: true
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    ansible_connection: local
+
+- debug:
+    var: _token_etc
 
 - name: Configure control node
   ansible.builtin.shell:
