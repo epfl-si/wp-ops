@@ -36,8 +36,8 @@ function enable_wp_debug ($wordpress) {
 
 function setup_db ($wordpress) {
     $db_credentials = get_db_credentials($wordpress);
-    define( 'DB_CHARSET', 'utf8' );
-    define( 'DB_COLLATE', '' );
+    define( 'DB_CHARSET', 'utf8mb4' );
+    define( 'DB_COLLATE', 'utf8mb4_unicode_ci' );
     define( 'DB_HOST', $db_credentials["db_host"]);
     define( 'DB_NAME', $db_credentials["db_name"]);
     define( 'DB_USER', $db_credentials["db_user"]);
