@@ -9,11 +9,10 @@ spec:
   kubernetes:
     service: test
   wordpress:
-    title: Lesite de Nicolas
-    tagline: "Super Site Nicolas !"
+    title: Nicolas's test WP
+    tagline: W O R D P R E S S - H 4 C K 3 R
     theme: wp-theme-2018
     languages:
-      - fr
       - en
     debug: true
   epfl:
