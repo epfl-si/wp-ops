@@ -13,34 +13,27 @@
     msg: "{{ node_list.resources | map(attribute='metadata.name') | join(',') }}"
   register: server_ip_list
 
-- epfl_si.rancher.rancher_login:
-  delegate_to: wordpress-test
-  run_once: true
-  vars: # TODO ask to Dominique to correct it into epfl_si.rancher
-    ansible_python_interpreter: "{{ ansible_playbook_python }}"
-    ansible_connection: local
-
 - epfl_si.rancher.rancher_registration:
+    rancher_manager_url: "https://{{ RKE_INSTALL_SERVER }}"
+    cluster_name: "{{ wpn_namespace }}"
   register: _token_etc
-  delegate_to: wordpress-test
+  delegate_to: localhost
   run_once: true
-  vars:
-    ansible_python_interpreter: "{{ ansible_playbook_python }}"
-    ansible_connection: local
 
 - debug:
-    var: _token_etc
+    msg: "{{ _token_etc.registration.insecureNodeCommand }}"
+  run_once: true
 
 - name: Configure control node
   ansible.builtin.shell:
-    cmd: CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" curl --insecure -fL https://{{ RKE_INSTALL_SERVER }}/system-agent-install.sh | sudo CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" sh -s - --server https://{{ RKE_INSTALL_SERVER }} --label 'cattle.io/os=linux' --token {{ rancher_token }} --ca-checksum {{ rancher_checksum }} --etcd --controlplane
+    cmd: "{{ _token_etc.registration.nodeCommand }} --etcd --controlplane"
   when:
     - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
     - RKE_ROLE == "control"
 
 - name: Configure worker node
   ansible.builtin.shell:
-    cmd: CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" curl --insecure -fL https://{{ RKE_INSTALL_SERVER }}/system-agent-install.sh | sudo CATTLE_AGENT_FALLBACK_PATH="/opt/rke2/bin" sh -s - --server https://{{ RKE_INSTALL_SERVER }} --label 'cattle.io/os=linux' --token {{ rancher_token }} --ca-checksum {{ rancher_checksum }} --worker
+    cmd: "{{ _token_etc.registration.nodeCommand }} --worker"
   when:
     - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
     - RKE_ROLE == "worker"
