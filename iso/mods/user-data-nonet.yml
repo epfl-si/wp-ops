@@ -1,0 +1,66 @@
+#cloud-config
+autoinstall:
+  version: 1
+  interactive-sections:
+    - network
+  locale: en_US.UTF-8
+  timezone: "Europe/Zurich"
+  keyboard:
+    layout: us
+    variant: ""
+    toggle: null
+
+  refresh-installer:
+    update: false
+
+  source:
+    id: ubuntu-server-minimal
+
+  # user-data:
+  #   disable_root: false
+  #   users:
+  #     - name: ubuntu
+  #       sudo: "ALL=(ALL) NOPASSWD:ALL"
+  #       password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+  #       ssh_import_id:
+  #         - gh:azecko
+  #         - gh:d4rkheart
+  #         - gh:domq
+  #         - gh:dragonleman
+  #         - gh:dwesh163
+  #         - gh:Jch4ipas
+  #         - gh:jdelasoie
+  #         - gh:lvenries
+  #         - gh:multiscan
+  #         - gh:obieler
+  #         - gh:ponsfrilus
+  #         - gh:rosamaggi
+  #         - gh:saskyapanchaud
+
+  identity:
+    # password is ubuntu and will be changed as soon as ansible runs (hopefully)
+    hostname: ubuntu-server
+    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+    username: ubuntu
+    realname: 'That idiot of the Ubuntu User'
+
+  ssh:
+    install-server: true
+    allow-pw: false
+
+  # commands that are executed even before /target is mounted
+  # here we might need to manually install the network for installation to work
+  early-commands:
+    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
+
+  # runcmd (commands that run at first boot) might do the job too
+  late-commands:
+    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
+    - |
+      if [ -f /cdrom/config/authorized_keys ] ; then
+        [ -d /target/root/.ssh ] || mkdir /target/root/.ssh
+        cp /cdrom/config/authorized_keys /target/root/.ssh/
+        chmod 0700 /target/root/.ssh
+        chmod 0600 /target/root/.ssh/authorized_keys
+      fi
+    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
