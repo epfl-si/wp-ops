@@ -40,7 +40,7 @@ autoinstall:
     hostname: ubuntu-server
     password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
     username: ubuntu
-    realname: 'That idiot of the Ubuntu User'
+    realname: 'The useless Ubuntu User'
 
   ssh:
     install-server: true
@@ -51,12 +51,11 @@ autoinstall:
   # It would be probably nicer to have an http server with the config part
   # so that if we configure the network manually here we can go fetch the
   # config without having to burn the CD each time we add a new server.
-  early-commands:
-    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
+  # early-commands:
+  #   - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
 
   # runcmd (commands that run at first boot) might do the job too
   late-commands:
-    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
     - |
       eth0=$(ls -1 /sys/class/net | grep -v -e lo -e cali)
       MAC=$(ip link show dev ${eth0} | awk '/ether/ {print $2}')
@@ -64,7 +63,11 @@ autoinstall:
       hd=/cdrom/config/hosts/$MAC
       if [ -d $hd ] ; then
         echo "Using configuration for MAC $MAC"
-        [ -d $hd/ssh ] && cp $hd/ssh/* /target/etc/ssh/
+        if [ -d $hd/ssh ] ; then
+          cp $hd/ssh/* /target/etc/ssh/
+          chmod 0600 /target/etc/ssh/*_key*
+          chmod 0644 /target/etc/ssh/*_key.pub
+        fi
       else 
         echo "Configuration for MAC $MAC not found. Using Generic configuration"
         hd=/cdrom/config/hosts/generic
@@ -80,4 +83,3 @@ autoinstall:
         chmod 0700 /target/root/.ssh
         chmod 0600 /target/root/.ssh/authorized_keys
       fi
-    - touch /run/continue && while [ -f /run/continue ]; do sleep 1; done
