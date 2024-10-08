@@ -24,6 +24,8 @@ die() {
 	exit 1
 }
 
+[ -d data ] || mkdir 
+
 ISOBASE=data/base.iso
 BOOT=data/BOOT
 MBR=data/base.mbr
