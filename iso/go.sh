@@ -6,11 +6,11 @@
 # https://multipass.run/install
 # test locally with
 # multipass launch noble --name test-vm --cloud-init 00/user-data
-# multipass shell test-vm 
+# multipass shell test-vm
 
 # multipass launch noble --name testvm1 --network name=en0,mode=auto,mac=E2:B3:BC:CE:CF:1F --cloud-init mods/00/user-data
 # multipass launch noble --name testvm1 --network name=en0,mode=auto,mac=CE:5E:B2:AF:B7:E6 --cloud-init mods/00/user-data
-# multipass delete -p testvm1  
+# multipass delete -p testvm1
 # multipass delete -p testvm2
 
 # set -x
@@ -30,7 +30,7 @@ ISOBASE=data/base.iso
 BOOT=data/BOOT
 MBR=data/base.mbr
 EFI=data/base.efi
-ISOFINAL=data/ubuntu24_fsd_autoinstall_gc.iso
+ISOFINAL=data/ubuntu24_fsd_autoinstall.iso
 FSDIR=data/src
 AUTODIR=$FSDIR/server
 NONETDIR=$FSDIR/servernn
@@ -69,7 +69,7 @@ if [ ! -f data/authorized_keys ] ; then
   for k in $SSHKEYS ; do
     curl https://github.com/$k.keys >> data/authorized_keys
   done
-fi  
+fi
 cp data/authorized_keys $CFGDIR/authorized_keys
 
 xorriso -as mkisofs -r \
@@ -90,5 +90,5 @@ xorriso -as mkisofs -r \
   $FSDIR
 
 echo "Install CD image update. Please upload it to xaas NAS"
-echo "$(PWD)/$ISOFINAL"
+echo "$(pwd)/$ISOFINAL"
 echo "smb://nassvmmix01.epfl.ch/si_vsissp_iso_priv_repo_p01_app/ITServices/its_wbhst"
