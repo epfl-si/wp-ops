@@ -13,6 +13,15 @@
     msg: "{{ node_list.resources | map(attribute='metadata.name') | join(',') }}"
   register: server_ip_list
 
+- name: Install NFS for worker nodes
+  ansible.builtin.apt:
+    name: nfs-common
+    state:
+      present
+  when:
+    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
+    - RKE_ROLE == "worker"
+
 - epfl_si.rancher.rancher_registration:
     rancher_manager_url: "https://{{ RKE_INSTALL_SERVER }}"
     cluster_name: "{{ wpn_namespace }}"
@@ -21,7 +30,7 @@
   run_once: true
 
 - debug:
-    msg: "{{ _token_etc.registration.insecureNodeCommand }}"
+    msg: "{{ _token_etc.registration.nodeCommand }}"
   run_once: true
 
 - name: Configure control node
@@ -34,15 +43,6 @@
 - name: Configure worker node
   ansible.builtin.shell:
     cmd: "{{ _token_etc.registration.nodeCommand }} --worker"
-  when:
-    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
-    - RKE_ROLE == "worker"
-
-- name: Install NFS for worker nodes
-  ansible.builtin.apt:
-    name: nfs-common
-    state:
-      present
   when:
     - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
     - RKE_ROLE == "worker"
