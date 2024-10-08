@@ -110,6 +110,12 @@ nodes:
         itswbhst0020:
           ansible_host: itswbhst0020.xaas.epfl.ch
           ansible_ip: 128.178.218.249
+#        itswbhst0021:
+#          ansible_host: itswbhst0021.xaas.epfl.ch
+#          ansible_ip: 128.178.218.17
+        itswbhst0022:
+          ansible_host: itswbhst0022.xaas.epfl.ch
+          ansible_ip: 128.178.218.28
       vars:
         RKE_ROLE: worker
 
