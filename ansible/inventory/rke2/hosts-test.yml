@@ -72,7 +72,9 @@ all:
       - # example of revoked key
         github: crazylady2004
         state: absent
-    USERS: []
+    USERS:
+      - username: root
+
 #      -
 #        username: administrator
 #        comment: default non root user
