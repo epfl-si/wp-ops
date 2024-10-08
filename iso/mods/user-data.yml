@@ -4,8 +4,8 @@ autoinstall:
   locale: en_US.UTF-8
   timezone: "Europe/Zurich"
   keyboard:
-    layout: us
-    variant: ""
+    layout: ch
+    variant: "fr"
     toggle: null
 
   refresh-installer:
