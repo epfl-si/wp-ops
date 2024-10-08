@@ -68,6 +68,10 @@ autoinstall:
           chmod 0600 /target/etc/ssh/*_key*
           chmod 0644 /target/etc/ssh/*_key.pub
         fi
+        if [ -f $hd/hostname ] ; then
+          hn=$(cat $hd/hostname)
+          hostnamectl set-hostname $hn
+        fi
       else 
         echo "Configuration for MAC $MAC not found. Using Generic configuration"
         hd=/cdrom/config/hosts/generic
