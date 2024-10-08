@@ -11,8 +11,8 @@ autoinstall:
   refresh-installer:
     update: false
 
-  source:
-    id: ubuntu-server-minimal
+#  source:
+#    id: ubuntu-server-minimal
 
   # user-data:
   #   disable_root: false
