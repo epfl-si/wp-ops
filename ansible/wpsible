@@ -43,6 +43,10 @@ platform_check () {
                         SUITCASE_WITH_EYAML=1 \
                         SUITCASE_ANSIBLE_VERSION="10.1.0" bash -x
     fi
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    if ! helm plugin list | grep -q 'diff'; then
+      helm plugin install https://github.com/databus23/helm-diff
+    fi
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
     export ANSIBLE_COLLECTIONS_PATHS="$PWD/ansible-deps-cache"
