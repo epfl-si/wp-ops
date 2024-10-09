@@ -7,6 +7,15 @@
       tags:
         - system
 
+- name: Cluster configuration
+  hosts: clusters
+  gather_facts: False
+  roles:
+    - name: install kinds on rke2 cluster
+      role: ../roles/rke2-cluster
+      tags:
+        - rke2-cluster
+
 - name: Kuberbetes association
   hosts: nodes
   gather_facts: False
