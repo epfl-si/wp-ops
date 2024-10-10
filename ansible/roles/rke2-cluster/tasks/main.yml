@@ -1,6 +1,7 @@
 - include_vars: ../vars/rke2-cluster-vars.yml
   tags: always
 
+
 - name: "Create {{ namespace_name }} namespace if not exist"
   kubernetes.core.k8s:
     name: "{{ namespace_name }}"
@@ -10,13 +11,33 @@
   delegate_to: localhost
   run_once: true
 
+
+- name: "Create {{ nfs_namespace_name }} namespace if not exist"
+  kubernetes.core.k8s:
+    name: "{{ nfs_namespace_name }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  delegate_to: localhost
+  run_once: true
+
+
 # créer le robot account avec le secret
 
-- name: "Deploy latest version of nfs-subdir-external-provisioner chart inside {{ namespace_name }} namespace (and create it)"
+
+- name: Add helm repo for nfs-subdir-external-provisioner
+  kubernetes.core.helm_repository:
+    name: nfs-subdir-external-provisioner
+    repo_url: "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/"
+  delegate_to: localhost
+  run_once: true
+
+
+- name: "Deploy latest version of nfs-subdir-external-provisioner chart inside {{ mariadb_namespace_name }} namespace (and create it)"
   kubernetes.core.helm:
     name: nfs-subdir-external-provisioner
     chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
-    release_namespace: nfs-subdir-external-provisioner-system
+    release_namespace: "{{ nfs_namespace_name }}"
     set_values:
       - value: "nfs.server={{ nfs_server_name }}"
         value_type: string
@@ -27,6 +48,54 @@
   delegate_to: localhost
   run_once: true
 
+
 # install mariadb helm
+
+- name: "Create {{ mariadb_namespace_name }} namespace if not exist"
+  kubernetes.core.k8s:
+    name: "{{ mariadb_namespace_name }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Add helm repo for mariad-operator
+  kubernetes.core.helm_repository:
+    name: mariadb-operator
+    repo_url: "https://helm.mariadb.com/mariadb-operator"
+  delegate_to: localhost
+  run_once: true
+
+
+- name: "Deploy latest version of mariad-operator-crds chart inside {{ mariadb_namespace_name }} namespace (and create it)"
+  kubernetes.core.helm:
+    name: mariadb-operator-crds
+    chart_ref: mariadb-operator/mariadb-operator-crds
+    release_namespace: "{{ mariadb_namespace_name }}"
+  delegate_to: localhost
+  run_once: true
+
+
+- name: "Deploy latest version of mariad-operator chart inside {{ mariadb_namespace_name }} namespace (and create it)"
+  kubernetes.core.helm:
+    name: mariadb-operator
+    chart_ref: mariadb-operator/mariadb-operator
+    release_namespace: "{{ mariadb_namespace_name }}"
+  delegate_to: localhost
+  run_once: true
+
+
 # /kubernetes/wpn-ngnix.yml
+
+- name: Create MariadDB objects
+  import_tasks:
+    file: wpn-mariadb.yml
+
+
 # /kubernetes/wpn-mariadb.yml
+
+- name: Create nginx objects
+  import_tasks:
+    file: wpn-nginx.yml
