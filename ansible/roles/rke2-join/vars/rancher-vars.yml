@@ -2,3 +2,5 @@ rancher_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_test/WordPress-Next/r
 
 rancher_token: "{{ rancher_secrets.token }}"
 rancher_checksum: "{{ rancher_secrets.checksum }}"
+
+installed_node_names: "{{ (node_list.resources if 'resources' in node_list else []) | map(attribute='metadata.name') }}"
