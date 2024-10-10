@@ -1,0 +1,113 @@
+# https://erpdev.atlassian.net/browse/WPN-28
+- name: Create nginx/deployment
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wpn-nginx
+        namespace: "{{ mariadb_namespace_name }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: wpn-nginx
+        strategy:
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              app: wpn-nginx
+          spec:
+            containers:
+              - name: wpn-nginx
+                image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-028
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                volumeMounts:
+                  - name: php-configmap
+                    mountPath: /wp/inventory/
+                  - name: php-secret
+                    mountPath: /wp/credentials/
+                  - name: wp-uploads
+                    mountPath: /data/
+                    subPath: wp-uploads
+            imagePullSecrets:
+              - name: svc0041-rke2-puller-pull-secret
+            restartPolicy: Always
+            volumes:
+              - name: php-configmap
+                configMap:
+                  name: wpn-nginx
+              - name: php-secret
+                secret:
+                  secretName: wpn-nginx
+              - name: wp-uploads
+                persistentVolumeClaim:
+                  claimName: wp-uploads
+
+
+- name: Create nginx/service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: wpn-nginx-service
+        namespace: "{{ mariadb_namespace_name }}"
+        labels:
+          app: wpn-nginx
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: "80"
+          port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: wpn-nginx
+        type: ClusterIP
+
+
+- name: Create nginx/ingress
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: wpn-nginx
+        namespace: "{{ mariadb_namespace_name }}"
+      spec:
+        rules:
+          - host: "wpn.fsd.team"
+            http:
+              paths:
+                - pathType: Prefix
+                  path: /
+                  backend:
+                    service:
+                      name: wpn-nginx-service
+                      port:
+                        number: 80
+
+
+- name: Create nginx/persistentvolumeclaim
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wp-uploads
+        namespace: "{{ mariadb_namespace_name }}"
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 2Gi

@@ -1,3 +1,8 @@
+
 namespace_name: wordpress-test
+
+nfs_namespace_name: nfs-subdir-external-provisioner-system
 nfs_server_name: nas-app-ma-nfs1.epfl.ch
 nfs_path: /svc0041_si_openshift_app_wwp_test_app/nfs-storageclass
+
+mariadb_namespace_name: mariadb-system
