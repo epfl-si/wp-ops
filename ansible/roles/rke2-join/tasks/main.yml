@@ -4,13 +4,13 @@
 - name: get nodes list
   kubernetes.core.k8s_info:
     kind: Node
-    namespace: "{{ wpn_namespace }}"
   register: node_list
+  failed_when: false
   delegate_to: localhost
 
 - name: debug nodes list json
   debug:
-    msg: "{{ node_list.resources | map(attribute='metadata.name') | join(',') }}"
+    var: installed_node_names
   register: server_ip_list
 
 - name: Install NFS for worker nodes
@@ -19,7 +19,7 @@
     state:
       present
   when:
-    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
+    - inventory_hostname not in installed_node_names
     - RKE_ROLE == "worker"
 
 - epfl_si.rancher.rancher_registration:
@@ -37,12 +37,12 @@
   ansible.builtin.shell:
     cmd: "{{ _token_etc.registration.nodeCommand }} --etcd --controlplane"
   when:
-    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
+    - inventory_hostname not in installed_node_names
     - RKE_ROLE == "control"
 
 - name: Configure worker node
   ansible.builtin.shell:
     cmd: "{{ _token_etc.registration.nodeCommand }} --worker"
   when:
-    - inventory_hostname not in (node_list.resources | map(attribute='metadata.name'))
+    - inventory_hostname not in installed_node_names
     - RKE_ROLE == "worker"
