@@ -27,6 +27,29 @@
   when:
     - RKE_ROLE == "control"
 
+- name: Ensure udp-checksum-offload-disable.service
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Disable udp checksum offload
+      Before=rancher-system-agent.service
+      [Install]
+      WantedBy=rancher-system-agent.service
+      [Service]
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=ethtool --offload  ens192  rx off  tx off
+    dest: /etc/systemd/system/udp-checksum-offload-disable.service
+  register: _systemd_config_file
+
+- name: Systemd service
+  ansible.builtin.systemd_service:
+    name: udp-checksum-offload-disable.service
+    state: started
+    enabled: true
+    daemon_reload: >
+      {{ _systemd_config_file | default({}) is changed }} 
+
 - name: get nodes list
   kubernetes.core.k8s_info:
     kind: Node
