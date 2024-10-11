@@ -7,12 +7,12 @@
       tags:
         - system
 
-- name: Kuberbetes association
+- name: Node configuration
   hosts: nodes
   gather_facts: False
   roles:
     - name: setup rke2 cluster via rke2
-      role: ../roles/rke2-join
+      role: ../roles/rke2-node
       tags:
         - rke2
 
