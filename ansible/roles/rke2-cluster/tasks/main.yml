@@ -8,7 +8,6 @@
     api_version: v1
     kind: Namespace
     state: present
-  delegate_to: localhost
   run_once: true
 
 
@@ -18,7 +17,6 @@
     api_version: v1
     kind: Namespace
     state: present
-  delegate_to: localhost
   run_once: true
 
 
@@ -29,7 +27,6 @@
   kubernetes.core.helm_repository:
     name: nfs-subdir-external-provisioner
     repo_url: "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/"
-  delegate_to: localhost
   run_once: true
 
 
@@ -45,7 +42,6 @@
         value_type: string
       - value: storageClass.defaultClass=true
         value_type: string
-  delegate_to: localhost
   run_once: true
 
 
@@ -57,7 +53,6 @@
     api_version: v1
     kind: Namespace
     state: present
-  delegate_to: localhost
   run_once: true
 
 
@@ -65,7 +60,6 @@
   kubernetes.core.helm_repository:
     name: mariadb-operator
     repo_url: "https://helm.mariadb.com/mariadb-operator"
-  delegate_to: localhost
   run_once: true
 
 
@@ -74,7 +68,6 @@
     name: mariadb-operator-crds
     chart_ref: mariadb-operator/mariadb-operator-crds
     release_namespace: "{{ mariadb_namespace_name }}"
-  delegate_to: localhost
   run_once: true
 
 
@@ -83,7 +76,6 @@
     name: mariadb-operator
     chart_ref: mariadb-operator/mariadb-operator
     release_namespace: "{{ mariadb_namespace_name }}"
-  delegate_to: localhost
   run_once: true
 
 
@@ -99,3 +91,6 @@
 - name: Create nginx objects
   import_tasks:
     file: wpn-nginx.yml
+
+
+# TODO cluster yaml custom configuration ( Ask to Dominique)
