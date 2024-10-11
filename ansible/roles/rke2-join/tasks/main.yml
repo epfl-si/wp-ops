@@ -39,6 +39,7 @@
   when:
     - inventory_hostname not in installed_node_names
     - RKE_ROLE == "control"
+  register: _control_nodes
 
 - name: Configure worker node
   ansible.builtin.shell:
@@ -46,3 +47,7 @@
   when:
     - inventory_hostname not in installed_node_names
     - RKE_ROLE == "worker"
+
+- when: _control_nodes is changed
+  pause:
+    prompt: "Please download the kubeconfig from Rancher and export it in the console: export KUBECONFIG=~/Downloads/wordpress-test.yaml"
