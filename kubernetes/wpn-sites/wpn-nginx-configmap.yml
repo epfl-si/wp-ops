@@ -1,59 +1,6 @@
 ---
-!!!
-You are doing it wrong ! This configMap now managed through the WordPress 
-Operator and if you need to edit it, you should better look into it from
-there (https://github.com/epfl-si/wp-ops/tree/feature/wp-operator).
-!!!
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: wpn-nginx
   namespace: wordpress-test
-data:
-  get_wordpress.php: |
-    <?php
-    namespace __entrypoint;
-    
-    function get_wordpress ($wp_env, $host, $uri) {
-        $common_values = [
-            'host'       => 'wp-httpd',
-            'wp_env'     => getenv('WP_ENV'), // why ?
-            'wp_version' => '6'
-        ];
-        $sites_values = [
-            '/site-A/site-C' => [
-                'site_uri' => '/site-A/site-C/',
-                'wp_debug' => TRUE
-            ],
-            '/site-A' => [
-                'site_uri' => '/site-A/',
-                'wp_debug' => TRUE
-            ],
-            '/site-E' => [
-                'site_uri' => '/site-E/',
-                'wp_debug' => TRUE
-            ],
-            '/site-B' => [
-                'site_uri' => '/site-B/',
-                'wp_debug' => TRUE
-            ],
-            '/site-R' => [
-                'site_uri' => '/site-R/',
-                'wp_debug' => TRUE
-            ],
-            '/' => [ // this is mandatory (used as default)!
-                'site_uri' => '/',
-                'wp_debug' => TRUE
-            ],
-        ];
-        
-        $key = $uri;
-        $array_paths = explode('/', $uri);
-        while ( ! array_key_exists($key, $sites_values) && $key != '' ) {
-            array_pop($array_paths);
-            $key = implode('/', $array_paths);
-        }
-        if ( $key == '' ) $key = '/';
-        error_log("Selected uri_path → " . $key);
-        return array_merge($common_values, $sites_values[$key]);
-    }
