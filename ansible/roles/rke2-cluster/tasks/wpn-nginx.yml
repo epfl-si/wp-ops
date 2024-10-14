@@ -7,7 +7,7 @@
       kind: Deployment
       metadata:
         name: wpn-nginx
-        namespace: "{{ mariadb_namespace_name }}"
+        namespace: "{{ namespace_name }}"
       spec:
         replicas: 1
         selector:
@@ -57,7 +57,7 @@
       kind: Service
       metadata:
         name: wpn-nginx-service
-        namespace: "{{ mariadb_namespace_name }}"
+        namespace: "{{ namespace_name }}"
         labels:
           app: wpn-nginx
         annotations:
@@ -81,7 +81,7 @@
       kind: Ingress
       metadata:
         name: wpn-nginx
-        namespace: "{{ mariadb_namespace_name }}"
+        namespace: "{{ namespace_name }}"
       spec:
         rules:
           - host: "wpn.fsd.team"
@@ -103,8 +103,8 @@
       apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        name: wp-uploads
-        namespace: "{{ mariadb_namespace_name }}"
+        name: wp-uploadswp-uploads
+        namespace: "{{ namespace_name }}"
       spec:
         accessModes:
           - ReadWriteMany
