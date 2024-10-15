@@ -40,10 +40,10 @@
             volumes:
               - name: php-configmap
                 configMap:
-                  name: wpn-nginx
+                  name: nginx-php-site-tree
               - name: php-secret
                 secret:
-                  secretName: wpn-nginx
+                  secretName: nginx-php-mariadb-credentials
               - name: wp-uploads
                 persistentVolumeClaim:
                   claimName: wp-uploads
