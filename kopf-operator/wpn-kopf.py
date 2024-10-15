@@ -9,6 +9,7 @@ from kubernetes.client.exceptions import ApiException
 import base64
 import subprocess
 import json
+import click
 
 configmap_name = "wpn-nginx"
 namespace_name = "wordpress-test"
@@ -16,7 +17,10 @@ namespace_name = "wordpress-test"
 # Function that runs when the operator starts
 @kopf.on.startup()
 def startup_fn(**kwargs):
+    import debugpy; debugpy.log_to("/Users/quatrava/Dev/tmp/debugpy-logs"); debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
+
     print("Operator started and initialized")
+    
     # TODO: check the presence of namespaces or cluster-wide flag here.
 
 def list_wordpress_sites():
