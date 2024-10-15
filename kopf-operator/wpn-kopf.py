@@ -424,3 +424,7 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
     delete_custom_object_mariadb(custom_api, namespace, name, "wordpress-", "grants")
 
     regenerate_nginx_configmap(logger)
+
+from kopf.cli import main
+if __name__ == '__main__':
+    sys.exit(main())

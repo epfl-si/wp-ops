@@ -56,7 +56,7 @@ To make it work on your device, follow these steps:
     svc.cluster.local cluster.local
     ```
 7. Quickly check that your VPN is _connected_ using `kubevpn status`
-8. Run the operator using `kopf run wpn-kopf.py`
+8. Run the operator using `python3 wpn-kopf.py`
    - If you want more logs, you can run it with the `--verbose` parameter
 
 
