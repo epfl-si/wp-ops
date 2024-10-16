@@ -7,3 +7,5 @@ nfs_path: /svc0041_si_openshift_app_wwp_test_app/nfs-storageclass
 
 mariadb_namespace_name: mariadb-system
 
+monitoring_namespace_name: cattle-monitoring-system
+

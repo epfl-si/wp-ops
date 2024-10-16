@@ -23,6 +23,18 @@
 # créer le robot account avec le secret
 
 
+- name: "Create {{ monitoring_namespace_name }} namespace if not exist"
+  kubernetes.core.k8s:
+    name: "{{ monitoring_namespace_name }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  run_once: true
+  tags: rancher-monitoring
+
+
+# install nfs
+
 - name: Add helm repo for nfs-subdir-external-provisioner
   kubernetes.core.helm_repository:
     name: nfs-subdir-external-provisioner
@@ -94,3 +106,28 @@
 
 
 # TODO cluster yaml custom configuration ( Ask to Dominique)
+
+
+# install monitoring
+
+- name: Add rancher repo
+  kubernetes.core.helm_repository:
+    name: rancher-charts
+    repo_url: "https://charts.rancher.io"
+  run_once: true
+
+
+- name: "Deploy latest version of rancher-monitoring-crd chart inside {{ monitoring_namespace_name }} namespace"
+  kubernetes.core.helm:
+    name: rancher-monitoring-crd
+    chart_ref: rancher-charts/rancher-monitoring-crd
+    release_namespace: "{{ monitoring_namespace_name }}"
+  run_once: true
+
+
+- name: "Deploy latest version of rancher-monitoring chart inside {{ monitoring_namespace_name }} namespace"
+  kubernetes.core.helm:
+    name: rancher-monitoring
+    chart_ref: rancher-charts/rancher-monitoring
+    release_namespace: "{{ monitoring_namespace_name }}"
+  run_once: true
