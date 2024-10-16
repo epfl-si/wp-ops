@@ -1,4 +1,4 @@
-- name: Create mariadb/deployment
+- name: Create mariadb/mariadb
   kubernetes.core.k8s:
     state: present
     definition:
@@ -18,7 +18,7 @@
           enabled: true
 
 
-- name: Create mariadb/deployment
+- name: Create mariadb/databse
   kubernetes.core.k8s:
     state: present
     definition:
@@ -36,7 +36,7 @@
         collate: utf8_general_ci
 
 
-- name: Create mariadb/deployment
+- name: Create mariadb/secret
   kubernetes.core.k8s:
     state: present
     definition:
@@ -50,7 +50,7 @@
         password: secret
 
 
-- name: Create mariadb/deployment
+- name: Create mariadb/user
   kubernetes.core.k8s:
     state: present
     definition:
@@ -69,7 +69,7 @@
         cleanupPolicy: Delete
 
 
-- name: Create mariadb/deployment
+- name: Create mariadb/grant
   kubernetes.core.k8s:
     state: present
     definition:
