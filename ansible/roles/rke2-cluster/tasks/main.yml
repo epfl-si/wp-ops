@@ -68,14 +68,14 @@
   run_once: true
 
 
-- name: Add helm repo for mariad-operator
+- name: Add helm repo for mariadb-operator
   kubernetes.core.helm_repository:
     name: mariadb-operator
     repo_url: "https://helm.mariadb.com/mariadb-operator"
   run_once: true
 
 
-- name: "Deploy latest version of mariad-operator-crds chart inside {{ mariadb_namespace_name }} namespace (and create it)"
+- name: "Deploy latest version of mariadb-operator-crds chart inside {{ mariadb_namespace_name }} namespace (and create it)"
   kubernetes.core.helm:
     name: mariadb-operator-crds
     chart_ref: mariadb-operator/mariadb-operator-crds
@@ -83,7 +83,7 @@
   run_once: true
 
 
-- name: "Deploy latest version of mariad-operator chart inside {{ mariadb_namespace_name }} namespace (and create it)"
+- name: "Deploy latest version of mariadb-operator chart inside {{ mariadb_namespace_name }} namespace (and create it)"
   kubernetes.core.helm:
     name: mariadb-operator
     chart_ref: mariadb-operator/mariadb-operator
