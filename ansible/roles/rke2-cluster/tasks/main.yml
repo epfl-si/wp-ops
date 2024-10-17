@@ -130,4 +130,9 @@
     name: rancher-monitoring
     chart_ref: rancher-charts/rancher-monitoring
     release_namespace: "{{ monitoring_namespace_name }}"
+    values:
+      global:
+        cattle:
+          clusterId: "{{ rancher_cluster_id }}"
+          clusterName: "{{ rancher_cluster_name }}"   # not for grafana, but for prpmetheus metrics (https://github.com/rancher/rancher/issues/41991#issuecomment-1774844555)
   run_once: true
