@@ -9,3 +9,6 @@ mariadb_namespace_name: mariadb-system
 
 monitoring_namespace_name: cattle-monitoring-system
 
+rancher_cluster_id: c-m-xrkjdvtf      # TODO: look this up
+rancher_cluster_name: wordpress-test
+
