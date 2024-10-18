@@ -41,11 +41,8 @@ platform_check () {
                         SUITCASE_PIP_EXTRA="requests bcrypt passlib mitogen==0.2.9 docker resolvelib<0.6.0,>=0.5.3 kubernetes" \
                         SUITCASE_WITH_KEYBASE=1 \
                         SUITCASE_WITH_EYAML=1 \
+                        SUITCASE_WITH_HELM=1 \
                         SUITCASE_ANSIBLE_VERSION="10.1.0" bash -x
-    fi
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-    if ! helm plugin list | grep -q 'diff'; then
-      helm plugin install https://github.com/databus23/helm-diff
     fi
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
