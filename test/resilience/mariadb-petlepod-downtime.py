@@ -25,7 +25,7 @@ import venv
 #   # restart script
 #   print("Self restarting", file=sys.stderr)
 #   os.execv(sys.executable, ['python3'] + sys.argv)
-  
+
 # missing_packages = []
 # for package in REQUIRED_PACKAGES:
 #   try:
@@ -58,11 +58,11 @@ urllib3.disable_warnings()
 
 BASEURL="https://wpn.fsd.team"
 URLS = list(map(lambda p: BASEURL+p, [    # ruby I whish you were here !
-    "/labs/mechanical-spectroscopy/",
-    "/schools/sb/sph/",
-    "/research/facilities/cmi/",
+    "/schools/sv/isrec/",
+    "/schools/sv/bmi/",
+    "/schools/sb/research/isic/",
     "/labs/lcav/",
-    "/education/phd/edpy-physics/",
+    "/research/awards/",
     "/education/bachelor/",
     "/campus/associations/list/irrotationnels/",
 ]))
@@ -74,7 +74,7 @@ class PodPetter:
     self.k8s = kclient.CoreV1Api()
     self.ws = wait_sleep
 
-  def wait_url(self, url, up=True):
+  def wait_url(self, url, expected_up=True):
     dt0 = time.time()
     while True:
       # timer starts imediatelly but it is useless to check imediatelly
@@ -84,7 +84,7 @@ class PodPetter:
         rt0 = time.time()
         response = requests.get(url, timeout=5, verify=False)
         rt1 = time.time()
-        if up and response.status_code == 200 or not up and response.status_code != 200:
+        if expected_up and response.status_code == 200 or not expected_up and response.status_code != 200:
           dt1 = time.time()
           ret = {
             "url":       url,
@@ -96,16 +96,15 @@ class PodPetter:
       except requests.RequestException as e:
         # print(f"Error with {url}: {e}. Retrying...", file=sys.stderr)
         pass
- 
+
   def wait_urls(self, up=True):
-    results = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
       futures = [executor.submit(self.wait_url, url, up) for url in self.urls]
 
-      for future in concurrent.futures.as_completed(futures):
-        result = future.result()
-        results.append(result);
-    return results
+      return [
+        future.result()
+        for future in concurrent.futures.as_completed(futures)
+      ]
 
   def pod_running(self, pod='mariadb-min-0'):
     res=self.k8s.read_namespaced_pod(pod, self.ns)
@@ -125,7 +124,6 @@ class PodPetter:
       return False
 
   def run(self, nrep=1):
-    allresults = []
     for irep in range(nrep):
       while not self.petlepod():
         time.sleep(1)
@@ -135,11 +133,8 @@ class PodPetter:
       results = self.wait_urls()
       for e in results:
         e['irep'] = irep
-        print(json.dumps(e)+",", file=sys.stderr)
-      allresults.extend(results)
-    return allresults
+        yield e
 
 pp = PodPetter()
-results = pp.run(500)
-results_json = json.dumps(results)
-print(results_json)
+for e in pp.run(1000):
+  print(json.dumps(e), file=sys.stdout)
