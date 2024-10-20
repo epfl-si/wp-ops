@@ -34,7 +34,7 @@ fatal () {
     exit 1
 }
 
-platform_check () {
+ensure_ansible () {
     if ! test -f ansible-deps-cache/.versions 2>/dev/null; then
         curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/install.sh | \
             SUITCASE_DIR=$PWD/ansible-deps-cache SUITCASE_ANSIBLE_REQUIREMENTS=requirements.yml \
@@ -44,11 +44,9 @@ platform_check () {
                         SUITCASE_WITH_HELM=1 \
                         SUITCASE_ANSIBLE_VERSION="10.1.0" bash -x
     fi
-    export PATH="$PWD/ansible-deps-cache/bin:$PATH"
-    export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
-    export ANSIBLE_COLLECTIONS_PATHS="$PWD/ansible-deps-cache"
 
-    oc_check
+    . ansible-deps-cache/lib.sh
+    ensure_ansible_runtime
 }
 
 oc_check () {
@@ -107,14 +105,10 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# https://github.com/ansible/ansible/issues/32499, https://bugs.python.org/issue35219
-case "$(uname -s)" in
-    Darwin) export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ;;
-esac
-
 set -e
 
-platform_check
+ensure_ansible
+oc_check
 case "$mode" in
     install-only) : ;;
     ansible-playbook)
