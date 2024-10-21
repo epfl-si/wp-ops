@@ -10,7 +10,7 @@ library(forcats)
 library(ggplot2)
 
 # transform log files into data frame
-files <- c("simulation_10.log", "simulation_20.log", "simulation_30.log")
+files <- c("simulation_10.log","simulation_20.log","simulation_30.log","simulation_40.log","simulation_50.log","simulation_60.log","simulation_70.log")
 data <- data.frame()
 for (file in files) {
     gatling <- read.csv(file, sep = "\t", header = FALSE, col.names = c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8"))
@@ -25,6 +25,9 @@ View(data)
 
 # plot response time
 plot <- ggplot(data, aes(x=test, y=responsetime)) + 
-  geom_violin(draw_quantiles = c(0.50, 0.95, 0.99)) +
-  geom_jitter(aes(colour=status, shape=status))
+  geom_jitter(aes(colour=status, shape=status)) +
+  geom_violin(draw_quantiles = c(0.50, 0.95, 0.99)) +   
+  ggtitle("Response time plot for a site with simultaneous user connections") +
+  xlab("") +
+  ylab("Response Time (ms)") 
 plot
