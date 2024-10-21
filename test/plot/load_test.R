@@ -26,7 +26,7 @@ View(data)
 # plot response time
 plot <- ggplot(data, aes(x=test, y=responsetime)) + 
   geom_jitter(aes(colour=status, shape=status)) +
-  geom_violin(draw_quantiles = c(0.50, 0.95, 0.99)) +   
+ 
   ggtitle("Response time plot for a site with simultaneous user connections") +
   xlab("") +
   ylab("Response Time (ms)") 
