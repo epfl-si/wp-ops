@@ -8,3 +8,4 @@ roles:
 collections:
 - name: epfl_si.actions
 - name: epfl_si.rancher
+  version: ">=0.5.0"
