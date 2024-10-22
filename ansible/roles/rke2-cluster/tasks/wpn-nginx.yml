@@ -27,10 +27,8 @@
                   - containerPort: 8080
                     protocol: TCP
                 volumeMounts:
-                  - name: php-configmap
-                    mountPath: /wp/inventory/
-                  - name: php-secret
-                    mountPath: /wp/credentials/
+                  - name: nginx-conf
+                    mountPath: /etc/nginx/generated-conf.d/
                   - name: wp-uploads
                     mountPath: /data/
                     subPath: wp-uploads
@@ -38,12 +36,9 @@
               - name: svc0041-rke2-puller-pull-secret
             restartPolicy: Always
             volumes:
-              - name: php-configmap
-                configMap:
-                  name: nginx-php-site-tree
-              - name: php-secret
+              - name: nginx-conf
                 secret:
-                  secretName: nginx-php-mariadb-credentials
+                  secretName: nginx-conf-site-tree
               - name: wp-uploads
                 persistentVolumeClaim:
                   claimName: wp-uploads
@@ -84,7 +79,7 @@
         namespace: "{{ namespace_name }}"
       spec:
         rules:
-          - host: "wpn.fsd.team"
+          - host: "wpn-124.fsd.team"
             http:
               paths:
                 - pathType: Prefix
