@@ -1,3 +1,5 @@
+"use strict";
+
 // Function to fetch and filter the data
 async function fetchAndFilterSites() {
   try {
@@ -28,12 +30,12 @@ const run = async () => {
   // Call the function
   let sites = await fetchAndFilterSites();
   // console.log(sites)
-  for (site of sites) {
+  for (const site of sites) {
     //console.log(site);
-    path = site.url.replace("https://www.epfl.ch", "")
+    let path = site.url.replace("https://www.epfl.ch", "")
     path = path.replace(/\/$/, "");  // Removes the trailing slash
 
-    siteYml = `apiVersion: wordpress.epfl.ch/v1
+    const siteYml = `apiVersion: wordpress.epfl.ch/v1
 kind: WordpressSite
 metadata:
   name: ${site.ansibleHost.replaceAll("__","-").replaceAll("_", "-")}
