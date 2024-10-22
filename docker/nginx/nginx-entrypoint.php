@@ -141,14 +141,6 @@ function settings_before_wp_settings () {
         define( 'WP_INSTALLING', true );
     }
 }
-function get_wordpress () {
-    // TODO: complete with more variables coming from nginx.
-    return [
-        'host'       => 'wpn-124.fsd.team',  // TODO: obtain from nginx
-        'wp_env'     => getenv('WP_ENV'),    // TODO: what about this? It sounds obsolete.
-        'wp_version' => '6'
-    ];
-}
 
 ##########################################################################################
 
