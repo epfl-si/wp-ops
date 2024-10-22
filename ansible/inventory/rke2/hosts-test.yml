@@ -124,6 +124,7 @@ clusters:
     wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
       ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
       ansible_user: root
       ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
       ansible_rancher_cluster_name: wordpress-test
