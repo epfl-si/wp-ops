@@ -1,5 +1,14 @@
 "use strict";
 
+import "process";
+
+let namespace = "wordpress-test";
+for (let arg of process.argv) {
+  if (arg.startsWith("--namespace=")) {
+    namespace = arg.split("=")[1];
+  }
+}
+
 // Function to fetch and filter the data
 async function fetchAndFilterSites() {
   try {
@@ -39,7 +48,7 @@ const run = async () => {
 kind: WordpressSite
 metadata:
   name: ${site.ansibleHost.replaceAll("__","-").replaceAll("_", "-")}
-  namespace: wordpress-test
+  namespace: ${namespace}
 spec:
   path: ${path}
   visibility: public
