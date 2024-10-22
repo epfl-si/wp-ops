@@ -89,8 +89,13 @@
 # /kubernetes/wpn-mariadb.yml
 
 - name: Create nginx objects
-  import_tasks:
+  include_tasks:
     file: wpn-nginx.yml
+    apply:
+      tags:
+        - cluster.nginx
+  tags:
+    - cluster.nginx
 
 
 # TODO cluster yaml custom configuration ( Ask to Dominique)
