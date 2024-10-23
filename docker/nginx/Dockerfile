@@ -3,7 +3,8 @@ FROM docker-registry.default.svc:5000/wwp-test/wp-base
 RUN echo "deb http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" > /etc/apt/sources.list.d/nginx.list
 RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | apt-key add -
 
-RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
+RUN set -e -x; \
+    apt-get -qy update && apt-get -qy install --no-install-recommends \
     gettext-base \
     libcgi-pm-perl \
     libio-all-lwp-perl \
@@ -12,9 +13,8 @@ RUN apt-get -qy update && apt-get -qy install --no-install-recommends \
     msmtp-mta \
     nginx \
     nginx-module-njs \
-    php${PHP_VERSION}-fpm \
-  && \
-    apt-get -qy autoremove && \
+    php${PHP_VERSION}-fpm ; \
+    apt-get -qy autoremove ; \
     apt-get clean
 
 COPY msmtprc /etc/msmtprc
