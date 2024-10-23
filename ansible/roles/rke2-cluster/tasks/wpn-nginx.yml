@@ -79,7 +79,7 @@
         namespace: "{{ namespace_name }}"
       spec:
         rules:
-          - host: "wpn-124.fsd.team"
+          - host: "wpn.fsd.team"
             http:
               paths:
                 - pathType: Prefix
