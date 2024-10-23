@@ -2,7 +2,7 @@
   tags: always
 
 
-- name: "Create {{ namespace_name }} namespace if not exist"
+- name: "Create {{ namespace_name }} namespace if not exists"
   kubernetes.core.k8s:
     name: "{{ namespace_name }}"
     api_version: v1
@@ -11,7 +11,7 @@
   run_once: true
 
 
-- name: "Create {{ nfs_namespace_name }} namespace if not exist"
+- name: "Create {{ nfs_namespace_name }} namespace if not exists"
   kubernetes.core.k8s:
     name: "{{ nfs_namespace_name }}"
     api_version: v1
@@ -23,7 +23,7 @@
 # créer le robot account avec le secret
 
 
-- name: "Create {{ monitoring_namespace_name }} namespace if not exist"
+- name: "Create {{ monitoring_namespace_name }} namespace if not exists"
   kubernetes.core.k8s:
     name: "{{ monitoring_namespace_name }}"
     api_version: v1
@@ -139,5 +139,5 @@
       global:
         cattle:
           clusterId: "{{ rancher_cluster_id }}"
-          clusterName: "{{ rancher_cluster_name }}"   # not for grafana, but for prpmetheus metrics (https://github.com/rancher/rancher/issues/41991#issuecomment-1774844555)
+          clusterName: "{{ rancher_cluster_name }}"   # not for grafana, but for prometheus metrics (https://github.com/rancher/rancher/issues/41991#issuecomment-1774844555)
   run_once: true
