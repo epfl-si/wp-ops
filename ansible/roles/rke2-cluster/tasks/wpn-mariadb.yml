@@ -18,7 +18,7 @@
           enabled: true
 
 
-- name: Create mariadb/databse
+- name: Create mariadb/database
   kubernetes.core.k8s:
     state: present
     definition:
