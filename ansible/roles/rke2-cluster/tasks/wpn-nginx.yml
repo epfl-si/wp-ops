@@ -1,4 +1,3 @@
-# https://erpdev.atlassian.net/browse/WPN-28
 - name: Create nginx/deployment
   kubernetes.core.k8s:
     state: present
