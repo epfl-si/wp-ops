@@ -1,4 +1,4 @@
-- name: Create nginx/deployment
+- name: Deployment/wpn-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -43,7 +43,7 @@
                   claimName: wp-uploads
 
 
-- name: Create nginx/service
+- name: Service/wpn-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -67,7 +67,7 @@
         type: ClusterIP
 
 
-- name: Create nginx/ingress
+- name: Ingress/wpn-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -90,7 +90,7 @@
                         number: 80
 
 
-- name: Create nginx/persistentvolumeclaim
+- name: PersistentVolumeClaim/wpn-nginx
   kubernetes.core.k8s:
     state: present
     definition:
