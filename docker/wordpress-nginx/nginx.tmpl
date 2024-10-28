@@ -16,6 +16,8 @@ error_log stderr;
 events {}
 daemon off;
 http {
+	include /etc/nginx/mime.types;
+
 	client_body_temp_path /tmp/nginx/client_body;
 	proxy_temp_path       /tmp/nginx/proxy;
 	fastcgi_temp_path     /tmp/nginx/fastcgi;
