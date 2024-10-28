@@ -1,0 +1,84 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: www-labs-lo
+  namespace: wordpress-test
+  annotations:
+    # This annotation meshes with “our” nginx controller, which is
+    # configured to accept snippets and put them into nginx.conf via a
+    # Golang template. (The “normal” nginx controller has snippets
+    # turned off, for security and robustness reasons.)
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+          location = /labs/lo/wp-admin {
+            return 301 /labs/lo/wp-admin/;
+          }
+
+          location ~ (wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/ {
+            rewrite .*/((wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/.*) /$1 break;
+            root /wp/6/;
+          }
+
+          location ~ (wp-content/uploads)/ {
+            rewrite .*/(wp-content/uploads/(.*)) /$2 break;
+            root /data/www-labs-lo/uploads/;
+          }
+
+          fastcgi_param WP_DEBUG           true;
+          fastcgi_param WP_ROOT_URI        /labs/lo/;
+          fastcgi_param WP_SITE_NAME       www-labs-lo;
+          fastcgi_param WP_ABSPATH         /wp/6/;
+          fastcgi_param WP_DB_HOST         mariadb-min;
+          fastcgi_param WP_DB_NAME         wp-db-www-labs-lo;
+          fastcgi_param WP_DB_USER         wp-db-user-www-labs-lo;
+          fastcgi_param WP_DB_PASSWORD     secret;
+
+          location ~ ^[^.]*$ {
+            fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+          }
+          location ~ \.php$ {
+            fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+          }
+
+          include "/etc/nginx/template/wordpress_fastcgi.conf";
+
+
+spec:
+  ingressClassName: wordpress
+  rules:
+    - host: "wpn.fsd.team"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /labs/lo
+            backend:
+              service:
+                name: wpn-nginx-service
+                port:
+                  number: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: www-schools-sti
+  namespace: wordpress-test
+  annotations:
+  annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      # Moar server snippets go here (by www-schools-sti)
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Configuration for www-schools-sti goes here.
+spec:
+  ingressClassName: wordpress
+  rules:
+    - host: "wpn.fsd.team"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /schools/sti/
+            backend:
+              service:
+                name: wpn-nginx-service
+                port:
+                  number: 80
