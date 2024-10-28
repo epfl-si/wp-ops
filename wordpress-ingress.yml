@@ -10,7 +10,7 @@ metadata:
     # turned off, for security and robustness reasons.)
     nginx.ingress.kubernetes.io/configuration-snippet: |
           location = /labs/lo/wp-admin {
-            return 301 /labs/lo/wp-admin/;
+            return 301 https://wpn.fsd.team/labs/lo/wp-admin/;
           }
 
           location ~ (wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/ {

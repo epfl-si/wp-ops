@@ -99,7 +99,7 @@ server {
 
 			{{ if (not (hasSuffix $path "/")) }}
 			location {{ $path }} {
-				return 301 {{ $path }}/;
+				return 301 https://{{ $server.Hostname }}{{ $location.Path }}/;
 			}
 
 {{/* Due to the functional indigence of Golang's templating language,
