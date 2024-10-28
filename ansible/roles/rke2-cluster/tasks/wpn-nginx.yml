@@ -173,7 +173,7 @@
                   - --configmap=$(POD_NAMESPACE)/wpn-nginx
                   - --watch-ingress-without-class=false
                 ports:
-                  - containerPort: 8080
+                  - containerPort: 8000
                     protocol: TCP
                 volumeMounts:
                   - name: wp-uploads
@@ -261,7 +261,7 @@
         - name: "80"
           port: 80
           protocol: TCP
-          targetPort: 8080
+          targetPort: 8000
         selector:
           app: wpn-nginx
         type: ClusterIP
