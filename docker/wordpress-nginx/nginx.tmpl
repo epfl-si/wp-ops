@@ -16,6 +16,11 @@ error_log stderr;
 events {}
 daemon off;
 http {
+	client_body_temp_path /tmp/nginx/client_body;
+	proxy_temp_path       /tmp/nginx/proxy;
+	fastcgi_temp_path     /tmp/nginx/fastcgi;
+	uwsgi_temp_path       /tmp/nginx/uwsgi;
+	scgi_temp_path        /tmp/nginx/scgi;
 
 	lua_package_path "/etc/nginx/lua/?.lua;;";
 
