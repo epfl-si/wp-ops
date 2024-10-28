@@ -1,0 +1,155 @@
+{{/* These variables are set at the top of the original template baked into the image: */}}
+
+{{ $all := . }}
+{{ $servers := .Servers }}
+{{ $cfg := .Cfg }}
+{{ $IsIPV6Enabled := .IsIPV6Enabled }}
+{{ $healthzURI := .HealthzURI }}
+{{ $backends := .Backends }}
+{{ $proxyHeaders := .ProxySetHeaders }}
+{{ $addHeaders := .AddHeaders }}
+
+pid {{ .PID }};
+
+error_log stderr;
+
+events {}
+daemon off;
+http {
+
+	lua_package_path "/etc/nginx/lua/?.lua;;";
+
+	lua_shared_dict certificate_data 20M;
+	lua_shared_dict certificate_servers 5M;
+	lua_shared_dict configuration_data 20M;
+
+	init_by_lua_block {
+		collectgarbage("collect")
+
+		-- init modules
+		local ok, res
+
+		ok, res = pcall(require, "configuration")
+		if not ok then
+		error("require failed: " .. tostring(res))
+		else
+		configuration = res
+		configuration.prohibited_localhost_port = '{{ .StatusPort }}'
+		end
+	}
+
+	# default server, used for NGINX healthcheck and access to nginx stats
+	server {
+		listen 127.0.0.1:{{ .StatusPort }};
+		set $proxy_upstream_name "internal";
+
+		keepalive_timeout 0;
+		gzip off;
+
+		access_log off;
+
+		location /healthz {
+			return 200;
+		}
+
+		location /nginx_status {
+			stub_status on;
+		}
+
+		location /configuration {
+			client_max_body_size                    21M;
+			client_body_buffer_size                 21M;
+			proxy_buffering                         off;
+
+			content_by_lua_block {
+				configuration.call()
+			}
+		}
+
+		location / {
+			content_by_lua_block {
+				ngx.exit(ngx.HTTP_NOT_FOUND)
+			}
+		}
+	}
+
+# `wordpress`-class ingress snippets start here.
+{{ range $server := $servers }}
+server {
+	server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
+	{{ range $location := $server.Locations }}
+		{{ $path := buildLocation $location false }}
+		{{ if (hasPrefix $path "= ") }}
+
+{{/* Generally speaking, the controller emits two Location objects for
+     each Ingress object it renders. One of them is an exact match
+     (hence the `= ` prefix, above) for the ingress' URL. We use that
+     slot in the Location loop to set up a redirect to “repair” a
+     “near-miss” URL, such as https://www.epfl.ch/labs/lo (note the
+     lack of a trailing slash). In order for relative links (in HTML
+     or otherwise) to work properly, we cannot serve these requests
+     as-is; we must redirect them. */}}
+
+			{{ if (not (hasSuffix $path "/")) }}
+			location {{ $path }} {
+				return 301 {{ $path }}/;
+			}
+
+{{/* Due to the functional indigence of Golang's templating language,
+     we *cannot* just chop off the final slash if it was mistakenly
+     added at the end of the Ingress `path`. Given that doing nothing
+     in such a case makes a tiny amount of sense (i.e. if whomever
+     wrote the Ingress object added a final slash, it could be
+     construed to mean that they don't want to deal with the
+     “near-miss” URL), nothing is exactly what we do. */}}
+
+			{{ end }}
+		{{ else if (not (empty $location.IngressPath)) }}
+
+{{/* This is the “main” Location object passed by the controller, and we use it to
+     render the main nginx config snippet (if there is one). */}}
+
+			{{ if (not (empty $location.ConfigurationSnippet)) }}
+			location {{ $path }} {
+				{{ $location.ConfigurationSnippet }}
+			}
+			{{ end }}
+		{{ else }}
+
+{{/* This is a supplemental Location that the controller emits as a
+catch-all, typically for /. Nothing to see here. */}}
+
+		{{ end }}
+	{{ end }}
+	{{ $server.ServerSnippet }}
+}
+{{ end }}
+# `wordpress`-class ingress snippets end here.
+
+}
+
+{{/* The controller wants to talk to us about TCP and UDP streams, but we
+     don't use them. */}}
+
+stream {
+	server {
+		listen 127.0.0.1:{{ .StreamPort }};
+
+		access_log off;
+
+		content_by_lua_block {
+                  local sock, err = ngx.req.socket(true)
+		  if not sock then
+		    ngx.log(ngx.ERR, "failed to get raw req socket: ", err)
+		    ngx.say("error: ", err)
+		  else
+		    local reader = sock:receiveuntil("\r\n")
+		    local _, err_read = reader()                  -- Whatever you say, dear
+		    if err_read then
+		      ngx.log(ngx.ERR, "could not read TCP/UDP dynamic-configuration:", err_read)
+		      ngx.say("error: ", err_read)
+		    end
+		  end
+		}
+	}
+}
