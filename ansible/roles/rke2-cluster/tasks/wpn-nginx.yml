@@ -132,10 +132,10 @@
         allow-snippet-annotations: "true"
         # Uncomment the next four lines to embug the nginx configuration
         # (see also similar comments elsewhere in the file):
-        nginx.tmpl: >-
-          {{ lookup("file", "../../../../docker/wordpress-nginx/nginx.tmpl") }}
-        wordpress_fastcgi.conf: >-
-          {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
+        # nginx.tmpl: >-
+        #   {{ lookup("file", "../../../../docker/wordpress-nginx/nginx.tmpl") }}
+        # wordpress_fastcgi.conf: >-
+        #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
 
 
 - name: Deployment/wpn-nginx
@@ -185,11 +185,11 @@
                   - name: kube-api-access
                     mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                     readOnly: true
-                  - name: wpn-nginx
-                    mountPath: /etc/nginx/template
-                    readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
+                  # - name: wpn-nginx
+                  #   mountPath: /etc/nginx/template
+                  #   readOnly: true
                 env:
                   - name: POD_NAME
                     valueFrom:
@@ -220,9 +220,9 @@
                   claimName: wp-uploads
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
-              - name: wpn-nginx
-                configMap:
-                  name: wpn-nginx
+              # - name: wpn-nginx
+              #   configMap:
+              #     name: wpn-nginx
               - name: kube-api-access
                 projected:
                   defaultMode: 420
