@@ -16,13 +16,6 @@ error_log stderr;
 events {}
 daemon off;
 
-{{/* The default values are just too small for WordPress, see
-https://stackoverflow.com/questions/23844761/upstream-sent-too-big-header-while-reading-response-header-from-upstream */}}
-
-fastcgi_buffers 16 32k;
-fastcgi_buffer_size 64k;
-fastcgi_busy_buffers_size 64k;
-
 http {
 	include /etc/nginx/mime.types;
 
@@ -31,6 +24,13 @@ http {
 	fastcgi_temp_path     /tmp/nginx/fastcgi;
 	uwsgi_temp_path       /tmp/nginx/uwsgi;
 	scgi_temp_path        /tmp/nginx/scgi;
+
+	{{/* The default values are just too small for WordPress, see
+	https://stackoverflow.com/questions/23844761/upstream-sent-too-big-header-while-reading-response-header-from-upstream */}}
+
+	fastcgi_buffers 16 32k;
+	fastcgi_buffer_size 64k;
+	fastcgi_busy_buffers_size 64k;
 
 	lua_package_path "/etc/nginx/lua/?.lua;;";
 
