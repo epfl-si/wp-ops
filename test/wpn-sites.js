@@ -60,9 +60,15 @@ spec:
     theme: wp-theme-2018
     languages:
 ${site.languages.map(item => `      - ${item}`).join('\n')}
+    plugins:
+${site.categories.map(item => `      - ${item}`).join('\n')}
     debug: true
   epfl:
     unit_id: ${site.unitId}
+    unit_name: ${site.unitName}
+    importFromOS3:
+      environment: ${site.openshiftEnv}
+      ansibleHost: ${site.ansibleHost}
 `
     console.log(siteYml);
     console.log('---');
