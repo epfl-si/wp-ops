@@ -57,9 +57,6 @@ metadata:
   name: www-schools-sti
   namespace: wordpress-test
   annotations:
-  annotations:
-    nginx.ingress.kubernetes.io/server-snippet: |
-      # Moar server snippets go here (by www-schools-sti)
     nginx.ingress.kubernetes.io/configuration-snippet: |
       # Configuration for www-schools-sti goes here.
 spec:
