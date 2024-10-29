@@ -32,13 +32,6 @@ metadata:
           fastcgi_param WP_DB_USER         wp-db-user-www-labs-lo;
           fastcgi_param WP_DB_PASSWORD     secret;
 
-          location ~ ^[^.]*$ {
-            fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
-          }
-          location ~ \.php$ {
-            fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
-          }
-
           include "/etc/nginx/template/wordpress_fastcgi.conf";
 
 
