@@ -9,6 +9,8 @@ metadata:
     # Golang template. (The “normal” nginx controller has snippets
     # turned off, for security and robustness reasons.)
     nginx.ingress.kubernetes.io/configuration-snippet: |
+          include "/etc/nginx/template/wordpress_fastcgi.conf";
+
           location = /labs/lo/wp-admin {
             return 301 https://wpn.fsd.team/labs/lo/wp-admin/;
           }
@@ -31,10 +33,6 @@ metadata:
           fastcgi_param WP_DB_NAME         wp-db-www-labs-lo;
           fastcgi_param WP_DB_USER         wp-db-user-www-labs-lo;
           fastcgi_param WP_DB_PASSWORD     secret;
-
-          include "/etc/nginx/template/wordpress_fastcgi.conf";
-
-
 spec:
   ingressClassName: wordpress
   rules:
