@@ -88,13 +88,13 @@ http {
 		}
 	}
 
-# `wordpress`-class ingress snippets start here.
-{{ range $server := $servers }}
-server {
-	server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
-	{{ range $location := $server.Locations }}
-		{{ $path := buildLocation $location false }}
-		{{ if (hasPrefix $path "= ") }}
+	# `wordpress`-class ingress snippets start here.
+	{{ range $server := $servers }}
+	server {
+		server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
+		{{ range $location := $server.Locations }}
+			{{ $path := buildLocation $location false }}
+			{{ if (hasPrefix $path "= ") }}
 
 {{/* Generally speaking, the controller emits two Location objects for
      each Ingress object it renders. One of them is an exact match
@@ -105,10 +105,10 @@ server {
      or otherwise) to work properly, we cannot serve these requests
      as-is; we must redirect them. */}}
 
-			{{ if (not (hasSuffix $path "/")) }}
-			location {{ $path }} {
-				return 301 https://{{ $server.Hostname }}{{ $location.Path }}/;
-			}
+				{{ if (not (hasSuffix $path "/")) }}
+				location {{ $path }} {
+					return 301 https://{{ $server.Hostname }}{{ $location.Path }}/;
+				}
 
 {{/* Due to the functional indigence of Golang's templating language,
      we *cannot* just chop off the final slash if it was mistakenly
@@ -118,29 +118,37 @@ server {
      construed to mean that they don't want to deal with the
      “near-miss” URL), nothing is exactly what we do. */}}
 
-			{{ end }}
-		{{ else if (not (empty $location.IngressPath)) }}
+				{{ end }}
+			{{ else if (not (empty $location.IngressPath)) }}
 
 {{/* This is the “main” Location object passed by the controller, and we use it to
      render the main nginx config snippet (if there is one). */}}
 
-			{{ if (not (empty $location.ConfigurationSnippet)) }}
-			location {{ $path }} {
-				{{ $location.ConfigurationSnippet }}
-			}
-			{{ end }}
-		{{ else }}
+				{{ if (not (empty $location.ConfigurationSnippet)) }}
+				location {{ $path }} {
+					{{ $location.ConfigurationSnippet }}
+				}
+				{{ end }}
+			{{ else }}
 
 {{/* This is a supplemental Location that the controller emits as a
-     catch-all, typically for /. Nothing to see here. */}}
+     catch-all, typically for /. Nothing to see here (we have our
+     own catch-all below). */}}
 
+			{{ end }}
 		{{ end }}
-	{{ end }}
-	{{ $server.ServerSnippet }}
-}
-{{ end }}
-# `wordpress`-class ingress snippets end here.
+		{{ $server.ServerSnippet }}
 
+		# `wordpress`-class ingress snippets end here.
+
+		# Catch-all in the (unlikely) case where there is no WordPress
+	        # at the root of the domain:
+		location / {
+			# Remove OpenResty ad-ware
+			root /404;
+		}
+	}
+	{{ end }}
 }
 
 {{/* The controller wants to talk to us about TCP and UDP streams, but we

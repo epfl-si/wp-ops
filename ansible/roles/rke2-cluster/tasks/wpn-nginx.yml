@@ -163,7 +163,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wpn-nginx:no-more-php-10
+                image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-040
                 args:
                   - /nginx-ingress-controller
                   - --disable-leader-election
