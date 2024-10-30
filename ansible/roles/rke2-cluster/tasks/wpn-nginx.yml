@@ -168,7 +168,6 @@
                   - /nginx-ingress-controller
                   - --disable-leader-election
                   - --controller-class=epfl.ch/ingress-wordpress
-                  - --ingress-class=wordpress
                   - --watch-namespace=$(POD_NAMESPACE)
                   - --configmap=$(POD_NAMESPACE)/wpn-nginx
                   - --watch-ingress-without-class=false
