@@ -110,12 +110,12 @@ http {
 			
 			# ------------------------------------------------------------- #
 
-{{/* Check if ConfigurationSnippet is empty for the root path (/).
-     The ConfigurationSnippet may contain unexpected values when the path is root.
-     Verify if the ingress is valid and uses service port 80.
-     NOTE: This unexpected behavior with root path ConfigurationSnippet is currently unexplained 
-     and will be investigated and fixed in a future update. */}}
-			{{ if and (eq $location.Path "/") (eq $ing.ServicePort "80") }}
+{{/* Verify if ConfigurationSnippet is provided and set as expected when the path is root (/).
+     The ConfigurationSnippet may introduce unanticipated values at the root path.
+     Ensure that the ingress have a Service name.
+     NOTE: Current behavior with root path ConfigurationSnippet is under review, 
+     and a fix will be included in a future update. */}}
+			{{ if and (eq $location.Path "/") (not (empty $ing.Service)) }}
 				{{ $hasRootLocation = true }}
 			{{ end }}
 
@@ -144,7 +144,7 @@ http {
      “near-miss” URL), nothing is exactly what we do. */}}
 
 				{{ end }}
-			{{ else if and (not (empty $location.ConfigurationSnippet)) (eq $ing.ServicePort "80") }}
+			{{ else if and (not (empty $location.ConfigurationSnippet)) (not (empty $ing.Service)) }}
 
 {{/* This is the “main” Location object passed by the controller, and we use it to
      render the main nginx config snippet (if there is one). */}}
