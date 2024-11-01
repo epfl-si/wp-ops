@@ -92,8 +92,33 @@ http {
 	{{ range $server := $servers }}
 	server {
 		server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
+
+		{{ $hasRootLocation := false }}
+
 		{{ range $location := $server.Locations }}
+			####################### START LOCATION ####################### 
 			{{ $path := buildLocation $location false }}
+
+			# ------------------------------------------------------------- #
+			{{ $ing := (getIngressInformation $location.Ingress $server.Hostname $location.IngressPath) }}
+				# Namespace      : {{ $ing.Namespace | quote}};
+				# Ingress name   : {{ $ing.Rule | quote }};
+				# Service name   : {{ $ing.Service | quote }};
+				# Service port   : {{ $ing.ServicePort | quote }};
+				# Location path  : {{ $ing.Path | escapeLiteralDollar | quote }};
+				# Ingress path   : {{ $location.IngressPath | quote }};
+			
+			# ------------------------------------------------------------- #
+
+{{/* Verify if ConfigurationSnippet is provided and set as expected when the path is root (/).
+     The ConfigurationSnippet may introduce unanticipated values at the root path.
+     Ensure that the ingress have a Service name.
+     NOTE: Current behavior with root path ConfigurationSnippet is under review, 
+     and a fix will be included in a future update. */}}
+			{{ if and (eq $location.Path "/") (not (empty $ing.Service)) }}
+				{{ $hasRootLocation = true }}
+			{{ end }}
+
 			{{ if (hasPrefix $path "= ") }}
 
 {{/* Generally speaking, the controller emits two Location objects for
@@ -119,16 +144,14 @@ http {
      “near-miss” URL), nothing is exactly what we do. */}}
 
 				{{ end }}
-			{{ else if (not (empty $location.IngressPath)) }}
+			{{ else if and (not (empty $location.ConfigurationSnippet)) (not (empty $ing.Service)) }}
 
 {{/* This is the “main” Location object passed by the controller, and we use it to
      render the main nginx config snippet (if there is one). */}}
-
-				{{ if (not (empty $location.ConfigurationSnippet)) }}
 				location {{ $path }} {
 					{{ $location.ConfigurationSnippet }}
 				}
-				{{ end }}
+				
 			{{ else }}
 
 {{/* This is a supplemental Location that the controller emits as a
@@ -136,17 +159,20 @@ http {
      own catch-all below). */}}
 
 			{{ end }}
+			######################## END LOCATION ########################
 		{{ end }}
 		{{ $server.ServerSnippet }}
 
-		# `wordpress`-class ingress snippets end here.
+		{{ if not $hasRootLocation }}
+			# `wordpress`-class ingress snippets end here.
 
-		# Catch-all in the (unlikely) case where there is no WordPress
-	        # at the root of the domain:
-		location / {
-			# Remove OpenResty ad-ware
-			root /404;
-		}
+			# Catch-all in the (unlikely) case where there is no WordPress
+				# at the root of the domain:
+			location / {
+				# Remove OpenResty ad-ware
+				return 404;
+			}
+		{{ end }}
 	}
 	{{ end }}
 }
