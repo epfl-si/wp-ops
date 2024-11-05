@@ -1,0 +1,26 @@
+- include_vars: ../vars/rke2-cluster-vars.yml
+  tags: always
+
+- include_vars: ../../../vars/secrets-wwp.yml
+  tags: always
+
+- name: EPFL Plugins Secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: wp-plugin-secrets
+        namespace: "{{ rancher_cluster_name }}"
+      type: Opaque
+      stringData:
+        restauration_api_password: "{{ restauration.api_password | eyaml(eyaml_keys) }}"
+        wpform_license: "{{ wpforms.license_key | eyaml(eyaml_keys) }}"
+        saferpay_test_apiusername: "{{ saferpay.test.apiusername | eyaml(eyaml_keys) }}"
+        saferpay_test_apipassword: "{{ saferpay.test.apipassword | eyaml(eyaml_keys) }}"
+        saferpay_test_customerid: "{{ saferpay.test.customerid | eyaml(eyaml_keys) | string }}"
+        saferpay_test_terminalid: "{{ saferpay.test.terminalid | eyaml(eyaml_keys) | string }}"
+        saferpay_prod_apiusername: "{{ saferpay.prod.apiusername | eyaml(eyaml_keys) }}"
+        saferpay_prod_customerid: "{{ saferpay.prod.customerid | eyaml(eyaml_keys) | string }}"
+        saferpay_prod_terminalid: "{{ saferpay.prod.terminalid | eyaml(eyaml_keys) | string }}"
