@@ -377,6 +377,7 @@
       - symlinked
       - active
     from: https://github.com/epfl-si/wp-plugin-epfl-menus
+    branch: feature/nginx
   register: _plugin_epfl_menus
 
 - name: wp-media-folder plugin
