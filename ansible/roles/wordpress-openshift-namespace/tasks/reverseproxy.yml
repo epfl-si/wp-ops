@@ -9,6 +9,9 @@
         namespace: svc0041p-wordpress
       spec:
         type: ExternalName
+        # TODO: this would be better if we were going through some
+        # *non-*public IP (so that we can shut down this one, and gain
+        # some DDOS resilience).
         externalName: www-origin.epfl.ch
         ports:
         - name: https
@@ -26,6 +29,7 @@
         namespace: svc0041p-wordpress
       subsets:
       - addresses:
+        # Keep this in sync with whatever the `.spec.externalName` above resolves to.
         - ip: 128.178.222.83
         ports:
         - name: https
