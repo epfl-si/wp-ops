@@ -1,6 +1,0 @@
-[awx_instances:children]
-awx_instances_prod
-
-[awx_instances_prod]
-awx-wwp   ansible_connection=oc ansible_oc_namespace=wwp ansible_oc_pod=awx-0 ansible_oc_container=awx-web ansible_python_interpreter=/var/lib/awx/venv/awx/bin/python3
-awx-wwp-infra   ansible_connection=oc ansible_oc_namespace=wwp-infra ansible_oc_pod=awx-0 ansible_oc_container=awx-web ansible_python_interpreter=/var/lib/awx/venv/awx/bin/python3

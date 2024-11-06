@@ -11,6 +11,34 @@
         msg: |
           You must update Ansible to at least 2.6 to use this playbook.
 
+- name: Base System
+  hosts: nodes
+  gather_facts: False
+  roles:
+    - name: setup base system requirements
+      role: ../roles/rke2-host
+      tags:
+        - system
+
+- name: Node configuration
+  hosts: nodes
+  gather_facts: False
+  roles:
+    - name: setup rke2 cluster via rke2
+      role: ../roles/rke2-node
+      hosts: nodes
+      tags:
+        - rke2
+
+- name: Cluster configuration
+  hosts: clusters
+  gather_facts: False
+  roles:
+    - name: install kinds on rke2 cluster
+      role: ../roles/rke2-cluster
+      tags:
+        - rke2-cluster
+
 - name: WordPress instances
   hosts: |
     {%- if (ansible_run_tags |
