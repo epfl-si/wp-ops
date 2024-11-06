@@ -1,6 +1,6 @@
 ---
 # tasks for WordPress OpenShift namespaces
-- name: "Headless Service"
+- name: "fallback-reverse-proxy Service"
   tags: "reverseproxy"
   kubernetes.core.k8s:
     definition:
@@ -16,7 +16,7 @@
         - name: https
           port: 443
 
-- name: "Default route"
+- name: "fallback-reverse-proxy Route"
   tags: "reverseproxy"
   kubernetes.core.k8s:
     definition:
