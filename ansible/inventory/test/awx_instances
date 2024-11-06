@@ -1,5 +1,0 @@
-[awx_instances:children]
-awx_instances_test
-
-[awx_instances_test]
-awx-poc-vpsi   ansible_connection=oc ansible_oc_namespace=wwp-test ansible_oc_pod=awx-0 ansible_oc_container=awx-web ansible_python_interpreter=/var/lib/awx/venv/awx/bin/python3

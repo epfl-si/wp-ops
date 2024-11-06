@@ -79,7 +79,6 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
         --prod)
             inventory_mode="test_and_prod"
-            WWP_NAMESPACES="wwp-test,wwp"
             shift ;;
         --prod-only)
             inventory_mode="prod_only"
@@ -89,9 +88,7 @@ while [ "$#" -gt 0 ]; do
             # Ignored for backward compatibility
             shift ;;
         --rke2_test)
-            inventory_mode="rke2_test"
-            WWP_NAMESPACES="wordpress-test"
-            playbook="playbooks/rke2.yml"
+            # Kept for backward compatibility - Use test inventory
             shift ;;
         --install-only)
             mode=install-only
