@@ -11,10 +11,10 @@
         namespace: svc0041p-wordpress
       spec:
         type: ExternalName
-        externalName: 128.178.222.83
+        externalName: www-origin.epfl.ch
         ports:
-          - name: https
-            port: 443
+        - name: https
+          port: 443
 
 - name: "Default route"
   tags: "reverseproxy"
