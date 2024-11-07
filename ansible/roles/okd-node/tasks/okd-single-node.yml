@@ -1,0 +1,4 @@
+- ansible.builtin.blockinfile:
+    path: /etc/hosts
+    block: |
+      127.0.0.1 api-int.okd-fsd.epfl.ch

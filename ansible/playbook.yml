@@ -39,6 +39,14 @@
       tags:
         - rke2-cluster
 
+- name: OKD host configuration
+  hosts: okd-nodes
+  gather_facts: False
+  roles:
+    - role: roles/okd-node
+      tags:
+        - okd-node
+
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift
   # namespaces, rather than hosts

@@ -1,0 +1,7 @@
+- tags:
+  - okd.node
+  include_tasks:
+    file: okd-single-node.yml
+    apply:
+      tags:
+        - okd.node

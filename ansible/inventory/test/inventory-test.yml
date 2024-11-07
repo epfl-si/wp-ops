@@ -131,3 +131,10 @@ clusters:
       ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
       ansible_rancher_cluster_name: wordpress-test
 
+okd-nodes:
+  hosts:
+    itswbhst0025:
+  vars:
+    ansible_host: "{{ inventory_hostname }}.xaas.epfl.ch"
+    ansible_user: core
+    ansible_become: true
