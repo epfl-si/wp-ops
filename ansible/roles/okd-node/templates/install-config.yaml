@@ -23,10 +23,4 @@ bootstrapInPlace:
   installationDisk: /dev/sda
 pullSecret: '{{ lookup("pipe", "keybase fs read " + okd_pull_secret_keybase_file) }}'
 sshKey: |
-   {{ lookup("url", "https://github.com/domq.keys") }}
-   {{ lookup("url", "https://github.com/rosamaggi.keys") }}
-   {{ lookup("url", "https://github.com/ponsfrilus.keys") }}
-   {{ lookup("url", "https://github.com/lvenries.keys") }}
-   {{ lookup("url", "https://github.com/obieler.keys") }}
-   {{ lookup("url", "https://github.com/williambelle.keys") }}
-   {{ lookup("url", "https://github.com/dragonleman.keys") }}
+    {{ lookup("github_keys", ["domq", "rosamaggi", "ponsfrilus", "lvenries", "obieler", "williambelle", "dragonleman"]) | indent(4) }}
