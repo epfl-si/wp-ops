@@ -59,3 +59,15 @@
 
       {{ _coreos_installer }} iso ignition embed -fi sno/bootstrap-in-place-for-live-iso.ign {{ okd_iso_image_name }}
       {{ _coreos_installer }} iso network embed -fk okd-network-config.keyfile {{ okd_iso_image_name }}
+
+
+- ansible.builtin.pause:
+    prompt: |
+      =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+      Please copy {{ okd_image_tmp_dir }}/{{ okd_iso_image_name }}
+      from {{ okd_image_generation_host }} into the XaaS filer
+      and install the VM out of it.
+
+      =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+      Press Return to continue:
