@@ -12,13 +12,3 @@
       tags:
         - okd
         - okd.iso
-
-- tags:
-  - okd
-  - okd.node
-  include_tasks:
-    file: okd-single-node.yml
-    apply:
-      tags:
-        - okd
-        - okd.node
