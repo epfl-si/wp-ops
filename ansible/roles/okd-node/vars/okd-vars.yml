@@ -1,0 +1,7 @@
+okd_image_generation_host: rancher-fsd.epfl.ch
+okd_image_tmp_dir: /tmp/ISO
+okd_pull_secret_keybase_file: /keybase/team/epfl_idevfsd/OpenShift-4/pull-secret-si-idev-mgr.json
+
+# As seen on https://github.com/okd-project/okd/releases/ :
+okd_version: 4.15.0-0.okd-2024-03-10-010116
+okd_iso_image_name: "fcos-live-{{ okd_version }}.iso"

@@ -1,0 +1,14 @@
+[connection]
+id=ens192
+type=802-3-ethernet
+autoconnect=true
+interface-name=ens192
+match-device=interface-name:ens192
+
+[ipv4]
+method=manual
+address=10.95.96.118
+netmask=255.255.255.0
+gateway=10.95.96.1
+dns=128.178.15.7
+

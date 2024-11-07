@@ -1,0 +1,61 @@
+# Ansiblified version of https://docs.okd.io/latest/installing/installing_sno/install-sno-installing-sno.html
+
+- ansible.builtin.file:
+    state: directory
+    path: "{{ okd_image_tmp_dir }}"
+
+- ansible.builtin.copy:
+    dest: "{{ okd_image_tmp_dir }}/install-config.yaml"
+    content: >-
+      {{ lookup("template", "install-config.yaml") }}
+  register: _okd_install_config_yaml
+
+- ansible.builtin.copy:
+    dest: "{{ okd_image_tmp_dir }}/okd-network-config.keyfile"
+    content: >-
+      {{ lookup("template", "okd-network-config.keyfile") }}
+  register: _okd_network_config
+
+- name: "Download the `openshift-install` distribution"
+  ansible.builtin.get_url:
+    url: "https://github.com/okd-project/okd/releases/download/{{ okd_version }}/openshift-install-linux-{{ okd_version }}.tar.gz"
+    dest: "{{ okd_image_tmp_dir }}/openshift-install-{{ okd_version }}.tar.gz"
+  register: _okd_installer_distribution
+
+- name: "Unpack `openshift-install`"
+  when: (_okd_installer_distribution | default({})) is changed
+  ansible.builtin.shell:
+    cmd: |
+      set -e -x
+      cd "{{ okd_image_tmp_dir }}"
+
+      tar zxvf openshift-install-{{ okd_version }}.tar.gz openshift-install
+      chmod +x ./openshift-install
+
+- name: "Download the OKD ISO"
+  ansible.builtin.shell:
+    creates: "{{ okd_image_tmp_dir }}/{{ okd_iso_image_name }}"
+    cmd: |
+      set -e -x
+      cd "{{ okd_image_tmp_dir }}"
+
+      ISO_URL=$(./openshift-install coreos print-stream-json | grep location | grep $(arch) | grep iso | cut -d\" -f4)
+      curl -L $ISO_URL -o {{ okd_iso_image_name }}
+
+- name: "patch ISO with current configuration"
+  ansible.builtin.shell:
+    cmd: |
+      set -e -x
+      cd "{{ okd_image_tmp_dir }}"
+
+      mkdir sno || true
+      # This avoids having to answer the interactive questions:
+      cp install-config.yaml sno/
+
+      # Creates more files in sno/:
+      ./openshift-install --dir=sno create single-node-ignition-config
+
+      {% set _coreos_installer = "podman run --privileged --pull always --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release" %}
+
+      {{ _coreos_installer }} iso ignition embed -fi sno/bootstrap-in-place-for-live-iso.ign {{ okd_iso_image_name }}
+      {{ _coreos_installer }} iso network embed -fk okd-network-config.keyfile {{ okd_iso_image_name }}

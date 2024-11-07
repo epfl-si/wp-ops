@@ -1,7 +1,24 @@
+- tags: always
+  include_vars: okd-vars.yml
+
+- name: "Generate ISO on {{ okd_image_generation_host }}"
+  tags:
+  - okd
+  - okd.iso
+  include_tasks:
+    file: okd-generate-iso.yml
+    apply:
+      delegate_to: "{{ okd_image_generation_host }}"
+      tags:
+        - okd
+        - okd.iso
+
 - tags:
+  - okd
   - okd.node
   include_tasks:
     file: okd-single-node.yml
     apply:
       tags:
+        - okd
         - okd.node
