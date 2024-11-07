@@ -1,5 +1,5 @@
 - tags: always
-  import_vars: okd-vars.yml
+  include_vars: okd-vars.yml
 
 - ansible.builtin.blockinfile:
     path: /etc/hosts
