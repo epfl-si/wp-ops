@@ -20,7 +20,7 @@ networking:
 platform:
   none: {}
 bootstrapInPlace:
-  installationDisk: /dev/sda
+  installationDisk: /dev/sdb
 pullSecret: '{{ lookup("pipe", "keybase fs read " + okd_pull_secret_keybase_file) }}'
 sshKey: |
     {{ lookup("github_keys", ["domq", "rosamaggi", "ponsfrilus", "lvenries", "obieler", "williambelle", "dragonleman"]) | indent(4) }}
