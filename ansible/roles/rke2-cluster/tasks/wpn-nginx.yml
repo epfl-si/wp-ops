@@ -289,7 +289,7 @@
                         number: 80
 
 
-- name: IngressClass/wpn-nginx
+- name: IngressClass/wordpress
   kubernetes.core.k8s:
     state: present
     definition:
@@ -301,7 +301,7 @@
         controller: epfl.ch/ingress-wordpress
 
 
-- name: PersistentVolumeClaim/wpn-nginx
+- name: PersistentVolumeClaim/wp-uploads
   kubernetes.core.k8s:
     state: present
     definition:
