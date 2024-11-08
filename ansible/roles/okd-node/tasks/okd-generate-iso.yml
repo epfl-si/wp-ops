@@ -32,6 +32,24 @@
       tar zxvf openshift-install-{{ okd_version }}.tar.gz openshift-install
       chmod +x ./openshift-install
 
+- name: "Clean up things that have a shelf life"
+  # As per https://access.redhat.com/solutions/6978445 , everything
+  # older than 24 hours will *definitely* not work.
+  ansible.builtin.shell:
+    cmd: |
+      set -e -x
+      cd "{{ okd_image_tmp_dir }}"
+      find sno/ \( -name *.ign -o -name *.json \) -cmin +1000 | (
+         while read file; do
+           rm -f "$file"
+           echo "DELETED"
+         done
+      )
+
+  register: _deleted_things
+  changed_when: >-
+    "DELETED" in (_deleted_things.stdout | default(""))
+
 - name: "Download the OKD ISO"
   ansible.builtin.shell:
     creates: "{{ okd_image_tmp_dir }}/{{ okd_iso_image_name }}"
