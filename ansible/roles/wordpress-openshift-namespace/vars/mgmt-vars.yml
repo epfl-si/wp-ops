@@ -20,6 +20,7 @@ _mgmt_access_list_wwp_test_and_wwp:
   - sami.panseri@epfl.ch
   - rosa.maggi@epfl.ch
   - ehouarn.duriaux@epfl.ch
+  - saskya.panchaud@epfl.ch
 
 _mgmt_access_list_wwp_test_only: []
 
