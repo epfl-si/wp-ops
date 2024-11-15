@@ -69,6 +69,8 @@ all:
       -
         github: williambelle
         state: present
+      - github: laurent-indermuehle
+        state: present
       - # example of revoked key
         github: crazylady2004
         state: absent
