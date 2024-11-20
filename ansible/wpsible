@@ -41,7 +41,7 @@ platform_check () {
                         SUITCASE_PIP_EXTRA="requests bcrypt passlib mitogen==0.2.9 docker" \
                         SUITCASE_WITH_KEYBASE=1 \
                         SUITCASE_WITH_EYAML=1 \
-                        SUITCASE_ANSIBLE_VERSION="4.10.0" bash -x
+                        SUITCASE_ANSIBLE_VERSION="8.7.0" bash -x
     fi
     export PATH="$PWD/ansible-deps-cache/bin:$PATH"
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
