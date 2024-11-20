@@ -190,7 +190,7 @@ class _LiveSite(_Site):
     @classmethod
     def _find_wp_configs(cls):
         cmd = ['bash', '-c',
-               'find %s \( -type d \( %s \) -prune -false \) -o -name wp-config.php' %
+               'find %s \\( -type d \\( %s \\) -prune -false \\) -o -name wp-config.php' %
                (cls._find_in_dirs, ' '.join(cls._prune_flags()))]
         if not is_awx():
             cmd = ['oc', 'exec', '-n', cls.k8s_namespace,
