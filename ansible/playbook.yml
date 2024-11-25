@@ -52,5 +52,15 @@
   # namespaces, rather than hosts
   hosts: all_openshift_namespaces
   gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: roles/wordpress-openshift-namespace
+  tasks:
+    - tags:
+       - openshift
+       - openshift.reverseproxy
+       - openshift.olm
+       - openshift.olm.nfs
+      include_role:
+        name: roles/wordpress-openshift-namespace
+        apply:
+          environment: "{{ inventory_k8s_environment }}"
+          tags:
+          - openshift
