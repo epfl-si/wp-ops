@@ -16,7 +16,7 @@
   gather_facts: False
   roles:
     - name: setup base system requirements
-      role: ../roles/rke2-host
+      role: roles/rke2-host
       tags:
         - system
 
@@ -25,7 +25,7 @@
   gather_facts: False
   roles:
     - name: setup rke2 cluster via rke2
-      role: ../roles/rke2-node
+      role: roles/rke2-node
       hosts: nodes
       tags:
         - rke2
@@ -35,7 +35,7 @@
   gather_facts: False
   roles:
     - name: install kinds on rke2 cluster
-      role: ../roles/rke2-cluster
+      role: roles/rke2-cluster
       tags:
         - rke2-cluster
 
@@ -45,4 +45,4 @@
   hosts: all_openshift_namespaces
   gather_facts: no    # Ansible facts are useless for this play
   roles:
-    - role: ../roles/wordpress-openshift-namespace
+    - role: roles/wordpress-openshift-namespace
