@@ -73,7 +73,7 @@ inventories () {
 export WWP_NAMESPACES=wwp-test
 
 mode=ansible-playbook
-playbook=".interactive-playbooks/main.yml"
+playbook="playbook.yml"
 declare -a ansible_args
 while [ "$#" -gt 0 ]; do
   case "$1" in
