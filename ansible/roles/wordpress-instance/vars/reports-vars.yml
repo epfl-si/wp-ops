@@ -1,2 +1,0 @@
-report_sites_options_filename: /tmp/report_sites_options.csv
-report_sites_options_filename_relpath: "{{ report_sites_options_filename | joinpath(wpsible_cwd) }}"

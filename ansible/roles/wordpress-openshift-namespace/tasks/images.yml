@@ -203,6 +203,3 @@
       oc tag wwp-test/mgmt:latest wwp-infra/mgmt:prod
       oc tag wwp-test/httpd:latest wwp/httpd:prod
       oc tag wwp-test/cronjob:latest wwp-infra/cronjob:latest
-  # 💡 Other image promotion tasks (besides “core” WordPress) can be
-  # found in ../../awx-instance/tasks/main.yml (under tag `-t
-  # awx.promote`)

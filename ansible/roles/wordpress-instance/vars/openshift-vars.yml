@@ -1,2 +1,0 @@
-openshift_dc: "httpd-{{ wp_env }}"
-openshift_container_name: "{{ openshift_dc }}"
