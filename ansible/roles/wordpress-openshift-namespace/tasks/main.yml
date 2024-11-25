@@ -8,3 +8,14 @@
     apply:
       tags:
         - openshift.reverseproxy
+
+- tags:
+    - openshift.olm
+    - openshift.olm.nfs
+  name: nfs-subdir-external-provisioner OLM operator instance
+  include_tasks:
+    file: nfs-ext-olm-user.yml
+    apply:
+      tags:
+        - openshift.olm
+        - openshift.olm.nfs
