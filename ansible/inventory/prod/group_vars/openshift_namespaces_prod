@@ -31,7 +31,7 @@ DeploymentConfigs:
 
 eyaml_keys:
   priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
-  pub: "{{ playbook_dir }}/../eyaml/epfl_wp_prod.pem"
+  pub: "{{ playbook_dir }}/eyaml/epfl_wp_prod.pem"
 
 # To edit the encrypted secrets below, you need eyaml installed.
 # Familiarize yourself with

@@ -1,3 +1,0 @@
----
-# defaults file for awx-instance role
-awx_playbook_branch: master

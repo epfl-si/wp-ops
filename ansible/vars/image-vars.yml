@@ -14,5 +14,3 @@ wp_base_image_name: wp-base
 backup_cron_image_name: cronjob
 
 wp_ops_git_uri: https://github.com/epfl-si/wp-ops
-
-awx_ee_image_name: wp-awx-ee

@@ -1,4 +1,0 @@
-# The expansion for this is required but not actually used by Ansible.
-build:
-  s3_assets:
-    bucket_name: svc0041-c1561ba80625465c2a53f01693922e7c

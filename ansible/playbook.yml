@@ -39,26 +39,6 @@
       tags:
         - rke2-cluster
 
-- name: WordPress instances
-  hosts: |
-    {%- if (ansible_run_tags |
-                          any_known_tag((playbook_dir | dirname) +
-                                        "/roles/wordpress-instance")) -%}
-    {# Note: we are twisting the Ansible concept of “hosts” in this play.
-     # An inventory entry in the all_wordpresses group is a WordPress
-     # instance, rather than a host in the “traditional” sysadmin sense.
-     #}
-    all_wordpresses
-    {%- else -%}
-    {# If no relevant tags are in use (including the implicit "all" tag when -t is not
-     # present on the command line), skip the whole role and save a big chunk of time:
-     #}
-    !all
-    {%- endif -%}
-  gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/wordpress-instance
-
 - name: OpenShift namespaces
   # Like above, members of the all_openshift_namespaces are OpenShift
   # namespaces, rather than hosts
@@ -66,9 +46,3 @@
   gather_facts: no    # Ansible facts are useless for this play
   roles:
     - role: ../roles/wordpress-openshift-namespace
-
-- name: Ansible Tower (AWX) instances
-  hosts: awx_instances
-  gather_facts: no    # Ansible facts are useless for this play
-  roles:
-    - role: ../roles/awx-instance

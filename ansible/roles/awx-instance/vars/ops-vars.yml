@@ -1,9 +1,0 @@
-# Variables for ../tasks/ops.yml
-
-# Canned subcommand to run something on the awx-0 container
-ops_oc_exec_args: "-c awx-web -n {{ ansible_oc_namespace }} awx-0"
-
-# Where backups take place (relative to the main playbook)
-ops_state_dir: ../state/awx
-ops_sql_backup: "{{ ops_state_dir }}/awx-{{ ansible_oc_namespace }}.sql"
-ops_django_backup: "{{ ops_state_dir }}/awx-{{ ansible_oc_namespace }}.djangodump"
