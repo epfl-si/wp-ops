@@ -1,0 +1,11 @@
+all_openshift_namespaces:
+   children:
+     openshift_namespaces_test:
+       vars:
+         ansible_connection: local
+         ansible_python_interpreter: "{{ ansible_playbook_python }}"
+       "hosts":
+         okd-test:
+           openshift_namespace: wordpress-test
+           inventory_k8s_environment:
+             K8S_AUTH_KUBECONFIG: credentials-cache/okd-test-fsd-team.yml
