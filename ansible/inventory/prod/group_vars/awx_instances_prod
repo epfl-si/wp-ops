@@ -1,6 +1,0 @@
-awx_is_production: true
-
-eyaml_keys:
-  priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
-  pub: "{{ playbook_dir }}/../eyaml/epfl_wp_prod.pem"
-

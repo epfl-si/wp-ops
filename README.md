@@ -75,6 +75,6 @@ Big up to all the following people, without whom this project will not be
 
 This module comprises the following subdirectories:
 
-- `ansible`: All the support for Ansible and Ansible Tower. Theoretically, `ansible/wpsible` can bring up the entire serving infrastructure from a backup into an empty OpenShift namespace that the operator has `oc login` access to — Including all required Kubernetes objects. A subset of the Ansible tasks is managed by Ansible Tower, providing a dashboard and crontab-like functionality to the operator. See `ansible/README.md` for further details on the layout inside this directory.
+- `ansible`: All the support for Ansible. Theoretically, `ansible/wpsible` can bring up the entire serving infrastructure from a backup into an empty OpenShift namespace that the operator has `oc login` access to — Including all required Kubernetes objects. See `ansible/README.md` for further details on the layout inside this directory.
 - `docker`: Dockerfiles used to build the production images (also used by [wp-dev](https://github.com/epfl-si/wp-dev) to build the images on your workstation)
 - `Makefile` and `k8s-backup`: manage the archiving of select mutable pieces of the Kubernetes configuration into a Keybase-encrypted git

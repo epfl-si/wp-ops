@@ -1,3 +1,0 @@
-- name: Update memento blocks
-  wordpress_block_update:
-  tags: wp.update_memento_block

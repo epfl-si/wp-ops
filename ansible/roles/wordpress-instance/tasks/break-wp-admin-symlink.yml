@@ -1,4 +1,0 @@
-- name: Remove symlink wp-admin
-  ansible.builtin.file:
-    path: "{{ wp_dir }}/wp-admin"
-    state: absent
