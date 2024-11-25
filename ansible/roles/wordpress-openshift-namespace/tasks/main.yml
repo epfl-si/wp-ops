@@ -1,10 +1,10 @@
 ---
 
-- name: Reverse-proxy as a service to OpenShift 3 (during rollover period)
-  tags:
-    - reverseproxy
+- tags:
+    - openshift.reverseproxy
+  name: Reverse-proxy as a service to OpenShift 3 (during rollover period)
   include_tasks:
     file: "reverseproxy.yml"
     apply:
       tags:
-        - reverseproxy
+        - openshift.reverseproxy
