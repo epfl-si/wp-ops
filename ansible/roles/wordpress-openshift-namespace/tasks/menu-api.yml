@@ -101,7 +101,7 @@
 - name: Menu and breadcrumb API DeploymentConfig
   openshift:
     apiVersion: apps.openshift.io/v1
-    kind: DeploymentConfig
+    kind: Deployment
     metadata:
       name: menu-api-siblings
       namespace: "{{ openshift_namespace }}"

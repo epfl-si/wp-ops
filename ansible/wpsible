@@ -47,7 +47,11 @@ platform_check () {
     export ANSIBLE_ROLES_PATH="$PWD/ansible-deps-cache/roles"
     export ANSIBLE_COLLECTIONS_PATHS="$PWD/ansible-deps-cache"
 
-    oc_check
+    if [ "$cluste" == "os3" ]; then
+      oc_check
+    else
+      oc4_check
+    fi
 }
 
 oc_check () {
@@ -57,7 +61,19 @@ oc_check () {
   fi
 }
 
+oc4_check () {
+  local clustername="$1"; shift
+
+  if ! oc whoami > /dev/null 2>&1 || ! oc whoami --show-server | grep -q "$cluster_url"; then
+      echo "Logging into OpenShift cluster at $cluster_url..."
+      oc login "$cluster_url" --web;
+  else
+      echo "Already logged into $cluster_url."
+  fi
+}
+
 inventory_mode="test"
+cluster="os3"
 inventories () {
     echo "-i inventory/wordpress-instances.py"
     case "$inventory_mode" in
@@ -86,6 +102,11 @@ while [ "$#" -gt 0 ]; do
             shift ;;
         --wp-veritas)
             # Ignored for backward compatibility
+            shift ;;
+        --os4)
+            cluster="os4"
+            cluster_url="https://api.ocpitsp0001.xaas.epfl.ch:6443"
+            WWP_NAMESPACES="svc0041p-wordpress"
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
