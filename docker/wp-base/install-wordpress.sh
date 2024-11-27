@@ -154,7 +154,7 @@ install_plugin_zip () {
         zip="${plugin_name}.zip"
         curl -L -o "$zip" "$url"
         unzip "$zip"
-        rm "$zip"
+        rm "$zip"; rm -rf __MACOSX
     )
 }
 
@@ -171,7 +171,7 @@ install_plugin_s3 () {
         cd "$targetdir"/wp-content/plugins
         zip=~-/"$(basename "$1")"
         unzip "$zip"
-        rm "$zip"
+        rm "$zip"; rm -rf __MACOSX
     )
 }
 
