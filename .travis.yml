@@ -30,16 +30,13 @@ script:
 - |
   set -e -x
 
-  wp_base_branch_build_arg=
   mgmt_build_args=
   if [ -n "$TRAVIS_BRANCH" ]; then
-    wp_base_branch_build_arg="--manifest-url=https://raw.githubusercontent.com/epfl-si/wp-ops/$TRAVIS_BRANCH/ansible/roles/wordpress-instance/tasks/plugins.yml"
     mgmt_build_args="--build-arg WP_OPS_BRANCH=$TRAVIS_BRANCH"
   fi
   docker build \
      --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"           \
      --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
-     --build-arg "INSTALL_AUTO_FLAGS=$wp_base_branch_build_arg" \
      -t docker-registry.default.svc:5000/wwp-test/wp-base docker/wp-base
   docker build $mgmt_build_args \
      -t docker-registry.default.svc:5000/wwp-test/mgmt docker/mgmt
