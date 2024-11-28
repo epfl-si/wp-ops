@@ -70,18 +70,28 @@ main () {
 
     for homemade_or_forked_plugin in \
         wp-plugin-epfl-coming-soon wordpress.plugin.tequila \
-        wordpress.plugin.accred wp-plugin-epfl-settings \
-        wp-plugin-epfl-remote-content wp-gutenberg-epfl \
-        wp-plugin-epfl-menus wp-plugin-epfl-404 wp-plugin-enlighter \
+        wp-plugin-epfl-settings \
+        wp-plugin-epfl-remote-content \
         wp-plugin-epfl-content-filter \
+        wp-plugin-epfl-menus wp-plugin-enlighter \
         wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
         wp-plugin-epfl-restauration wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
-        wp-plugin-epfl-partner-universities wp-plugin-epfl-courses-se \
+        wp-plugin-epfl-partner-universities \
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
+
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+
+    for forked_plugin in \
+        wp-plugin-epfl-404 \
+        wp-gutenberg-epfl  \
+        wp-plugin-epfl-courses-se \
+        wordpress.plugin.accred ; do
+        install_plugin_git https://github.com/epfl-si/$forked_plugin \
+                           feature/upgradePHPAndWordpressVersion
+    done
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
@@ -110,7 +120,7 @@ install_themes () {
     (
         cd $targetdir/wp-content
         rm -rf themes
-        git clone https://github.com/epfl-si/wp-theme-2018 themes
+        git clone -b  feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-theme-2018 themes
     )
 }
 
@@ -118,7 +128,7 @@ install_mu_plugins () {
     (
         cd $targetdir/wp-content
         rm -rf mu-plugins
-        git clone https://github.com/epfl-si/wp-mu-plugins mu-plugins
+        git clone -b feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-mu-plugins mu-plugins
     )
 }
 
@@ -140,10 +150,15 @@ install_tinymce_advanced_plugin () {
 
 install_plugin_git () {
     url="$1"
+    opt_branch="$2"
     (
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
-        git clone "$1"
+        if [ -n "$opt_branch" ]; then
+            git clone -b "$opt_branch" "$url"
+        else
+            git clone "$url"
+        fi
         rename_plugin_dir "$(basename "$1")"
     )
 }
