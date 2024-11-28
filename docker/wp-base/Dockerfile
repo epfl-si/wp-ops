@@ -48,6 +48,13 @@ ADD clearstatcache-wp-import.patch /tmp/
 COPY install-wordpress.sh /tmp
 RUN chmod +x /tmp/install-wordpress.sh
 
+# 💡 The Docker cache unfortunately has no way of knowing that you
+# `git push`ed something. If you want to force a rebuild of only the
+# rules starting here (while still leveraging the cache for everything
+# above), uncomment the next line. Keep incrementing the number each
+# time you want to bypass the cache again.
+# ADD cachebuster /tmp/cachebuster1
+
 ARG WORDPRESS_VERSION_LINEAGES="6.1"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
