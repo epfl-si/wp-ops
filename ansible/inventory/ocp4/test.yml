@@ -1,0 +1,6 @@
+all:
+  hosts:
+    wordpress-test-openshift-4:
+      ansible_connection: local
+      ansible_host: localhost
+      openshift_namespace: svc0041t-wordpress
