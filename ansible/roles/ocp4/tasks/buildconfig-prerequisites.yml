@@ -1,0 +1,22 @@
+- name: Secret for Service Account 'builder'
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        name: builder-pull-secret
+        namespace: "{{ openshift_namespace }}"
+      data:
+        .dockerconfigjson: "{{ builder_pull_secret_config | to_json | b64encode }}"
+
+- name: Service Account for Build Config
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: builder
+        namespace: "{{ openshift_namespace }}"
+      secrets:
+        - name: builder-pull-secret
