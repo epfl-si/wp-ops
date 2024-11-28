@@ -30,17 +30,11 @@ script:
 - |
   set -e -x
 
-  mgmt_build_args=
-  if [ -n "$TRAVIS_BRANCH" ]; then
-    mgmt_build_args="--build-arg WP_OPS_BRANCH=$TRAVIS_BRANCH"
-  fi
   docker build \
      --build-arg "GITHUB_API_USER=${GITHUB_API_USER}"           \
      --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
      -t docker-registry.default.svc:5000/wwp-test/wp-base docker/wp-base
-  docker build $mgmt_build_args \
-     -t docker-registry.default.svc:5000/wwp-test/mgmt docker/mgmt
   for docker_dir in $(find docker -mindepth 1 -maxdepth 1 -type d \
-                      | grep -v wp-base | grep -v mgmt | xargs -t -n 1); do
+                      | grep -v wp-base | xargs -t -n 1); do
     docker build "$docker_dir"
   done
