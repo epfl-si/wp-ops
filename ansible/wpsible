@@ -64,7 +64,8 @@ inventories () {
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
         prod_only) echo "-i inventory/prod" ;;
-        rke2_test) echo "-i inventory/rke2/hosts-test.yml"
+        rke2_test) echo "-i inventory/rke2/hosts-test.yml" ;;
+        ocp4_test) echo "-i inventory/ocp4/test.yml"
     esac
 }
 
@@ -89,6 +90,11 @@ while [ "$#" -gt 0 ]; do
             shift ;;
         --install-only)
             mode=install-only
+            shift ;;
+        --ocp4_test)
+            inventory_mode="ocp4_test"
+            WWP_NAMESPACE="svc0041t-wordpress"
+            playbook="playbooks/ocp4.yml"
             shift ;;
         --rke2_test)
             # Kept for backward compatibility - Use test inventory
