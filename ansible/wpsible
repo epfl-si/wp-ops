@@ -93,6 +93,9 @@ while [ "$#" -gt 0 ]; do
             WWP_NAMESPACES="wordpress-test"
             playbook="playbooks/rke2.yml"
             shift ;;
+        --install-only)
+            mode=install-only
+            shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
             shift ;;
@@ -107,6 +110,7 @@ set -e
 ensure_ansible
 oc_check
 case "$mode" in
+    install-only) : ;;
     ansible-playbook)
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
