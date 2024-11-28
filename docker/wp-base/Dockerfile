@@ -24,13 +24,8 @@ RUN mkdir /var/www/.composer; \
     chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
 
 # Travis-specific arguments — See ../../.travis.yml
-ARG GITHUB_API_USER
-ARG GITHUB_API_TOKEN
 RUN su -s /bin/sh www-data -c " \
     set -e -x;                                                            \
-    if [ -n '${GITHUB_API_TOKEN}' ]; then                                 \
-        composer config -g github-oauth.github.com '${GITHUB_API_TOKEN}'; \
-    fi;                                                                   \
     wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
     wp package install https://github.com/epfl-si/wp-cli/archive/master.zip;            \
     rm -f ~/.composer/auth.json"
