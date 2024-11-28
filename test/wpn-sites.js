@@ -45,7 +45,7 @@ spec:
     debug: true
   epfl:
     unit_id: ${site.unitId}
-    unit_name: ${site.unitName}
+    subdomain_name: ${['www','labs'].indexOf(site.openshiftEnv) > -1 ? 'www.epfl.ch' : url.parse(site.url).hostname}
     importFromOS3:
       environment: ${site.openshiftEnv}
       ansibleHost: ${site.ansibleHost}
