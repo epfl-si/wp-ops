@@ -1,12 +1,21 @@
-FROM docker-registry.default.svc:5000/wwp-test/wp-base
+FROM ubuntu:jammy
 
+ARG PHP_VERSION=8.2
 RUN set -e -x; \
-    apt-get -qy update && apt-get -qy install --no-install-recommends \
-    msmtp \
-    msmtp-mta \
-    php${PHP_VERSION}-fpm ; \
-    apt-get -qy autoremove ; \
+    apt -qy update ; \
+    apt -qy install --no-install-recommends \
+        msmtp  msmtp-mta software-properties-common gpg-agent ; \
+    add-apt-repository ppa:ondrej/php ; \
+    apt -qy update ; \
+    apt -qy install php${PHP_VERSION}-fpm php${PHP_VERSION}-cli php${PHP_VERSION}-curl php${PHP_VERSION}-gd php${PHP_VERSION}-ldap    \
+    php${PHP_VERSION}-mbstring php${PHP_VERSION}-mysql php${PHP_VERSION}-xml php${PHP_VERSION}-zip ;                                                 \
+    apt-get -qy autoremove ;                                          \
     apt-get clean
+
+COPY --from=wp-base /wp /wp
+COPY --from=wp-base /usr/local/bin/wp /usr/local/bin/wp
+COPY --from=wp-base /var/www/.composer/ /var/www/.composer/
+COPY --from=wp-base /var/www/.wp-cli/ /var/www/.wp-cli/
 
 COPY msmtprc /etc/msmtprc
 RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
