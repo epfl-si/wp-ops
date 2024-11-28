@@ -141,6 +141,7 @@ install_plugin_git () {
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
         git clone "$1"
+        rename_plugin_dir "$(basename "$1")"
     )
 }
 
@@ -154,6 +155,10 @@ install_plugin_zip () {
         zip="${plugin_name}.zip"
         curl -L -o "$zip" "$url"
         unzip "$zip"
+
+        # Some zip files are packed wrong inside:
+        rename_plugin_dir "$(unzip -l "$zip" | sed -n 's|^.* \([^ ]*\)*/.*$|\1|p' | head -1)"
+
         rm "$zip"; rm -rf __MACOSX
     )
 }
@@ -171,8 +176,41 @@ install_plugin_s3 () {
         cd "$targetdir"/wp-content/plugins
         zip=~-/"$(basename "$1")"
         unzip "$zip"
+
+        # Some zip files are packed wrong inside:
+        rename_plugin_dir "$(cd /tmp; unzip -l "$(basename "$zip")" | sed -n 's|^.* \([^ ]*\)*/.*$|\1|p' | head -1)"
+
         rm "$zip"; rm -rf __MACOSX
     )
+}
+
+rename_plugin_dir () {
+    (
+        cd "$targetdir"/wp-content/plugins
+        local canonical_name="$(plugin_canonical_name "$1")"
+        if [ "$1" != "$canonical_name" ] ; then
+            mv "$1" "$canonical_name"
+        fi
+    )
+}
+
+# Return the “canonical” name for a plugin directory
+plugin_canonical_name () {
+    local plugin_dir="$(echo "$1" | cut -d/ -f1)"
+    local plugin_dir_sans_versions="$(echo "$plugin_dir" | sed 's/-[0-9].*[.].*//')"
+    if [ "$plugin_dir_sans_versions" != "$plugin_dir" ]; then
+        echo "$plugin_dir_sans_versions"
+        return 0
+    fi
+
+    case "$plugin_dir" in
+        wp-plugin-epfl-content-filter) echo "EPFL-Content-Filter" ;;
+        wp-plugin-epfl-library) echo "EPFL-Library-Plugins" ;;
+        wp-plugin-epfl-settings) echo "EPFL-settings" ;;
+        wp-plugin-*) echo "$plugin_dir" | cut -d- -f3- ;;
+        wordpress.plugin.*) echo "$plugin_dir" | cut -d. -f3- ;;
+        *) echo "$plugin_dir" ;;
+    esac
 }
 
 main
