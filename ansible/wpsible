@@ -87,6 +87,9 @@ while [ "$#" -gt 0 ]; do
         --wp-veritas)
             # Ignored for backward compatibility
             shift ;;
+        --install-only)
+            mode=install-only
+            shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
             shift ;;
@@ -105,6 +108,7 @@ set -e
 
 platform_check
 case "$mode" in
+    install-only) : ;;
     ansible-playbook)
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
