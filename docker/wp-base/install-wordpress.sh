@@ -81,6 +81,9 @@ main () {
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+
+    chown -R root:root "$targetdir"
+    chmod -R u=rwX,g=rX,o=rX "$targetdir"
 }
 
 delete_stock_wp_content () {
