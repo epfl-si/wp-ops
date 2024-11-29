@@ -82,7 +82,6 @@ RUN set -e -x;   env; \
     rm -rf /wp/*/wp-content/themes/wp-theme-2018/assets; \
     git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build; \
     cd /tmp/elements_build; \
-    npm install --global yarn; \
     yarn; yarn build; \
     for wp in /wp/*; do cp -a dist/ $wp/wp-content/themes/wp-theme-2018/assets; done
 
