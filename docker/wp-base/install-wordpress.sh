@@ -73,7 +73,7 @@ main () {
         wp-plugin-epfl-settings \
         wp-plugin-epfl-remote-content \
         wp-plugin-epfl-content-filter \
-        wp-plugin-epfl-menus wp-plugin-enlighter \
+        wp-plugin-enlighter \
         wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
         wp-plugin-epfl-restauration wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
@@ -92,6 +92,12 @@ main () {
         install_plugin_git https://github.com/epfl-si/$forked_plugin \
                            feature/upgradePHPAndWordpressVersion
     done
+
+    for forked_plugin in \
+            wp-plugin-epfl-menus  ; do
+            install_plugin_git https://github.com/epfl-si/$forked_plugin \
+                               feature/nginx
+        done
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
