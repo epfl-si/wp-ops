@@ -105,15 +105,16 @@ done
 set -e
 
 ensure_ansible
-oc_check
 case "$mode" in
     install-only) : ;;
     ansible-playbook)
+        oc_check
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
                          $playbook
         ;;
     ansible)
+        oc_check
         ansible $(inventories) $ansible_flags "${ansible_args[@]}"
         ;;
 esac
