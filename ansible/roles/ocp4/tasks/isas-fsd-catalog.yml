@@ -1,69 +1,3 @@
-- name: Image Stream for based image Python
-  when: >-
-    openshift_namespace == "svc0041t-wordpress"
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: image.openshift.io/v1
-      kind: ImageStream
-      metadata:
-        name: python
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        lookupPolicy:
-          local: true
-        tags:
-          - name: "3.13-slim"
-            from:
-              kind: DockerImage
-              name: "python:3.13-slim"
-            importPolicy:
-              scheduled: true
-
-- name: Image Stream for opm
-  when: >-
-    openshift_namespace == "svc0041t-wordpress"
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: image.openshift.io/v1
-      kind: ImageStream
-      metadata:
-        name: opm
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        lookupPolicy:
-          local: true
-        tags:
-          - name: "v1.40.0"
-            from:
-              kind: DockerImage
-              name: "quay.io/operator-framework/opm:v1.40.0"
-            importPolicy:
-              scheduled: true
-
-- name: Image Stream for based image ose-operator-registry-rhel9
-  when: >-
-    openshift_namespace == "svc0041t-wordpress"
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: image.openshift.io/v1
-      kind: ImageStream
-      metadata:
-        name: ose-operator-registry-rhel9
-        namespace: "{{ openshift_namespace }}"
-      spec:
-        lookupPolicy:
-          local: true
-        tags:
-          - name: "v4.17"
-            from:
-              kind: DockerImage
-              name: "registry.redhat.io/openshift4/ose-operator-registry-rhel9:v4.17"
-            importPolicy:
-              scheduled: true
-
 - name: Build Config - isas-fsd-catalog
   when: >-
     openshift_namespace == "svc0041t-wordpress"
@@ -81,22 +15,6 @@
           git:
             ref: "main"
             uri: "{{ isas_fsd_catalog_git_uri }}"
-          images:
-            - from:
-                kind: ImageStreamTag
-                name: "python:3.13-slim"
-              as:
-                - python:3.13-slim
-            - from:
-                kind: ImageStreamTag
-                name: opm:v1.40.0
-              as:
-                - quay.io/operator-framework/opm:v1.40.0
-            - from:
-                kind: ImageStreamTag
-                name: "ose-operator-registry-rhel9:v4.17"
-              as:
-                - registry.redhat.io/openshift4/ose-operator-registry-rhel9:v4.17
         strategy:
           type: Docker
           dockerStrategy:
