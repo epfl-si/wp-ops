@@ -131,7 +131,6 @@ install_tinymce_advanced_plugin () {
           | map(.value) | last ' < /tmp/tinymce-advanced-versions.json \
       | xargs -t -i curl -o tinymce-advanced.zip {}
 
-    rm -rf "$targetdir"/wp-content/plugins/tinymce-advanced
     mkdir -p "$targetdir"/wp-content/plugins
     ( cd "$targetdir"/wp-content/plugins; unzip ~-/tinymce-advanced.zip )
     rm tinymce-advanced.zip
@@ -152,7 +151,6 @@ install_plugin_zip () {
     plugin_name="$1"
     url="$2"
     (
-        rm -rf "$targetdir"/wp-content/plugins/"$plugin_name"
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
         zip="${plugin_name}.zip"
@@ -174,7 +172,6 @@ install_plugin_s3 () {
     aws --endpoint-url=$S3_URL --region=$S3_REGION s3 cp \
             "$S3_BASEDIR/$1" .
     (
-        rm -rf "$targetdir"/wp-content/plugins/"$plugin_name"
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
         zip=~-/"$(basename "$1")"
