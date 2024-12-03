@@ -75,7 +75,7 @@ main () {
         wp-plugin-epfl-content-filter \
         wp-plugin-enlighter \
         wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
-        wp-plugin-epfl-restauration wp-plugin-epfl-library \
+        wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
         wp-plugin-epfl-partner-universities \
         wp-plugin-epfl-cache-control \
@@ -89,6 +89,7 @@ main () {
         wp-plugin-epfl-404 \
         wp-gutenberg-epfl  \
         wp-plugin-epfl-courses-se \
+        wp-plugin-epfl-restauration \
         wordpress.plugin.accred ; do
         install_plugin_git https://github.com/epfl-si/$forked_plugin \
                            feature/upgradePHPAndWordpressVersion
