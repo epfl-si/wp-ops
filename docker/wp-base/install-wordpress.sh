@@ -77,7 +77,6 @@ main () {
         wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
         wp-plugin-epfl-partner-universities \
-        wp-plugin-epfl-cache-control \
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
@@ -89,6 +88,7 @@ main () {
         wp-gutenberg-epfl  \
         wp-plugin-epfl-courses-se \
         wp-plugin-epfl-restauration \
+        wp-plugin-epfl-cache-control \
         wordpress.plugin.accred ; do
         install_plugin_git https://github.com/epfl-si/$forked_plugin \
                            feature/upgradePHPAndWordpressVersion
