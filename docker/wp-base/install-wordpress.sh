@@ -41,7 +41,7 @@ main () {
     install_tinymce_advanced_plugin /tmp/tinymce-advanced-versions.json
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook svg-support very-simple-meta-description \
+        flowpaper-lite-pdf-flipbook very-simple-meta-description \
         ewww-image-optimizer wordpress-importer ; do
         install_plugin_wordpress_official "$official_plugin"
     done
@@ -50,7 +50,6 @@ main () {
       git apply < /tmp/clearstatcache-wp-import.patch )
 
     install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.5.4.zip
-    install_plugin_zip svg-support https://downloads.wordpress.org/plugin/svg-support.2.5.5.zip
 
     # Some of these plugins are commercial plugins that we pay for;
     # others have been discontinued. We don't want them publicly
