@@ -73,6 +73,7 @@ main () {
         wordpress.plugin.accred wp-plugin-epfl-settings \
         wp-plugin-epfl-remote-content wp-gutenberg-epfl \
         wp-plugin-epfl-menus wp-plugin-epfl-404 wp-plugin-enlighter \
+        wp-plugin-epfl-content-filter \
         wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
         wp-plugin-epfl-restauration wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
@@ -205,6 +206,8 @@ plugin_canonical_name () {
 
     case "$plugin_dir" in
         wp-plugin-epfl-content-filter) echo "EPFL-Content-Filter" ;;
+        wp-plugin-epfl-remote-content) echo "epfl-remote-content-shortcode" ;;
+        wp-plugin-epfl-cache-control) echo "cache-control" ;;
         wp-plugin-epfl-library) echo "EPFL-Library-Plugins" ;;
         wp-plugin-epfl-settings) echo "EPFL-settings" ;;
         wp-plugin-*) echo "$plugin_dir" | cut -d- -f3- ;;
