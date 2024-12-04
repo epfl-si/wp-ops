@@ -3,6 +3,9 @@
 # Builds happen in a test namespace *only.* The images can then be consumed
 # (through the same Quay instance) in both test and production namespaces.
 
+- include_vars: image-vars.yml
+  tags: always
+
 - name: "Build Config Prerequisites"
   when: >-
     "openshift_namespaces_test" in group_names
