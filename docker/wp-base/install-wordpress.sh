@@ -73,7 +73,7 @@ main () {
         wp-plugin-epfl-remote-content \
         wp-plugin-epfl-content-filter \
         wp-plugin-enlighter \
-        wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
+        wp-plugin-epfl-intranet  \
         wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
         wp-plugin-epfl-partner-universities \
