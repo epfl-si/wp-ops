@@ -1,7 +1,0 @@
-- name: Build Cloud on OCP4
-  hosts: all
-  roles:
-    - name: setup build cloud on openshift 4 
-      role: roles/ocp4
-      tags:
-        - ocp4
