@@ -58,7 +58,7 @@ main () {
     if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
         # find-my-blocks: changed authors in the 3.6.x release cycle,
         # new author dropped our previous contributions
-        install_plugin_s3 find-my-blocks-3.5.5.zip
+        install_plugin_s3 find-my-blocks-3.5.6.zip
         # Paid-for plugins - pretty much *the* reason why we
         # build in our private cloud.
         install_plugin_s3 wpforms.1.8.5.2.zip
