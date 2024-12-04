@@ -1,205 +1,22 @@
-# Kubernetes configuration for production-related images and their builds
+# Kubernetes configuration for “cloud” builds
 #
-# Builds happen in the wwp-test namespace *only.* The images are then
-# promoted using `oc tag` or an equivalent API call.
-#
-# See also continuous-integration.yml (which has its own set of images)
+# Builds happen in a test namespace *only.* The images can then be consumed
+# (through the same Quay instance) in both test and production namespaces.
 
-- include_vars: ../../../vars/image-vars.yml
-  tags: always
-
-- tags: always
-  when: openshift_namespace == 'wwp-test'
-  include_vars: "{{ item }}"
-  with_items:
-    - secrets-wwp-test.yml
-    - ../../../vars/secrets-wwp-test.yml
-
-- name: "Docker Hub credentials"
-  when: not openshift_is_production
-  openshift:
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: docker-hub-credentials
-      namespace: '{{ openshift_namespace }}'
-    type: kubernetes.io/dockerconfigjson
-    data:
-      .dockerconfigjson: "{{ _docker_auths_dict | to_json | b64encode }}"
-  vars:
-    _docker_auths_dict:
-      # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-      auths:
-        "https://index.docker.io/v1/":
-          "auth": "{{ _loginpassword | b64encode }}"
-    _loginpassword: >-
-      {{ "%s:%s" % (_login, _password) }}
-    _login: "{{ build.docker_hub.username }}"
-    _password: "{{ build.docker_hub.password | eyaml(eyaml_keys) }}"
-  tags: images.secret
-
-- name: "`oc secrets link` into the {{ _builder_service_account }} service account"
-  shell:
-    cmd: |
-      set -e -x
-      case "$(oc -n {{ openshift_namespace }} get -o yaml \
-                 serviceaccount {{ _builder_service_account }})" in
-        *"- name: {{ _docker_hub_secret_name }}"*)
-          echo "ALREADY_LINKED"
-          exit 0;;
-        *)
-        oc -n {{ openshift_namespace }} secrets link {{ _builder_service_account }} {{ _docker_hub_secret_name }} --for=pull
-      esac
-  vars:
-    _docker_hub_secret_name: docker-hub-credentials   # See above
-    _builder_service_account: builder  # And not `default`, as incorrectly blogged about
-  register: _oc_secrets_link
-  changed_when: >-
-    _oc_secrets_link
-    and
-    ( "ALREADY_LINKED" not in _oc_secrets_link.stdout )
-  tags: images.secret
-
-- name: "Pull upstream {{ wp_base_base_image.qualified }} image into {{ wp_base_base_image.mirrored }}"
-  when: not openshift_is_production
-  openshift:
-    kind: ImageStream
-    apiVersion: image.openshift.io/v1
-    metadata:
-      name: "{{ wp_base_base_image.shortname }}"
-      namespace: "{{ openshift_namespace }}"
-    spec:
-      tags:
-        - name: "{{ wp_base_base_image.tag }}"
-          from:
-            kind: DockerImage
-            name: "{{ wp_base_base_image.qualified }}"
-          importPolicy:
-            # Scheduled import doesn't work - See comment below:
-            scheduled: false
-  tags: images.mirror
-
-# Unfortunately, we can't let OpenShift handle the syncing anymore.
-# `ubuntu:focal-20221130` is the latest image in the `ubuntu:focal`
-# lineage with an “old” (so-called Docker v2) layer index; starting at
-# `ubuntu:focal-20230126`, the image is in OCI format, which only
-# OpenShift versions 4.7 and above can consume (see
-# https://access.redhat.com/solutions/4933011). This fact was checked
-# today with a couple of curl API calls; see commit message for
-# details. The current workaround is below: use the operator
-# workstation to do a `docker pull` / `docker push` sequence.
-
-- name: "`docker pull {{ wp_base_base_image.qualified }}`"
-  connection: local
-  docker_image:
-    source: pull
-    name: "{{ wp_base_base_image.qualified }}"
-    repository: "{{ wp_base_base_image_manually_push_to }}"
-  tags:
-  - images.mirror
-  - images.mirror.refresh
-
-- name: "`docker login` into OpenShift"
-  changed_when: false
-  shell:
-    cmd: |
-      docker login os-docker-registry.epfl.ch -u quatrava -p "$(oc whoami -t)"
-  tags:
-  - images.mirror
-  - images.mirror.refresh
-
-- name: "`docker push` {{ wp_base_base_image.qualified }} into OpenShift"
-  connection: local
-  docker_image:
-    name: "{{ wp_base_base_image_manually_push_to }}"
-    push: true
-    source: local
-  tags:
-  - images.mirror
-  - images.mirror.refresh
-
-- name: "Testing ImageStreams and their build information"
-  when: not openshift_is_production
-  openshift_imagestream:
-    name: "{{ item.name }}"
-    namespace: "{{ openshift_namespace }}"
-    metadata: "{{ item.metadata | default({}) }}"
-    git:
-        repository: "{{ wp_ops_git_uri }}"
-        path: "{{ item.git_path }}"
-        ref: "{{ images_build_branch }}"
-    strategy: "{{ item.strategy | default({}) }}"
-    triggers: >-
-      {{ [_triggers[item.triggered_by]] if item.triggered_by is defined else [] }}
-  with_items:
-    - name: "{{ wp_base_image_name }}"
-      git_path: docker/wp-base
-      strategy:
-        dockerStrategy:
-          # See above - We have our own mirror of `ubuntu:focal`
-          from:
-             kind: "ImageStreamTag"
-             name: "{{ wp_base_base_image.shortname }}:{{ wp_base_base_image.tag }}"
-          forcePull: true
-          noCache: true
-          buildArgs:
-            - name: INSTALL_AUTO_FLAGS
-              value: >-
-                --s3-endpoint-url={{ build.s3_assets.endpoint_url }}
-                --s3-region={{       build.s3_assets.region }}
-                --s3-bucket-name={{  build.s3_assets.bucket_name }}
-                --s3-key-id={{       build.s3_assets.key_id }}
-                --s3-secret={{       build.s3_assets.secret | eyaml(eyaml_keys) }}
-                --manifest-url=https://raw.githubusercontent.com/epfl-si/wp-ops/{{ images_build_branch }}/ansible/roles/wordpress-instance/tasks/plugins.yml
-    - name: "{{ nginx_image_name }}"
-      git_path: docker/nginx
-      from: "{{ wp_base_image_name }}"
-      triggered_by: wp-base
-    - name: "{{ mgmt_image_name }}"
-      git_path: docker/mgmt
-      from: "{{ wp_base_image_name }}"
-      triggered_by: wp-base
-    - name: "{{ backup_cron_image_name }}"
-      git_path: docker/cronjob
-      from: "{{ mgmt_image_name }}"
-      triggered_by: mgmt
-  vars:
-    _triggers:
-      wp-base:
-        type: ImageChange
-        imageChange:
-          from:
-            kind: ImageStreamTag
-            namespace: "{{ openshift_namespace }}"
-            name: "{{ wp_base_image_name }}:latest"
-      mgmt:
-        type: ImageChange
-        imageChange:
-          from:
-            kind: ImageStreamTag
-            namespace: "{{ openshift_namespace }}"
-            name: "{{ mgmt_image_name }}:latest"
-  tags: images.build
-
-- name: "Production ImageStreams"
-  when: openshift_is_production
-  openshift_imagestream:
-    name: "{{ item.name }}"
-    namespace: "{{ openshift_namespace }}"
-    metadata: "{{ item.metadata | default({}) }}"
-  with_items:
-    - name: "{{ nginx_image_name }}"
-    - name: "{{ mgmt_image_name }}"
-
-- name: "Promote wwp-test images to wwp"
+- name: "Build Config Prerequisites"
   when: >-
-    openshift_is_production and
-    ("images.promote" in ansible_run_tags)
-  tags: images.promote
-  local_action:
-    module: shell
-    cmd: |
-      oc tag wwp-test/mgmt:latest wwp/mgmt:prod
-      oc tag wwp-test/mgmt:latest wwp-infra/mgmt:prod
-      oc tag wwp-test/httpd:latest wwp/httpd:prod
-      oc tag wwp-test/cronjob:latest wwp-infra/cronjob:latest
+    "openshift_namespaces_test" in group_names
+  include_tasks:
+    file: buildconfig-prerequisites.yml
+    apply:
+      tags:
+        - images
+
+- name: "ISAS-FSD Catalog"
+  when: >-
+    "openshift_namespaces_test" in group_names
+  include_tasks:
+    file: isas-fsd-catalog.yml
+    apply:
+      tags:
+        - images.catalog
