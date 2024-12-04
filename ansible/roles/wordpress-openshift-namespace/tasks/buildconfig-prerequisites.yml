@@ -20,3 +20,8 @@
         namespace: "{{ openshift_namespace }}"
       secrets:
         - name: builder-pull-secret
+      # This is not supposed to be required (it worked without in
+      # OpenShift 4.14); but see
+      # https://access.redhat.com/solutions/7098226
+      imagePullSecrets:
+      - name: builder-pull-secret
