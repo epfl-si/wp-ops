@@ -40,10 +40,8 @@ spec:
     title: ${site.title}
     tagline: ${site.tagline}
     theme: wp-theme-2018
-    languages:
-${site.languages.map(item => `      - ${item}`).join('\n')}
-    plugins:
-${site.categories.map(item => `      - ${item}`).join('\n')}
+    languages: ${JSON.stringify(site.languages || [] )}
+    plugins: ${JSON.stringify(site.categories || [] )}
     debug: true
   epfl:
     unit_id: ${site.unitId}
