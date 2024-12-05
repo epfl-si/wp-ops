@@ -1,13 +1,7 @@
 "use strict";
-
-import "process";
+var url = require('url');
 
 let namespace = "wordpress-test";
-for (let arg of process.argv) {
-  if (arg.startsWith("--namespace=")) {
-    namespace = arg.split("=")[1];
-  }
-}
 
 // Function to fetch and filter the data
 async function fetchAndFilterSites() {
@@ -16,18 +10,8 @@ async function fetchAndFilterSites() {
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/sites');
     const data = await response.json();
 
-    // Filter the sites where openshiftEnv is "www"
-    let filteredSites = data.filter(site => site.openshiftEnv === 'www' || site.openshiftEnv === 'labs');
-
-    // Filter the sites that are not www.epfl.ch
-    filteredSites = filteredSites.filter(site => site.url.includes('https://www.epfl.ch'));
-
-    // Filter the sites that are an association
-    // filteredSites = filteredSites.filter(site => !site.url.includes('campus/associations/list'));
-
-    // Log or return the filtered data
-    //console.log(filteredSites);
-    //console.log(filteredSites.length);
+    // Filter the sites where openshiftEnv is "www" or "labs"
+    let filteredSites = data.filter(site => site.openshiftEnv !== '');
     return filteredSites;
   } catch (error) {
     console.error('Error fetching or filtering sites:', error);
@@ -38,10 +22,8 @@ async function fetchAndFilterSites() {
 const run = async () => {
   // Call the function
   let sites = await fetchAndFilterSites();
-  // console.log(sites)
   for (const site of sites) {
-    //console.log(site);
-    let path = site.url.replace("https://www.epfl.ch", "")
+    let path = site.url.replace(/https:\/\/.*?\.epfl\.ch/, '');
     path = path.replace(/\/$/, "");  // Removes the trailing slash
 
     const siteYml = `apiVersion: wordpress.epfl.ch/v1
@@ -58,16 +40,14 @@ spec:
     title: ${site.title}
     tagline: ${site.tagline}
     theme: wp-theme-2018
-    languages:
-${site.languages.map(item => `      - ${item}`).join('\n')}
-    plugins:
-${site.categories.map(item => `      - ${item}`).join('\n')}
+    languages: ${JSON.stringify(site.languages || [] )}
+    plugins: ${JSON.stringify(site.categories || [] )}
     debug: true
   epfl:
     unit_id: ${site.unitId}
-    unit_name: ${site.unitName}
+    subdomain_name: ${['www','labs'].indexOf(site.openshiftEnv) > -1 ? 'www.epfl.ch' : url.parse(site.url).hostname}
     importFromOS3:
-      environment: ${site.openshiftEnv}
+      environment_os3: ${site.openshiftEnv}
       ansibleHost: ${site.ansibleHost}
 `
     console.log(siteYml);
