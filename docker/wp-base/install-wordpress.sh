@@ -41,7 +41,7 @@ main () {
     install_tinymce_advanced_plugin /tmp/tinymce-advanced-versions.json
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook svg-support very-simple-meta-description \
+        flowpaper-lite-pdf-flipbook very-simple-meta-description \
         ewww-image-optimizer wordpress-importer ; do
         install_plugin_wordpress_official "$official_plugin"
     done
@@ -50,7 +50,6 @@ main () {
       git apply < /tmp/clearstatcache-wp-import.patch )
 
     install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.5.4.zip
-    install_plugin_zip svg-support https://downloads.wordpress.org/plugin/svg-support.2.5.5.zip
 
     # Some of these plugins are commercial plugins that we pay for;
     # others have been discontinued. We don't want them publicly
@@ -59,29 +58,47 @@ main () {
     if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
         # find-my-blocks: changed authors in the 3.6.x release cycle,
         # new author dropped our previous contributions
-        install_plugin_s3 find-my-blocks-3.5.5.zip
+        install_plugin_s3 find-my-blocks-3.5.6.zip
         # Paid-for plugins - pretty much *the* reason why we
         # build in our private cloud.
-        install_plugin_s3 wpforms.1.8.5.2.zip
-        install_plugin_s3 wpforms-surveys-polls.1.10.0.zip
+        install_plugin_s3 wpforms.1.9.2.3.zip
+        install_plugin_s3 wpforms-surveys-polls.1.14.0.zip
         # Additionally this last one is stuck in the past:
-        install_plugin_s3 wp-media-folder.5.3.21.zip
+        install_plugin_s3 wp-media-folder.5.9.13.zip
     fi
 
     for homemade_or_forked_plugin in \
         wp-plugin-epfl-coming-soon wordpress.plugin.tequila \
-        wordpress.plugin.accred wp-plugin-epfl-settings \
-        wp-plugin-epfl-remote-content wp-gutenberg-epfl \
-        wp-plugin-epfl-menus wp-plugin-epfl-404 wp-plugin-enlighter \
+        wp-plugin-epfl-settings \
+        wp-plugin-epfl-remote-content \
         wp-plugin-epfl-content-filter \
-        wp-plugin-epfl-intranet wp-plugin-epfl-emploi  \
-        wp-plugin-epfl-restauration wp-plugin-epfl-library \
+        wp-plugin-enlighter \
+        wp-plugin-epfl-intranet  \
+        wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
-        wp-plugin-epfl-partner-universities wp-plugin-epfl-courses-se \
+        wp-plugin-epfl-partner-universities \
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
+
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+
+    for forked_plugin in \
+        wp-plugin-epfl-404 \
+        wp-gutenberg-epfl  \
+        wp-plugin-epfl-courses-se \
+        wp-plugin-epfl-restauration \
+        wp-plugin-epfl-cache-control \
+        wordpress.plugin.accred ; do
+        install_plugin_git https://github.com/epfl-si/$forked_plugin \
+                           feature/upgradePHPAndWordpressVersion
+    done
+
+    for forked_plugin in \
+            wp-plugin-epfl-menus  ; do
+            install_plugin_git https://github.com/epfl-si/$forked_plugin \
+                               feature/nginx
+        done
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
@@ -110,7 +127,7 @@ install_themes () {
     (
         cd $targetdir/wp-content
         rm -rf themes
-        git clone https://github.com/epfl-si/wp-theme-2018 themes
+        git clone -b  feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-theme-2018 themes
     )
 }
 
@@ -118,7 +135,7 @@ install_mu_plugins () {
     (
         cd $targetdir/wp-content
         rm -rf mu-plugins
-        git clone https://github.com/epfl-si/wp-mu-plugins mu-plugins
+        git clone -b feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-mu-plugins mu-plugins
     )
 }
 
@@ -140,10 +157,15 @@ install_tinymce_advanced_plugin () {
 
 install_plugin_git () {
     url="$1"
+    opt_branch="$2"
     (
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
-        git clone "$1"
+        if [ -n "$opt_branch" ]; then
+            git clone -b "$opt_branch" "$url"
+        else
+            git clone "$url"
+        fi
         rename_plugin_dir "$(basename "$1")"
     )
 }
