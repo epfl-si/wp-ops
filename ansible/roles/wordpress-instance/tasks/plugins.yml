@@ -613,7 +613,8 @@
   wordpress_plugin:
     name: wpforms-epfl-payonline
     state: "{{ plugins_for_payonline_category }}"
-    from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+    # from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
+    from: https://github.com/epfl-si/wpforms-epfl-payonline/releases/download/v2.1.3/wpforms-epfl-payonline.zip
   tags:
     - wp.plugins.wpforms
     - wp.plugins.payonline
