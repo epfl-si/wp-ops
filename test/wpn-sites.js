@@ -18,6 +18,13 @@ async function fetchAndFilterSites() {
   }
 }
 
+const determinePlugins = (categories, openshiftEnv) => {
+  if (['www','labs'].indexOf(openshiftEnv) > -1) {
+    categories.push('epfl-menus');
+  }
+  return JSON.stringify(categories || [])
+}
+
 
 const run = async () => {
   // Call the function
@@ -33,22 +40,22 @@ metadata:
   namespace: ${namespace}
 spec:
   path: ${path}
-  visibility: public
-  kubernetes:
-    service: test
+  owner:
+    epfl:
+      unitId: ${site.unitId}
   wordpress:
     title: ${site.title}
     tagline: ${site.tagline}
     theme: wp-theme-2018
     languages: ${JSON.stringify(site.languages || [] )}
-    plugins: ${JSON.stringify(site.categories || [] )}
+    plugins: ${determinePlugins(site.categories, site.openshiftEnv)}
     debug: true
   epfl:
-    unit_id: ${site.unitId}
-    subdomain_name: ${['www','labs'].indexOf(site.openshiftEnv) > -1 ? 'www.epfl.ch' : url.parse(site.url).hostname}
-    importFromOS3:
-      environment_os3: ${site.openshiftEnv}
-      ansibleHost: ${site.ansibleHost}
+    import:
+      sourceType: openshift3
+      openshift3BackupSource:
+        environment: ${site.openshiftEnv}
+        ansibleHost: ${site.ansibleHost}
 `
     console.log(siteYml);
     console.log('---');
