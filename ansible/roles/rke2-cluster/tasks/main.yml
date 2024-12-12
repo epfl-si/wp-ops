@@ -91,11 +91,6 @@
   run_once: true
 
 
-- name: Create MariadDB objects
-  import_tasks:
-    file: wpn-mariadb.yml
-
-
 - name: Create nginx objects
   include_tasks:
     file: nginx.yml

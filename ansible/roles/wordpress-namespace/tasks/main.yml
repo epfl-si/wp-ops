@@ -8,3 +8,7 @@
     apply:
       tags:
         - openshift.reverseproxy
+
+- name: MariaDB server
+  import_tasks:
+    file: mariadb.yml
