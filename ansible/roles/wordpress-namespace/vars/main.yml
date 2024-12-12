@@ -1,5 +1,5 @@
 ---
-# vars file for wordpress-openshift-namespace
+# vars file for wordpress-namespace
 
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
 
