@@ -1,0 +1,12 @@
+all_namespaces:
+  children:
+    openshift_namespaces_test:
+      vars:
+        ansible_connection: local  # Unless stipulated otherwise in a task
+        eyaml_keys:
+          priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
+          pub: "{{ playbook_dir }}/eyaml/epfl_wp_test.pem"
+      "hosts":
+        svc0041t-wordpress:
+          openshift_namespace: svc0041t-wordpress
+          ansible_python_interpreter: "{{ansible_playbook_python}}"
