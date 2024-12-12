@@ -6,7 +6,7 @@
       kind: MariaDB
       metadata:
         name: mariadb-min
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       spec:
         storage:
           size: 2G
@@ -25,7 +25,7 @@
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Database
       metadata:
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
         name: wordpress-test
       spec:
         # If you want the database to be created with a different name than the resource name
