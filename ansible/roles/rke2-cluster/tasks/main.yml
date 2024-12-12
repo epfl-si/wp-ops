@@ -90,17 +90,6 @@
     release_namespace: "{{ mariadb_namespace_name }}"
   run_once: true
 
-
-- name: Create nginx objects
-  include_tasks:
-    file: nginx.yml
-    apply:
-      tags:
-        - cluster.nginx
-  tags:
-    - cluster.nginx
-
-
 - name: IngressClass/wordpress
   kubernetes.core.k8s:
     state: present
