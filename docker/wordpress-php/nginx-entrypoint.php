@@ -185,5 +185,6 @@ define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 settings_before_wp_settings();
 require(ABSPATH . 'wp-settings.php');
 
+$_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
 // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
-require(ABSPATH . $entrypoint_path);
+require($_SERVER["SCRIPT_FILENAME"]);
