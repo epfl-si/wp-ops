@@ -1,4 +1,4 @@
-- name: Create mariadb/mariadb
+- name: "`MariaDB/mariadb-min`"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -18,7 +18,7 @@
           enabled: true
 
 
-- name: Create mariadb/database
+- name: "`Database/wordpres-test`"
   kubernetes.core.k8s:
     state: present
     definition:
