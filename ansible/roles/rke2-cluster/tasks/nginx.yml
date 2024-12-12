@@ -289,17 +289,6 @@
                         number: 80
 
 
-- name: IngressClass/wordpress
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: networking.k8s.io/v1
-      kind: IngressClass
-      metadata:
-        name: wordpress
-      spec:
-        controller: epfl.ch/ingress-wordpress
-
 
 - name: PersistentVolumeClaim/wp-uploads
   kubernetes.core.k8s:
