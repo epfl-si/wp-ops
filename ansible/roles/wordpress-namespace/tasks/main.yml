@@ -12,3 +12,12 @@
 - name: MariaDB server
   import_tasks:
     file: mariadb.yml
+
+- name: Web server
+  include_tasks:
+    file: nginx.yml
+    apply:
+      tags:
+        - wp.web
+  tags:
+    - wp.web
