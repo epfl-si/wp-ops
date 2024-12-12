@@ -133,6 +133,9 @@ function settings_before_wp_settings () {
         // In the “normal” loading flow, all PHP scripts under `/wp-admin` ensure
         // to `define("WP_ADMIN", true);` before loading settings:
         define("WP_ADMIN", true);
+        if (path_has_component(uri_path(), "admin-ajax.php")) {
+            define("DOING_AJAX", true );
+        }
     }
 
     // We don't really support running on an empty database, but we
