@@ -1,6 +1,1 @@
-rancher_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_test/WordPress-Next/rancher-admin-credentials.yml') | from_yaml }}"
-
-rancher_token: "{{ rancher_secrets.token }}"
-rancher_checksum: "{{ rancher_secrets.checksum }}"
-
 installed_node_names: "{{ (node_list.resources if 'resources' in node_list else []) | map(attribute='metadata.name') }}"
