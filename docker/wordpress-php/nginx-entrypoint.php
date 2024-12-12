@@ -186,8 +186,9 @@ define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 // `wp-settings.php`, rather than `load.php` and `index.php` which
 // both insist on loading a `wp-config.php` file.
 settings_before_wp_settings();
+$_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
+
 require(ABSPATH . 'wp-settings.php');
 
-$_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
 // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
 require($_SERVER["SCRIPT_FILENAME"]);
