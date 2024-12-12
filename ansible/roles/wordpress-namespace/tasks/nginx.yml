@@ -6,7 +6,7 @@
       kind: ServiceAccount
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       automountServiceAccountToken: false
 
 
@@ -18,11 +18,11 @@
       kind: RoleBinding
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       subjects:
       - kind: ServiceAccount
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: Role
@@ -37,7 +37,7 @@
       kind: Role
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       rules:
         # Required for `--namespace` flag: the controller wants to read its own namespace.
         - apiGroups: ['']
@@ -84,11 +84,11 @@
       kind: ClusterRoleBinding
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       subjects:
       - kind: ServiceAccount
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: ClusterRole
@@ -103,7 +103,7 @@
       kind: ClusterRole
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       rules:
         # Copied and trimmed down from `clusterrole/rke2-ingress-nginx` in namespace `kube-system`:
         - apiGroups: ['']
@@ -127,7 +127,7 @@
       kind: ConfigMap
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       data:
         allow-snippet-annotations: "true"
         # Uncomment the next four lines to embug the nginx configuration
@@ -146,7 +146,7 @@
       kind: Deployment
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       spec:
         replicas: 1
         selector:
@@ -250,7 +250,7 @@
       kind: Service
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
         labels:
           app: wp-nginx
         annotations:
@@ -274,7 +274,7 @@
       kind: Ingress
       metadata:
         name: wp-nginx
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       spec:
         rules:
           - host: "wpn.fsd.team"
@@ -298,7 +298,7 @@
       kind: PersistentVolumeClaim
       metadata:
         name: wp-uploads
-        namespace: "{{ namespace_name }}"
+        namespace: "{{ openshift_namespace }}"
       spec:
         accessModes:
           - ReadWriteMany
