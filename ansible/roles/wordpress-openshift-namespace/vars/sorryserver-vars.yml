@@ -1,2 +1,0 @@
-sorryserver_webhook_secret: >-
-  {{ webhooks.github.sorryserver | eyaml(eyaml_keys) }}
