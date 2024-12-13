@@ -6,7 +6,7 @@ all_namespaces:
         eyaml_keys:
           priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
           pub: "{{ playbook_dir }}/eyaml/epfl_wp_prod.pem"
-      hosts:
+      "hosts":
         svc0041p-wordpress:
           ansible_python_interpreter: "{{ansible_playbook_python}}"
           inventory_namespace: svc0041p-wordpress
