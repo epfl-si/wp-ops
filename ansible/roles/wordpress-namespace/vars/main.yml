@@ -1,8 +1,6 @@
 ---
 # vars file for wordpress-namespace
 
-openshift_is_production: "{{ inventory_namespace == 'wwp' }}"
-
 nodejs_base_image_name: node
 nodejs_base_image_tag: 20-alpine
 nodejs_base_image: "{{ nodejs_base_image_name }}:{{ nodejs_base_image_tag }}"
