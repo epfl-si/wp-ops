@@ -12,3 +12,12 @@
         - wp.web
   tags:
     - wp.web
+
+- name: Serving secrets (for plugins, outgoing SMTP etc.)
+  include_tasks:
+    file: secrets.yml
+    apply:
+      tags:
+      - wp.secrets
+  tags:
+    - wp.secrets
