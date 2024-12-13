@@ -1,0 +1,8 @@
+- include_tasks:
+    file: "reverseproxy.yml"
+    apply:
+      tags:
+        - openshift.reverseproxy
+  tags:
+    - openshift.reverseproxy
+
