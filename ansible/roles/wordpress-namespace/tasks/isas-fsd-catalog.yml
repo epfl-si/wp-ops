@@ -1,13 +1,13 @@
 - name: Build Config - isas-fsd-catalog
   when: >-
-    openshift_namespace == "svc0041t-wordpress"
+    inventory_namespace == "svc0041t-wordpress"
   kubernetes.core.k8s:
     definition:
       apiVersion: build.openshift.io/v1
       kind: BuildConfig
       metadata:
         name: isas-fsd-catalog
-        namespace: "{{ openshift_namespace }}"
+        namespace: "{{ inventory_namespace }}"
       spec:
         serviceAccount: builder
         source:
