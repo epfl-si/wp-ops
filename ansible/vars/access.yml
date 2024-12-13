@@ -1,0 +1,31 @@
+admins:
+  - fullname: William Belle
+    github: williambelle
+  - fullname: Olivier Bieler
+    github: obieler
+  - fullname: Nicolas Borboën
+    github: ponsfrilus
+  - fullname: Giovanni Cangiani
+    github: multiscan
+  - fullname: Julien Delasoie
+    github: jdelasoie
+  - fullname: Lindo Duratti
+    github: dragonleman
+  - fullname: Ehouarn Duriaux
+    github: dwesh163
+  - fullname: Laurent Indermühle
+    github: laurent-indermuehle
+  - fullname: Rosa Maggi
+    github: rosamaggi
+  - fullname: Saskya Panchaud
+    github: saskyapanchaud
+  - fullname: Sami Panseri
+    github: azecko
+  - fullname: Dominique Quatravaux
+    github: domq
+  - fullname: Leonardo Surdez
+    github: d4rkheart
+  - fullname: Luc Venries
+    github: lvenries
+  - fullname: Jérémy Würsch
+    github: Jch4ipas
