@@ -1,10 +1,11 @@
----
+- tags: always
+  include_vars: access.yml
+
 # This will be already done in the base iso image
 - name: Ensure ssh keys for root
   ansible.posix.authorized_key:
     user: root
-    state: "{{ item.state | default(present) }}"
     key: "https://github.com/{{ item.github }}.keys"
     comment: "# ssh-import-id gh:{{ item.github }}"
-  with_items: "{{ SSH_KEYS }}"
+  with_items: "{{ admins }}"
   become: true

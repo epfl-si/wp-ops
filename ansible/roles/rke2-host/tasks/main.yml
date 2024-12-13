@@ -14,3 +14,10 @@
     - system.install
   import_tasks:
     file: install.yml
+
+- name: Ssh Access
+  tags:
+    - system.config
+    - system.config.ssh
+  import_tasks:
+    file: config_ssh.yml
