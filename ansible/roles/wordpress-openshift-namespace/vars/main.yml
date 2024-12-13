@@ -2,7 +2,6 @@
 # vars file for wordpress-openshift-namespace
 
 openshift_is_production: "{{ openshift_namespace == 'wwp' }}"
-openshift_registry_tag: "{{ 'prod' if openshift_is_production else 'latest' }}"
 
 nodejs_base_image_name: node
 nodejs_base_image_tag: 20-alpine
