@@ -16,7 +16,7 @@
       type: Opaque
       stringData:
         restauration_api_password: "{{ restauration.api_password | eyaml(eyaml_keys) }}"
-        wpform_license: "{{ wpforms.license_key | eyaml(eyaml_keys) }}"
+        wpforms_license: "{{ wpforms.license_key | eyaml(eyaml_keys) }}"
         saferpay_test_apiusername: "{{ saferpay.test.apiusername | eyaml(eyaml_keys) }}"
         saferpay_test_apipassword: "{{ saferpay.test.apipassword | eyaml(eyaml_keys) }}"
         saferpay_test_customerid: "{{ saferpay.test.customerid | eyaml(eyaml_keys) | string }}"
