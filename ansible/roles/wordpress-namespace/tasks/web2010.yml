@@ -3,34 +3,34 @@
 
 - name: "Pull {{ web2010_base_image_stage0_mirrored_from }} into {{ web2010_base_image_stage0_mirrored_to }}"
   when: >-
-    openshift_namespace == "wwp-test"
+    inventory_namespace == "wwp-test"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ web2010_base_image_stage0_name }}"
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ inventory_namespace }}"
     from: "{{ web2010_base_image_stage0_mirrored_from }}"
     tag: "{{ web2010_base_image_stage0_tag | string }}"
 
 - name: "Pull {{ web2010_base_image_stage1_mirrored_from }} into {{ web2010_base_image_stage1_mirrored_to }}"
   when: >-
-    openshift_namespace == "wwp-test"
+    inventory_namespace == "wwp-test"
   delegate_to: localhost
   openshift_imagestream:
     metadata:
       name: "{{ web2010_base_image_stage1_name }}"
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ inventory_namespace }}"
     from: "{{ web2010_base_image_stage1_mirrored_from }}"
     tag: "{{ web2010_base_image_stage1_tag }}"
 
 - name: Build Config and Image Stream
   # Build in test only (and promote to production)
   when: >-
-    openshift_namespace == "wwp-test"
+    inventory_namespace == "wwp-test"
   openshift_imagestream:
     state: latest
     metadata:
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ inventory_namespace }}"
       name: nginx-web2010
     git:
       repository: "{{ web2010_git_uri }}"
@@ -48,7 +48,7 @@
     kind: DeploymentConfig
     metadata:
       name: nginx-web2010
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ inventory_namespace }}"
     spec:
       replicas: 2
       selector:
@@ -90,18 +90,18 @@
             from:
               kind: ImageStreamTag
               name: 'nginx-web2010:{{ web2010_image_tag }}'
-              namespace: "{{ openshift_namespace }}"
+              namespace: "{{ inventory_namespace }}"
 
 - name: (Re-)Build nginx-web2010 in OpenShift
   shell:
-    cmd: "oc -n {{ openshift_namespace }} start-build --wait nginx-web2010"
+    cmd: "oc -n {{ inventory_namespace }} start-build --wait nginx-web2010"
   when:
     - >
       ( (_web2010_imagestream | default({})) is changed )
       or
       "web2010.rebuild" in ansible_run_tags
     - >-
-      openshift_namespace == "wwp-test"
+      inventory_namespace == "wwp-test"
   tags:
     - web2010.rebuild
 
@@ -112,7 +112,7 @@
     kind: Service
     metadata:
       name: nginx-web2010
-      namespace: "{{ openshift_namespace }}"
+      namespace: "{{ inventory_namespace }}"
     spec:
       type: ClusterIP
       ports:
@@ -128,7 +128,7 @@
     - >-
       "web2010.image.promote" in ansible_run_tags
     - >-
-      openshift_namespace == "wwp"
+      inventory_namespace == "wwp"
   tags: web2010.image.promote
   local_action:
     module: shell

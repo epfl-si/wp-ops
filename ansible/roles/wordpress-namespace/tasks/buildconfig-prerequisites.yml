@@ -6,7 +6,7 @@
       type: kubernetes.io/dockerconfigjson
       metadata:
         name: builder-pull-secret
-        namespace: "{{ openshift_namespace }}"
+        namespace: "{{ inventory_namespace }}"
       data:
         .dockerconfigjson: "{{ builder_pull_secret_config | to_json | b64encode }}"
 
@@ -17,7 +17,7 @@
       kind: ServiceAccount
       metadata:
         name: builder
-        namespace: "{{ openshift_namespace }}"
+        namespace: "{{ inventory_namespace }}"
       secrets:
         - name: builder-pull-secret
       # This is not supposed to be required (it worked without in
