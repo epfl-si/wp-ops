@@ -9,9 +9,7 @@ all_namespaces:
       children:
         openshift_namespaces_test:
           vars:
-            eyaml_keys:
-              priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
-              pub: "{{ playbook_dir }}/eyaml/epfl_wp_test.pem"
+            inventory_deployment_stage: test
           "hosts":
             svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress

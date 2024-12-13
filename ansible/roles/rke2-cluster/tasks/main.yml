@@ -129,14 +129,3 @@
           clusterId: "{{ rancher_cluster_id }}"
           clusterName: "{{ rancher_cluster_name }}"   # not for grafana, but for prometheus metrics (https://github.com/rancher/rancher/issues/41991#issuecomment-1774844555)
   run_once: true
-
-
-# /kubernetes/plugins.yml
-- name: Create plugins secrets
-  include_tasks:
-    file: plugins.yml
-    apply:
-      tags:
-      - plugins_secrets
-  tags:
-    - plugins_secrets
