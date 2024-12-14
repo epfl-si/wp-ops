@@ -7,8 +7,6 @@ all_namespaces:
           priv: "/keybase/team/epfl_wp_prod/eyaml-privkey.pem"
           pub: "{{ playbook_dir }}/eyaml/epfl_wp_prod.pem"
       hosts:
-        # wwp:
-        #   nfs_path: nas-app-ma-nfs1:/si_test_openshift_wp_jahia_app/wordpress 
         svc0041p-wordpress:
           ansible_python_interpreter: "{{ansible_playbook_python}}"
           inventory_namespace: svc0041p-wordpress
