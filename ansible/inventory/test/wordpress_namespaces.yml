@@ -1,12 +1,17 @@
 all_namespaces:
+  vars:
+    # Unless stipulated otherwise in a task, wrangling a namespace happens
+    # from the operator's workstation.
+    ansible_connection: local
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   children:
-    openshift_namespaces_test:
-      vars:
-        ansible_connection: local  # Unless stipulated otherwise in a task
-        eyaml_keys:
-          priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
-          pub: "{{ playbook_dir }}/eyaml/epfl_wp_test.pem"
-      "hosts":
-        svc0041t-wordpress:
-          inventory_namespace: svc0041t-wordpress
-          ansible_python_interpreter: "{{ansible_playbook_python}}"
+    openshift_namespaces:
+      children:
+        openshift_namespaces_test:
+          vars:
+            eyaml_keys:
+              priv: "/keybase/team/epfl_wp_test/eyaml-privkey.pem"
+              pub: "{{ playbook_dir }}/eyaml/epfl_wp_test.pem"
+          "hosts":
+            svc0041t-wordpress:
+              inventory_namespace: svc0041t-wordpress
