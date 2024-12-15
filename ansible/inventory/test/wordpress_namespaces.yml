@@ -15,3 +15,13 @@ all_namespaces:
           "hosts":
             svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
+    rke2_namespaces:
+      children:
+        rke2_namespaces_test:
+          vars:
+            inventory_deployment_stage: test
+          "hosts":
+            rancher-wordpress-test:
+              ansible_rancher_cluster_name: wordpress-test
+              ansible_rancher_url: https://rancher-fsd.epfl.ch
+              inventory_namespace: wordpress-test
