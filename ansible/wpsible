@@ -49,14 +49,6 @@ ensure_ansible () {
     ensure_ansible_runtime
 }
 
-oc_check () {
-  if [[ "$inventory_mode" == rke2* ]] ; then return ; fi
-  if ! oc projects >/dev/null 2>&1; then
-    echo "Please login to openshift:"
-    oc login https://pub-os-exopge.epfl.ch --username=$USER
-  fi
-}
-
 inventory_mode="test"
 inventories () {
     echo "-i inventory/wordpress-instances.py"
@@ -106,13 +98,11 @@ ensure_ansible
 case "$mode" in
     install-only) : ;;
     ansible-playbook)
-        oc_check
         ansible-playbook $playbook_flags $(inventories) "${ansible_args[@]}" \
                          -e "wpsible_cwd=$OLDPWD" \
                          $playbook
         ;;
     ansible)
-        oc_check
         ansible $(inventories) $ansible_flags "${ansible_args[@]}"
         ;;
 esac
