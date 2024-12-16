@@ -1,42 +1,42 @@
-- name: ServiceAccount/wpn-nginx
+- name: ServiceAccount/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ServiceAccount
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       automountServiceAccountToken: false
 
 
-- name: RoleBinding/wpn-nginx
+- name: RoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       subjects:
       - kind: ServiceAccount
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: Role
-        name: wpn-nginx
+        name: wp-nginx
 
 
-- name: Role/wpn-nginx
+- name: Role/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       rules:
         # Required for `--namespace` flag: the controller wants to read its own namespace.
@@ -72,37 +72,37 @@
           resources:
           - configmaps
           resourceNames:
-          - wpn-nginx
+          - wp-nginx
           verbs: ['get', 'watch']
 
 
-- name: ClusterRoleBinding/wpn-nginx
+- name: ClusterRoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: ClusterRoleBinding
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       subjects:
       - kind: ServiceAccount
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: ClusterRole
-        name: wpn-nginx
+        name: wp-nginx
 
 
-- name: ClusterRole/wpn-nginx
+- name: ClusterRole/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: ClusterRole
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       rules:
         # Copied and trimmed down from `clusterrole/rke2-ingress-nginx` in namespace `kube-system`:
@@ -119,14 +119,14 @@
           verbs: ['get', 'list', 'watch']
 
 
-- name: ConfigMap/wpn-nginx
+- name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       data:
         allow-snippet-annotations: "true"
@@ -138,38 +138,38 @@
         #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
 
 
-- name: Deployment/wpn-nginx
+- name: Deployment/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       spec:
         replicas: 1
         selector:
           matchLabels:
-            app: wpn-nginx
+            app: wp-nginx
         strategy:
           type: RollingUpdate
         template:
           metadata:
             labels:
-              app: wpn-nginx
+              app: wp-nginx
           spec:
-            serviceAccountName: wpn-nginx
+            serviceAccountName: wp-nginx
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wpn-nginx:2024-042
+                image: quay-its.epfl.ch/svc0041/wpn-nginx:wpn-nginx-php-32
                 args:
                   - /nginx-ingress-controller
                   - --disable-leader-election
                   - --controller-class=epfl.ch/ingress-wordpress
                   - --watch-namespace=$(POD_NAMESPACE)
-                  - --configmap=$(POD_NAMESPACE)/wpn-nginx
+                  - --configmap=$(POD_NAMESPACE)/wp-nginx
                   - --watch-ingress-without-class=false
                 ports:
                   - containerPort: 8000
@@ -186,7 +186,7 @@
                     readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
-                  # - name: wpn-nginx
+                  # - name: wp-nginx
                   #   mountPath: /etc/nginx/template
                   #   readOnly: true
                 env:
@@ -201,7 +201,7 @@
                         apiVersion: v1
                         fieldPath: metadata.namespace
               - name: php
-                image: quay-its.epfl.ch/svc0041/wpn-php:2024-003
+                image: quay-its.epfl.ch/svc0041/wpn-php:wp66-032
                 volumeMounts:
                   - name: wp-uploads
                     mountPath: /data/
@@ -219,9 +219,9 @@
                   claimName: wp-uploads
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
-              # - name: wpn-nginx
+              # - name: wp-nginx
               #   configMap:
-              #     name: wpn-nginx
+              #     name: wp-nginx
               - name: kube-api-access
                 projected:
                   defaultMode: 420
@@ -242,17 +242,17 @@
                         path: namespace
 
 
-- name: Service/wpn-nginx
+- name: Service/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: Service
       metadata:
-        name: wpn-nginx-service
+        name: wp-nginx-service
         namespace: "{{ namespace_name }}"
         labels:
-          app: wpn-nginx
+          app: wp-nginx
         annotations:
           authors: isas-fsd
       spec:
@@ -262,18 +262,18 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: wpn-nginx
+          app: wp-nginx
         type: ClusterIP
 
 
-- name: Ingress/wpn-nginx
+- name: Ingress/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
-        name: wpn-nginx
+        name: wp-nginx
         namespace: "{{ namespace_name }}"
       spec:
         rules:
@@ -284,7 +284,7 @@
                   path: /
                   backend:
                     service:
-                      name: wpn-nginx-service
+                      name: wp-nginx-service
                       port:
                         number: 80
 
