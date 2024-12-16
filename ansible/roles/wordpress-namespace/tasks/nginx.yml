@@ -1,4 +1,5 @@
-- name: ServiceAccount/wp-nginx
+- when: _rbac_managed   # See this variable in main.yml
+  name: ServiceAccount/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -9,8 +10,9 @@
         namespace: "{{ inventory_namespace }}"
       automountServiceAccountToken: false
 
-# TODO: move all of this to the controller. WPN-218
-- name: RoleBinding/wp-nginx
+
+- when: _rbac_managed
+  name: RoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -29,7 +31,8 @@
         name: wp-nginx
 
 
-- name: Role/wp-nginx
+- when: _rbac_managed
+  name: Role/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -76,7 +79,8 @@
           verbs: ['get', 'watch']
 
 
-- name: ClusterRoleBinding/wp-nginx
+- when: _rbac_managed
+  name: ClusterRoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
@@ -95,7 +99,8 @@
         name: wp-nginx
 
 
-- name: ClusterRole/wp-nginx
+- when: _rbac_managed
+  name: ClusterRole/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
