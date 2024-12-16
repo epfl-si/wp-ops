@@ -9,7 +9,7 @@
         namespace: "{{ inventory_namespace }}"
       automountServiceAccountToken: false
 
-
+# TODO: move all of this to the controller. WPN-218
 - name: RoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
