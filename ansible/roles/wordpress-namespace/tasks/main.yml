@@ -1,5 +1,10 @@
 ---
 
+- name: Log in to cluster
+  tags: always
+  import_tasks:
+    file: k8s-login.yml
+
 - name: MariaDB server
   import_tasks:
     file: mariadb.yml

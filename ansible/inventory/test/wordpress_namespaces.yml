@@ -13,6 +13,9 @@ all_namespaces:
           "hosts":
             svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
+              openshift_login:
+                url: https://api.ocpitst0001.xaas.epfl.ch:6443
+                insecure: true
     rke2_namespaces:
       children:
         rke2_namespaces_test:
