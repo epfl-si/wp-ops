@@ -18,7 +18,7 @@
           enabled: true
 
 
-- name: "`Database/wordpres-test`"
+- name: "`Database/wordpress-test`"
   kubernetes.core.k8s:
     state: present
     definition:
