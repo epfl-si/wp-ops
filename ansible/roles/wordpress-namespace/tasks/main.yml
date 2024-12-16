@@ -6,16 +6,25 @@
     file: k8s-login.yml
 
 - name: MariaDB server
-  import_tasks:
+  include_tasks:
     file: mariadb.yml
+    apply:
+      tags:
+        - wp
+        - wp.mariadb
+  tags:
+    - wp
+    - wp.mariadb
 
 - name: Web server
   include_tasks:
     file: nginx.yml
     apply:
       tags:
+        - wp
         - wp.web
   tags:
+    - wp
     - wp.web
 
 - name: Serving secrets (for plugins, outgoing SMTP etc.)
@@ -23,6 +32,8 @@
     file: secrets.yml
     apply:
       tags:
+      - wp
       - wp.secrets
   tags:
+    - wp
     - wp.secrets
