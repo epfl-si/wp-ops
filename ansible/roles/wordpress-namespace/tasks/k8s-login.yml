@@ -7,7 +7,7 @@
   changed_when: false
   shell: |
     export KUBECONFIG="$K8S_AUTH_KUBECONFIG"
-    if kubectl get pods -n {{ inventory_namespace }} >/dev/null; then
+    if oc get pods -n {{ inventory_namespace }} >/dev/null; then
       echo "CREDENTIALS_STILL_VALID"
       exit 0
     fi
