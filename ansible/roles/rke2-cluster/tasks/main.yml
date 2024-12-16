@@ -102,7 +102,7 @@
 
 - name: Create nginx objects
   include_tasks:
-    file: wpn-nginx.yml
+    file: nginx.yml
     apply:
       tags:
         - cluster.nginx
