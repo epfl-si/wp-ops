@@ -50,5 +50,7 @@
   # (or RKE2) namespaces, rather than hosts
   hosts: all_namespaces
   gather_facts: no    # Ansible facts are useless for this play
+  environment:
+    K8S_AUTH_KUBECONFIG: "kubeconfigs/{{ inventory_hostname }}.yml"
   roles:
     - role: roles/wordpress-namespace
