@@ -28,12 +28,16 @@ rke2_nodes:
           ansible_ip: 128.178.218.249
 
 rke2_clusters:
+  vars:
+    # Unless stipulated otherwise in a task, wrangling a Rancher
+    # cluster happens from the operator's workstation...
+    ansible_connection: local
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    # ... Although occasionally (e.g. to obtain tokens)
+    # `epfl_si.rancher` tasks need ssh access.
+    ansible_user: root
   "hosts":   # Not real hosts, hence the scarequotes
     cluster:rancher-wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
-      ansible_connection: local
-      ansible_python_interpreter: "{{ ansible_playbook_python }}"
-      ansible_user: root
       ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
       ansible_rancher_cluster_name: wordpress-test
-
