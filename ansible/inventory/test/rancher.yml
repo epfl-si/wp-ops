@@ -2,7 +2,6 @@
 all:
   vars:
     ansible_user: root
-    wpn_namespace: wordpress-test
     RKE_INSTALL_SERVER: rancher-fsd.epfl.ch
 
 rke2_nodes:
