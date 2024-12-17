@@ -15,6 +15,9 @@ RUN chmod 1777 /etc/ingress-controller/ssl/ /tmp/nginx/ \
     /etc/ingress-controller/telemetry/ /etc/nginx/
 RUN chmod 666 /etc/nginx/nginx.conf
 
+## Uncomment the following line if you want to test out your RBAC live:
+# COPY --from=bitnami/kubectl:latest /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
+
 USER 101
 
 COPY --from=openresty /usr/local/openresty/nginx/sbin/nginx /usr/bin/nginx
