@@ -5,14 +5,14 @@ all:
     wpn_namespace: wordpress-test
     RKE_INSTALL_SERVER: rancher-fsd.epfl.ch
 
-nodes:
+rke2_nodes:
   vars:
     ansible_rancher_url: https://rancher-fsd.epfl.ch
     ansible_user: root
     ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
     ansible_rancher_cluster_name: wordpress-test
   children:
-    controls:
+    rke2_control_nodes:
       hosts:
         itswbhst0016:
           ansible_host: itswbhst0016.xaas.epfl.ch
@@ -26,7 +26,7 @@ nodes:
       vars:
         RKE_ROLE: control
 
-    workers:
+    rke2_workers:
       hosts:
         itswbhst0018:
           ansible_host: itswbhst0018.xaas.epfl.ch
@@ -37,7 +37,7 @@ nodes:
       vars:
         RKE_ROLE: worker
 
-clusters:
+rke2_clusters:
   "hosts":   # Not real hosts, hence the scarequotes
     cluster:rancher-wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
