@@ -2,7 +2,6 @@
 all:
   vars:
     ansible_user: root
-    RKE_INSTALL_SERVER: rancher-fsd.epfl.ch
 
 rke2_nodes:
   vars:
@@ -22,8 +21,6 @@ rke2_nodes:
         itswbhst0017:
           ansible_host: itswbhst0017.xaas.epfl.ch
           ansible_ip: 128.178.218.240
-      vars:
-        RKE_ROLE: control
 
     rke2_workers:
       hosts:
@@ -33,8 +30,6 @@ rke2_nodes:
         itswbhst0020:
           ansible_host: itswbhst0020.xaas.epfl.ch
           ansible_ip: 128.178.218.249
-      vars:
-        RKE_ROLE: worker
 
 rke2_clusters:
   "hosts":   # Not real hosts, hence the scarequotes

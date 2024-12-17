@@ -16,7 +16,8 @@
     classic: yes
     channel: latest/stable
   when:
-    - RKE_ROLE == "control"
+    - >-
+       "rke2_control_nodes" in group_names
 
 - name: configure kubectl
   ansible.builtin.blockinfile:
@@ -25,7 +26,8 @@
     block: |
       export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
   when:
-    - RKE_ROLE == "control"
+    - >-
+       "rke2_control_nodes" in group_names
 
 - name: Ensure udp-checksum-offload-disable.service
   ansible.builtin.copy:
@@ -69,10 +71,11 @@
       present
   when:
     - inventory_hostname not in installed_node_names
-    - RKE_ROLE == "worker"
+    - >-
+       "rke2_workers" in group_names
 
 - epfl_si.rancher.rancher_registration:
-    rancher_manager_url: "https://{{ RKE_INSTALL_SERVER }}"
+    rancher_manager_url: "https://{{ rke2_install_server }}"
     cluster_name: "{{ ansible_rancher_cluster_name }}"
   register: _token_etc
   delegate_to: localhost
@@ -87,7 +90,8 @@
     cmd: "{{ _token_etc.registration.nodeCommand }} --etcd --controlplane"
   when:
     - inventory_hostname not in installed_node_names
-    - RKE_ROLE == "control"
+    - >-
+       "rke2_control_nodes" in group_names
   register: _control_nodes
 
 - name: Configure worker node
@@ -95,7 +99,8 @@
     cmd: "{{ _token_etc.registration.nodeCommand }} --worker"
   when:
     - inventory_hostname not in installed_node_names
-    - RKE_ROLE == "worker"
+    - >-
+       "rke2_workers" in group_names
 
 - when: _control_nodes is changed
   pause:
