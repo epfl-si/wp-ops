@@ -73,7 +73,7 @@
 
 - epfl_si.rancher.rancher_registration:
     rancher_manager_url: "https://{{ RKE_INSTALL_SERVER }}"
-    cluster_name: "{{ wpn_namespace }}"
+    cluster_name: "{{ ansible_rancher_cluster_name }}"
   register: _token_etc
   delegate_to: localhost
   run_once: true
