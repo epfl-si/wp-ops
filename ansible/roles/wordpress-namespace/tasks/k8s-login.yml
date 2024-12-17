@@ -41,7 +41,7 @@
     - register: _rancher_login
       epfl_si.rancher.rancher_login:
     - copy:
-        dest: "kubeconfigs/{{ inventory_hostname }}.yml"
+        dest: "{{ k8s_auth_kubeconfig }}"
         content: >-
           {{ _rancher_login.kubeconfig }}
 
