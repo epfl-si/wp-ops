@@ -18,7 +18,7 @@ COPY --from=wp-base /var/www/.composer/ /var/www/.composer/
 COPY --from=wp-base /var/www/.wp-cli/ /var/www/.wp-cli/
 
 COPY msmtprc /etc/msmtprc
-RUN sed -i 's|^pid = .*|pid = /run/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+RUN sed -i 's|^pid = .*|pid = /tmp/php-fpm.pid|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^;log_level = .*|log_level = notice|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^;log_limit = .*|log_limit = 4096|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
 RUN sed -i 's|^error_log = .*|error_log = /proc/self/fd/2|' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
@@ -27,6 +27,8 @@ COPY php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/local.ini
 
 RUN sed -i 's|^listen = .*|listen = /run/php-fpm/php-fpm.sock|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 RUN echo "listen.mode = 0666" >> /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i 's|listen.owner|; listen.owner|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i 's|listen.group|; listen.group|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 RUN sed -i 's|;access.log = .*|access.log = /dev/null|' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 RUN echo 'catch_workers_output = yes' >> /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
