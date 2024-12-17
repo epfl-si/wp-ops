@@ -83,8 +83,8 @@ nodes:
         RKE_ROLE: worker
 
 clusters:
-  "hosts":
-    wordpress-test:
+  "hosts":   # Not real hosts, hence the scarequotes
+    cluster:rancher-wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
       ansible_connection: local
       ansible_python_interpreter: "{{ ansible_playbook_python }}"
