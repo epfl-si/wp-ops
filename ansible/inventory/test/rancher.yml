@@ -39,5 +39,4 @@ rke2_clusters:
   "hosts":   # Not real hosts, hence the scarequotes
     cluster:rancher-wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
-      ansible_rancher_credentials_file: "kubeconfig-wordpress.yml"
       ansible_rancher_cluster_name: wordpress-test
