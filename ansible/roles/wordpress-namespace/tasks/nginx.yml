@@ -168,14 +168,23 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wpn-nginx:wpn-nginx-php-32
-                args:
+                image: quay-its.epfl.ch/svc0041/wp-nginx:2024-008
+                command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
                   - --controller-class=epfl.ch/ingress-wordpress
                   - --watch-namespace=$(POD_NAMESPACE)
                   - --configmap=$(POD_NAMESPACE)/wp-nginx
                   - --watch-ingress-without-class=false
+                  - --http-port=8000
+                  - --https-port=8443
+                resources:
+                  limits:
+                    cpu: '1'
+                    memory: 1Gi
+                  requests:
+                    cpu: 500m
+                    memory: 512Mi
                 ports:
                   - containerPort: 8000
                     protocol: TCP
@@ -206,7 +215,14 @@
                         apiVersion: v1
                         fieldPath: metadata.namespace
               - name: php
-                image: quay-its.epfl.ch/svc0041/wpn-php:wp66-032
+                image: quay-its.epfl.ch/svc0041/wp-php:2024-008
+                resources:
+                  limits:
+                    cpu: '1'
+                    memory: 1Gi
+                  requests:
+                    cpu: 500m
+                    memory: 512Mi
                 volumeMounts:
                   - name: wp-uploads
                     mountPath: /data/
