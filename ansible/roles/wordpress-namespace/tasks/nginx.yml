@@ -287,7 +287,8 @@
         type: ClusterIP
 
 
-- name: Ingress/wp-nginx
+- when: _routing_managed
+  name: Ingress/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
