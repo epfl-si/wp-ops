@@ -28,6 +28,9 @@
         # (and OKDs) use OLM as the RBAC vehicle instead:
         _rbac_managed: >-
           {{ "rke2_namespaces" in group_names }}
+        # For now, we manage Routes by hand (so as to revert them quickly if need be):
+        _routing_managed: >-
+          {{ "rke2_namespaces" in group_names }}
   tags:
     - wp
     - wp.web
