@@ -39,6 +39,7 @@ metadata:
   name: ${site.ansibleHost.replaceAll("__","-").replaceAll("_", "-")}
   namespace: ${namespace}
 spec:
+  hostname: wpn.fsd.team
   path: ${path}
   owner:
     epfl:
