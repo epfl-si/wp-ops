@@ -16,6 +16,33 @@
     - wp
     - wp.mariadb
 
+- name: Storage (for files)
+  include_tasks:
+    file: storage.yml
+    apply:
+      tags:
+      - wp
+      - wp.storage
+  tags:
+    - wp
+    - wp.storage
+  vars:
+    # Setting up the PV (and managing access to it, so that other
+    # tenants cannot “steal” it from us) is for ITOP-SDDC to manage:
+    _storage_managed: >-
+      {{ inventory_has_cluster_admin | default(False) }}
+
+- name: Serving secrets (for plugins, outgoing SMTP etc.)
+  include_tasks:
+    file: secrets.yml
+    apply:
+      tags:
+      - wp
+      - wp.secrets
+  tags:
+    - wp
+    - wp.secrets
+
 - name: Web server
   include_tasks:
     file: nginx.yml
@@ -36,30 +63,3 @@
     - wp
     - wp.web
     - wp.nginx
-
-- name: Serving secrets (for plugins, outgoing SMTP etc.)
-  include_tasks:
-    file: secrets.yml
-    apply:
-      tags:
-      - wp
-      - wp.secrets
-  tags:
-    - wp
-    - wp.secrets
-
-- name: Storage (for files)
-  include_tasks:
-    file: storage.yml
-    apply:
-      tags:
-      - wp
-      - wp.storage
-  tags:
-    - wp
-    - wp.storage
-  vars:
-    # Setting up the PV (and managing access to it, so that other
-    # tenants cannot “steal” it from us) is for ITOP-SDDC to manage:
-    _storage_managed: >-
-      {{ inventory_has_cluster_admin | default(False) }}
