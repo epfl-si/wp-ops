@@ -17,6 +17,7 @@
           # we want to pretend it costs almost nothing:
           storage: 1Gi
         volumeMode: Filesystem
+        storageClassName: ""
         nfs:
           server: nas-app-ma-nfs1.epfl.ch
           path: /svc0041_si_openshift_app_wwp_test_app/wp-data
@@ -40,6 +41,7 @@
         resources:
           requests:
             storage: 1Gi
+        storageClassName: ""
 
 # During the transition period, we can read from the old volumes:
 
@@ -58,6 +60,7 @@
         capacity:
           storage: 1Gi
         volumeMode: Filesystem
+        storageClassName: ""
         nfs:
           server: nas-app-ma-nfs1.epfl.ch
           path: /si_openshift_app_wwp_app/wordpress
@@ -82,3 +85,4 @@
         resources:
           requests:
             storage: 1Gi
+        storageClassName: ""
