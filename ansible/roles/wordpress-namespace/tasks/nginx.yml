@@ -189,9 +189,8 @@
                   - containerPort: 8000
                     protocol: TCP
                 volumeMounts:
-                  - name: wp-uploads
-                    mountPath: /data/
-                    subPath: wp-uploads
+                  - name: wp-data
+                    mountPath: /wp-data/
                     readOnly: true
                   - name: fpm-socket
                     mountPath: /run/php-fpm
@@ -224,9 +223,8 @@
                     cpu: 500m
                     memory: 512Mi
                 volumeMounts:
-                  - name: wp-uploads
-                    mountPath: /data/
-                    subPath: wp-uploads
+                  - name: wp-data
+                    mountPath: /wp-data/
                   - name: fpm-socket
                     mountPath: /run/php-fpm
             imagePullSecrets:
@@ -235,9 +233,9 @@
             volumes:
               - name: fpm-socket
                 emptyDir: {}
-              - name: wp-uploads
+              - name: wp-data
                 persistentVolumeClaim:
-                  claimName: wp-uploads
+                  claimName: wp-data
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
               # - name: wp-nginx
@@ -310,20 +308,3 @@
                       port:
                         number: 80
 
-
-
-- name: PersistentVolumeClaim/wp-uploads
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: wp-uploads
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        accessModes:
-          - ReadWriteMany
-        resources:
-          requests:
-            storage: 2Gi

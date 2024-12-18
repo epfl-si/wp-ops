@@ -179,7 +179,7 @@ enable_wp_debug();
  */
 define('EPFL_SITE_NAME', $_SERVER['WP_SITE_NAME']);
 // Define the EPFL_WP_UPLOADS constant
-$site_upload_dir = '/data/' . EPFL_SITE_NAME . '/uploads';
+$site_upload_dir = '/wp-data/' . EPFL_SITE_NAME . '/uploads';
 define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 
 // Initialize WordPress' constants. This is best done using

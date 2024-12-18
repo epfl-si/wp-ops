@@ -18,6 +18,7 @@ all_namespaces:
                 insecure: true
             namespace:wordpress-test-in-okd:
               inventory_namespace: wordpress-test
+              inventory_has_cluster_admin: True
               openshift_login:
                 url: https://api.okd-test.fsd.team:6443
                 insecure: true
@@ -32,3 +33,4 @@ all_namespaces:
               ansible_rancher_url: https://rancher-fsd.epfl.ch
               ansible_rancher_cluster_name: wordpress-test
               ansible_user: root
+              inventory_has_cluster_admin: True
