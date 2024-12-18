@@ -51,7 +51,6 @@ ensure_ansible () {
 
 inventory_mode="test"
 inventories () {
-    echo "-i inventory/wordpress-instances.py"
     case "$inventory_mode" in
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
