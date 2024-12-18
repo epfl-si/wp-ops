@@ -1,3 +1,6 @@
+- include_vars: image-vars.yml
+  tags: always
+
 - when: _rbac_managed   # See this variable in main.yml
   name: ServiceAccount/wp-nginx
   kubernetes.core.k8s:
@@ -228,7 +231,7 @@
                   - name: fpm-socket
                     mountPath: /run/php-fpm
             imagePullSecrets:
-              - name: svc0041-rke2-puller-pull-secret
+              - name: "{{ image_pull_secret_name }}"
             restartPolicy: Always
             volumes:
               - name: fpm-socket
