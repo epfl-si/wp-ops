@@ -1,5 +1,6 @@
 
-- name: PersistentVolume/wp-data
+- when: _storage_managed
+  name: PersistentVolume/wp-data
   kubernetes.core.k8s:
     state: present
     definition:
@@ -38,7 +39,8 @@
 
 # During the transition period, we can read from the old volumes:
 
-- name: PersistentVolume/wp-data-ro-openshift3
+- when: _storage_managed
+  name: PersistentVolume/wp-data-ro-openshift3
   kubernetes.core.k8s:
     state: present
     definition:
