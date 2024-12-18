@@ -12,12 +12,18 @@
         accessModes:
         - ReadWriteMany
         capacity:
-          storage: 500Gi
+          # This counts towards our OpenShift quota (despite the
+          # metering happening on different hardware altogether), so
+          # we want to pretend it costs almost nothing:
+          storage: 1Gi
         volumeMode: Filesystem
-        storageClassName: nfs-client
         nfs:
           server: nas-app-ma-nfs1.epfl.ch
           path: /svc0041_si_openshift_app_wwp_test_app/wp-data
+        claimRef:
+          kind: PersistentVolumeClaim
+          namespace: "{{ inventory_namespace }}"
+          name: wp-data
 
 - name: PersistentVolumeClaim/wp-data
   kubernetes.core.k8s:
@@ -33,9 +39,7 @@
           - ReadWriteMany
         resources:
           requests:
-            storage: 500Gi
-        storageClassName: nfs-client
-        volumeName: wp-data
+            storage: 1Gi
 
 # During the transition period, we can read from the old volumes:
 
@@ -52,13 +56,16 @@
         accessModes:
         - ReadOnlyMany
         capacity:
-          storage: 500Gi
+          storage: 1Gi
         volumeMode: Filesystem
-        storageClassName: nfs-client
         nfs:
           server: nas-app-ma-nfs1.epfl.ch
           path: /si_openshift_app_wwp_app/wordpress
           readOnly: true
+        claimRef:
+          kind: PersistentVolumeClaim
+          namespace: "{{ inventory_namespace }}"
+          name: wp-data-ro-openshift3
 
 - name: PersistentVolumeClaim/wp-data-ro-openshift3
   kubernetes.core.k8s:
@@ -74,6 +81,4 @@
           - ReadOnlyMany
         resources:
           requests:
-            storage: 500Gi
-        storageClassName: nfs-client
-        volumeName: wp-data-ro-openshift3
+            storage: 1Gi
