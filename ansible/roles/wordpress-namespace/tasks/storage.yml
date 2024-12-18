@@ -1,0 +1,76 @@
+
+- name: PersistentVolume/wp-data
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: wp-data
+      spec:
+        accessModes:
+        - ReadWriteMany
+        capacity:
+          storage: 500Gi
+        volumeMode: Filesystem
+        storageClassName: nfs-client
+        nfs:
+          server: nas-app-ma-nfs1.epfl.ch
+          path: /svc0041_si_openshift_app_wwp_test_app/wp-data
+
+- name: PersistentVolumeClaim/wp-data
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wp-data
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 500Gi
+        storageClassName: nfs-client
+        volumeName: wp-data
+
+# During the transition period, we can read from the old volumes:
+
+- name: PersistentVolume/wp-data-ro-openshift3
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: wp-data-ro-openshift3
+      spec:
+        accessModes:
+        - ReadOnlyMany
+        capacity:
+          storage: 500Gi
+        volumeMode: Filesystem
+        storageClassName: nfs-client
+        nfs:
+          server: nas-app-ma-nfs1.epfl.ch
+          path: /si_openshift_app_wwp_app/wordpress
+
+- name: PersistentVolumeClaim/wp-data-ro-openshift3
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wp-data-ro-openshift3
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadOnlyMany
+        resources:
+          requests:
+            storage: 500Gi
+        storageClassName: nfs-client
+        volumeName: wp-data-ro-openshift3
