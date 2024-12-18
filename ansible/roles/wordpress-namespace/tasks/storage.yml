@@ -56,6 +56,7 @@
         nfs:
           server: nas-app-ma-nfs1.epfl.ch
           path: /si_openshift_app_wwp_app/wordpress
+          readOnly: true
 
 - name: PersistentVolumeClaim/wp-data-ro-openshift3
   kubernetes.core.k8s:
