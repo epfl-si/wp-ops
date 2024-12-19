@@ -146,6 +146,10 @@
     - /robots.txt
 
     #######################################################
+    ## Random crud in .htaccess
+    - /.well-known
+
+    #######################################################
     ## Vanity URLs
     - /stats
     # Decision: we didn't keep https://www.epfl.ch/kaltura/; it is broken since we switched HSTS on.
