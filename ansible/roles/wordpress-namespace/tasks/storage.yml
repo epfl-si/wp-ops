@@ -1,3 +1,5 @@
+- tags: always
+  include_vars: storage-vars.yml
 
 - when: _storage_managed
   name: PersistentVolume/wp-data
@@ -19,8 +21,8 @@
         volumeMode: Filesystem
         storageClassName: ""
         nfs:
-          server: nas-app-ma-nfs1.epfl.ch
-          path: /svc0041_si_openshift_app_wwp_test_app/wp-data
+          server: "{{ storage_nas[inventory_deployment_stage].nfs_server }}"
+          path:  "{{ storage_nas[inventory_deployment_stage].path }}"
         claimRef:
           kind: PersistentVolumeClaim
           namespace: "{{ inventory_namespace }}"
