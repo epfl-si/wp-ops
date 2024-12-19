@@ -105,8 +105,9 @@
       kind: Route
       metadata:
         name: >-
-          fallback-reverse-proxy-{{ item | regex_replace('[^A-Za-z0-9]', '-') }}
+          fallback-reverse-proxy-{{
                item | regex_replace('[^A-Za-z0-9-]+', '-')
+                    | regex_replace('^-', '')  }}
         namespace: svc0041p-wordpress
         labels:
           route: public
