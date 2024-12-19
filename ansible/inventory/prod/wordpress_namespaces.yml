@@ -11,7 +11,7 @@ all_namespaces:
           vars:
             inventory_deployment_stage: production
           "hosts":   # Not real hosts, hence the scarequotes
-            namespace:svc0041p-wordpress:
+            namespace|svc0041p-wordpress:
               inventory_namespace: svc0041p-wordpress
               openshift_login:
                 url: https://api.ocpitsp0001.xaas.epfl.ch:6443

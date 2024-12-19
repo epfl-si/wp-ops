@@ -37,6 +37,6 @@ rke2_clusters:
     # `epfl_si.rancher` tasks need ssh access.
     ansible_user: root
   "hosts":   # Not real hosts, hence the scarequotes
-    cluster:rancher-wordpress-test:
+    cluster|rancher-wordpress-test:
       ansible_rancher_url: https://rancher-fsd.epfl.ch
       ansible_rancher_cluster_name: wordpress-test

@@ -40,7 +40,8 @@
         - rke2-cluster
 
 - name: Production reverse-proxy to OpenShift 3 (during rollover period)
-  "hosts": svc0041p-wordpress
+  "hosts":
+   - namespace|svc0041p-wordpress
   gather_facts: no
   roles:
     - role: roles/openshift-reverse-proxy

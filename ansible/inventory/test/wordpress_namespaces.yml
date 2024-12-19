@@ -11,12 +11,12 @@ all_namespaces:
           vars:
             inventory_deployment_stage: test
           "hosts":   # Not real hosts, hence the scarequotes
-            namespace:svc0041t-wordpress:
+            namespace|svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
               openshift_login:
                 url: https://api.ocpitst0001.xaas.epfl.ch:6443
                 insecure: true
-            namespace:wordpress-test-in-okd:
+            namespace|wordpress-test-in-okd:
               inventory_namespace: wordpress-test
               inventory_has_cluster_admin: True
               openshift_login:
@@ -28,7 +28,7 @@ all_namespaces:
           vars:
             inventory_deployment_stage: test
           "hosts":   # Ibid.
-            namespace:wordpress-test-in-rancher:
+            namespace|wordpress-test-in-rancher:
               inventory_namespace: wordpress-test
               ansible_rancher_url: https://rancher-fsd.epfl.ch
               ansible_rancher_cluster_name: wordpress-test
