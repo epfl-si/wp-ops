@@ -1,5 +1,4 @@
 - name: "fallback-reverse-proxy Service"
-  tags: "reverseproxy"
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
@@ -19,7 +18,6 @@
 
 - name: "fallback-reverse-proxy Endpoint"
   # Required (for now) to trick HAProxy into doing its job; see https://access.redhat.com/solutions/6992561
-  tags: "reverseproxy"
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
@@ -37,7 +35,6 @@
           protocol: TCP
 
 - name: "fallback-reverse-proxy Route"
-  tags: "reverseproxy"
   kubernetes.core.k8s:
     definition:
       kind: Route
