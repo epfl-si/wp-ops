@@ -15,3 +15,4 @@ all_namespaces:
               inventory_namespace: svc0041p-wordpress
               openshift_login:
                 url: https://api.ocpitsp0001.xaas.epfl.ch:6443
+                insecure: true
