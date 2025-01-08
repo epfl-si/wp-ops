@@ -1,0 +1,24 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Restore
+metadata:
+  namespace: svc0041t-wordpress
+  name: restore
+spec:
+  backupRef:
+    name: backup
+  mariaDbRef:
+    name: mariadb-min
+  s3:
+    bucket: svc0041-b80382f4fba20c6c1d9dc1bebefc5583
+    prefix: backup/wpn
+    endpoint: s3.epfl.ch
+    accessKeyIdSecretKeyRef:
+      name: s3-backup-credentials
+      key: keyId
+    secretAccessKeySecretKeyRef:
+      name: s3-backup-credentials
+      key: accessSecret
+    tls:
+      enabled: true
+  database: wp-db-www
+  targetRecoveryTime: 2025-01-08T12:30:00Z

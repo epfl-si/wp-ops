@@ -1,3 +1,7 @@
+- tags: always
+  include_vars:
+    file : "backup-secrets-{{ inventory_deployment_stage }}.yml"
+
 - name: "`MariaDB/mariadb-min`"
   kubernetes.core.k8s:
     state: present
@@ -17,20 +21,31 @@
         metrics:
           enabled: true
 
-
-- name: "`Database/wordpress-test`"
+- name: "MariaDB cron job for backups"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
-      kind: Database
+      kind: Backup
       metadata:
         namespace: "{{ inventory_namespace }}"
-        name: wordpress-test
+        name: backup-mariadb
       spec:
-        # If you want the database to be created with a different name than the resource name
-        # name: my-logical-database
         mariaDbRef:
           name: mariadb-min
-        characterSet: utf8
-        collate: utf8_general_ci
+        schedule:
+          cron: "0 3 */1 * *"
+          suspend: false
+        storage:
+          s3:
+            bucket: "{{ s3_bucket }}"
+            prefix: backup/wpn
+            endpoint: s3.epfl.ch
+            accessKeyIdSecretKeyRef:
+              name: s3-backup-credentials
+              key: keyId
+            secretAccessKeySecretKeyRef:
+              name: s3-backup-credentials
+              key: accessSecret
+            tls:
+              enabled: true
