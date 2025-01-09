@@ -103,24 +103,7 @@
 
   with_items:
     #######################################################
-    ## URLs diverted by Varnish
-    # ... to Web2010 (`nginx-web2010` deployment)
-    - /accessibility.en.shtml
-    - /accessibility.fr.shtml
-    - /css
-    - /errors
-    - /javascript-help.en.shtml
-    - /javascript-help.fr.shtml
-    - /js
-    - /navigate.en.shtml
-    - /navigate.fr.shtml
-    - /images
-    - /img
-    # Redirected as part of /etc/nginx/conf.d/web2010_nginx.conf on that same Deployment:
-    - /cgi-bin/csoldap
-    - /templates
- 
-    # ... to another Deployment than `httpd-www`
+    ## URLs diverted by Varnish to another Deployment than `httpd-www`
     - /labs
 
     #######################################################
