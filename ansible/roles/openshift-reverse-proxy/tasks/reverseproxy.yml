@@ -115,14 +115,13 @@
     # ... And it comes with a PGP key for some reason?
     - /gpg_key.txt
 
-    - /analytics.txt
     - /cdn-cgi
     - /favicon.ico
     - /fonts
 
     # Not kept:
     # - JSON files and subdirectories matching *menu* are *not* meant to be served.
-    # - /google*.html files are DNS challenges. They are single-use.
+    # - /google*.html and analytics.txt files are DNS challenges. They are single-use.
 
     #######################################################
     ## Pseudo-files formerly served by WordPress itself
