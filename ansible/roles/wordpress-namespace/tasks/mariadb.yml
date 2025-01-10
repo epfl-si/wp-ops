@@ -39,7 +39,7 @@
         storage:
           s3:
             bucket: "{{ s3_bucket }}"
-            prefix: backup/wpn
+            prefix: MariaDB
             endpoint: s3.epfl.ch
             accessKeyIdSecretKeyRef:
               name: s3-backup-credentials
