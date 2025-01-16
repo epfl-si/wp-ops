@@ -1,195 +1,128 @@
 - include_vars: menu-api-vars.yml
   tags: always
+- include_vars: image-vars.yml
+  tags: always
 
-- name: "Testing ImageStreams and their build information for Menu API"
-  when: >-
-    inventory_namespace == "wwp-test"
-  openshift_imagestream:
-    metadata:
-      name: "menu-api-siblings"
-      namespace: "{{ inventory_namespace }}"
-    git:
-      repository: https://github.com/epfl-si/wp-menu-api
-      ref: "master"
-    from: "{{ nodejs_base_image_mirrored_to }}"
-  register: _menu_api_build
-  tags: menu_api.is
-
-- name: "Rebuild {{ menu_api_image_name }} now"
-  when: |
-    (
-    (_menu_api_build | default({})) is changed
-    or
-    ("menu_api.rebuild" in ansible_run_tags)
-    )
-    and 
-    inventory_namespace == "wwp-test"
-  shell: "oc -n {{ inventory_namespace }} start-build --wait {{ menu_api_image_name }}"
-  tags: menu_api.rebuild
-
-- name: menu-api-configmap ConfigMap
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: menu-api-configmap
-      namespace: "{{ inventory_namespace }}"
-    data:
-      menu-api-config.yaml: |
-        WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
-        POD_NAME: "httpd-"
-        SERVICE_PORT: "3001"
-        PATH_REFRESH_FILE: "./data"
-        DEBUG: {{ _debug }}
-        LOCAL_ENV: false
-        REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
-        LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
-        LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
-        ASSOC_BREADCRUMB_EN: |
-          https://www.epfl.ch/campus/en/campusenglish/
-          https://www.epfl.ch/campus/associations/en/student-associations/
-          https://www.epfl.ch/campus/associations/list/en/all-associations/
-        ASSOC_BREADCRUMB_FR: |
-          https://www.epfl.ch/campus/fr/campus/
-          https://www.epfl.ch/campus/associations/fr/associations-detudiants/
-          https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/
-        MENU_BAR_LINKS_EN: |
-          https://www.epfl.ch/about/en/
-          https://www.epfl.ch/education/en/
-          https://www.epfl.ch/research/en/
-          https://www.epfl.ch/innovation/en/
-          https://www.epfl.ch/schools/en/
-          https://www.epfl.ch/campus/en/
-          https://www.epfl.ch/labs/en/
-        MENU_BAR_LINKS_FR: |
-          https://www.epfl.ch/about/fr/
-          https://www.epfl.ch/education/fr/
-          https://www.epfl.ch/research/fr/
-          https://www.epfl.ch/innovation/fr/
-          https://www.epfl.ch/schools/fr/
-          https://www.epfl.ch/campus/fr/
-          https://www.epfl.ch/labs/fr/
-        MENU_BAR_LINKS_DE: |
-          https://www.epfl.ch/about/de/
-          https://www.epfl.ch/education/de/
-          https://www.epfl.ch/research/de/
-          https://www.epfl.ch/innovation/de/
-          https://www.epfl.ch/schools/de/
-          https://www.epfl.ch/campus/de/
-          https://www.epfl.ch/labs/en/
+- name: ConfigMap/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+      data:
+        menu-api-config.yaml: |
+          WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
+          POD_NAME: "httpd-"
+          SERVICE_PORT: "3001"
+          PATH_REFRESH_FILE: "./data"
+          DEBUG: {{ _debug }}
+          LOCAL_ENV: false
+          REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
+          LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
+          LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
+          ASSOC_BREADCRUMB_EN: |
+            https://www.epfl.ch/campus/en/campusenglish/
+            https://www.epfl.ch/campus/associations/en/student-associations/
+            https://www.epfl.ch/campus/associations/list/en/all-associations/
+          ASSOC_BREADCRUMB_FR: |
+            https://www.epfl.ch/campus/fr/campus/
+            https://www.epfl.ch/campus/associations/fr/associations-detudiants/
+            https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/
+          MENU_BAR_LINKS_EN: |
+            https://www.epfl.ch/about/en/
+            https://www.epfl.ch/education/en/
+            https://www.epfl.ch/research/en/
+            https://www.epfl.ch/innovation/en/
+            https://www.epfl.ch/schools/en/
+            https://www.epfl.ch/campus/en/
+            https://www.epfl.ch/labs/en/
+          MENU_BAR_LINKS_FR: |
+            https://www.epfl.ch/about/fr/
+            https://www.epfl.ch/education/fr/
+            https://www.epfl.ch/research/fr/
+            https://www.epfl.ch/innovation/fr/
+            https://www.epfl.ch/schools/fr/
+            https://www.epfl.ch/campus/fr/
+            https://www.epfl.ch/labs/fr/
+          MENU_BAR_LINKS_DE: |
+            https://www.epfl.ch/about/de/
+            https://www.epfl.ch/education/de/
+            https://www.epfl.ch/research/de/
+            https://www.epfl.ch/innovation/de/
+            https://www.epfl.ch/schools/de/
+            https://www.epfl.ch/campus/de/
+            https://www.epfl.ch/labs/en/
   vars:
     _wp_veritas_base_url: >-
-      {{ "wp-veritas.epfl.ch" if inventory_namespace == "wwp"
+      {{ "wp-veritas.epfl.ch" if inventory_namespace == "svc0041p-wordpress"
       else "wp-veritas-test.epfl.ch" }}
     _debug: >-
-      {{ false if inventory_namespace == "wwp"
+      {{ false if inventory_namespace == "svc0041p-wordpress"
       else true }}
   register: _menu_api_config_map
 
-- name: "Redeploy {{ menu_api_image_name }}"
-  when: >-
-    ("menu_api.redeploy" in ansible_run_tags)
-    or
-    ( (_menu_api_config_map | default()) is changed)
-  local_action:
-    module: shell
-    cmd: "oc rollout latest {{ menu_api_image_name }} --namespace {{ inventory_namespace }}"
-  tags:
-    - menu_api.redeploy
+- name: Deployment/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: menu-api
+        template:
+          metadata:
+            labels:
+              app: menu-api
+          spec:
+            containers:
+              - name: menu-api
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-001-{{ inventory_deployment_stage }}"
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 100m
+                    memory: 512Mi
+                volumeMounts:
+                  - name: menu-api
+                    mountPath: /config/
+                ports:
+                  - containerPort: 3001
+            volumes:
+              - name: menu-api
+                configMap:
+                  name: menu-api
+            imagePullSecrets:
+              - name: "{{ image_pull_secret_name }}"
 
-- name: Menu and breadcrumb API DeploymentConfig
-  openshift:
-    apiVersion: apps.openshift.io/v1
-    kind: DeploymentConfig
-    metadata:
-      name: menu-api-siblings
-      namespace: "{{ inventory_namespace }}"
-    spec:
-      replicas: 1
-      selector:
-        deployment-config.name: menu-api-siblings
-      template:
-        metadata:
-          labels:
-            deployment-config.name: menu-api-siblings
-        spec:
-          containers:
-            - name: menu-api-siblings
-              image: 'docker-registry.default.svc:5000/{{ inventory_namespace }}/menu-api-siblings:latest'
-              imagePullPolicy: Always
-              volumeMounts:
-                - name: menu-api-config
-                  mountPath: /config/
-          volumes:
-            - name: menu-api-config
-              configMap:
-                name: menu-api-configmap
-      triggers:
-      - type: ConfigChange
-      - type: ImageChange
-        imageChangeParams:
-          automatic: true
-          containerNames:
-          - menu-api-siblings
-          from:
-            kind: ImageStreamTag
-            name: 'menu-api-siblings:latest'
-            namespace: "{{ inventory_namespace }}"
-  vars:
-    _subpath: "{{ _subpaths[inventory_namespace] }}"
-    _subpaths:
-      wwp-test: .
-      wwp: .
-
-- name: Menu and breadcrumb API Service
-  openshift:
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: menu-api-siblings
-      namespace: "{{ inventory_namespace }}"
-    spec:
-      type: ClusterIP
-      ports:
-        - port: 3001
-          protocol: TCP
-          targetPort: 3001
-      selector:
-        deployment-config.name: menu-api-siblings
-
-# CronJob to refresh the Menu's API cache on a regular basis
-- name: "Installing Menu's API refreshing cronjob"
-  openshift:
-    apiVersion: batch/v1beta1
-    kind: CronJob
-    metadata:
-      name: menu-api-refresh-cron
-      namespace: "{{ inventory_namespace }}"
-    spec:
-      schedule: "*/10 * * * *" # Every 10 minutes, mind the CloudFlare cache
-      concurrencyPolicy: "Forbid" # Do not start a new cron if the previous one is still running
-      jobTemplate:
-        spec:
-          template:
-            spec:
-              containers:
-              - name: menu-api-refresh
-                image: "curlimages/curl:8.9.1"
-                imagePullPolicy: IfNotPresent
-                args:
-                  - /bin/sh
-                  - -ec
-                  - 'curl "http://menu-api-siblings:3001/refresh"'
-              restartPolicy: Never
-  tags:
-    - menu_api.cronjob
-
-- name: "Promote menu-api-siblings images from wwp-test to wwp"
-  when: >-
-    inventory_namespace == 'wwp'
-  tags: menu_api.promote
-  local_action:
-    module: shell
-    cmd: |
-      oc tag wwp-test/menu-api-siblings:latest wwp/menu-api-siblings:latest
+- name: Service/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: menu-api
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+          - port: 3001
+            protocol: TCP
+            targetPort: 3001
+        selector:
+          app: menu-api
+        type: ClusterIP
