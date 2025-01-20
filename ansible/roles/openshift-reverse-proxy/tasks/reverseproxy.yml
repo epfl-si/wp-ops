@@ -106,11 +106,6 @@
     ## URLs diverted by Varnish to another Deployment than `httpd-www`
     - /labs
 
-    #######################################################
-    ## Files and subdirectories formerly served by WordPress' Apache
-
-    - /cdn-cgi
-
     # Not kept:
     # - JSON files and subdirectories matching *menu* are *not* meant to be served.
     # - /google*.html and analytics.txt files are DNS challenges. They are single-use.
