@@ -45,7 +45,7 @@
         mariaDbRef:
           name: "{{ mariadb_name }}"
         schedule:
-          cron: "0 3 */1 * *"
+          cron: "0 1 * * *"
           suspend: false
         storage:
           s3:
