@@ -1,19 +1,30 @@
 - tags: always
   include_vars:
-    file : "backup-secrets-{{ inventory_deployment_stage }}.yml"
+    file : "{{ item }}"
+  with_items: 
+    - mariadb-vars.yml
+    - "backup-secrets-{{ inventory_deployment_stage }}.yml"
 
-- name: "`MariaDB/mariadb-min`"
+- name: "MariaDB/{{ mariadb_name }} with StorageClass {{ storage_class_to_use }}"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: mariadb-min
+        name: "{{ mariadb_name }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
-          size: 2G
+          size: 100Gi
+          storageClassName: "{{ storage_class_to_use }}"
+          volumeClaimTemplate:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            storageClassName: "{{ storage_class_to_use }}"
         rootPasswordSecretKeyRef:
           name: mariadb
           key: root-password
@@ -21,18 +32,18 @@
         metrics:
           enabled: true
 
-- name: "MariaDB cron job for backups"
+- name: "Backup/{{ mariadb_name }} (Backups scheduling)"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Backup
       metadata:
+        name: "{{ mariadb_name }}"
         namespace: "{{ inventory_namespace }}"
-        name: backup-mariadb
       spec:
         mariaDbRef:
-          name: mariadb-min
+          name: "{{ mariadb_name }}"
         schedule:
           cron: "0 3 */1 * *"
           suspend: false
