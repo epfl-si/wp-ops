@@ -109,15 +109,7 @@
     #######################################################
     ## Files and subdirectories formerly served by WordPress' Apache
 
-    # https://www.ncsc.admin.ch/ncsc/fr/home/infos-fuer/infos-unternehmen/aktuelle-themen/security-txt.html
-    # says we should have this?
-    - /security.txt
-    # ... And it comes with a PGP key for some reason?
-    - /gpg_key.txt
-
     - /cdn-cgi
-    - /favicon.ico
-    - /fonts
 
     # Not kept:
     # - JSON files and subdirectories matching *menu* are *not* meant to be served.
@@ -126,10 +118,6 @@
     #######################################################
     ## Pseudo-files formerly served by WordPress itself
     - /robots.txt
-
-    #######################################################
-    ## Random crud in .htaccess
-    - /.well-known
 
     #######################################################
     ## Vanity URLs
