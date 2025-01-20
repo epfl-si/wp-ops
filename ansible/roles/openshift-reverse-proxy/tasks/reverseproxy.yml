@@ -111,10 +111,6 @@
     # - /google*.html and analytics.txt files are DNS challenges. They are single-use.
 
     #######################################################
-    ## Pseudo-files formerly served by WordPress itself
-    - /robots.txt
-
-    #######################################################
     ## Vanity URLs
     - /stats
     # Decision: we didn't keep https://www.epfl.ch/kaltura/; it is broken since we switched HSTS on.
