@@ -63,3 +63,17 @@
     - wp
     - wp.web
     - wp.nginx
+
+- name: Cloudflare Settings
+  include_tasks:
+    file: cloudflare-settings.yml
+    apply:
+      tags:
+      - cloudflare-settings
+  tags:
+    - cloudflare-settings
+    - cloudflare-settings.tls
+    - cloudflare-settings.tls.verify-token
+    - cloudflare-settings.tls.get-ciphers-setting
+    - cloudflare-settings.tls.change-ciphers-setting
+    - cloudflare-settings.tls.reset-ciphers-setting
