@@ -183,11 +183,15 @@
                   - --https-port=8443
                 resources:
                   limits:
-                    cpu: '1'
+                    cpu: 750m
                     memory: 1Gi
                   requests:
-                    cpu: 500m
-                    memory: 512Mi
+                    cpu: >-
+                      {{ "1" if inventory_namespace == "svc0041p-wordpress"
+                      else "20m" }}
+                    memory: >-
+                      {{ "1Gi" if inventory_namespace == "svc0041p-wordpress"
+                      else "256Mi" }}
                 ports:
                   - containerPort: 8000
                     protocol: TCP
@@ -220,11 +224,15 @@
                 image: quay-its.epfl.ch/svc0041/wp-php:2024-012
                 resources:
                   limits:
-                    cpu: '1'
+                    cpu: 750m
                     memory: 1Gi
                   requests:
-                    cpu: 500m
-                    memory: 512Mi
+                    cpu: >-
+                      {{ "1" if inventory_namespace == "svc0041p-wordpress"
+                      else "20m" }}
+                    memory: >-
+                      {{ "1Gi" if inventory_namespace == "svc0041p-wordpress"
+                      else "256Mi" }}
                 volumeMounts:
                   - name: wp-data
                     mountPath: /wp-data/
@@ -310,4 +318,3 @@
                       name: wp-nginx
                       port:
                         number: 80
-
