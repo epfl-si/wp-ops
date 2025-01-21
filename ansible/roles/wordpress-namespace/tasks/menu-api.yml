@@ -18,6 +18,8 @@
           POD_NAME: "httpd-"
           SERVICE_PORT: "3001"
           PATH_REFRESH_FILE: "./data"
+          PATH_SITES_FILE: ""
+          NAMESPACE: "svc0041t-wordpress"
           DEBUG: {{ _debug }}
           LOCAL_ENV: false
           REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
