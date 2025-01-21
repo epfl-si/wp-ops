@@ -238,7 +238,7 @@
                 emptyDir: {}
               - name: wp-data
                 persistentVolumeClaim:
-                  claimName: wp-data
+                  claimName: wordpress-data
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
               # - name: wp-nginx
