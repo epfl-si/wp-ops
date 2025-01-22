@@ -61,3 +61,53 @@
       value: []
   tags:
     - cloudflare-settings.tls.reset-ciphers
+
+- name: Cloudflare Rulesets settings - Verify API token
+  uri:
+    url: "{{ cloudflare_api_url }}/user/tokens/verify"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_rules_settings_token }}"
+  tags:
+    - cloudflare-settings.rulesets.verify-token
+
+- name: Cloudflare Rulesets settings - Get rulesets
+  uri:
+    url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/rulesets"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_rules_settings_token }}"
+  register: rulesets_response
+  tags:
+    - cloudflare-settings.rulesets.list
+
+- name: Cloudflare Rulesets settings - Print rulesets
+  debug:
+    var: rulesets_response.json
+  tags:
+    - cloudflare-settings.rulesets.list
+
+- name: Cloudflare Rulesets settings - Update Response Header Transorm Rules
+  uri:
+    url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/rulesets/{{ cloudflare_http_resp_headers_transf_ruleset_id }}"
+    method: PUT
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cloudflare_api_rules_settings_token }}"
+    body_format: json
+    body:
+      rules:
+        - expression: "(http.host eq \"www.epfl.ch/\")"
+          description: "[API as-code deployed] Set CSP (report-only)"
+          action: "rewrite"
+          action_parameters:
+            headers:
+              content-security-policy-report-only:
+                operation: "set"
+                value: "{{ cloudflare_resp_header_csp_value }}"
+  register: _rulesets_settings_resp_header_transf
+  changed_when: true
+  tags:
+    - cloudflare-settings.rulesets.update-response-header-transform-rules
