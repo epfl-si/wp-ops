@@ -65,6 +65,8 @@
     - wp.nginx
 
 - name: Cloudflare Settings
+  when: >-
+    "openshift_namespaces_prod" in group_names
   include_tasks:
     file: cloudflare-settings.yml
     apply:
