@@ -77,3 +77,7 @@
     - cloudflare-settings.tls.list-ciphers
     - cloudflare-settings.tls.update-ciphers
     - cloudflare-settings.tls.reset-ciphers
+    - cloudflare-settings.rulesets
+    - cloudflare-settings.rulesets.verify-token
+    - cloudflare-settings.rulesets.list
+    - cloudflare-settings.rulesets.update-response-header-transform-rules
