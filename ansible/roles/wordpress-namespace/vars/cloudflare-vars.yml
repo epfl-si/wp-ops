@@ -7,26 +7,49 @@ cloudflare_http_resp_headers_transf_ruleset_id: "{{ _cloudflare_secrets.HTTP_RES
 cloudflare_resp_header_csp_value: >-
    {{ _cloudflare_resp_header_csp | regex_replace('[ \n]+', ' ', multiline=True) }}
 _cloudflare_resp_header_csp: |-
-  default-src 'self' 'unsafe-inline' *.epfl.ch;
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.epfl.ch
-                    https://ajax.googleapis.com
-                    https://cdnjs.cloudflare.com
-                    https://connect.facebook.net
-                    https://platform.twitter.com
-                    https://www.google-analytics.com
-                    https://www.googletagmanager.com
-                    https://www.instagram.com
-                    https://www.youtube.com
-                    https://*.cast.switch.ch
-                    https://player.vimeo.com;
+  default-src 'self' 'unsafe-inline' 
+      *.epfl.ch;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval'
+      *.epfl.ch
+      https://*.cast.switch.ch
+      https://ajax.googleapis.com
+      https://cdnjs.cloudflare.com
+      https://connect.facebook.net
+      https://platform.twitter.com
+      https://player.vimeo.com
+      https://www.google-analytics.com
+      https://www.googletagmanager.com
+      https://www.instagram.com
+      https://www.youtube.com;
   object-src 'none';
-  connect-src 'self' https://*.cast.switch.ch https://*.cloudfront.net *.epfl.ch https://api.cdnjs.com
-    https://*.google-analytics.com https://stats.g.doubleclick.net https://www.google-analytics.com;
-  frame-src 'self' *.epfl.ch https://datawrapper.dwcdn.net https://player.vimeo.com https://api.cast.switch.ch
-    https://platform.twitter.com https://www.instagram.com https://www.youtube.com;
-  style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com *.epfl.ch;
-  font-src 'self' https://fonts.gstatic.com *.epfl.ch data:;
-  media-src 'self' *.epfl.ch https://*.cloudfront.net data:;
-  img-src * data: https://s.w.org https://syndication.twitter.com https://www.google-analytics.com;
+  connect-src 'self'
+      *.epfl.ch
+      https://*.cast.switch.ch
+      https://*.cloudfront.net
+      https://*.google-analytics.com
+      https://api.cdnjs.com
+      https://stats.g.doubleclick.net
+      https://www.google-analytics.com;
+  frame-src 'self' 
+      *.epfl.ch
+      https://api.cast.switch.ch
+      https://datawrapper.dwcdn.net
+      https://platform.twitter.com
+      https://player.vimeo.com
+      https://www.instagram.com
+      https://www.youtube.com;
+  style-src-elem 'self' 'unsafe-inline'
+      *.epfl.ch
+      https://fonts.googleapis.com;
+  font-src 'self' data:
+      *.epfl.ch
+      https://fonts.gstatic.com;
+  media-src 'self' data:
+      *.epfl.ch
+      https://*.cloudfront.net;
+  img-src * data:
+      https://s.w.org
+      https://syndication.twitter.com
+      https://www.google-analytics.com;
   worker-src 'none' blob:;
   report-uri https://report-uri.epfl.ch/csp-report;
