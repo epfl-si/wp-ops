@@ -11,7 +11,7 @@
   tags:
     - cloudflare-settings.tls.verify-token
 
-- name: Cloudflare TLS settings - Get ciphers setting
+- name: Cloudflare TLS settings - Get ciphers
   uri:
     url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/settings/ciphers"
     method: GET
@@ -20,15 +20,15 @@
       Authorization: "Bearer {{ cloudflare_api_tls_settings_token }}"
   register: ciphers_setting_response
   tags:
-    - cloudflare-settings.tls.get-ciphers-setting
+    - cloudflare-settings.tls.list-ciphers
 
-- name: Cloudflare TLS settings - Print ciphers setting
+- name: Cloudflare TLS settings - Print ciphers
   debug:
     var: ciphers_setting_response.json
   tags:
-    - cloudflare-settings.tls.get-ciphers-setting
+    - cloudflare-settings.tls.list-ciphers
 
-- name: Cloudflare TLS settings - Change ciphers setting
+- name: Cloudflare TLS settings - Update ciphers
   uri:
     url: "{{ cloudflare_api_url }}/zones/{{ cloudflare_api_zone_id }}/settings/ciphers"
     method: PATCH
@@ -45,9 +45,9 @@
         - "ECDHE-RSA-AES128-GCM-SHA256"
         - "ECDHE-RSA-CHACHA20-POLY1305"
   tags:
-    - cloudflare-settings.tls.change-ciphers-setting
+    - cloudflare-settings.tls.update-ciphers
 
-- name: Cloudflare TLS settings - Reset ciphers setting
+- name: Cloudflare TLS settings - Reset ciphers
   when: >-
     "cloudflare-settings.tls.reset-ciphers-setting" in ansible_run_tags
   uri:
@@ -60,4 +60,4 @@
     body:
       value: []
   tags:
-    - cloudflare-settings.tls.reset-ciphers-setting
+    - cloudflare-settings.tls.reset-ciphers

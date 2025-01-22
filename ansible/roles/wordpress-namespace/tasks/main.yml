@@ -74,6 +74,6 @@
     - cloudflare-settings
     - cloudflare-settings.tls
     - cloudflare-settings.tls.verify-token
-    - cloudflare-settings.tls.get-ciphers-setting
-    - cloudflare-settings.tls.change-ciphers-setting
-    - cloudflare-settings.tls.reset-ciphers-setting
+    - cloudflare-settings.tls.list-ciphers
+    - cloudflare-settings.tls.update-ciphers
+    - cloudflare-settings.tls.reset-ciphers
