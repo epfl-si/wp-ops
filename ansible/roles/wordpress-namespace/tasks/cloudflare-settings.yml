@@ -99,7 +99,7 @@
     body_format: json
     body:
       rules:
-        - expression: "(http.host eq \"www.epfl.ch/\")"
+        - expression: "(http.host eq \"www.epfl.ch\")"
           description: "[API as-code deployed] Set CSP (report-only)"
           action: "rewrite"
           action_parameters:
