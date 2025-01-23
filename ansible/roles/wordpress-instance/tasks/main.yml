@@ -39,6 +39,20 @@
 # be guarded by a suitable `when:` clause, which ensures that we do
 # nothing if the user already took the matters in their own hands.
 
+- name: Break symlink wp-admin
+  tags:
+    - never  # That is, skip unless "-t wp.wipe" or "-t wp.backup" is
+             # passed on the command line
+    - wp.break-wp-admin-symlink
+    - wp.mig_os4
+  include_tasks:
+    file: "break-wp-admin-symlink.yml"
+    apply:
+      # Tags don't auto-inherit with `include_tasks`:
+      tags:
+        - wp.break-wp-admin-symlink
+        - wp.mig_os4
+
 - name: Backup
   when: >-
     (wp_do_backup | default(True) | bool)
@@ -49,6 +63,7 @@
              # passed on the command line
     - wp.wipe
     - wp.backup
+    - wp.mig_os4
   include_tasks:
     file: "backup.yml"
     apply:
@@ -56,6 +71,7 @@
       tags:
         - wp.wipe
         - wp.backup
+        - wp.mig_os4
 
 - name: Wipe
   import_tasks: "wipe.yml"
