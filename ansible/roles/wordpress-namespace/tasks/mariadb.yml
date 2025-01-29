@@ -47,6 +47,14 @@
         schedule:
           cron: "0 1 * * *"
           suspend: false
+        args:
+          # Note: our volume comes from a NetApp share that have the
+          #       snapshoting acitvated. It creates a `.snapshot` folders in
+          #       every directories, resulting in this error:
+          #         `mariadb-dump: Got error: 1102: "Incorrect database name 
+          #           '#mysql50#.snapshot'" when selecting the database`
+          #      The following line ignore the backups from theses folders.
+          - '--ignore-database=#mysql50#.snapshot'
         resources:
           limits:
             cpu: 300m
