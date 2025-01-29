@@ -1,3 +1,4 @@
 ---
 mariadb_name: mariadb
 storage_class_to_use: wordpress-nfs-db
+number_of_mariadb: 5
