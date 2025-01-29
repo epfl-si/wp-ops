@@ -14,7 +14,7 @@
         namespace: "{{ inventory_namespace }}"
       data:
         menu-api-config.yaml: |
-          WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites"
+          WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites?platform_target=openshift-3"
           POD_NAME: "httpd-"
           SERVICE_PORT: "3001"
           PATH_REFRESH_FILE: "./data"
