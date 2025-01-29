@@ -54,6 +54,8 @@
           requests:
             cpu: 50m
             memory: 64Mi
+        # This is the default:
+        maxRetention: 720h
         storage:
           s3:
             bucket: "{{ s3_bucket }}"
