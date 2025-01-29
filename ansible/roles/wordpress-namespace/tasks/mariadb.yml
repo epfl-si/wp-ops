@@ -5,14 +5,17 @@
     - mariadb-vars.yml
     - "backup-secrets-{{ inventory_deployment_stage }}.yml"
 
-- name: "MariaDB/{{ mariadb_name }} with StorageClass {{ storage_class_to_use }}"
+- name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ storage_class_to_use }}"
+  with_sequence: >-
+    {{ "1-" + number_of_mariadb|string if inventory_namespace == "svc0041p-wordpress"
+        else "1-2" }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: "{{ mariadb_name }}"
+        name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
@@ -33,19 +36,22 @@
           enabled: true
 
 - name: "Backup/{{ mariadb_name }} (Backups scheduling)"
+  with_sequence: >-
+    {{ "1-" + number_of_mariadb|string if inventory_namespace == "svc0041p-wordpress"
+        else "1-2" }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Backup
       metadata:
-        name: "{{ mariadb_name }}"
+        name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         mariaDbRef:
           name: "{{ mariadb_name }}"
         schedule:
-          cron: "0 1 * * *"
+          cron: "0 {{ item|int }} * * *"
           suspend: false
         args:
           # Note: our volume comes from a NetApp share that have the
