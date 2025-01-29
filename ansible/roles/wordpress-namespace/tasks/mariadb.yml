@@ -47,6 +47,13 @@
         schedule:
           cron: "0 1 * * *"
           suspend: false
+        resources:
+          limits:
+            cpu: 300m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         storage:
           s3:
             bucket: "{{ s3_bucket }}"
