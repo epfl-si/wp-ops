@@ -64,6 +64,15 @@
     - wp.web
     - wp.nginx
 
+- name: "Menu API"
+  include_tasks:
+    file: menu-api.yml
+    apply:
+      tags:
+        - menu_api
+  tags:
+    - menu_api
+
 - name: Cloudflare Settings
   when: >-
     "openshift_namespaces_prod" in group_names
