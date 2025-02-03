@@ -51,9 +51,7 @@
   # (or RKE2) namespaces, rather than hosts
   hosts: all_namespaces
   gather_facts: no    # Ansible facts are useless for this play
-  vars:
-    k8s_auth_kubeconfig: >-
-      kubeconfigs/{{ inventory_hostname | regex_replace(':', '__') }}.yml
+  vars_files: ansible-k8s-credentials.yml
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
   roles:
