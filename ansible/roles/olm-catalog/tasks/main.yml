@@ -1,0 +1,28 @@
+# Kubernetes configuration for “cloud” builds
+#
+# Builds happen on the test OpenShift *only.* The images can then be consumed
+# (through the same Quay instance) in both test and production namespaces.
+
+- name: "Build Config Prerequisites"
+  include_tasks:
+    file: buildconfig-prerequisites.yml
+    apply:
+      tags:
+        - images
+
+- tags: always
+  include_vars: ../../../vars/image-vars.yml
+
+- name: "Images and builds"
+  include_tasks:
+    file: isas-fsd-catalog.yml
+    # Because `include_tasks` is dynamic, tags don't auto-inherit:
+    apply:
+      tags:
+        - catalog
+        - catalog.image
+        - images.catalog   # Former name
+  tags:
+    - catalog
+    - catalog.image
+    - images.catalog
