@@ -1,0 +1,27 @@
+- name: Secret for Service Account 'builder'
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        name: builder-pull-secret
+        namespace: "{{ inventory_namespace }}"
+      data:
+        .dockerconfigjson: "{{ builder_pull_secret_config | to_json | b64encode }}"
+
+- name: Service Account for Build Config
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: builder
+        namespace: "{{ inventory_namespace }}"
+      secrets:
+        - name: builder-pull-secret
+      # This is not supposed to be required (it worked without in
+      # OpenShift 4.14); but see
+      # https://access.redhat.com/solutions/7098226
+      imagePullSecrets:
+      - name: builder-pull-secret
