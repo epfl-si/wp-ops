@@ -183,8 +183,8 @@
                   - --https-port=8443
                 resources:
                   limits:
-                    cpu: 750m
-                    memory: 1Gi
+                    cpu: '{{ _request_cpu }}'
+                    memory: '{{ _request_ram }}'
                   requests:
                     cpu: '{{ _request_cpu }}'
                     memory: '{{ _request_ram }}'
@@ -220,15 +220,11 @@
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-005
                 resources:
                   limits:
-                    cpu: 750m
-                    memory: 1Gi
+                    cpu: '{{ _request_cpu }}'
+                    memory: '{{ _request_ram }}'
                   requests:
-                    cpu: >-
-                      {{ "1" if inventory_deployment_stage == "production"
-                      else "20m" }}
-                    memory: >-
-                      {{ "1Gi" if inventory_deployment_stage == "production"
-                      else "256Mi" }}
+                    cpu: '{{ _request_cpu }}'
+                    memory: '{{ _request_ram }}'
                 volumeMounts:
                   - name: wp-data
                     mountPath: /wp-data/
