@@ -54,7 +54,7 @@ spec:
     theme: wp-theme-2018
     languages: ${JSON.stringify(site.languages || [] )}
     plugins: ${determinePlugins(site.categories, site.openshiftEnv)}
-    debug: true
+    debug: ${namespace=='svc0041p-wordpress' ? false : true}
   epfl:
     import:
       sourceType: openshift3
