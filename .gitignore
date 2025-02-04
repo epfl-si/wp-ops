@@ -1,5 +1,6 @@
 ansible/*.json
 ansible/**/*.retry
+ansible/kubeconfigs
 data/wp/wp-content/plugins/epfl.zip
 data/wp/wp-content/themes/wp-theme-2018.zip
 __pycache__
