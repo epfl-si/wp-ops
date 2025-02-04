@@ -68,7 +68,9 @@
             cpu: 300m
             memory: 512Mi
           requests:
-            cpu: 50m
+            cpu: >-
+              {{ "200m" if inventory_deployment_stage == "prod"
+                 else "50m" }}
             memory: 64Mi
         # This is the default:
         maxRetention: 720h
