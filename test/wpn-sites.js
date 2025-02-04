@@ -11,7 +11,12 @@ async function fetchAndFilterSites() {
     const data = await response.json();
 
     // Filter the sites where openshiftEnv is "www" or "labs"
-    let filteredSites = data.filter(site => site.openshiftEnv !== '');
+    // let filteredSites = data.filter(site => site.openshiftEnv !== '');
+    
+    // filter on "labs"
+    let filteredSites = data.filter(site => site.openshiftEnv === 'labs');
+    // without the WPForms plugin
+    filteredSites = filteredSites.filter(site => !site.categories.includes('WPForms'))
     return filteredSites;
   } catch (error) {
     console.error('Error fetching or filtering sites:', error);
