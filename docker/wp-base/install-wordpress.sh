@@ -68,7 +68,7 @@ main () {
     fi
 
     for homemade_or_forked_plugin in \
-        wp-plugin-epfl-coming-soon wordpress.plugin.tequila \
+        wp-plugin-epfl-coming-soon \
         wp-plugin-epfl-settings \
         wp-plugin-epfl-remote-content \
         wp-plugin-epfl-content-filter \
@@ -89,6 +89,7 @@ main () {
         wp-plugin-epfl-courses-se \
         wp-plugin-epfl-restauration \
         wp-plugin-epfl-cache-control \
+        wordpress.plugin.tequila \
         wordpress.plugin.accred ; do
         install_plugin_git https://github.com/epfl-si/$forked_plugin \
                            feature/upgradePHPAndWordpressVersion
