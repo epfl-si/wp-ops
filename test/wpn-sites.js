@@ -24,7 +24,7 @@ async function fetchAndFilterSites() {
 }
 
 const determinePlugins = (categories, openshiftEnv) => {
-  if (['www','labs'].indexOf(openshiftEnv) > -1) {
+  if (['www'].indexOf(openshiftEnv) > -1) {
     categories.push('epfl-menus');
   }
   return JSON.stringify(categories || [])
