@@ -1,7 +1,7 @@
 "use strict";
 var url = require('url');
 
-let namespace = "wordpress-test";
+let namespace = "svc0041p-wordpress"; // svc0041t-wordpress
 
 // Function to fetch and filter the data
 async function fetchAndFilterSites() {
