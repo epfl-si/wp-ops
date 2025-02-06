@@ -1,7 +1,7 @@
 - tags: always
   include_vars:
     file : "{{ item }}"
-  with_items: 
+  with_items:
     - mariadb-vars.yml
     - "backup-secrets-{{ inventory_deployment_stage }}.yml"
 
@@ -15,7 +15,7 @@
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
+        name: "{{ _mariadb_name }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
@@ -29,11 +29,13 @@
                 storage: 1Gi
             storageClassName: "{{ storage_class_to_use }}"
         rootPasswordSecretKeyRef:
-          name: mariadb
+          name: "{{ _mariadb_name }}"
           key: root-password
           generate: true
         metrics:
           enabled: true
+  vars:
+    _mariadb_name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
 
 - name: "Backup/{{ mariadb_name }} (Backups scheduling)"
   with_sequence: >-
@@ -58,7 +60,7 @@
           #       snapshotting acitvated. This means that `.snapshot` folders
           #       pop up randomly in every directory, causing this error:
           #
-          #         `mariadb-dump: Got error: 1102: "Incorrect database name 
+          #         `mariadb-dump: Got error: 1102: "Incorrect database name
           #           '#mysql50#.snapshot'" when selecting the database`
           #
           #       The following line works around that.
