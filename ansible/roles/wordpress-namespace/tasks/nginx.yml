@@ -171,7 +171,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-005
+                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-008
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
@@ -190,6 +190,9 @@
                     memory: '{{ _request_ram }}'
                 ports:
                   - containerPort: 8000
+                    protocol: TCP
+                  - name: php-fpm-metrics
+                    containerPort: 9253
                     protocol: TCP
                 volumeMounts:
                   - name: wp-data
@@ -217,7 +220,7 @@
                         apiVersion: v1
                         fieldPath: metadata.namespace
               - name: php
-                image: quay-its.epfl.ch/svc0041/wp-php:2025-005
+                image: quay-its.epfl.ch/svc0041/wp-php:2025-008
                 resources:
                   limits:
                     cpu: '{{ _request_cpu }}'
@@ -230,6 +233,16 @@
                     mountPath: /wp-data/
                   - name: fpm-socket
                     mountPath: /run/php-fpm
+              - name: php-fpm-exporter
+                image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
+                resources:
+                  requests:
+                    cpu: '{{ _request_cpu_de_minimis }}'
+                    memory: '{{ _request_ram_de_minimis }}'
+                args:
+                  - --phpfpm.fix-process-count
+                  - --log.level
+                  - debug
             imagePullSecrets:
               - name: "{{ image_pull_secret_name }}"
             restartPolicy: Always
@@ -265,11 +278,28 @@
   vars:
     _request_cpu: >-
       {{ "1" if inventory_deployment_stage == "production"
-      else "20m" }}
+      else _request_cpu_de_minimis }}
     _request_ram: >-
       {{ "1Gi" if inventory_deployment_stage == "production"
-      else "256Mi" }}
+      else _request_ram_de_minimis }}
+    _request_cpu_de_minimis: "20m"
+    _request_ram_de_minimis: "256Mi"
 
+- name: PodMonitor/wp-nginx
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: PodMonitor
+      metadata:
+        name: wp-nginx
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: wp-nginx
+        podMetricsEndpoints:
+          - port: php-fpm-metrics
 
 - name: Service/wp-nginx
   kubernetes.core.k8s:
