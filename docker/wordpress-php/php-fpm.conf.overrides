@@ -1,0 +1,6 @@
+;; EPFL-specific overrides to global php-fpm configuration
+
+pid = /tmp/php-fpm.pid
+log_level = notice
+log_limit = 4096
+error_log = /proc/self/fd/2
