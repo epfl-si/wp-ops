@@ -7,3 +7,5 @@ listen = /run/php-fpm/php-fpm.sock
 listen.mode = 0666
 access.log = /dev/null
 catch_workers_output = yes
+pm.status_path = /status
+pm.status_listen = 9000
