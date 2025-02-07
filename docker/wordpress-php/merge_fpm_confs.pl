@@ -29,6 +29,11 @@ while(my $line = <$orig>) {
     next if $overridden{$setting};
   }
   print $line;
+
+  if ($line =~ m/^\[global\]/) {
+    print($_) for (@override_lines);
+    @override_lines = ();
+  }
 }
 
 print($_) for (@override_lines);
