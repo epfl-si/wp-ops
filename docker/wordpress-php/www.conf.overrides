@@ -1,0 +1,9 @@
+;; EPFL-specific overrides to per-pool php-fpm configuration
+
+listen = /run/php-fpm/php-fpm.sock
+;; listen.owner is unset
+;; listen.group is unset
+
+listen.mode = 0666
+access.log = /dev/null
+catch_workers_output = yes
