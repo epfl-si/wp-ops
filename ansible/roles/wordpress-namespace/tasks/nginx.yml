@@ -219,6 +219,8 @@
                       fieldRef:
                         apiVersion: v1
                         fieldPath: metadata.namespace
+                  - name: MENU_API_HOST
+                    value: "menu-api"
               - name: php
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-011
                 resources:
