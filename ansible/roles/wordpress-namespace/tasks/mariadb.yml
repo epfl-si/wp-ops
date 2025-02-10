@@ -49,7 +49,7 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         mariaDbRef:
-          name: "{{ mariadb_name }}"
+          name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
         schedule:
           cron: "0 {{ item|int }} * * *"
           suspend: false
