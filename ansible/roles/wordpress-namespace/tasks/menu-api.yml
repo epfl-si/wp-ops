@@ -14,15 +14,13 @@
         namespace: "{{ inventory_namespace }}"
       data:
         menu-api-config.yaml: |
-          WPVERITAS_URL: "https://{{ _wp_veritas_base_url }}/api/v1/sites?platform_target=openshift-3"
-          POD_NAME: "httpd-"
+          POD_NAME: ""
           SERVICE_PORT: "3001"
           PATH_REFRESH_FILE: "./data"
           PATH_SITES_FILE: ""
           NAMESPACE: "{{ inventory_namespace }}"
           DEBUG: {{ _debug }}
           LOCAL_ENV: false
-          REST_URL_END: "wp-json/epfl/v1/menus/top?lang="
           LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
           LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
           ASSOC_BREADCRUMB_EN: |
