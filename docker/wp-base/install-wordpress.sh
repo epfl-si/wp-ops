@@ -135,7 +135,7 @@ install_mu_plugins () {
     (
         cd $targetdir/wp-content
         rm -rf mu-plugins
-        git clone -b feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-mu-plugins mu-plugins
+        git clone -b WPN https://github.com/epfl-si/wp-mu-plugins mu-plugins
     )
 }
 
