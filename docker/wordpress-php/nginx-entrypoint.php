@@ -178,7 +178,8 @@ enable_wp_debug();
  * k8s's WordPress object.
  */
 define('EPFL_SITE_NAME', $_SERVER['WP_SITE_NAME']);
-// Define the EPFL_WP_UPLOADS constant
+// Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the corresponding
+// filter in our mu-plugins:
 $site_upload_dir = '/wp-data/' . EPFL_SITE_NAME . '/uploads';
 define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 
