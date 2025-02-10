@@ -77,7 +77,7 @@
         storage:
           s3:
             bucket: "{{ s3_bucket }}"
-            prefix: MariaDB
+            prefix: "MariaDB-{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
             endpoint: s3.epfl.ch
             accessKeyIdSecretKeyRef:
               name: s3-backup-credentials
