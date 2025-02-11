@@ -302,6 +302,21 @@
     _request_cpu_de_minimis: "20m"
     _request_ram_de_minimis: "256Mi"
 
+- name: PodDisruptionBudget/wp-nginx
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: wp-nginx
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        minAvailable: 1
+        selector:
+          matchLabels:
+            app: wp-nginx
+
 - name: PodMonitor/wp-nginx
   kubernetes.core.k8s:
     state: present
