@@ -7,9 +7,8 @@ RUN set -e -x; \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
     add-apt-repository ppa:ondrej/php ; \
     apt -qy update ; \
-    apt -qy install php${PHP_VERSION}-fpm php${PHP_VERSION}-cli php${PHP_VERSION}-curl php${PHP_VERSION}-gd php${PHP_VERSION}-ldap    \
-    php${PHP_VERSION}-mbstring php${PHP_VERSION}-mysql php${PHP_VERSION}-xml php${PHP_VERSION}-zip ;                                                 \
-    apt-get -qy autoremove ;                                          \
+    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip}' ; \
+    apt-get -qy autoremove ; \
     apt-get clean
 
 COPY --from=wp-base /wp /wp
