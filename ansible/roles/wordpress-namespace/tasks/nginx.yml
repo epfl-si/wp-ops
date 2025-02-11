@@ -182,9 +182,6 @@
                   - --http-port=8000
                   - --https-port=8443
                 resources:
-                  limits:
-                    cpu: '{{ _request_cpu }}'
-                    memory: '{{ _request_ram }}'
                   requests:
                     cpu: '{{ _request_cpu }}'
                     memory: '{{ _request_ram }}'
@@ -222,9 +219,6 @@
               - name: php
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-011
                 resources:
-                  limits:
-                    cpu: '{{ _request_cpu }}'
-                    memory: '{{ _request_ram }}'
                   requests:
                     cpu: '{{ _request_cpu }}'
                     memory: '{{ _request_ram }}'
