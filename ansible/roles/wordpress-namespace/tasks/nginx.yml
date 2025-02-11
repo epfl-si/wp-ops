@@ -167,6 +167,13 @@
             labels:
               app: wp-nginx
           spec:
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  - labelSelector:
+                      matchLabels:
+                        app: wp-nginx
+                    topologyKey: kubernetes.io/hostname
             serviceAccountName: wp-nginx
             automountServiceAccountToken: false
             containers:
