@@ -20,6 +20,7 @@ RUN chmod 666 /etc/nginx/nginx.conf
 
 USER 101
 
+COPY  prometheus.lua /usr/local/lib/lua/prometheus.lua
 COPY --from=openresty /usr/local/openresty/nginx/sbin/nginx /usr/bin/nginx
 COPY --from=openresty /usr/local/openresty /usr/local/openresty
 COPY --from=wp-base /wp /wp
