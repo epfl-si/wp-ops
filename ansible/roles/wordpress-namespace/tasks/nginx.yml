@@ -174,6 +174,13 @@
                       matchLabels:
                         app: wp-nginx
                     topologyKey: kubernetes.io/hostname
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  - weight: 100
+                    podAffinityTerm:
+                      labelSelector:
+                        matchLabels:
+                          app: wp-nginx
+                      topologyKey: topology.kubernetes.io/zone
             serviceAccountName: wp-nginx
             automountServiceAccountToken: false
             containers:
