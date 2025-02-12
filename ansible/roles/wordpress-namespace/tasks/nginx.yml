@@ -196,6 +196,7 @@
                   - --http-port=8000
                   - --https-port=8443
                 resources:
+                  limits: "{{ _limits_for_prod_only }}"
                   requests:
                     cpu: '{{ _request_cpu }}'
                     memory: '{{ _request_ram }}'
@@ -235,6 +236,7 @@
               - name: php
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-011
                 resources:
+                  limits: "{{ _limits_for_prod_only }}"
                   requests:
                     cpu: '{{ _request_cpu }}'
                     memory: '{{ _request_ram }}'
@@ -249,6 +251,8 @@
                   requests:
                     cpu: '{{ _request_cpu_de_minimis }}'
                     memory: '{{ _request_ram_de_minimis }}'
+                  # This fits under the default (LimitRange-imposed) limits
+                  # even for production; so we don't need `limits:` here.
                 args:
                   - --phpfpm.fix-process-count
                   - --log.level
@@ -292,6 +296,9 @@
     _request_ram: >-
       {{ "1Gi" if inventory_deployment_stage == "production"
       else _request_ram_de_minimis }}
+    _limits_for_prod_only: >-
+      {{ {} if inventory_deployment_stage != "production"
+         else { "cpu": _request_cpu, "memory": _request_ram } }}
     _request_cpu_de_minimis: "20m"
     _request_ram_de_minimis: "256Mi"
 
