@@ -172,11 +172,9 @@ setup_nonces();
 
 enable_wp_debug();
 
-/**
- * Define the EPFL_SITE_NAME
- * This match the `site['metadata']['name']` to the 
- * k8s's WordPress object.
- */
+// Define the EPFL_SITE_NAME
+// This match the `site['metadata']['name']` to the 
+// k8s's WordPress object.
 define('EPFL_SITE_NAME', $_SERVER['WP_SITE_NAME']);
 // Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the corresponding
 // filter in our mu-plugins:
