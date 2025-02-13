@@ -175,6 +175,10 @@ enable_wp_debug();
 // This is 2025. We don't do plain HTTP anymore.
 $_SERVER['HTTPS'] = '1';
 
+// Disable the auto-updater and other portions of WordPress that want
+// to alter their own PHP code:
+define('DISALLOW_FILE_MODS', 1);
+
 // Define the EPFL_SITE_NAME
 // This match the `site['metadata']['name']` to the 
 // k8s's WordPress object.
