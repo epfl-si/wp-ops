@@ -1,3 +1,9 @@
+route_main_hostname: >-
+  {{ "www.epfl.ch" if inventory_deployment_stage == "production"
+     else "wpn-test.epfl.ch" }}
+
+######## OpenShift 3 stuff (obsolescent) below
+
 static_routes:
   wwp:
     - name: httpd-www

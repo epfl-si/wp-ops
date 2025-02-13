@@ -3,6 +3,9 @@
 - include_vars: image-vars.yml
   tags: always
 
+- include_vars: routes-vars.yml
+  tags: always
+
 - name: Deployment/redirects
   kubernetes.core.k8s:
     state: present
@@ -87,3 +90,29 @@
         selector:
           app: redirects
         type: ClusterIP
+
+- name: Route/redirects
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Route
+      metadata:
+        name: redirects
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          route: public
+        annotations:
+          haproxy.router.openshift.io/balance: roundrobin
+          haproxy.router.openshift.io/disable_cookies: "true"
+      spec:
+        host: "{{ route_main_hostname }}"
+        path: /campus/associations/list/
+        port:
+          targetPort: "web"
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+        to:
+          kind: Service
+          name: redirects
