@@ -73,6 +73,17 @@
   tags:
     - menu_api
 
+- name: Redirections microservice
+  include_tasks:
+    file: redirects.yml
+    apply:
+      tags:
+        - wp
+        - wp.redirects
+  tags:
+    - wp
+    - wp.redirects
+
 - name: Cloudflare Settings
   when: >-
     "openshift_namespaces_prod" in group_names

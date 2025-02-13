@@ -1,0 +1,89 @@
+# Redirects-not-as-a-service (as in, if you want to add more, you need to rebuild an image and other fumigations)
+
+- include_vars: image-vars.yml
+  tags: always
+
+- name: Deployment/redirects
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: redirects
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1  # XXX Set to 2
+        selector:
+          matchLabels:
+            app: redirects
+        template:
+          metadata:
+            labels:
+              app: redirects
+          spec:
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  - topologyKey: kubernetes.io/hostname
+                    labelSelector:
+                      matchLabels:
+                        app: redirects
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  - weight: 100
+                    podAffinityTerm:
+                      topologyKey: topology.kubernetes.io/zone
+                      labelSelector:
+                        matchLabels:
+                          app: redirects
+            containers:
+              - name: apache
+                image: quay-its.epfl.ch/svc0041/apache-redirects:2025-001
+                imagePullPolicy: Always  # XXX
+                resources:
+                  limits: "{{ _limits_for_prod_only }}"
+                  requests:
+                    cpu: '{{ _request_cpu }}'
+                    memory: '{{ _request_ram }}'
+                ports:
+                  - name: web
+                    containerPort: 8080
+                    protocol: TCP
+            imagePullSecrets:
+              - name: "{{ image_pull_secret_name }}"
+            restartPolicy: Always
+  vars:
+    _request_cpu: >-
+      {{ "0.1" if inventory_deployment_stage == "production"
+      else _request_cpu_de_minimis }}
+    _request_ram: >-
+      {{ "128Mi" if inventory_deployment_stage == "production"
+      else _request_ram_de_minimis }}
+    _limits_for_prod_only: >-
+      {{ {} if inventory_deployment_stage != "production"
+         else { "cpu": _request_cpu, "memory": _request_ram } }}
+    _request_cpu_de_minimis: "20m"
+    _request_ram_de_minimis: "256Mi"
+
+- name: Service/redirects
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: redirects
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: redirects
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: web
+          port: 80
+          protocol: TCP
+          targetPort: web
+        selector:
+          app: redirects
+        type: ClusterIP
