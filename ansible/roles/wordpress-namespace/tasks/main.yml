@@ -92,3 +92,12 @@
     - cloudflare-settings.rulesets.verify-token
     - cloudflare-settings.rulesets.list
     - cloudflare-settings.rulesets.update-response-header-transform-rules
+
+- name: Grafana
+  include_tasks:
+    file: grafana.yml
+    apply:
+      tags:
+      - grafana
+  tags:
+    - grafana
