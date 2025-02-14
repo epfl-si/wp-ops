@@ -20,24 +20,26 @@
             title: "{{ _foldername }}"
 
     - name: "ConfigMap for GrafanaDashboard/WPN"
+      loop: "{{ lookup('fileglob', '../templates/grafana/*.json', wantlist=True) }}"
       kubernetes.core.k8s:
         definition:
           apiVersion: v1
           kind: ConfigMap
           metadata:
-            name: grafana-dashboard-wpn
+            name: "grafana-dashboard-{{ item[:-5] | basename | lower }}"
             namespace: "{{ inventory_namespace }}"
           data:
-            json: "{{ lookup('template', 'grafana/WPN.json') }}"
+            json: "{{ lookup('template', 'grafana/' + item | basename ) }}"
 
     - name: "GrafanaDashboard/WPN"
+      loop: "{{ lookup('fileglob', '../templates/grafana/*.json', wantlist=True) }}"
       kubernetes.core.k8s:
         state: present
         definition:
           kind: GrafanaDashboard
           apiVersion: grafana.integreatly.org/v1beta1
           metadata:
-            name: wpn
+            name: "{{ item[:-5] | basename | lower }}"
             namespace: "{{ inventory_namespace }}"
           spec:
             allowCrossNamespaceImport: true
@@ -46,5 +48,5 @@
                 dashboards: grafana-prod
             folder: "{{ _foldername }}"
             configMapRef:
-              name: grafana-dashboard-wpn
+              name: "grafana-dashboard-{{ item[:-5] | basename | lower }}"
               key: json
