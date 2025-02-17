@@ -206,7 +206,7 @@
                   - name: php-fpm-metrics
                     containerPort: 9253
                     protocol: TCP
-                  - name: ngnix-metrics
+                  - name: nginx-metrics
                     containerPort: 9145
                     protocol: TCP  
                 volumeMounts:
@@ -335,6 +335,7 @@
             app: wp-nginx
         podMetricsEndpoints:
           - port: php-fpm-metrics
+          - port: nginx-metrics
 
 - name: Service/wp-nginx
   kubernetes.core.k8s:
