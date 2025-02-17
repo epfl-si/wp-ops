@@ -94,11 +94,8 @@ main () {
                            feature/upgradePHPAndWordpressVersion
     done
 
-    for forked_plugin in \
-            wp-plugin-epfl-menus  ; do
-            install_plugin_git https://github.com/epfl-si/$forked_plugin \
+    install_plugin_git https://github.com/epfl-si/wp-plugin-epfl-menus \
                                feature/nginx
-        done
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
