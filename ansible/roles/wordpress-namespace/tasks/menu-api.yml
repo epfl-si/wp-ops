@@ -98,6 +98,15 @@
                     mountPath: /config/
                 ports:
                   - containerPort: 3001
+                readinessProbe:
+                  httpGet:
+                    path: /metrics
+                    port: 3001
+                  failureThreshold: 10  # 5 minutes - Time enough to scrape the whole fleet
+                livenessProbe:
+                  httpGet:
+                    path: /metrics
+                    port: 3001
             volumes:
               - name: menu-api
                 configMap:
