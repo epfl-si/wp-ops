@@ -98,11 +98,11 @@
                     mountPath: /config/
                 ports:
                   - containerPort: 3001
-                readinessProbe:
+                startupProbe:
                   httpGet:
                     path: /metrics
                     port: 3001
-                  failureThreshold: 10  # 5 minutes - Time enough to scrape the whole fleet
+                  failureThreshold: 30  # 5 minutes - Time enough to scrape the whole fleet
                 livenessProbe:
                   httpGet:
                     path: /metrics
