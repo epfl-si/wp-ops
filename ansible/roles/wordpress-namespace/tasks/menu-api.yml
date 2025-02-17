@@ -83,9 +83,10 @@
             labels:
               app: menu-api
           spec:
+            serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-001-{{ inventory_deployment_stage }}"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-004-{{ inventory_deployment_stage }}"
                 resources:
                   limits:
                     cpu: 500m
@@ -135,3 +136,47 @@
         selector:
           app: menu-api
         type: ClusterIP
+
+
+- name: ServiceAccount/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+
+- name: Role/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ['wordpress.epfl.ch']
+          resources:
+            - wordpresssites
+          verbs: ['get', 'list', 'watch']
+
+- name: RoleBinding/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: menu-api
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: menu-api
