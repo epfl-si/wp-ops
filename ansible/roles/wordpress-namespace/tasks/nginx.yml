@@ -206,6 +206,9 @@
                   - name: php-fpm-metrics
                     containerPort: 9253
                     protocol: TCP
+                  - name: ngnix-metrics
+                    containerPort: 9145
+                    protocol: TCP  
                 volumeMounts:
                   - name: wp-data
                     mountPath: /wp-data/

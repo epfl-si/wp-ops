@@ -18,9 +18,13 @@ RUN chmod 666 /etc/nginx/nginx.conf
 ## Uncomment the following line if you want to test out your RBAC live:
 # COPY --from=bitnami/kubectl:latest /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
 
+COPY ./prometheus/prometheus.lua /etc/nginx/lua/prometheus.lua
+COPY ./prometheus/prometheus_keys.lua /etc/nginx/lua/prometheus_keys.lua
+COPY ./prometheus/prometheus_resty_counter.lua /etc/nginx/lua/prometheus_resty_counter.lua
+RUN chown www-data:www-data /etc/nginx/lua/prometheus.lua /etc/nginx/lua/prometheus_keys.lua /etc/nginx/lua/prometheus_resty_counter.lua
+
 USER 101
 
-COPY  prometheus.lua /usr/local/lib/lua/prometheus.lua
 COPY --from=openresty /usr/local/openresty/nginx/sbin/nginx /usr/bin/nginx
 COPY --from=openresty /usr/local/openresty /usr/local/openresty
 COPY --from=wp-base /wp /wp
