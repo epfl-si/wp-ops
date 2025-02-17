@@ -185,7 +185,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-019
+                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-020
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
@@ -236,7 +236,7 @@
                         apiVersion: v1
                         fieldPath: metadata.namespace
               - name: php
-                image: quay-its.epfl.ch/svc0041/wp-php:2025-019
+                image: quay-its.epfl.ch/svc0041/wp-php:2025-020
                 env:
                   - name: MENU_API_HOST
                     value: "menu-api"
