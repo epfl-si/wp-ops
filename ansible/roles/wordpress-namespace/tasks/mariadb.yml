@@ -28,6 +28,11 @@
               requests:
                 storage: 1Gi
             storageClassName: "{{ storage_class_to_use }}"
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 600Mi
         rootPasswordSecretKeyRef:
           name: mariadb
           key: root-password
