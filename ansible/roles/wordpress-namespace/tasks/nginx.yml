@@ -185,7 +185,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-023
+                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-024
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
@@ -237,7 +237,7 @@
                   - name: MENU_API_HOST
                     value: "menu-api"
               - name: php
-                image: quay-its.epfl.ch/svc0041/wp-php:2025-023
+                image: quay-its.epfl.ch/svc0041/wp-php:2025-024
                 resources:
                   limits: "{{ _limits_for_prod_only }}"
                   requests:

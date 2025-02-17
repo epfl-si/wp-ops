@@ -111,8 +111,6 @@ http {
 	# prometheus lua nginx metrics
 	server {
 		listen 9145;
-		allow 127.0.0.1;
-		deny all;
 		location /metrics {
 			content_by_lua_block {
 				metric_connections:set(ngx.var.connections_reading, {"reading"})
