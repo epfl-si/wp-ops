@@ -215,10 +215,6 @@
                   - name: kube-api-access
                     mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                     readOnly: true
-                  - name: wordpress-authentication
-                    mountPath: /wp-nonces/wp-nonces.php
-                    subPath: wp-nonces.php
-                    readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
                   # - name: wp-nginx
@@ -249,6 +245,10 @@
                     mountPath: /wp-data/
                   - name: fpm-socket
                     mountPath: /run/php-fpm
+                  - name: wordpress-authentication
+                    mountPath: /wp-nonces/wp-nonces.php
+                    subPath: wp-nonces.php
+                    readOnly: true
               - name: php-fpm-exporter
                 image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
                 resources:
