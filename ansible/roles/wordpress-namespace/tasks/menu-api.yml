@@ -87,7 +87,7 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-004-{{ inventory_deployment_stage }}"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-004"
                 resources:
                   limits:
                     cpu: 500m
