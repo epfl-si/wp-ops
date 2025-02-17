@@ -5,7 +5,7 @@
     - mariadb-vars.yml
     - "backup-secrets-{{ inventory_deployment_stage }}.yml"
 
-- name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ storage_class_to_use }}"
+- name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ mariadb_storage_class }}"
   with_sequence: >-
     {{ "1-" + number_of_mariadb|string if inventory_namespace == "svc0041p-wordpress"
         else "1-2" }}
@@ -20,14 +20,14 @@
       spec:
         storage:
           size: 1Gi
-          storageClassName: "{{ storage_class_to_use }}"
+          storageClassName: "{{ mariadb_storage_class }}"
           volumeClaimTemplate:
             accessModes:
               - ReadWriteOnce
             resources:
               requests:
                 storage: 1Gi
-            storageClassName: "{{ storage_class_to_use }}"
+            storageClassName: "{{ mariadb_storage_class }}"
         resources:
           requests:
             memory: 512Mi
