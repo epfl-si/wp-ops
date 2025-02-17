@@ -249,8 +249,7 @@
                   - name: fpm-socket
                     mountPath: /run/php-fpm
                   - name: wordpress-authentication
-                    mountPath: /wp-nonces/wp-nonces.php
-                    subPath: wp-nonces.php
+                    mountPath: /wp-nonces
                     readOnly: true
               - name: php-fpm-exporter
                 image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
