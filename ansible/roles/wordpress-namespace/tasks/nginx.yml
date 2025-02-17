@@ -215,6 +215,10 @@
                   - name: kube-api-access
                     mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                     readOnly: true
+                  - name: wordpress-authentication
+                    mountPath: /wp-nonces/wp-nonces.php
+                    subPath: wp-nonces.php
+                    readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
                   # - name: wp-nginx
@@ -289,6 +293,9 @@
                           apiVersion: v1
                           fieldPath: metadata.namespace
                         path: namespace
+              - name: wordpress-authentication
+                secret:
+                  secretName: wordpress-authentication
   vars:
     _request_cpu: >-
       {{ "1" if inventory_deployment_stage == "production"
