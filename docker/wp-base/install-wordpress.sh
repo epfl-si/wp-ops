@@ -124,7 +124,7 @@ install_themes () {
     (
         cd $targetdir/wp-content
         rm -rf themes
-        git clone -b WPN https://github.com/epfl-si/wp-theme-2018 themes
+        git clone -b feature/upgradePHPAndWordpressVersion https://github.com/epfl-si/wp-theme-2018 themes
     )
 }
 
