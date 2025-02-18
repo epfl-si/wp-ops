@@ -1,15 +1,28 @@
 - include_vars: s3_secrets_vars.yml
   tags: always
 
-- name: ConfigMap/wp-operator
+- name: ConfigMap/s3-configmap-for-os4
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: wp-operator
+        name: s3-configmap-for-os4
         namespace: "{{ inventory_namespace }}"
       data:
         s3_bucket_name: "{{ s3_bucket['os4'][inventory_deployment_stage]['bucket_name'] }}"
         path: "{{ s3_bucket['os4'][inventory_deployment_stage]['path'] }}"
+
+- name: ConfigMap/s3-configmap-for-os3
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: s3-configmap-for-os3
+        namespace: "{{ inventory_namespace }}"
+      data:
+        s3_bucket_name: "{{ s3_bucket['os3']['production']['bucket_name'] }}"
+        path: "{{ s3_bucket['os3']['production']['path'] }}"
