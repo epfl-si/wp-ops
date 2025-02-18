@@ -1,9 +1,9 @@
 - tags: always
   include_vars:
     file : "{{ item }}"
-  with_items: 
+  with_items:
     - mariadb-vars.yml
-    - "backup-secrets-{{ inventory_deployment_stage }}.yml"
+    - s3_secrets_vars.yml
 
 - name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ mariadb_storage_class }}"
   with_sequence: >-
@@ -63,7 +63,7 @@
           #       snapshotting acitvated. This means that `.snapshot` folders
           #       pop up randomly in every directory, causing this error:
           #
-          #         `mariadb-dump: Got error: 1102: "Incorrect database name 
+          #         `mariadb-dump: Got error: 1102: "Incorrect database name
           #           '#mysql50#.snapshot'" when selecting the database`
           #
           #       The following line works around that.
@@ -74,21 +74,21 @@
             memory: 512Mi
           requests:
             cpu: >-
-              {{ "200m" if inventory_deployment_stage == "prod"
+              {{ "200m" if inventory_deployment_stage == "production"
                  else "50m" }}
             memory: 64Mi
         # This is the default:
         maxRetention: 720h
         storage:
           s3:
-            bucket: "{{ s3_bucket }}"
+            bucket: "{{ s3_bucket['os4'][inventory_deployment_stage]['bucket_name'] }}"
             prefix: "MariaDB-{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
             endpoint: s3.epfl.ch
             accessKeyIdSecretKeyRef:
-              name: s3-backup-credentials
+              name: s3-credentials-for-os4
               key: keyId
             secretAccessKeySecretKeyRef:
-              name: s3-backup-credentials
+              name: s3-credentials-for-os4
               key: accessSecret
             tls:
               enabled: true
