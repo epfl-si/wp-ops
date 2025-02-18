@@ -73,6 +73,15 @@
   tags:
     - menu_api
 
+- name: "WP_Operator"
+  include_tasks:
+    file: wp-operator.yml
+    apply:
+      tags:
+        - wp_operator
+  tags:
+    - wp_operator
+
 - name: Cloudflare Settings
   when: >-
     "openshift_namespaces_prod" in group_names
