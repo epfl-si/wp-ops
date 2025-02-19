@@ -78,9 +78,9 @@
     file: wp-operator.yml
     apply:
       tags:
-        - wp_operator
+        - wp.operator
   tags:
-    - wp_operator
+    - wp.operator
 
 - name: Cloudflare Settings
   when: >-
