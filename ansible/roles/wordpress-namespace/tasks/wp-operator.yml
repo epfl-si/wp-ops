@@ -1,4 +1,4 @@
-- include_vars: s3_secrets_vars.yml
+- include_vars: s3-secrets-vars.yml
   tags: always
 
 - name: ConfigMap/s3-configmap-for-os4
@@ -11,8 +11,8 @@
         name: s3-configmap-for-os4
         namespace: "{{ inventory_namespace }}"
       data:
-        s3_bucket_name: "{{ s3_bucket['os4'][inventory_deployment_stage]['bucket_name'] }}"
-        path: "{{ s3_bucket['os4'][inventory_deployment_stage]['path'] }}"
+        s3_bucket_name: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
+        path: "{{ s3_buckets['os4'][inventory_deployment_stage]['path'] }}"
 
 - name: ConfigMap/s3-configmap-for-os3
   kubernetes.core.k8s:
@@ -24,5 +24,5 @@
         name: s3-configmap-for-os3
         namespace: "{{ inventory_namespace }}"
       data:
-        s3_bucket_name: "{{ s3_bucket['os3']['production']['bucket_name'] }}"
-        path: "{{ s3_bucket['os3']['production']['path'] }}"
+        s3_bucket_name: "{{ s3_buckets['os3']['production']['bucket_name'] }}"
+        path: "{{ s3_buckets['os3']['production']['path'] }}"

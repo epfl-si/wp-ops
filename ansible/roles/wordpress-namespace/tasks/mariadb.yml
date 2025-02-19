@@ -3,7 +3,7 @@
     file : "{{ item }}"
   with_items:
     - mariadb-vars.yml
-    - s3_secrets_vars.yml
+    - s3-secrets-vars.yml
 
 - name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ mariadb_storage_class }}"
   with_sequence: >-
@@ -81,7 +81,7 @@
         maxRetention: 720h
         storage:
           s3:
-            bucket: "{{ s3_bucket['os4'][inventory_deployment_stage]['bucket_name'] }}"
+            bucket: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
             prefix: "MariaDB-{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
             endpoint: s3.epfl.ch
             accessKeyIdSecretKeyRef:
