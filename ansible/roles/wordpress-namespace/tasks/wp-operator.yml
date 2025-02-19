@@ -1,7 +1,7 @@
 - include_vars: s3-secrets-vars.yml
   tags: always
 
-- name: ConfigMap/s3-configmap-for-os4
+- name: ConfigMap/wp-backups
   kubernetes.core.k8s:
     state: present
     definition:
@@ -14,7 +14,7 @@
         s3_bucket_name: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
         path: "{{ s3_buckets['os4'][inventory_deployment_stage]['path'] }}"
 
-- name: ConfigMap/s3-configmap-for-os3
+- name: ConfigMap/openshift3-migrations
   kubernetes.core.k8s:
     state: present
     definition:
