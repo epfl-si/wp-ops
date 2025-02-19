@@ -6,7 +6,7 @@
   - inventory_openshift is defined
   - inventory_openshift.domain != "okd-test.fsd.team"  # Meh
   block:
-    - name: "GrafanaFolder/WordPress"
+    - name: "GrafanaFolder/wordpress"
       kubernetes.core.k8s:
         state: present
         definition:
@@ -34,7 +34,7 @@
           data:
             json: "{{ lookup('template', 'grafana/' + item | basename ) }}"
 
-    - name: "GrafanaDashboard/WPN"
+    - name: "GrafanaDashboard objects"
       loop: "{{ lookup('fileglob', '../templates/grafana/*.json', wantlist=True) }}"
       kubernetes.core.k8s:
         state: present
