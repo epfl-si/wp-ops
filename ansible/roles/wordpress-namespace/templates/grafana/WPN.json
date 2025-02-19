@@ -114,7 +114,7 @@
           "disableTextWrap":false,
           "editorMode":"code",
 {% endraw %}
-          "expr":"count(up{namespace=\"{{ inventory_namespace }}\",container=\"nginx\"})",
+          "expr":"count(kube_pod_status_phase{namespace=\"{{ inventory_namespace }}\", pod=~\"wp-nginx.*\", phase=\"Running\"})",
 {% raw %}
           "fullMetaSearch":false,
           "includeNullMetadata":true,
@@ -123,7 +123,7 @@
           "useBackend":false
         }
       ],
-      "title":"Nginx Pods",
+      "title":"Running Pods (wp-nginx)",
       "type":"gauge"
     },
     {
@@ -396,7 +396,9 @@
             "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode":"code",
-          "expr":"sum(irate(container_network_receive_bytes_total{pod=~\"^web2010.*|^wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)\n",
+{% endraw %}
+          "expr":"sum(irate(container_network_receive_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (pod)\n",
+{% raw %}
           "range":true,
           "refId":"A"
         }
@@ -498,7 +500,9 @@
             "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode":"code",
-          "expr":"sum(irate(container_network_transmit_bytes_total{pod=~\"^web2010.*|^wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)",
+{% endraw %}
+          "expr":"sum(irate(container_network_transmit_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (pod)",
+{% raw %}
           "legendFormat":"__auto",
           "range":true,
           "refId":"A"
