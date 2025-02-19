@@ -114,7 +114,7 @@
           "disableTextWrap":false,
           "editorMode":"code",
 {% endraw %}
-          "expr":"count(up{namespace=\"{{ inventory_namespace }}\",container=\"nginx\"})",
+          "expr":"count(up{namespace=\"{{ inventory_namespace }}\",container=\"nginx\",endpoint=\"nginx-metrics\"})",
 {% raw %}
           "fullMetaSearch":false,
           "includeNullMetadata":true,
