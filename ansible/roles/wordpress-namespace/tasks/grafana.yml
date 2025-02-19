@@ -2,7 +2,9 @@
   include_vars: grafana-vars.yml
 
 - name: "Deploy the WordPress Gragana dashboards"
-  when: inventory_namespace == 'svc0041p-wordpress'
+  when:
+  - inventory_openshift is defined
+  - inventory_openshift.domain != "okd-test.fsd.team"  # Meh
   block:
     - name: "GrafanaFolder/WordPress"
       kubernetes.core.k8s:
@@ -17,7 +19,7 @@
             allowCrossNamespaceImport: true
             instanceSelector:
               matchLabels:
-                dashboards: grafana-prod
+                dashboards: "{{ grafana_dashboards_match_label }}"
             title: "{{ grafana_folder_name }}"
 
     - name: "ConfigMap for GrafanaDashboard/WPN"
@@ -46,7 +48,7 @@
             allowCrossNamespaceImport: true
             instanceSelector:
               matchLabels:
-                dashboards: grafana-prod
+                dashboards: "{{ grafana_dashboards_match_label }}"
             folder: "{{ grafana_folder_name }}"
             configMapRef:
               name: "grafana-dashboard-{{ item[:-5] | basename | lower }}"
