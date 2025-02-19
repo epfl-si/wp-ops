@@ -1,1 +1,5 @@
+grafana_dashboards_match_label: >-
+  {{ "grafana-prod" if inventory_deployment_stage == "production"
+  else "grafana-test" }}
+
 grafana_folder_name: WordPress
