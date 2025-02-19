@@ -1,7 +1,8 @@
+- tags: always
+  include_vars: grafana-vars.yml
+
 - name: "Deploy the WordPress Gragana dashboards"
   when: inventory_namespace == 'svc0041p-wordpress'
-  vars:
-    _foldername: WordPress
   block:
     - name: "GrafanaFolder/WordPress"
       kubernetes.core.k8s:
@@ -17,7 +18,7 @@
             instanceSelector:
               matchLabels:
                 dashboards: grafana-prod
-            title: "{{ _foldername }}"
+            title: "{{ grafana_folder_name }}"
 
     - name: "ConfigMap for GrafanaDashboard/WPN"
       loop: "{{ lookup('fileglob', '../templates/grafana/*.json', wantlist=True) }}"
@@ -46,7 +47,7 @@
             instanceSelector:
               matchLabels:
                 dashboards: grafana-prod
-            folder: "{{ _foldername }}"
+            folder: "{{ grafana_folder_name }}"
             configMapRef:
               name: "grafana-dashboard-{{ item[:-5] | basename | lower }}"
               key: json
