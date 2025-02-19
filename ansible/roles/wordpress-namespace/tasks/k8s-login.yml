@@ -27,8 +27,8 @@
   shell: |
     rm $K8S_AUTH_KUBECONFIG
     env KUBECONFIG="$K8S_AUTH_KUBECONFIG" \
-      oc login --web --server={{ openshift_login.url }} {{
-               "--insecure-skip-tls-verify" if (openshift_login.insecure | default(False)) else ""
+      oc login --web --server=https://api.{{ inventory_openshift.domain }}:6443 {{
+               "--insecure-skip-tls-verify" if (inventory_openshift.insecure | default(False)) else ""
               }}
 
 - name: Log in to Rancher
