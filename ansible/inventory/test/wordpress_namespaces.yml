@@ -13,14 +13,14 @@ all_namespaces:
           "hosts":   # Not real hosts, hence the scarequotes
             namespace|svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
-              openshift_login:
-                url: https://api.ocpitst0001.xaas.epfl.ch:6443
+              inventory_openshift:
+                domain: ocpitst0001.xaas.epfl.ch
                 insecure: true
             namespace|wordpress-test-in-okd:
               inventory_namespace: wordpress-test
               inventory_has_cluster_admin: True
-              openshift_login:
-                url: https://api.okd-test.fsd.team:6443
+              inventory_openshift:
+                domain: okd-test.fsd.team
                 insecure: true
     rke2_namespaces:
       children:
