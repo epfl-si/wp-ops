@@ -80,8 +80,10 @@
       "links":[
         {
           "targetBlank":true,
-          "title":"ocpitsp0001",
-          "url":"https://console-openshift-console.apps.ocpitsp0001.xaas.epfl.ch/k8s/ns/svc0041p-wordpress/core~v1~Pod?name=wp-nginx"
+{% endraw %}
+          "title":"{{ (inventory_openshift.domain | split('.'))[0] }}",
+          "url":"https://console-openshift-console.apps.{{ inventory_openshift.domain }}/k8s/ns/{{ inventory_namespace }}/core~v1~Pod?name=wp-nginx"
+{% raw %}
         }
       ],
       "options":{
@@ -111,7 +113,9 @@
           },
           "disableTextWrap":false,
           "editorMode":"code",
-          "expr":"count(up{namespace=\"svc0041p-wordpress\",container=\"nginx\"})",
+{% endraw %}
+          "expr":"count(up{namespace=\"{{ inventory_namespace }}\",container=\"nginx\"})",
+{% raw %}
           "fullMetaSearch":false,
           "includeNullMetadata":true,
           "range":true,
