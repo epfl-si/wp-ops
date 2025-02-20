@@ -11,10 +11,10 @@ spec:
     prefix: backup/wpn/site-a
     endpoint: s3.epfl.ch
     accessKeyIdSecretKeyRef:
-      name: s3-backup-credentials
+      name: epfl-s3-migrations-credentials
       key: keyId
     secretAccessKeySecretKeyRef:
-      name: s3-backup-credentials
+      name: epfl-s3-migrations-credentials
       key: accessSecret
     tls:
       enabled: true
