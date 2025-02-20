@@ -8,20 +8,20 @@
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: s3-configmap-for-os4
+        name: wp-backups
         namespace: "{{ inventory_namespace }}"
       data:
         s3_bucket_name: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
         path: "{{ s3_buckets['os4'][inventory_deployment_stage]['path'] }}"
 
-- name: ConfigMap/openshift3-migrations
+- name: ConfigMap/epfl-s3-migrations
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: s3-configmap-for-os3
+        name: epfl-s3-migrations
         namespace: "{{ inventory_namespace }}"
       data:
         s3_bucket_name: "{{ s3_buckets['os3']['production']['bucket_name'] }}"

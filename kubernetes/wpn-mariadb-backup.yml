@@ -24,10 +24,10 @@ spec:
       prefix: backup/k8s
       endpoint: s3.epfl.ch
       accessKeyIdSecretKeyRef:
-        name: s3-backup-credentials
+        name: epfl-s3-migrations-credentials
         key: keyId
       secretAccessKeySecretKeyRef:
-        name: s3-backup-credentials
+        name: epfl-s3-migrations-credentials
         key: accessSecret
       tls:
         enabled: true
@@ -37,7 +37,7 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: s3-backup-credentials
+  name: epfl-s3-migrations-credentials
   namespace: wordpress-test
 stringData:
   keyId: REPLACE_THIS_WITH_KEY_ID
