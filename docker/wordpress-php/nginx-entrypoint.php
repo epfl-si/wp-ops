@@ -107,14 +107,7 @@ function setup_nonces () {
     if ( file_exists("/wp-nonces/wp-nonces.php") ) {
         include("/wp-nonces/wp-nonces.php");
     } else {
-        define( 'AUTH_KEY',         '_#yH+/R.)X%;`*(4u=gy|Jo5`d8Gj)/1FaU[haP9P$48;v]1Eg7&zk:]nspMKuA#' );
-        define( 'SECURE_AUTH_KEY',  'c&%V:8FXis7@;>l+2+FSUGYS?wG01r@W?&jq!V0-z:79A_W{*5CfSYf5{F&3FR!a' );
-        define( 'LOGGED_IN_KEY',    'R@d4lS~LwB+:z$n{WN]#K:im_)7DT/~zhQw3S, YSTsl,-?k4/i_<t}rk*Dg) CI' );
-        define( 'NONCE_KEY',        'RB~Xw1<TjGLru*w>PC2-fl1h .8>aY|9sa8x7-tm7]Psh{XY!I?Te<_b@qUQ=:mO' );
-        define( 'AUTH_SALT',        'pj;f>C9/>dI|978`z@bI)}eb$2~3/:P<g~wd3k%=tbp-O`![td}6z{<{~L73=Fw2' );
-        define( 'SECURE_AUTH_SALT', 'p|8ugKn38lKR0/XSt(LaR;}[Rsr}8,|b|BFG^_`N^BHGV?8N{O3d9XH~v5FYHl}i' );
-        define( 'LOGGED_IN_SALT',   '{2Y,4WGBE6wT$gdOD.n)duoV5:Jm5d?L@p{`,^HorJ5`>zaprEqc;<]W|d7-T?zE' );
-        define( 'NONCE_SALT',       'mVSh!um&7*qGB%sZ,gg6KDD!ko<s,e1Dj>X[CP+fR6<f(&iy[#?~y VBuS^${/&Q' );
+        die("Missing /wp-nonces/wp-nonces.php");
     }
 }
 
