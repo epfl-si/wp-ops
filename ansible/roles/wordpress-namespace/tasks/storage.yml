@@ -28,6 +28,26 @@
           namespace: "{{ inventory_namespace }}"
           name: wordpress-data
 
+- name: NfsSubdirExternalProvisioner's
+  with_items:
+   - data
+   - db
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: nfs.epfl.ch/v1alpha1
+      kind: NfsSubdirProvisioner
+      metadata:
+        name: "wordpress-{{ item }}"
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        nfs:
+          server: "{{ storage_nas[inventory_deployment_stage].nfs_server }}"
+          path:  "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-{{ item }}"
+        storageClass:
+          defaultClass: false
+          name: "wordpress-nfs-{{ item }}"
+
 - name: PersistentVolumeClaim/wordpress-data
   kubernetes.core.k8s:
     state: present
