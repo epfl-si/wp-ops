@@ -20,6 +20,8 @@ spec:
 #        - ReadWriteOnce
   storage:
     s3:
+      # The bucket name (which is different for test/prod) can be found in
+      # /keybase/team/epfl_wp_prod/os4-s3-credentials.yaml
       bucket: svc0041-5da0d377aa221ddc24a6110fee695f69
       prefix: backup/k8s
       endpoint: s3.epfl.ch
