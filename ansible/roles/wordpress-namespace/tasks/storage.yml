@@ -47,6 +47,9 @@
         storageClass:
           defaultClass: false
           name: "wordpress-nfs-{{ item }}"
+        resources:
+          requests:
+            cpu: 100m
 
 - name: PersistentVolumeClaim/wordpress-data
   kubernetes.core.k8s:
