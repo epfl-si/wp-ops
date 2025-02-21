@@ -1,7 +1,7 @@
 storage_nas:
   test:
     nfs_server: nas-app-ma-nfs1.epfl.ch
-    path: /svc0041_si_openshift_app_wwp_test_app/wordpress-data
+    path: /svc0041_si_openshift_app_wwp_test_app
   production:
     nfs_server: nas-app-ma-nfs2.epfl.ch
-    path: /svc0041_wordpress_app/wordpress-data
+    path: /svc0041_wordpress_app
