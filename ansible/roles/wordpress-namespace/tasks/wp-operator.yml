@@ -11,16 +11,16 @@
         name: wp-backups
         namespace: "{{ inventory_namespace }}"
       data:
-        s3_bucket_name: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
+        S3_BACKUP_BUCKET: "{{ s3_backup_credentials[inventory_deployment_stage]['bucket_name'] }}"
 
-- name: ConfigMap/epfl-s3-migrations
+- name: ConfigMap/epfl-migrations
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: epfl-s3-migrations
+        name: epfl-migrations-s3
         namespace: "{{ inventory_namespace }}"
       data:
-        s3_bucket_name: "{{ s3_buckets['os3']['production']['bucket_name'] }}"
+        EPFL_MIGRATION_BUCKET: "{{ s3_epfl_migration_credentials['bucket_name'] }}"
