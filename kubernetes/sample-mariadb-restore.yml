@@ -11,6 +11,8 @@ spec:
       cpu: "100m"
       memory: "256Mi"
   s3:
+    # The bucket name (which is different for test/prod) can be found in
+    # /keybase/team/epfl_wp_prod/os4-s3-credentials.yaml
     bucket: svc0041-f09a145f151acfe768583301e0389e65
     prefix: MariaDB
     endpoint: s3.epfl.ch
