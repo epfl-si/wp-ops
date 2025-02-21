@@ -2,14 +2,14 @@
   include_vars: storage-vars.yml
 
 - when: _storage_managed
-  name: PersistentVolume/wp-data
+  name: PersistentVolume/wordpress-data
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: PersistentVolume
       metadata:
-        name: wp-data
+        name: wordpress-data
       spec:
         accessModes:
         - ReadWriteMany
@@ -26,16 +26,16 @@
         claimRef:
           kind: PersistentVolumeClaim
           namespace: "{{ inventory_namespace }}"
-          name: wp-data
+          name: wordpress-data
 
-- name: PersistentVolumeClaim/wp-data
+- name: PersistentVolumeClaim/wordpress-data
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        name: wp-data
+        name: wordpress-data
         namespace: "{{ inventory_namespace }}"
       spec:
         accessModes:
