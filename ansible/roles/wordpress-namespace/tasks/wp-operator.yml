@@ -12,7 +12,6 @@
         namespace: "{{ inventory_namespace }}"
       data:
         s3_bucket_name: "{{ s3_buckets['os4'][inventory_deployment_stage]['bucket_name'] }}"
-        path: "{{ s3_buckets['os4'][inventory_deployment_stage]['path'] }}"
 
 - name: ConfigMap/epfl-s3-migrations
   kubernetes.core.k8s:
@@ -25,4 +24,3 @@
         namespace: "{{ inventory_namespace }}"
       data:
         s3_bucket_name: "{{ s3_buckets['os3']['production']['bucket_name'] }}"
-        path: "{{ s3_buckets['os3']['production']['path'] }}"
