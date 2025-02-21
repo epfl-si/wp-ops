@@ -62,8 +62,8 @@
           - ReadWriteMany
         resources:
           requests:
-            storage: 1Gi
-        storageClassName: ""
+            storage: 10Gi
+        storageClassName: wordpress-nfs-data
 
 # During the transition period, we can read from the old volumes:
 
