@@ -7,14 +7,14 @@ spec:
   mariaDbRef:
     name: mariadb-min
   s3:
-    bucket: svc0041-b80382f4fba20c6c1d9dc1bebefc5583
+    bucket: svc0041-5da0d377aa221ddc24a6110fee695f69
     prefix: backup/wpn/site-a
     endpoint: s3.epfl.ch
     accessKeyIdSecretKeyRef:
-      name: epfl-s3-migrations-credentials
+      name: s3-backup-credentials
       key: keyId
     secretAccessKeySecretKeyRef:
-      name: epfl-s3-migrations-credentials
+      name: s3-backup-credentials
       key: accessSecret
     tls:
       enabled: true

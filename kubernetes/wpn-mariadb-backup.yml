@@ -20,14 +20,14 @@ spec:
 #        - ReadWriteOnce
   storage:
     s3:
-      bucket: svc0041-b80382f4fba20c6c1d9dc1bebefc5583
+      bucket: svc0041-5da0d377aa221ddc24a6110fee695f69
       prefix: backup/k8s
       endpoint: s3.epfl.ch
       accessKeyIdSecretKeyRef:
-        name: epfl-s3-migrations-credentials
+        name: s3-backup-credentials
         key: keyId
       secretAccessKeySecretKeyRef:
-        name: epfl-s3-migrations-credentials
+        name: s3-backup-credentials
         key: accessSecret
       tls:
         enabled: true
@@ -37,7 +37,7 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: epfl-s3-migrations-credentials
+  name: s3-backup-credentials
   namespace: wordpress-test
 stringData:
   keyId: REPLACE_THIS_WITH_KEY_ID
