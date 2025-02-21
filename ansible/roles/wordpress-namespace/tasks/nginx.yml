@@ -210,7 +210,7 @@
                     containerPort: 9145
                     protocol: TCP  
                 volumeMounts:
-                  - name: wp-data
+                  - name: wordpress-data
                     mountPath: /wp-data/
                     readOnly: true
                   - name: fpm-socket
@@ -244,7 +244,7 @@
                     cpu: '{{ _request_cpu_serving }}'
                     memory: '{{ _request_ram }}'
                 volumeMounts:
-                  - name: wp-data
+                  - name: wordpress-data
                     mountPath: /wp-data/
                   - name: fpm-socket
                     mountPath: /run/php-fpm
@@ -269,7 +269,7 @@
             volumes:
               - name: fpm-socket
                 emptyDir: {}
-              - name: wp-data
+              - name: wordpress-data
                 persistentVolumeClaim:
                   claimName: wordpress-data
               # Uncomment the next three lines to embug the nginx configuration
