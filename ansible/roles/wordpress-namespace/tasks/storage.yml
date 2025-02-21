@@ -22,7 +22,7 @@
         storageClassName: ""
         nfs:
           server: "{{ storage_nas[inventory_deployment_stage].nfs_server }}"
-          path:  "{{ storage_nas[inventory_deployment_stage].path }}"
+          path:  "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-data"
         claimRef:
           kind: PersistentVolumeClaim
           namespace: "{{ inventory_namespace }}"
