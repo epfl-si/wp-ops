@@ -5,18 +5,7 @@
   import_tasks:
     file: k8s-login.yml
 
-- name: MariaDB server
-  include_tasks:
-    file: mariadb.yml
-    apply:
-      tags:
-        - wp
-        - wp.mariadb
-  tags:
-    - wp
-    - wp.mariadb
-
-- name: Storage (for files)
+- name: Storage
   include_tasks:
     file: storage.yml
     apply:
@@ -31,6 +20,17 @@
     # tenants cannot “steal” it from us) is for ITOP-SDDC to manage:
     _storage_managed: >-
       {{ inventory_has_cluster_admin | default(False) }}
+
+- name: MariaDB server
+  include_tasks:
+    file: mariadb.yml
+    apply:
+      tags:
+        - wp
+        - wp.mariadb
+  tags:
+    - wp
+    - wp.mariadb
 
 - name: Serving secrets (for plugins, outgoing SMTP etc.)
   include_tasks:
