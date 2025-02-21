@@ -185,7 +185,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-024
+                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-025
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
@@ -198,7 +198,7 @@
                 resources:
                   limits: "{{ _limits_for_prod_only }}"
                   requests:
-                    cpu: '{{ _request_cpu }}'
+                    cpu: '{{ _request_cpu_serving }}'
                     memory: '{{ _request_ram }}'
                 ports:
                   - containerPort: 8000
@@ -237,11 +237,11 @@
                   - name: MENU_API_HOST
                     value: "menu-api"
               - name: php
-                image: quay-its.epfl.ch/svc0041/wp-php:2025-024
+                image: quay-its.epfl.ch/svc0041/wp-php:2025-025
                 resources:
                   limits: "{{ _limits_for_prod_only }}"
                   requests:
-                    cpu: '{{ _request_cpu }}'
+                    cpu: '{{ _request_cpu_serving }}'
                     memory: '{{ _request_ram }}'
                 volumeMounts:
                   - name: wp-data
@@ -252,7 +252,7 @@
                 image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
                 resources:
                   requests:
-                    cpu: '{{ _request_cpu_de_minimis }}'
+                    cpu: '{{ _request_cpu_monitoring }}'
                     memory: '{{ _request_ram_de_minimis }}'
                   # This fits under the default (LimitRange-imposed) limits
                   # even for production; so we don't need `limits:` here.
@@ -293,8 +293,11 @@
                           fieldPath: metadata.namespace
                         path: namespace
   vars:
-    _request_cpu: >-
+    _request_cpu_serving: >-
       {{ "1" if inventory_deployment_stage == "production"
+      else "200m" }}
+    _request_cpu_monitoring: >-
+      {{ "100m" if inventory_deployment_stage == "production"
       else _request_cpu_de_minimis }}
     _request_ram: >-
       {{ "1Gi" if inventory_deployment_stage == "production"
