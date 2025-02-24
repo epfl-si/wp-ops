@@ -20,7 +20,7 @@
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: epfl-migrations-s3
+        name: epfl-migrations
         namespace: "{{ inventory_namespace }}"
       data:
         EPFL_MIGRATION_BUCKET: "{{ s3_epfl_migration_credentials['bucket_name'] }}"
