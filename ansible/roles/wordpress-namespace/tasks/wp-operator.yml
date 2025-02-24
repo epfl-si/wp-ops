@@ -24,3 +24,18 @@
         namespace: "{{ inventory_namespace }}"
       data:
         EPFL_MIGRATION_BUCKET: "{{ s3_epfl_migration_credentials['bucket_name'] }}"
+
+- name: Credentials required to restore from previous (OpenShift 3) production backups
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: epfl-migrations
+        namespace: "{{ inventory_namespace }}"
+      type: Opaque
+      stringData:
+        EPFL_MIGRATION_KEYID: "{{ s3_epfl_migration_credentials['keyId'] }}"
+        EPFL_MIGRATION_ACCESSSECRET: "{{ s3_epfl_migration_credentials['accessSecret'] }}"
+        RESTIC_PASSWORD: "{{ s3_epfl_migration_credentials['resticPassword'] }}"
