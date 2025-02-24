@@ -11,7 +11,7 @@
         name: wp-backups
         namespace: "{{ inventory_namespace }}"
       data:
-        S3_BACKUP_BUCKET: "{{ s3_backup_credentials[inventory_deployment_stage]['bucket_name'] }}"
+        S3_BACKUP_BUCKET: "{{ s3_backup_credentials['bucket_name'] }}"
 
 - name: ConfigMap/epfl-migrations
   kubernetes.core.k8s:
