@@ -57,13 +57,13 @@
             https://www.epfl.ch/labs/en/
   vars:
     _wp_veritas_base_url: >-
-      {{ "wp-veritas.epfl.ch" if inventory_namespace == "svc0041p-wordpress"
+      {{ "wp-veritas.epfl.ch" if inventory_deployment_stage == "production"
       else "wp-veritas-test.epfl.ch" }}
     _debug: >-
-      {{ false if inventory_namespace == "svc0041p-wordpress"
+      {{ false if inventory_deployment_stage == "production"
       else true }}
     _request_timeout: >-
-      {{ 10000 if inventory_namespace == "svc0041p-wordpress"
+      {{ 10000 if inventory_deployment_stage == "production"
       else 30000 }}
   register: _menu_api_config_map
 
