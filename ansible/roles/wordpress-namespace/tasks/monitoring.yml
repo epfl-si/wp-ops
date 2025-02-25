@@ -1,0 +1,95 @@
+- include_vars: monitoring-secrets.yml
+  tags: always
+
+- name: Secret - Bot Token (Telegram)
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: telegram-bot-token
+        namespace: "{{ inventory_namespace }}"
+      data:
+        access_token: "{{ telegram_bot_token | b64encode }}"
+
+- name: Monitoring - AlertmanagerConfig
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: monitoring.coreos.com/v1beta1
+      kind: AlertmanagerConfig
+      metadata:
+        name: alertmanager-telegram
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        route:
+          receiver: "telegram"
+          groupBy: ["environment"]
+          groupWait: 20s
+          groupInterval: 5m
+          repeatInterval: 3h
+          matchers:
+            - name: sendto
+              value: telegram
+              matchType: "="
+        receivers:
+          - name: "telegram"
+            telegramConfigs:
+              - botToken:
+                  name: telegram-bot-token
+                  key: access_token
+                chatID: "{{ telegram_chat_id }}"
+                message: |
+                  {% raw %}
+                  {{ range .Alerts }}
+                  {{ if eq .Status "firing" }}
+                  🔥 FIRING [{{ .Labels.environment }}] -- {{ .Annotations.summary }}
+                  {{ .Annotations.description }}
+                  Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+                  {{ else if eq .Status "resolved" }}
+                  ✅ RESOLVED [{{ .Labels.environment }}] -- {{ .Annotations.summary }}
+                  {{ .Annotations.description }}
+                  Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+                  Ended at (UTC): {{ .EndsAt.Format "2006-01-02 15:04:05" }}
+                  {{ end }}
+                  {{ end }}
+                  {% endraw %}
+                sendResolved: true
+
+- name: Monitoring - PrometheusRule
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: PrometheusRule
+      metadata:
+        name: wordpress-alerts
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        groups:
+          - name: pod-alerts
+            rules:
+              - alert: WordPressNginxPodCountMismatch
+                expr: >
+                  kube_deployment_status_replicas_available{deployment="wp-nginx", namespace="{{ inventory_namespace }}"} 
+                  != kube_deployment_spec_replicas{deployment="wp-nginx", namespace="{{ inventory_namespace }}"}
+                for: 3m
+                labels:
+                  environment: "{{ inventory_deployment_stage | upper }}"
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Pod count mismatch (wp-nginx)"
+                  description: "The deployment wp-nginx has not the desired number of pods for over 5 minutes."
+          - name: monitoring-alerts
+            rules:
+              - alert: NoMonitoring
+                expr: >
+                  up{namespace="{{ inventory_namespace }}"} == 0
+                for: 3m
+                labels:
+                  environment: "{{ inventory_deployment_stage | upper }}"
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Monitoring is down"
+                  description: "The monitoring (internal) is down for over 3 minutes."
