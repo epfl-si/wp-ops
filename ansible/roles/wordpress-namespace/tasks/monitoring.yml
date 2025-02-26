@@ -91,5 +91,9 @@
                   severity: critical
                   sendto: telegram
                 annotations:
-                  summary: "Monitoring is down"
-                  description: "The monitoring (internal) is down for over 3 minutes."
+                  summary: "Monitoring target is down"
+                  description: >-
+                    {% raw -%}
+                    The target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }})
+                    has been down for over 3 minutes.
+                    {%- endraw %}
