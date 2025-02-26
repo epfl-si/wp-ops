@@ -92,10 +92,10 @@
                 image: "quay-its.epfl.ch/svc0041/menu-api:2025-014"
                 resources:
                   limits:
-                    cpu: 500m
+                    cpu: 1
                     memory: 1Gi
                   requests:
-                    cpu: 100m
+                    cpu: 1
                     memory: 512Mi
                 volumeMounts:
                   - name: menu-api
