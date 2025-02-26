@@ -196,7 +196,7 @@
                   - --http-port=8000
                   - --https-port=8443
                 resources:
-                  limits: "{{ _limits_for_prod_only }}"
+                  limits: "{{ _limits_serving_for_prod_only }}"
                   requests:
                     cpu: '{{ _request_cpu_serving }}'
                     memory: '{{ _request_ram }}'
@@ -208,7 +208,7 @@
                     protocol: TCP
                   - name: nginx-metrics
                     containerPort: 9145
-                    protocol: TCP  
+                    protocol: TCP
                 volumeMounts:
                   - name: wordpress-data
                     mountPath: /wp-data/
@@ -239,7 +239,7 @@
               - name: php
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-025
                 resources:
-                  limits: "{{ _limits_for_prod_only }}"
+                  limits: "{{ _limits_serving_for_prod_only }}"
                   requests:
                     cpu: '{{ _request_cpu_serving }}'
                     memory: '{{ _request_ram }}'
@@ -308,9 +308,9 @@
     _request_ram: >-
       {{ "1Gi" if inventory_deployment_stage == "production"
       else _request_ram_de_minimis }}
-    _limits_for_prod_only: >-
+    _limits_serving_for_prod_only: >-
       {{ {} if inventory_deployment_stage != "production"
-         else { "cpu": _request_cpu, "memory": _request_ram } }}
+         else { "cpu": _request_cpu_serving, "memory": _request_ram } }}
     _request_cpu_de_minimis: "20m"
     _request_ram_de_minimis: "256Mi"
 
