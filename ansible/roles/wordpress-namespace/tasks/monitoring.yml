@@ -24,7 +24,7 @@
       spec:
         route:
           receiver: "telegram"
-          groupBy: ["environment"]
+          groupBy: ["alertname"]
           groupWait: 20s
           groupInterval: 5m
           repeatInterval: 3h
@@ -43,11 +43,11 @@
                   {% raw %}
                   {{ range .Alerts }}
                   {{ if eq .Status "firing" }}
-                  🔥 FIRING [{{ .Labels.environment }}] -- {{ .Annotations.summary }}
+                  🔥 FIRING -- {{ .Annotations.summary }}
                   {{ .Annotations.description }}
                   Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
                   {{ else if eq .Status "resolved" }}
-                  ✅ RESOLVED [{{ .Labels.environment }}] -- {{ .Annotations.summary }}
+                  ✅ RESOLVED -- {{ .Annotations.summary }}
                   {{ .Annotations.description }}
                   Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
                   Ended at (UTC): {{ .EndsAt.Format "2006-01-02 15:04:05" }}
@@ -74,7 +74,6 @@
                   != kube_deployment_spec_replicas{deployment="wp-nginx", namespace="{{ inventory_namespace }}"}
                 for: 3m
                 labels:
-                  environment: "{{ inventory_deployment_stage | upper }}"
                   severity: critical
                   sendto: telegram
                 annotations:
@@ -87,7 +86,6 @@
                   up{namespace="{{ inventory_namespace }}"} == 0
                 for: 3m
                 labels:
-                  environment: "{{ inventory_deployment_stage | upper }}"
                   severity: critical
                   sendto: telegram
                 annotations:
