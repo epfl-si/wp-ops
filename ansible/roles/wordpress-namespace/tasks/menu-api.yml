@@ -89,7 +89,7 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-012"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-014"
                 resources:
                   limits:
                     cpu: 500m
@@ -101,7 +101,8 @@
                   - name: menu-api
                     mountPath: /config/
                 ports:
-                  - containerPort: 3001
+                  - name: menu-api-port
+                    containerPort: 3001
                 startupProbe:
                   httpGet:
                     path: /metrics
@@ -183,3 +184,19 @@
         apiGroup: rbac.authorization.k8s.io
         kind: Role
         name: menu-api
+
+- name: PodMonitor/menu-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: PodMonitor
+      metadata:
+        name: menu-api
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: menu-api
+        podMetricsEndpoints:
+          - port: menu-api-port
