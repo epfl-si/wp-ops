@@ -86,44 +86,47 @@
             rules:
               - alert: NginxClientClosedRequests
                 expr: >
-                  rate(nginx_http_requests_total{status="499", namespace="{{ inventory_namespace }}"}[2m]) > 0
-                for: 2m
+                  rate(nginx_http_requests_total{status="499", namespace="{{ inventory_namespace }}"}[{{ _499s_rate_window_minutes }}m]) > {{ _499s_threshold }}
+                for: "{{ _499s_duration_minutes }}m"
                 labels:
                   severity: warning
                   sendto: telegram
                 annotations:
                   summary: "nginx 499 Errors Detected"
                   description: >-
+                    nginx is returning too many HTTP 499 errors (Client Closed Request) with a rate greater than {{ _499s_threshold }} over the last two minutes.
+                    The condition has persist for at least {{ _499s_duration_minutes }} minutes.
                     {% raw -%}
-                    nginx is returning HTTP 499 errors (Client Closed Request) for more than 2 minutes.
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
               - alert: NginxInternalServerError
                 expr: >
-                  rate(nginx_http_requests_total{status="500", namespace="{{ inventory_namespace }}"}[2m]) > 0
-                for: 2m
+                  rate(nginx_http_requests_total{status="500", namespace="{{ inventory_namespace }}"}[{{ _500s_rate_window_minutes }}m]) > {{ _500s_threshold }}
+                for: "{{ _500s_duration_minutes }}m"
                 labels:
                   severity: critical
                   sendto: telegram
                 annotations:
                   summary: "nginx 500 Errors Detected"
                   description: >-
+                    nginx is returning too many HTTP 500 errors with a rate greater than {{ _500s_threshold }} over the last two minutes.
+                    The condition has persist for at least {{ _500s_duration_minutes }} minutes.
                     {% raw -%}
-                    nginx is returning HTTP 500 errors for more than 2 minutes.
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
               - alert: NginxGatewayTimeout
                 expr: >
-                  rate(nginx_http_requests_total{status="504", namespace="{{ inventory_namespace }}"}[2m]) > 0
-                for: 2m
+                  rate(nginx_http_requests_total{status="504", namespace="{{ inventory_namespace }}"}[{{ _504s_rate_window_minutes }}m]) > {{ _504s_threshold }}
+                for: "{{ _504s_duration_minutes }}m"
                 labels:
                   severity: critical
                   sendto: telegram
                 annotations:
                   summary: "nginx 504 Errors Detected"
                   description: >-
+                    nginx is returning too many HTTP 504 errors (Gateway Timeout) with a rate greater than {{ _504s_threshold }} over the last two minutes.
+                    The condition has persist for at least {{ _504s_duration_minutes }} minutes.
                     {% raw -%}
-                    nginx is returning HTTP 504 errors (Gateway Timeout) for more than 2 minutes.
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
           - name: pod-alerts
@@ -155,3 +158,13 @@
                     The Prometheus target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     has been down for over 3 minutes.
                     {%- endraw %}
+  vars:
+    _499s_threshold: 1
+    _499s_rate_window_minutes: 2
+    _499s_duration_minutes: 2
+    _500s_threshold: 1
+    _500s_rate_window_minutes: 2
+    _500s_duration_minutes: 2
+    _504s_threshold: 1
+    _504s_rate_window_minutes: 2
+    _504s_duration_minutes: 2
