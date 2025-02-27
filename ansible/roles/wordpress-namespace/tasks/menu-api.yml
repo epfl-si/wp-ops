@@ -89,12 +89,13 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-014"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-015"
                 resources:
                   limits:
+                    cpu: 4
                     memory: 1Gi
                   requests:
-                    cpu: 1
+                    cpu: '{{ _cpu_request }}'
                     memory: 512Mi
                 volumeMounts:
                   - name: menu-api
@@ -117,6 +118,10 @@
                   name: menu-api
             imagePullSecrets:
               - name: "{{ image_pull_secret_name }}"
+  vars:
+    _cpu_request: >-
+      {{ "1" if inventory_deployment_stage == "production"
+      else "500m" }}
 
 - name: Service/menu-api
   kubernetes.core.k8s:
