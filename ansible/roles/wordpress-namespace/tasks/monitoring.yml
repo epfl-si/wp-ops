@@ -24,7 +24,7 @@
       spec:
         route:
           receiver: "telegram"
-          groupBy: ["alertname"]
+          groupBy: ["instance"]
           groupWait: 20s
           groupInterval: 5m
           repeatInterval: 3h
@@ -66,6 +66,66 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         groups:
+          - name: php-fpm-alerts
+            rules:
+              - alert: PhpFpmHighProcessRequestDuration
+                expr: >
+                  phpfpm_process_request_duration > 30 * 1000 * 1000
+                for: 2m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "PHP-FPM High process request duration"
+                  description: >-
+                    {% raw -%}
+                    PHP-FPM process request duration exceeded 30s for more than 2 minutes.
+                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    {%- endraw %}
+          - name: nginx-alerts
+            rules:
+              - alert: NginxClientClosedRequests
+                expr: >
+                  rate(nginx_http_requests_total{status="499", namespace="{{ inventory_namespace }}"}[2m]) > 0
+                for: 2m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "nginx 499 Errors Detected"
+                  description: >-
+                    {% raw -%}
+                    nginx is returning HTTP 499 errors (Client Closed Request) for more than 2 minutes.
+                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    {%- endraw %}
+              - alert: NginxInternalServerError
+                expr: >
+                  rate(nginx_http_requests_total{status="500", namespace="{{ inventory_namespace }}"}[2m]) > 0
+                for: 2m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "nginx 500 Errors Detected"
+                  description: >-
+                    {% raw -%}
+                    nginx is returning HTTP 500 errors for more than 2 minutes.
+                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    {%- endraw %}
+              - alert: NginxGatewayTimeout
+                expr: >
+                  rate(nginx_http_requests_total{status="504", namespace="{{ inventory_namespace }}"}[2m]) > 0
+                for: 2m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "nginx 504 Errors Detected"
+                  description: >-
+                    {% raw -%}
+                    nginx is returning HTTP 504 errors (Gateway Timeout) for more than 2 minutes.
+                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    {%- endraw %}
           - name: pod-alerts
             rules:
               - alert: WordPressNginxPodCountMismatch
@@ -92,6 +152,6 @@
                   summary: "Monitoring target is down"
                   description: >-
                     {% raw -%}
-                    The target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }})
+                    The target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     has been down for over 3 minutes.
                     {%- endraw %}
