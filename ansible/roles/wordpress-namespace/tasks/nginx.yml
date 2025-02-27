@@ -236,10 +236,6 @@
                         fieldPath: metadata.namespace
                   - name: MENU_API_HOST
                     value: "menu-api"
-                  - name: MENU_API_CURLOPT_CONNECTTIMEOUT
-                    value: 0.5
-                  - name: MENU_API_CURLOPT_TIMEOUT
-                    value: 1
               - name: php
                 image: quay-its.epfl.ch/svc0041/wp-php:2025-025
                 resources:
