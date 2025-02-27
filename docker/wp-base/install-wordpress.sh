@@ -61,8 +61,8 @@ main () {
         install_plugin_s3 find-my-blocks-3.5.6.zip
         # Paid-for plugins - pretty much *the* reason why we
         # build in our private cloud.
-        install_plugin_s3 wpforms.1.9.2.3.zip
-        install_plugin_s3 wpforms-surveys-polls.1.14.0.zip
+        install_plugin_s3 wpforms.1.9.4.zip
+        install_plugin_s3 wpforms-surveys-polls.1.15.0.zip
         # Additionally this last one is stuck in the past:
         install_plugin_s3 wp-media-folder.5.9.13.zip
     fi
