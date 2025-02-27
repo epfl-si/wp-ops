@@ -129,6 +129,23 @@
                     {% raw -%}
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
+          - name: mariadb-alerts
+            rules:
+              - alert: MariaDbTooManyRestarts
+                # Matching by `pod=~` is required to weed out `migrate-*` pods
+                expr: >
+                  sum(round(increase(kube_pod_container_status_restarts_total{namespace="{{ inventory_namespace }}", container="mariadb", pod=~"mariadb-.*"}[{{ _mariadb_restarts_window_minutes }}m]))) > 1
+                for: 3m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Too many MariaDB restarts"
+                  description: >-
+                    {% raw -%}
+                    More than once MariaDB (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    {%- endraw %}
+                    has restarted in the last {{ _mariadb_restarts_window_minutes }} minutes.
           - name: pod-alerts
             rules:
               - alert: WordPressNginxPodCountMismatch
@@ -168,3 +185,4 @@
     _504s_threshold: 1
     _504s_rate_window_minutes: 2
     _504s_duration_minutes: 2
+    _mariadb_restarts_window_minutes: 15
