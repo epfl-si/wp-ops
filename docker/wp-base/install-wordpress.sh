@@ -50,6 +50,7 @@ main () {
       git apply < /tmp/clearstatcache-wp-import.patch )
 
     install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.5.4.zip
+    install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
 
     # Some of these plugins are commercial plugins that we pay for;
     # others have been discontinued. We don't want them publicly
