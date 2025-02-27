@@ -138,7 +138,7 @@
                   sendto: telegram
                 annotations:
                   summary: "Pod count mismatch (wp-nginx)"
-                  description: "The deployment wp-nginx has not the desired number of pods for over 5 minutes."
+                  description: "The deployment wp-nginx has not the desired number of pods for over 3 minutes."
           - name: monitoring-alerts
             rules:
               - alert: NoMonitoring
@@ -152,6 +152,6 @@
                   summary: "Monitoring target is down"
                   description: >-
                     {% raw -%}
-                    The target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    The Prometheus target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     has been down for over 3 minutes.
                     {%- endraw %}
