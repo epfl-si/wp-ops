@@ -30,6 +30,9 @@
             storageClassName: "{{ mariadb_storage_class }}"
         resources:
           requests:
+            cpu: >-
+              {{ "500m" if inventory_deployment_stage == "production"
+                 else "50m" }}
             memory: 750Mi
           limits:
             memory: 1Gi
