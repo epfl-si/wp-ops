@@ -69,8 +69,14 @@
     file: menu-api.yml
     apply:
       tags:
+        - wp
+        - wp.web
+        - wp.menus
         - menu_api
   tags:
+    - wp
+    - wp.web
+    - wp.menus
     - menu_api
 
 - name: "WordPress operator"
@@ -89,8 +95,12 @@
     file: cloudflare-settings.yml
     apply:
       tags:
+      - wp
+      - wp.cloudflare
       - cloudflare-settings
   tags:
+    - wp
+    - wp.cloudflare
     - cloudflare-settings
     - cloudflare-settings.tls
     - cloudflare-settings.tls.verify-token
@@ -107,8 +117,13 @@
     file: grafana.yml
     apply:
       tags:
+      - wp
+      - wp.monitoring
+      - wp.grafana
       - grafana
   tags:
+    - wp
+    - wp.grafana
     - grafana
 
 - name: Monitoring
@@ -119,7 +134,13 @@
     file: monitoring.yml
     apply:
       tags:
-        - monitoring
+      - wp
+      - wp.grafana
+      - wp.monitoring
+      - monitoring
   tags:
+    - wp
+    - wp.grafana
+    - wp.monitoring
     - monitoring
 
