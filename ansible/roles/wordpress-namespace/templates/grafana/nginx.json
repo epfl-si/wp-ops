@@ -16,7 +16,7 @@
       }
     ]
   },
-  "description": "nginx dashboard for nginx-lua-prometheus",
+  "description": "Basic nginx vitals: error rate and latency",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
