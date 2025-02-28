@@ -94,7 +94,7 @@ RUN sh /tmp/symlink-wp-versions.sh && rm /tmp/symlink-wp-versions.sh
 ######################################################################
 # Copy global error pages
 ######################################################################
-COPY global-error-pages /wp/global-error-pages
+COPY wp-error-pages /wp/wp-error-pages
 
 FROM scratch
 
