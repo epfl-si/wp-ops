@@ -16,7 +16,7 @@
       }
     ]
   },
-  "description": "Nginx dashboard for nginx-lua-prometheus",
+  "description": "nginx dashboard for nginx-lua-prometheus",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -33,7 +33,7 @@
       },
       "id": 15,
       "panels": [],
-      "title": "Nginx HTTP Connections",
+      "title": "nginx HTTP Connections",
       "type": "row"
     },
     {
@@ -185,7 +185,7 @@
           "useBackend": false
         }
       ],
-      "title": "Nginx HTTP Connections / $pod",
+      "title": "nginx HTTP Connections / $pod",
       "type": "timeseries"
     },
     {
@@ -804,7 +804,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Nginx Lua",
+  "title": "nginx",
   "uid": "b_lN9SZWz",
   "version": 37,
   "weekStart": ""
