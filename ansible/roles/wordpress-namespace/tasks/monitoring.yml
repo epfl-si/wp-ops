@@ -227,6 +227,6 @@
     _menuapi_restarts_window_minutes: 15
     _menuapi_restart_duration_minutes: 3
     _menuapi_slow_requests_window_minutes: 5
-    _menuapi_95_pct_threshold: 0.02
+    _menuapi_95_pct_threshold: 0.2
     _menuapi_slow_requests_duration_minutes: 3
     _menuapi_count_pods_duration_minutes: 3
