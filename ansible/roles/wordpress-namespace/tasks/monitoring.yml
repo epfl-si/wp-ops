@@ -66,6 +66,47 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         groups:
+          - name: menu-api-alerts
+            rules:
+              - alert: MenuApiTooManyRestarts
+                expr: >
+                  round(increase(kube_pod_container_status_restarts_total{namespace="{{ inventory_namespace }}", container="menu-api"}[{{ _menuapi_restarts_window_minutes }}m])) > 1
+                for: "{{ _menuapi_restart_duration_minutes }}m"
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Too many Menu-Api restarts"
+                  description: >-
+                    Menu-API has restarted more than once in the last {{ _menuapi_restarts_window_minutes }} minutes.
+              - alert: MenuApiPodCountMismatch
+                expr: >
+                  kube_deployment_status_replicas_available{deployment="menu-api", namespace="{{ inventory_namespace }}"} 
+                  != kube_deployment_spec_replicas{deployment="menu-api", namespace="{{ inventory_namespace }}"}
+                for: "{{ _menuapi_count_pods_duration_minutes }}m"
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Pod count mismatch (menu-api)"
+                  description: >-
+                    The deployment menu-api has not the desired number of pods for over {{ _menuapi_count_pods_duration_minutes }} minutes.
+              - alert: MenuApiSlowRequests
+                expr: >
+                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold }}
+                for: "{{ _menuapi_slow_requests_duration_minutes }}m"
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "MenuAPI slow requests"
+                  description: >-
+                    menu-api is returning slow requests at 95% on the route
+                    {% raw -%}
+                     {{ $labels.route }} 
+                    {%- endraw %}
+                    with a rate greater than {{ _menuapi_95_pct_threshold }} over the last five minutes.
+                    The condition has persist for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
           - name: php-fpm-alerts
             rules:
               - alert: PhpFpmHighProcessRequestDuration
@@ -186,3 +227,9 @@
     _504s_rate_window_minutes: 2
     _504s_duration_minutes: 2
     _mariadb_restarts_window_minutes: 15
+    _menuapi_restarts_window_minutes: 15
+    _menuapi_restart_duration_minutes: 3
+    _menuapi_slow_requests_window_minutes: 5
+    _menuapi_95_pct_threshold: 0.02
+    _menuapi_slow_requests_duration_minutes: 3
+    _menuapi_count_pods_duration_minutes: 3
