@@ -15,4 +15,3 @@ all_namespaces:
               inventory_namespace: svc0041p-wordpress
               inventory_openshift:
                 domain: ocpitsp0001.xaas.epfl.ch
-                insecure: true
