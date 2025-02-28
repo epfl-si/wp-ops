@@ -131,7 +131,7 @@ http {
 		error_page 500 /global-error/500.php;
 		error_page 403 /global-error/403.php;
 
-		location ~ ^/global-error/.*\.php$ {
+		location /global-error/.*\.php$ {
 			root /wp/wp-error-pages;
 			fastcgi_pass unix:/run/php/php8.1-fpm.sock;
 		}
