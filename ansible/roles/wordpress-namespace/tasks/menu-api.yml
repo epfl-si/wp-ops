@@ -89,7 +89,7 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-016"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-017"
                 resources:
                   limits:
                     cpu: 4
