@@ -15,7 +15,6 @@ all_namespaces:
               inventory_namespace: svc0041t-wordpress
               inventory_openshift:
                 domain: ocpitst0001.xaas.epfl.ch
-                insecure: true
             namespace|wordpress-test-in-okd:
               inventory_namespace: wordpress-test
               inventory_has_cluster_admin: True
