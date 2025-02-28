@@ -142,10 +142,7 @@
                 annotations:
                   summary: "Too many MariaDB restarts"
                   description: >-
-                    {% raw -%}
-                    More than once MariaDB (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
-                    {%- endraw %}
-                    has restarted in the last {{ _mariadb_restarts_window_minutes }} minutes.
+                    More than one MariaDB has restarted in the last {{ _mariadb_restarts_window_minutes }} minutes.
           - name: pod-alerts
             rules:
               - alert: WordPressNginxPodCountMismatch
