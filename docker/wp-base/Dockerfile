@@ -47,7 +47,7 @@ RUN chmod +x /tmp/install-wordpress.sh
 # `git push`ed something. Here is a way to force a rebuild everytime,
 # regardless of the cached state (on your workstation) or lack thereof
 # (in a cloud build).
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
+# ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
 
 ARG WORDPRESS_VERSION_LINEAGES="6.7"
 ARG AWS_ACCESS_KEY_ID
@@ -90,6 +90,11 @@ RUN set -e -x;   env; \
 # We do that last for simplicity, at a small cost in build time
 COPY symlink-wp-versions.sh /tmp
 RUN sh /tmp/symlink-wp-versions.sh && rm /tmp/symlink-wp-versions.sh
+
+######################################################################
+# Copy global error pages
+######################################################################
+COPY global-error-pages /wp/global-error-pages
 
 FROM scratch
 
