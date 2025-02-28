@@ -127,6 +127,15 @@ http {
 	server {
 		server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
 
+
+		error_page 500 /global-error/500.php;
+		error_page 403 /global-error/403.php;
+
+		location ~ ^/global-error/.*\.php$ {
+			root /wp-errors-pages;
+			fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+		}
+
 		{{ $hasRootLocation := false }}
 
 		{{ range $location := $server.Locations }}
