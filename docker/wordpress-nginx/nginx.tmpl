@@ -126,14 +126,17 @@ http {
 	{{ range $server := $servers }}
 	server {
 		server_name {{ buildServerName $server.Hostname }} {{range $server.Aliases }}{{ . }} {{ end }};
-
-
+		
 		error_page 500 /global-error/500.php;
 		error_page 403 /global-error/403.php;
 
-		location /global-error/.*\.php$ {
-			root /wp/wp-error-pages;
-			fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+		location /global-error/ {
+			root /wp/wp-error-pages/;
+		}
+
+		location ~ ^/global-error/.*\.php$ {
+			root /wp/wp-error-pages/;
+			fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
 		}
 
 		{{ $hasRootLocation := false }}
