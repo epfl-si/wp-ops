@@ -202,5 +202,6 @@
         selector:
           matchLabels:
             app: menu-api
+        jobLabel: app
         podMetricsEndpoints:
           - port: menu-api-port
