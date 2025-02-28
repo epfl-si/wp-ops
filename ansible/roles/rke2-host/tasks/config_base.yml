@@ -1,7 +1,0 @@
----
-
-# - name: Ensure NTP service is running and enabled
-#   service:
-#     name: chronyd
-#     enabled: yes
-#     state: started

@@ -21,15 +21,3 @@ all_namespaces:
               inventory_openshift:
                 domain: okd-test.fsd.team
                 insecure: true
-    rke2_namespaces:
-      children:
-        rke2_namespaces_test:
-          vars:
-            inventory_deployment_stage: test
-          "hosts":   # Ibid.
-            namespace|wordpress-test-in-rancher:
-              inventory_namespace: wordpress-test
-              ansible_rancher_url: https://rancher-fsd.epfl.ch
-              ansible_rancher_cluster_name: wordpress-test
-              ansible_user: root
-              inventory_has_cluster_admin: True
