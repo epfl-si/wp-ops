@@ -1,2 +1,0 @@
-installed_node_names: "{{ (node_list.resources if 'resources' in node_list else []) | map(attribute='metadata.name') }}"
-rke2_install_server: rancher-fsd.epfl.ch

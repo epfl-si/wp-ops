@@ -52,13 +52,8 @@
         - wp.web
         - wp.nginx
       vars:
-        # We want to manage RBAC in RKE2 clusters only — OpenShifts
-        # (and OKDs) use OLM as the RBAC vehicle instead:
-        _rbac_managed: >-
-          {{ "rke2_namespaces" in group_names }}
         # For now, we manage Routes by hand (so as to revert them quickly if need be):
-        _routing_managed: >-
-          {{ "rke2_namespaces" in group_names }}
+        _routing_managed: false
   tags:
     - wp
     - wp.web

@@ -30,18 +30,3 @@
       oc login --web --server=https://api.{{ inventory_openshift.domain }}:6443 {{
                "--insecure-skip-tls-verify" if (inventory_openshift.insecure | default(False)) else ""
               }}
-
-- name: Log in to Rancher
-  when:
-  - >-
-    "CREDENTIALS_STILL_VALID" not in _k8s_login_check.stdout
-  - >-
-    "rke2_namespaces" in group_names
-  block:
-    - register: _rancher_login
-      epfl_si.rancher.rancher_login:
-    - copy:
-        dest: "{{ k8s_auth_kubeconfig }}"
-        content: >-
-          {{ _rancher_login.kubeconfig }}
-

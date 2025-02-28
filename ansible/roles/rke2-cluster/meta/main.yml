@@ -1,3 +1,0 @@
-dependencies:
-  - name: epfl_si.ansible-module-openshift
-  - name: epfl_si.ansible-module-eyaml

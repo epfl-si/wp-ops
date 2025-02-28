@@ -55,7 +55,6 @@ inventories () {
         test) echo "-i inventory/test" ;;
         test_and_prod) echo "-i inventory/test -i inventory/prod" ;;
         prod_only) echo "-i inventory/prod" ;;
-        rke2_test) echo "-i inventory/rke2/hosts-test.yml" ;;
     esac
 }
 
@@ -78,9 +77,6 @@ while [ "$#" -gt 0 ]; do
             shift ;;
         --install-only)
             mode=install-only
-            shift ;;
-        --rke2_test)
-            # Kept for backward compatibility - Use test inventory
             shift ;;
         -m) mode=ansible
             ansible_args+=("-m")
