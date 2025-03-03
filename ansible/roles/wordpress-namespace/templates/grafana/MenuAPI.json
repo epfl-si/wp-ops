@@ -531,7 +531,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "builder",
-          "expr": "sum(menu_api_external_detached_menus_total)\n",
+{% endraw %}
+          "expr": "sum(menu_api_external_detached_menus_total{namespace=\"{{ inventory_namespace }}\"})",
+{% raw %}
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
