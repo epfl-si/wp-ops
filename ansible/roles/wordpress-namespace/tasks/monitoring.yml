@@ -90,7 +90,7 @@
                 annotations:
                   summary: "Pod count mismatch (menu-api)"
                   description: >-
-                    The deployment menu-api has not the desired number of pods for over {{ _menuapi_count_pods_duration_minutes }} minutes.
+                    The menu-api deployment hasn't had the desired number of pods since {{ _menuapi_count_pods_duration_minutes }} minutes.
               - alert: MenuApiSlowRequests
                 expr: >
                   histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold }}
@@ -106,7 +106,7 @@
                     {{ $labels.route }}
                     {%- endraw %},
                     with a response time greater than {{ _menuapi_95_pct_threshold }} seconds over the last five minutes.
-                    This condition has persist for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
+                    This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
           - name: php-fpm-alerts
             rules:
               - alert: PhpFpmHighProcessRequestDuration
@@ -136,7 +136,7 @@
                   summary: "nginx 499 Errors Detected"
                   description: >-
                     nginx is returning too many HTTP 499 errors (Client Closed Request) with a rate greater than {{ _499s_threshold }} over the last two minutes.
-                    The condition has persist for at least {{ _499s_duration_minutes }} minutes.
+                    The condition has persisted for at least {{ _499s_duration_minutes }} minutes.
                     {% raw -%}
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
@@ -151,7 +151,7 @@
                   summary: "nginx 500 Errors Detected"
                   description: >-
                     nginx is returning too many HTTP 500 errors with a rate greater than {{ _500s_threshold }} over the last two minutes.
-                    The condition has persist for at least {{ _500s_duration_minutes }} minutes.
+                    The condition has persisted for at least {{ _500s_duration_minutes }} minutes.
                     {% raw -%}
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
@@ -166,7 +166,7 @@
                   summary: "nginx 504 Errors Detected"
                   description: >-
                     nginx is returning too many HTTP 504 errors (Gateway Timeout) with a rate greater than {{ _504s_threshold }} over the last two minutes.
-                    The condition has persist for at least {{ _504s_duration_minutes }} minutes.
+                    The condition has persisted for at least {{ _504s_duration_minutes }} minutes.
                     {% raw -%}
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
