@@ -101,12 +101,12 @@
                 annotations:
                   summary: "MenuAPI slow requests"
                   description: >-
-                    menu-api is returning slow requests at 95% on the route
+                    menu-api is returning slow requests at the 95th percentile on the route  
                     {% raw -%}
-                     {{ $labels.route }} 
-                    {%- endraw %}
-                    with a rate greater than {{ _menuapi_95_pct_threshold }} over the last five minutes.
-                    The condition has persist for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
+                    {{ $labels.route }}
+                    {%- endraw %},
+                    with a response time greater than {{ _menuapi_95_pct_threshold }} seconds over the last five minutes.
+                    This condition has persist for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
           - name: php-fpm-alerts
             rules:
               - alert: PhpFpmHighProcessRequestDuration
