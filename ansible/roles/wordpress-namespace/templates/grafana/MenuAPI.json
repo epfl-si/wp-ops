@@ -137,7 +137,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum by(message) (rate(menu_api_errors_count{namespace=\"{{ inventory_namespace }}\"}[5m]))",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -205,7 +207,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum(menu_api_errors_count{namespace=\"{{ inventory_namespace }}\"})",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -306,7 +310,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum by(statusCode) (rate(menu_api_http_requests_count{namespace=\"{{ inventory_namespace }}\"}[10m]))",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -378,7 +384,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum(menu_api_orphan_pages_count{namespace=\"{{ inventory_namespace }}\"})",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -450,7 +458,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum by(lang) (menu_api_pages_total{namespace=\"{{ inventory_namespace }}\"})",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -618,7 +628,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "menu_api_refresh_duration_seconds{namespace=\"{{ inventory_namespace }}\"}",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -718,7 +730,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+{% endraw %}
           "expr": "sum(menu_api_wp_api_call_duration_seconds{namespace=\"{{ inventory_namespace }}\"}) / count(menu_api_wp_api_call_duration_seconds)",
+{% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -807,7 +821,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
+{% endraw %}
           "expr": "sum(rate(http_request_duration_seconds_bucket{namespace=\"{{ inventory_namespace }}\",job=\"menu-api\",route!=\"/refresh\"}[$__rate_interval])) by (le)",
+{% raw %}
           "format": "heatmap",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -1129,7 +1145,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
+{% endraw %}
           "expr": "rate(process_cpu_seconds_total{namespace=\"{{ inventory_namespace }}\",job=\"menu-api\"}[2m])",
+{% raw %}
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1226,7 +1244,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
+{% endraw %}
           "expr": "process_resident_memory_bytes{namespace=\"{{ inventory_namespace }}\",job=\"menu-api\"}",
+{% raw %}
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1322,7 +1342,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
+{% endraw %}
           "expr": "container_file_descriptors{namespace=\"{{ inventory_namespace }}\",container=\"menu-api\"}",
+{% raw %}
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1418,7 +1440,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
+{% endraw %}
           "expr": "process_open_fds{namespace=\"{{ inventory_namespace }}\",container=\"menu-api\"}",
+{% raw %}
           "instant": true,
           "legendFormat": "__auto",
           "range": true,
