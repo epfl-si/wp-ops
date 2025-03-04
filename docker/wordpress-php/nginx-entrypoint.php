@@ -187,7 +187,11 @@ define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
 // `wp-settings.php`, rather than `load.php` and `index.php` which
 // both insist on loading a `wp-config.php` file.
 settings_before_wp_settings();
+
 $_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
+if (! file_exists($_SERVER["SCRIPT_FILENAME"])) {
+    serve_404_and_exit();
+}
 
 require(ABSPATH . 'wp-settings.php');
 
