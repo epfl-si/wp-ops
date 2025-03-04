@@ -16,6 +16,9 @@ COPY --from=wp-base /usr/local/bin/wp /usr/local/bin/wp
 COPY --from=wp-base /var/www/.composer/ /var/www/.composer/
 COPY --from=wp-base /var/www/.wp-cli/ /var/www/.wp-cli/
 
+# We don't do the wp-cron out of the interactive Web server:
+RUN find /wp/ -name wp-cron.php -delete
+
 COPY msmtprc /etc/msmtprc
 
 COPY merge_fpm_confs.pl /usr/local/lib/
