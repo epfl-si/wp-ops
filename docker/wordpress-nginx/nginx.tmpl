@@ -119,7 +119,7 @@ http {
 				prometheus:collect()
 			}
 		}
-	}	
+	}
 
 	# `wordpress`-class ingress snippets start here.
 	{{ range $server := $servers }}
@@ -129,7 +129,7 @@ http {
 		{{ $hasRootLocation := false }}
 
 		{{ range $location := $server.Locations }}
-			####################### START LOCATION ####################### 
+			####################### START LOCATION #######################
 			{{ $path := buildLocation $location false }}
 
 			# ------------------------------------------------------------- #
@@ -140,13 +140,13 @@ http {
 				# Service port   : {{ $ing.ServicePort | quote }};
 				# Location path  : {{ $ing.Path | escapeLiteralDollar | quote }};
 				# Ingress path   : {{ $location.IngressPath | quote }};
-			
+
 			# ------------------------------------------------------------- #
 
 {{/* Verify if ConfigurationSnippet is provided and set as expected when the path is root (/).
      The ConfigurationSnippet may introduce unanticipated values at the root path.
      Ensure that the ingress have a Service name.
-     NOTE: Current behavior with root path ConfigurationSnippet is under review, 
+     NOTE: Current behavior with root path ConfigurationSnippet is under review,
      and a fix will be included in a future update. */}}
 			{{ if and (eq $location.Path "/") (not (empty $ing.Service)) }}
 				{{ $hasRootLocation = true }}
@@ -184,7 +184,7 @@ http {
 				location {{ $path }} {
 					{{ $location.ConfigurationSnippet }}
 				}
-				
+
 			{{ else }}
 
 {{/* This is a supplemental Location that the controller emits as a
