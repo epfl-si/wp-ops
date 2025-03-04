@@ -113,7 +113,7 @@ function setup_nonces () {
 
 function serve_404_and_exit () {
     http_response_code(404);
-    print('406 citroen not found');
+    print('404 citroen not found');
     exit();
 }
 
