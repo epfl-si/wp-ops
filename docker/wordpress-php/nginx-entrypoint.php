@@ -139,13 +139,6 @@ function settings_before_wp_settings () {
         define( 'WP_INSTALLING', true );
     }
 }
-function get_wordpress () {
-    // TODO: complete with more variables coming from nginx.
-    return [
-        'host'       => 'wpn-124.fsd.team',  // TODO: obtain from nginx
-        'wp_version' => '6'
-    ];
-}
 
 ##########################################################################################
 
