@@ -167,14 +167,13 @@ $_SERVER['HTTPS'] = '1';
 // to alter their own PHP code:
 define('DISALLOW_FILE_MODS', 1);
 
-// Define the EPFL_SITE_NAME
-// This match the `site['metadata']['name']` to the 
-// k8s's WordPress object.
-define('EPFL_SITE_NAME', $_SERVER['WP_SITE_NAME']);
-// Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the corresponding
-// filter in our mu-plugins:
-$site_upload_dir = '/wp-data/' . EPFL_SITE_NAME . '/uploads';
-define('EPFL_SITE_UPLOADS_DIR', $site_upload_dir);
+// Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the
+// corresponding filter in our mu-plugins.
+// 💡 `$_SERVER['WP_SITE_NAME']` flows from the WordPressSite object's
+// Kubernetes name, through the operator-prepared nginx snippets
+// inside the custom Ingress objects.
+define('EPFL_SITE_UPLOADS_DIR',
+       '/wp-data/' . $_SERVER['WP_SITE_NAME'] . '/uploads');
 
 // Initialize WordPress' constants. This is best done using
 // `wp-settings.php`, rather than `load.php` and `index.php` which
