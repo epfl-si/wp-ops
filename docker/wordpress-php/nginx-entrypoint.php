@@ -154,6 +154,11 @@ if (! $entrypoint_path) {
     serve_go_away_and_exit();
 }
 
+$_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
+if (! file_exists($_SERVER["SCRIPT_FILENAME"])) {
+    serve_404_and_exit();
+}
+
 setup_db();
 
 setup_nonces();
@@ -179,11 +184,6 @@ define('EPFL_SITE_UPLOADS_DIR',
 // `wp-settings.php`, rather than `load.php` and `index.php` which
 // both insist on loading a `wp-config.php` file.
 settings_before_wp_settings();
-
-$_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
-if (! file_exists($_SERVER["SCRIPT_FILENAME"])) {
-    serve_404_and_exit();
-}
 
 require(ABSPATH . 'wp-settings.php');
 
