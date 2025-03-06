@@ -1,10 +1,5 @@
 ---
 
-- name: Log in to cluster
-  tags: always
-  import_tasks:
-    file: k8s-login.yml
-
 - name: Storage
   include_tasks:
     file: storage.yml
