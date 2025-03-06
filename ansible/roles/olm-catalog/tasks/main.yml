@@ -9,6 +9,8 @@
     apply:
       tags:
         - images
+  tags:
+    - images
 
 - tags: always
   include_vars: ../../../vars/image-vars.yml
