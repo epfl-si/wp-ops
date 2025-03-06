@@ -1,6 +1,4 @@
 - name: Build Config - isas-fsd-catalog
-  when: >-
-    inventory_namespace == "svc0041t-wordpress"
   kubernetes.core.k8s:
     definition:
       apiVersion: build.openshift.io/v1
