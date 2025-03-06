@@ -164,7 +164,6 @@
         }
       },
       "pluginVersion": "11.5.1",
-      "repeat": "pod",
       "repeatDirection": "h",
       "targets": [
         {
@@ -173,9 +172,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
 {% endraw %}
-          "expr": "nginx_http_connections{pod=~\"$pod\", namespace=\"{{ inventory_namespace }}\"}",
+          "expr": "sum(nginx_http_connections{pod=~\"$pod\", namespace=\"{{ inventory_namespace }}\"}) by (state)",
 {% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -185,7 +184,7 @@
           "useBackend": false
         }
       ],
-      "title": "nginx HTTP Connections / $pod",
+      "title": "nginx HTTP Connections",
       "type": "timeseries"
     },
     {
@@ -300,7 +299,6 @@
         }
       },
       "pluginVersion": "11.5.1",
-      "repeat": "pod",
       "repeatDirection": "h",
       "targets": [
         {
@@ -309,10 +307,10 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
 {% endraw %}
-          "expr": "irate(nginx_http_requests_total{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[5m])",
+          "expr": "sum(irate(nginx_http_requests_total{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (status)",
 {% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -323,7 +321,7 @@
           "useBackend": false
         }
       ],
-      "title": "Requests By Status / $pod",
+      "title": "Requests By Status",
       "type": "timeseries"
     },
     {
@@ -409,7 +407,6 @@
         }
       },
       "pluginVersion": "11.5.1",
-      "repeat": "pod",
       "repeatDirection": "h",
       "targets": [
         {
@@ -418,9 +415,9 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
 {% endraw %}
-          "expr": "idelta(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[5m])",
+          "expr": "sum(idelta(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (le)",
 {% raw %}
           "format": "heatmap",
           "fullMetaSearch": false,
@@ -433,7 +430,7 @@
           "useBackend": false
         }
       ],
-      "title": "Request Duration Histogram / $pod",
+      "title": "Request Duration Histogram",
       "type": "heatmap"
     },
     {
@@ -566,7 +563,6 @@
         }
       },
       "pluginVersion": "11.5.1",
-      "repeat": "pod",
       "repeatDirection": "h",
       "targets": [
         {
@@ -577,7 +573,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
 {% endraw %}
-          "expr": "histogram_quantile(0.5, rate(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m]))",
+          "expr": "histogram_quantile(0.5, sum(rate(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m])) by (le))",
 {% raw %}
           "format": "time_series",
           "fullMetaSearch": false,
@@ -595,7 +591,7 @@
           },
           "editorMode": "code",
 {% endraw %}
-          "expr": "histogram_quantile(0.75, rate(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m]))",
+          "expr": "histogram_quantile(0.75, sum(rate(nginx_http_request_duration_seconds_bucket{host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m])) by (le))",
 {% raw %}
           "format": "time_series",
           "hide": false,
@@ -611,7 +607,7 @@
           },
           "editorMode": "code",
 {% endraw %}
-          "expr": "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket{pod=~\"$pod\", host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m]))",
+          "expr": "histogram_quantile(0.95, sum(rate(nginx_http_request_duration_seconds_bucket{host=~\"$host\", namespace=\"{{ inventory_namespace }}\"}[1m])) by (le))",
 {% raw %}
           "format": "time_series",
           "hide": false,
@@ -621,7 +617,7 @@
           "refId": "B"
         }
       ],
-      "title": "Request Duration Percentile / $pod",
+      "title": "Request Duration Percentile",
       "type": "timeseries"
     },
     {
@@ -709,7 +705,7 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "hideZeros": false,
@@ -718,7 +714,6 @@
         }
       },
       "pluginVersion": "11.5.1",
-      "repeat": "pod",
       "repeatDirection": "h",
       "targets": [
         {
@@ -727,19 +722,19 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
 {% endraw %}
-          "expr": "nginx_metric_errors_total{pod=~\"$pod\", namespace=\"{{ inventory_namespace }}\"}",
+          "expr": "nginx_metric_errors_total{namespace=\"{{ inventory_namespace }}\"}",
 {% raw %}
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "{{label_name}}",
+          "legendFormat": "{{pod}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Number of nginx-lua-prometheus errors / $pod",
+      "title": "Number of nginx-lua-prometheus errors",
       "type": "timeseries"
     }
   ],
@@ -749,30 +744,6 @@
   "tags": [],
   "templating": {
     "list": [
-      {
-        "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "73a57e8b-7679-4a18-915c-292f143448c7",
-        "definition": "label_values(nginx_http_connections,pod)",
-        "includeAll": true,
-        "multi": true,
-        "name": "pod",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(nginx_http_connections,pod)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
       {
         "allowCustomValue": true,
         "current": {
@@ -794,6 +765,34 @@
         "refresh": 1,
         "regex": "",
         "sort": 1,
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        },
+        "definition": "label_values(nginx_http_connections,pod)",
+        "includeAll": true,
+        "multi": true,
+        "name": "pod",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(nginx_http_connections,pod)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
         "type": "query"
       }
     ]
