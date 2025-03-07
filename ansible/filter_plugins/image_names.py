@@ -2,19 +2,19 @@ import re
 
 class FilterModule(object):
     '''
-    Parse a string of the form `foo.bar/myimage:mytag`
+    Parse strings of the form `foo.bar/myimage:mytag`
     '''
 
     def filters(self):
         return {
-            'parse_external_docker_tag': self.parse_external_docker_tag
+            'parse_docker_image_name': self.parse_docker_image_name
         }
 
-    def parse_external_docker_tag(self, docker_tag, mirrored_base=None):
-        if ":" in docker_tag:
-            (uri, tag) = docker_tag.split(":", 1)
+    def parse_docker_image_name (self, docker_image_name, mirrored_base=None):
+        if ":" in docker_image_name:
+            (uri, tag) = docker_image_name.split(":", 1)
         else:
-            uri = docker_tag
+            uri = docker_image_name
             tag = "latest"
 
         uri_parts = uri.split("/")
