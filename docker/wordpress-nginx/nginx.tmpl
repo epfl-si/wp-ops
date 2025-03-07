@@ -136,11 +136,11 @@ http {
 			if ($query_string ~* "status=(\d+)") {
 				set $status_override $1;
 			}
-			fastcgi_param status				$status_override;
+			fastcgi_param STATUS				$status_override;
 			fastcgi_param SCRIPT_FILENAME		$request_filename;
-			fastcgi_param query_string			$query_string;
-			fastcgi_param request_method		$request_method;
-			fastcgi_param request_uri			$request_uri;
+			fastcgi_param QUERY_STRING			$query_string;
+			fastcgi_param REQUEST_METHOD		$request_method;
+			fastcgi_param REQUEST_URI			$request_uri;
 			fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
 		}
 
