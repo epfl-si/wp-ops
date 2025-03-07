@@ -10,9 +10,10 @@ RUN apk add --no-cache libcap && \
     apk del libcap
 
 # In OpenShift, getting permissions is hard mmkay
-RUN mkdir -p 1777 /var/run/openresty/
+RUN mkdir /var/run/openresty/
 RUN chmod 1777 /etc/ingress-controller/ssl/ /tmp/nginx/ \
-    /etc/ingress-controller/telemetry/ /etc/nginx/
+    /etc/ingress-controller/telemetry/ /etc/nginx/ \
+    /var/run/openresty/
 RUN chmod 666 /etc/nginx/nginx.conf
 
 ## Uncomment the following line if you want to test out your RBAC live:
