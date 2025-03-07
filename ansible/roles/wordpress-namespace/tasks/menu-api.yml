@@ -92,7 +92,6 @@
                 image: "quay-its.epfl.ch/svc0041/menu-api:2025-017"
                 resources:
                   limits:
-                    cpu: 4
                     memory: 1Gi
                   requests:
                     cpu: '{{ _cpu_request }}'
