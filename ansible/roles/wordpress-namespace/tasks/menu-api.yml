@@ -77,7 +77,7 @@
         name: menu-api
         namespace: "{{ inventory_namespace }}"
       spec:
-        replicas: 1
+        replicas: 3    # TODO: deploy version -020, which will fix the performance issue
         selector:
           matchLabels:
             app: menu-api
@@ -89,7 +89,7 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-017"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-018"
                 resources:
                   limits:
                     memory: 1Gi
