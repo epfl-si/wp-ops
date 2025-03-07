@@ -41,16 +41,20 @@
                 chatID: "{{ telegram_chat_id }}"
                 message: |
                   {% raw %}
-                  {{ range .Alerts }}
-                  {{ if eq .Status "firing" }}
-                  🔥 FIRING -- {{ .Annotations.summary }}
-                  {{ .Annotations.description }}
-                  Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-                  {{ else if eq .Status "resolved" }}
-                  ✅ RESOLVED -- {{ .Annotations.summary }}
-                  {{ .Annotations.description }}
-                  Started at (UTC): {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-                  Ended at (UTC): {{ .EndsAt.Format "2006-01-02 15:04:05" }}
+                  {{ if .Alerts }}
+                  {{ $first := index .Alerts 0 }}
+                  {{ if eq $first.Status "firing" }}
+                  🔥 FIRING -- {{ $first.Annotations.summary }}
+                  {{ $first.Annotations.description }}
+                  Started at (UTC): {{ $first.StartsAt.Format "2006-01-02 15:04:05" }}
+                  {{ else if eq $first.Status "resolved" }}
+                  ✅ RESOLVED -- {{ $first.Annotations.summary }}
+                  {{ $first.Annotations.description }}
+                  Started at (UTC): {{ $first.StartsAt.Format "2006-01-02 15:04:05" }}
+                  Ended at (UTC): {{ $first.EndsAt.Format "2006-01-02 15:04:05" }}
+                  {{ end }}
+                  {{ if gt (len .Alerts) 1 }}
+                  There are multiple alerts of this type: {{ len .Alerts }}
                   {{ end }}
                   {{ end }}
                   {% endraw %}
@@ -111,7 +115,7 @@
             rules:
               - alert: PhpFpmHighProcessRequestDuration
                 expr: >
-                  phpfpm_process_request_duration > 30 * 1000 * 1000
+                  phpfpm_process_request_duration{namespace="{{ inventory_namespace }}"} > 30 * 1000 * 1000
                 for: 2m
                 labels:
                   severity: critical
@@ -121,7 +125,7 @@
                   description: >-
                     {% raw -%}
                     PHP-FPM process request duration exceeded 30s for more than 2 minutes.
-                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
+                    (pod: {{ $labels.pod }}, instance: {{ $labels.instance }}, child: {{ $labels.child }})
                     {%- endraw %}
           - name: nginx-alerts
             rules:
