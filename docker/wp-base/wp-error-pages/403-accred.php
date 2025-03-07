@@ -18,10 +18,7 @@ $unit_label = htmlentities($_GET["unit_label"]);
 </p>
 
 <ul>
-  <li><a href="https://accred.epfl.ch/cgi-bin/adminsofunite.pl?unite=<?php echo $unit_id ?>">
-      Find out who your accreditor is
-    </a></li>
-  <li><a href="https://accreditation.epfl.ch/page-26654-fr.html">
-      Accreditation FAQ (French only)
+  <li><a href="https://accreditation.epfl.ch">
+      Accreditation FAQ
     </a></li>
 </ul>
