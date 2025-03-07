@@ -90,8 +90,7 @@
         <p>
           <?php include("403-{$error_type}.php") ?>
         </p>
-        <!-- The debug informations -->
-        <?php include("403-debug.php") ?>
+        <?php include("debug.php") ?>
       </main>
     </div>
     <div class="bg-gray-100 pt-5 mt-auto">
