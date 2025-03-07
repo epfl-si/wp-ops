@@ -132,7 +132,11 @@ http {
 		location /global-error/ {
             alias /wp/wp-error-pages/;
 
-            fastcgi_param STATUS             500;            
+			set $status_override $status;
+			if ($query_string ~* "status=(\d+)") {
+				set $status_override $1;
+			}
+			fastcgi_param STATUS 			 $status_override;
             fastcgi_param SCRIPT_FILENAME    $request_filename;
             fastcgi_param QUERY_STRING       $query_string;
             fastcgi_param REQUEST_METHOD     $request_method;
