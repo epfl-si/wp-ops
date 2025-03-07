@@ -106,7 +106,9 @@
                   httpGet:
                     path: /metrics
                     port: 3001
-                  failureThreshold: 30  # 5 minutes - Time enough to scrape the whole fleet
+                  failureThreshold: 60  # 10 minutes - Experience suggests that with a fleet of
+                                        # 680 sites, 5 minutes is not enough. TODO: increase
+                                        # parallelism instead.
                 livenessProbe:
                   httpGet:
                     path: /metrics
