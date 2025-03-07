@@ -1,18 +1,21 @@
 <?php
 
-// Custom 403 error page.
-//
-// This script finds the error type (e.g. "default")
-// and then includes 403-template.php which in turn includes
-// 403-{$error_type}.php.
+// Custom XXX error page.
 
-// make sure we send a 403 status code
-header("HTTP/1.1 403 Forbidden");
+$statuses = [
+  403 => "Forbidden",
+  500 => "Internal Server Error",
+  502 => "Bad Gateway",
+  503 => "Service Unavailable",
+  504 => "Gateway Timeout",
+];
 
-// request variables
-$request_id  = $_SERVER["UNIQUE_ID"] ?? '';
+$status = $_SERVER["STATUS"] ?? 500;
+$st = array_key_exists($status, $statuses) ? $status : 500;
+
+header("HTTP/1.1 $st {$statuses[$st]}");
+
 $request_uri = $_SERVER["REQUEST_URI"];
-// If using CloudFlare, we retrieve original client IP in 'HTTP_CF_CONNECTING_IP'. The content of 'REMOTE_ADDR' is a CloudFlare IP.
 $request_ip  = (array_key_exists("HTTP_CF_CONNECTING_IP", $_SERVER)) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER["REMOTE_ADDR"];
 
 // ip protocol version & regex to check if inside EPFL campus
@@ -28,23 +31,16 @@ if (filter_var($request_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 $is_login = strpos($request_uri, "wp-login") !== false;
 $is_wp_admin = strpos($request_uri, "wp-admin") !== false;
 
-// is the user's IP inside the EPFL campus?
 $is_inside_epfl = preg_match($ip_regex, $request_ip) == 1;
 $is_inside_epfl_string = $is_inside_epfl ? "inside EPFL" : "outside EPFL";
 
-// the error types supported by this page
 $error_types = ["default", "accred", "inside"];
-
-// the current error type
 $error_type = "default";
 
-
-// the error type can be overridden by a GET parameter,
-// this is useful for testing and it's used for the
-// accred error, because it comes from a redirect. We
-// check that's is a supported error:
 if (array_key_exists("error_type", $_GET) && in_array($_GET["error_type"], $error_types)) {
   $error_type = $_GET["error_type"];
 }
 
-include("403-template.php");
+$stx = $st == 403 ? "403" : "50x";
+
+include("{$stx}-template.php");

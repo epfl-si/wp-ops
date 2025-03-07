@@ -78,7 +78,7 @@
               </svg>
             </a>
           </li>
-          <li class="breadcrumb-item active" aria-current="page">Internal server error</li>
+          <li class="breadcrumb-item active" aria-current="page"><?php echo $statuses[$st]; ?></li>
         </ol>
       </nav>
     </div>
@@ -86,12 +86,12 @@
     <div class="main-container">
       <p class="w-100 pb-5">
       <main id="main" class="content container">
-        <h1 class="mb-5">Internal server error</h1>
+        <h1 class="mb-5"><?php echo $statuses[$st]; ?></h1>
         <p>
           The server encountered an unexpected error and was unable to respond to your request. Please try again later.
         </p>
-        <!-- The debug informations -->
-        <?php include("500-debug.php") ?>
+        <?php include("debug.php") ?>
+
       </main>
     </div>
     <div class="bg-gray-100 pt-5 mt-auto">
