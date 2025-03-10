@@ -21,44 +21,47 @@
           DEBUG: {{ _debug }}
           REQUEST_TIMEOUT: {{ _request_timeout }}
           LOCAL_ENV: false
-          LABS_LINK_URL_FR: "https://www.epfl.ch/labs/fr/laboratoires/"
-          LABS_LINK_URL_EN: "https://www.epfl.ch/labs/en/laboratories/"
+          LABS_LINK_URL_FR: "https://{{ _wp_host_base_url }}/labs/fr/laboratoires/"
+          LABS_LINK_URL_EN: "https://{{ _wp_host_base_url }}/labs/en/laboratories/"
           ASSOC_BREADCRUMB_EN: |
-            https://www.epfl.ch/campus/en/campusenglish/
-            https://www.epfl.ch/campus/associations/en/student-associations/
-            https://www.epfl.ch/campus/associations/list/en/all-associations/
+            https://{{ _wp_host_base_url }}/campus/en/campusenglish/
+            https://{{ _wp_host_base_url }}/campus/associations/en/student-associations/
+            https://{{ _wp_host_base_url }}/campus/associations/list/en/all-associations/
           ASSOC_BREADCRUMB_FR: |
-            https://www.epfl.ch/campus/fr/campus/
-            https://www.epfl.ch/campus/associations/fr/associations-detudiants/
-            https://www.epfl.ch/campus/associations/list/fr/toutes-les-associations/
+            https://{{ _wp_host_base_url }}/campus/fr/campus/
+            https://{{ _wp_host_base_url }}/campus/associations/fr/associations-detudiants/
+            https://{{ _wp_host_base_url }}/campus/associations/list/fr/toutes-les-associations/
           MENU_BAR_LINKS_EN: |
-            https://www.epfl.ch/about/en/
-            https://www.epfl.ch/education/en/
-            https://www.epfl.ch/research/en/
-            https://www.epfl.ch/innovation/en/
-            https://www.epfl.ch/schools/en/
-            https://www.epfl.ch/campus/en/
-            https://www.epfl.ch/labs/en/
+            https://{{ _wp_host_base_url }}/about/en/
+            https://{{ _wp_host_base_url }}/education/en/
+            https://{{ _wp_host_base_url }}/research/en/
+            https://{{ _wp_host_base_url }}/innovation/en/
+            https://{{ _wp_host_base_url }}/schools/en/
+            https://{{ _wp_host_base_url }}/campus/en/
+            https://{{ _wp_host_base_url }}/labs/en/
           MENU_BAR_LINKS_FR: |
-            https://www.epfl.ch/about/fr/
-            https://www.epfl.ch/education/fr/
-            https://www.epfl.ch/research/fr/
-            https://www.epfl.ch/innovation/fr/
-            https://www.epfl.ch/schools/fr/
-            https://www.epfl.ch/campus/fr/
-            https://www.epfl.ch/labs/fr/
+            https://{{ _wp_host_base_url }}/about/fr/
+            https://{{ _wp_host_base_url }}/education/fr/
+            https://{{ _wp_host_base_url }}/research/fr/
+            https://{{ _wp_host_base_url }}/innovation/fr/
+            https://{{ _wp_host_base_url }}/schools/fr/
+            https://{{ _wp_host_base_url }}/campus/fr/
+            https://{{ _wp_host_base_url }}/labs/fr/
           MENU_BAR_LINKS_DE: |
-            https://www.epfl.ch/about/de/
-            https://www.epfl.ch/education/de/
-            https://www.epfl.ch/research/de/
-            https://www.epfl.ch/innovation/de/
-            https://www.epfl.ch/schools/de/
-            https://www.epfl.ch/campus/de/
-            https://www.epfl.ch/labs/en/
+            https://{{ _wp_host_base_url }}/about/de/
+            https://{{ _wp_host_base_url }}/education/de/
+            https://{{ _wp_host_base_url }}/research/de/
+            https://{{ _wp_host_base_url }}/innovation/de/
+            https://{{ _wp_host_base_url }}/schools/de/
+            https://{{ _wp_host_base_url }}/campus/de/
+            https://{{ _wp_host_base_url }}/labs/en/
   vars:
     _wp_veritas_base_url: >-
       {{ "wp-veritas.epfl.ch" if inventory_deployment_stage == "production"
       else "wp-veritas-test.epfl.ch" }}
+    _wp_host_base_url: >-
+      {{ "www.epfl.ch" if inventory_deployment_stage == "production"
+      else "wpn-test.epfl.ch" }}
     _debug: >-
       {{ false if inventory_deployment_stage == "production"
       else true }}
