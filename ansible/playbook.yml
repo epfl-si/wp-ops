@@ -22,6 +22,9 @@
     import_tasks:
       file: tasks/k8s-login.yml
 
+# TODO: We should integrate with Quay here. At a minimum we need to create
+# one `imagePullSecret` for every namespace.
+
 - name: OLM catalog image
   hosts: namespace|svc0041t-wordpress
   gather_facts: False
