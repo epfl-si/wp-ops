@@ -39,6 +39,7 @@ main () {
     install_mu_plugins
 
     install_tinymce_advanced_plugin /tmp/tinymce-advanced-versions.json
+    hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
         flowpaper-lite-pdf-flipbook very-simple-meta-description \
@@ -118,6 +119,14 @@ patch_tinymce_flickering_firefox () {
         cd $targetdir
         patch -p0 -F3 < /tmp/wordpress-TinyMCE-flickering-Firefox.patch.6
         cp wp-includes/js/tinymce/plugins/wordpress/plugin{,.min}.js
+    )
+}
+
+hotfix_tinymce_advanced_classic_paragraph () {
+    (
+        cd $targetdir
+        sed -i -e 's|\(.\)=\(window.tinymce.get(`editor-${e}`);\)|\1 = \2 if (!\1) return;|g' \
+            wp-content/plugins/tinymce-advanced/block-editor/classic-paragraph.js
     )
 }
 
