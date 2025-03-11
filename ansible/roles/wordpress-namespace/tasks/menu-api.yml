@@ -79,7 +79,7 @@
         name: menu-api
         namespace: "{{ inventory_namespace }}"
       spec:
-        replicas: 3    # TODO: deploy version -020, which will fix the performance issue
+        replicas: 1
         selector:
           matchLabels:
             app: menu-api
