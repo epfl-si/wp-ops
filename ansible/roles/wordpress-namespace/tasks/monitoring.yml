@@ -97,7 +97,7 @@
                     The menu-api deployment hasn't had the desired number of pods since {{ _menuapi_count_pods_duration_minutes }} minutes.
               - alert: MenuApiSlowRequests
                 expr: >
-                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold }}
+                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh", route!="/refreshSingleMenu"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_normal_requests }}
                 for: "{{ _menuapi_slow_requests_duration_minutes }}m"
                 labels:
                   severity: critical
@@ -109,7 +109,23 @@
                     {% raw -%}
                     {{ $labels.route }}
                     {%- endraw %},
-                    with a response time greater than {{ _menuapi_95_pct_threshold }} seconds over the last five minutes.
+                    with a response time greater than {{ _menuapi_95_pct_threshold_normal_requests }} seconds over the last five minutes.
+                    This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
+              - alert: MenuApiSlowRequestsForRefresh
+                expr: >
+                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route=~"/refresh|/refreshSingleMenu"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_request_requests }}
+                for: "{{ _menuapi_slow_requests_duration_minutes }}m"
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "MenuAPI slow requests"
+                  description: >-
+                    menu-api is returning slow requests for refresh at the 95th percentile on the route  
+                    {% raw -%}
+                    {{ $labels.route }}
+                    {%- endraw %},
+                    with a response time greater than {{ _menuapi_95_pct_threshold_request_requests }} seconds over the last five minutes.
                     This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
           - name: php-fpm-alerts
             rules:
@@ -231,6 +247,7 @@
     _menuapi_restarts_window_minutes: 15
     _menuapi_restart_duration_minutes: 3
     _menuapi_slow_requests_window_minutes: 5
-    _menuapi_95_pct_threshold: 0.2
+    _menuapi_95_pct_threshold_normal_requests: 0.06
+    _menuapi_95_pct_threshold_request_requests: 1
     _menuapi_slow_requests_duration_minutes: 3
     _menuapi_count_pods_duration_minutes: 3
