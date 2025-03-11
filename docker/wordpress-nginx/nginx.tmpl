@@ -150,6 +150,9 @@ http {
      and a fix will be included in a future update. */}}
 			{{ if and (eq $location.Path "/") (not (empty $ing.Service)) }}
 				{{ $hasRootLocation = true }}
+				location /robots.txt {
+					fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+				}
 			{{ end }}
 
 			{{ if (hasPrefix $path "= ") }}
