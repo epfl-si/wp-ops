@@ -3,6 +3,9 @@
 # Builds happen on the test OpenShift *only.* The images can then be consumed
 # (through the same Quay instance) in both test and production namespaces.
 
+- tags: always
+  include_vars: catalog-vars.yml
+
 - name: "Build Config Prerequisites"
   include_tasks:
     file: buildconfig-prerequisites.yml
@@ -11,9 +14,6 @@
         - images
   tags:
     - images
-
-- tags: always
-  include_vars: catalog-vars.yml
 
 - name: "Images and builds"
   include_tasks:
