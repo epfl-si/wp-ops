@@ -37,6 +37,7 @@
   tags:
     - wp
     - wp.secrets
+    - msmtp
 
 - name: Web server
   include_tasks:
@@ -133,4 +134,3 @@
     - wp.grafana
     - wp.monitoring
     - monitoring
-
