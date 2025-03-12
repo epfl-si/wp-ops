@@ -91,7 +91,7 @@
             serviceAccountName: menu-api
             containers:
               - name: menu-api
-                image: "quay-its.epfl.ch/svc0041/menu-api:2025-018"
+                image: "quay-its.epfl.ch/svc0041/menu-api:2025-020"
                 resources:
                   limits:
                     memory: 1Gi
