@@ -24,6 +24,7 @@ http {
 	fastcgi_temp_path     /tmp/nginx/fastcgi;
 	uwsgi_temp_path       /tmp/nginx/uwsgi;
 	scgi_temp_path        /tmp/nginx/scgi;
+    client_max_body_size  50M;
 
 	{{/* The default values are just too small for WordPress, see
 	https://stackoverflow.com/questions/23844761/upstream-sent-too-big-header-while-reading-response-header-from-upstream */}}
