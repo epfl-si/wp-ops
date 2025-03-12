@@ -13,7 +13,7 @@
     - images
 
 - tags: always
-  include_vars: ../../../vars/image-vars.yml
+  include_vars: catalog-vars.yml
 
 - name: "Images and builds"
   include_tasks:
