@@ -1,0 +1,10 @@
+isas_fsd_catalog_git_uri: https://github.com/epfl-si/isas-fsd-catalog
+
+_builder_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_test/WordPress-Next/ocp4_builder_secrets.yml') | from_yaml }}"
+
+_builder_robot_credentials: "{{ builder_secrets.quay.pull_robot.name }}:{{ _builder_secrets.quay.pull_robot.token }}"
+
+builder_pull_secret_config:
+  auths:
+    "quay-its.epfl.ch":
+      "auth": "{{ _builder_robot_credentials | b64encode }}"
