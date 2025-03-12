@@ -42,6 +42,7 @@
           metadata:
             labels:
               app: wp-nginx
+              version: "{{ nginx_deployment_images_tag }}"
           spec:
             affinity:
               podAntiAffinity:
@@ -61,7 +62,7 @@
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: quay-its.epfl.ch/svc0041/wp-nginx:2025-033
+                image: "quay-its.epfl.ch/svc0041/wp-nginx:{{ nginx_deployment_images_tag }}"
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
@@ -113,7 +114,7 @@
                   - name: MENU_API_HOST
                     value: "menu-api"
               - name: php
-                image: quay-its.epfl.ch/svc0041/wp-php:2025-033
+                image: "quay-its.epfl.ch/svc0041/wp-php:{{ nginx_deployment_images_tag }}"
                 resources:
                   limits: "{{ _limits_serving_for_prod_only }}"
                   requests:
