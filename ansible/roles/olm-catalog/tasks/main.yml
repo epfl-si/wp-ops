@@ -1,4 +1,4 @@
-# Kubernetes configuration for “cloud” builds
+# Kubernetes configuration for “cloud” builds of the OLM catalog
 #
 # Builds happen on the test OpenShift *only.* The images can then be consumed
 # (through the same Quay instance) in both test and production namespaces.
