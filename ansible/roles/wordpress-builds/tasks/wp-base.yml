@@ -117,3 +117,56 @@
           name: tekton-webhook
         port:
           targetPort: tekton-webhook
+
+- name: "Tekton tasks required for building"
+  kubernetes.core.k8s:
+    namespace:  "{{ inventory_namespace }}"
+    src: "{{ item }}"
+  with_items:
+  - https://api.hub.tekton.dev/v1/resource/tekton/task/git-clone/0.9/raw
+  - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
+
+- name: "Pipeline/wp-base"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: tekton.dev/v1beta1
+      kind: Pipeline
+      metadata:
+        name: wp-base
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        params:
+          - name: quay-repo
+            description: The hostname of the Quay repository to push to
+            default: "{{ ansible_quay_hostname }}"
+          - name: next-build-id
+            description: "Sequence number of the next build to push to Quay"
+        workspaces:
+          - name: shared-workspace
+          - name: dockerconfig
+        tasks:
+          - name: git-clone
+            taskRef:
+              kind: Task
+              name: git-clone
+            params:
+              - name: url
+                value: https://github.com/epfl-si/wp-ops
+            workspaces:
+            - name: output
+              workspace: shared-workspace
+          - name: build
+            runAfter: [git-clone]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "$(params.quay-repo)/{{ quay_organization }}/wp-base:2025-$(params.next-build-id)"
+              - name: CONTEXT
+                value: "docker/wp-base"
+              - name: VERBOSE
+                value: "true"
+            workspaces:
+            - name: source
+              workspace: shared-workspace
