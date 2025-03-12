@@ -128,6 +128,9 @@
                   - name: wordpress-authentication
                     mountPath: /wp-nonces
                     readOnly: true
+                  - name: smtp-password
+                    mountPath: /secrets/
+                    readOnly: true
               - name: php-fpm-exporter
                 image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
                 resources:
@@ -175,6 +178,9 @@
               - name: wordpress-authentication
                 secret:
                   secretName: wordpress-authentication
+              - name: smtp-password
+                secret:
+                  secretName: smtp-password
   vars:
     _request_cpu_serving: >-
       {{ "1" if inventory_deployment_stage == "production"
