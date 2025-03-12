@@ -3,6 +3,9 @@
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import os
+import re
+import requests
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -21,6 +24,8 @@ class TektonableBranch:
 
     def __init__ (self, branch):
         self.branch = branch
+        self.quay = QuayRequests()
+        self.quay_organization = "svc0041"
 
     @property
     def sbom (self):
@@ -42,9 +47,24 @@ class TektonableBranch:
         this_year = datetime.today().strftime("%Y")
         return f"{this_year}{self.branch_midfix}-{'%03d' % self.next_build_id}"
 
+
     @property
     def next_build_id (self):
-        return 42   # TODO: fetch and increment from Kubernetes or Quay state
+        return 1 + max((
+            self._get_max_of_build_ids("wp-nginx"),
+            self._get_max_of_build_ids("wp-php")))
+
+
+    def _get_all_tags (self, image_name):
+        return self.quay.get(f"/api/v1/repository/{self.quay_organization}/{image_name}").json()["tags"].keys()
+
+    def _get_max_of_build_ids (self, image_name):
+        def parse (image_tag):
+            return re.match(r"(?P<year>\d+)-(?P<midfix>.*-)?(?P<serial>\d+)$", image_tag)
+
+        parsed = [parse(p) for p in self._get_all_tags(image_name)]
+
+        return max(int(p["serial"]) for p in parsed if p and not p["midfix"])
 
     @property
     def branch_midfix (self):
@@ -76,6 +96,35 @@ class WebhookHandler(BaseHTTPRequestHandler):
 
         self.send_response(200)
         self.end_headers()
+
+class QuayRequests:
+    def __init__ (self):
+        self.url_base = f"https://{os.getenv('QUAY_API_HOSTNAME')}"
+        self.bearer_token = os.getenv('QUAY_API_BEARER_TOKEN')
+
+    def request (self, method, endpoint, json, headers={}):
+        if "Authorization" not in headers:
+            headers["Authorization"] = f"bearer {self.bearer_token}"
+        response = requests.request(
+            method,
+            f"{self.url_base}{endpoint}",
+            json=json, headers=headers)
+
+        response.raise_for_status()
+        return response
+
+    def get (self, endpoint, json=None, headers={}):
+        return self.request("GET", endpoint, json, headers)
+
+    def post (self, endpoint, json, headers={}):
+        return self.request("POST", endpoint, json, headers)
+
+    def put (self, endpoint, json, headers={}):
+        return self.request("PUT", endpoint, json, headers)
+
+    def delete (self, endpoint, json=None, headers={}):
+        return self.request("DELETE", endpoint, json, headers)
+
 
 server = HTTPServer(('', 8080), WebhookHandler)
 server.serve_forever()
