@@ -130,14 +130,18 @@ http {
 		error_page 403 500 502 503 504 /global-error/index.php;
 
 		location /global-error/ {
-			alias /wp/wp-error-pages/;
+			set $status_code $status;
 
-			set $status_override $status;
 			if ($query_string ~* "status=(\d+)") {
-				set $status_override $1;
+				set $status_code $1;
 			}
-			fastcgi_param STATUS				$status_override;
-			fastcgi_param SCRIPT_FILENAME		$request_filename;
+
+			if ($uri ~* "/([^/]+)/(\d+)\.php$") {
+				set $status_code $2;
+			}
+
+			fastcgi_param STATUS				$status_code;
+			fastcgi_param SCRIPT_FILENAME		/wp/wp-error-pages/index.php;
 			fastcgi_param QUERY_STRING			$query_string;
 			fastcgi_param REQUEST_METHOD		$request_method;
 			fastcgi_param REQUEST_URI			$request_uri;

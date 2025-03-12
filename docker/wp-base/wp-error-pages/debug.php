@@ -13,13 +13,17 @@ $ip_info = "$request_ip ($ip_v, $is_inside_epfl_string)"
   <?php } ?>
   <?php if ($_SERVER["HTTP_REFERER"]) { ?>
     <tr>
-      <th style="width: 6em;">Request URI</th>
-      <td><?php echo htmlentities(explode("?", $_SERVER["HTTP_REFERER"])[0]); ?></td>
+      <th style="width: 8em;">Request URI</th>
+      <?php if ($_SERVER["STATUS"] == 403) { ?>
+        <td><?php echo htmlentities(explode("?", $_SERVER["HTTP_REFERER"])[0]); ?></td>
+      <?php } else { ?>
+        <td><?php echo htmlentities($_SERVER["HTTP_REFERER"]); ?></td>
+      <?php } ?>
     </tr>
   <?php } ?>
   <?php if ($error_type && $stx != "50x") { ?>
     <tr>
-      <th style="width: 6em;">Error type</th>
+      <th style="width: 8em;">Error type</th>
       <td><?php echo $error_type ?></td>
     </tr>
   <?php } ?>
