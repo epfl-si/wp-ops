@@ -18,6 +18,7 @@ all_namespaces:
             namespace|wordpress-test-in-okd:
               inventory_namespace: wordpress-test
               inventory_has_cluster_admin: True
+              inventory_has_only_one_worker_node: True
               inventory_openshift:
                 domain: okd-test.fsd.team
                 insecure: true
