@@ -1,0 +1,6 @@
+# Robot account whose credentials will be used to pull (almost) everything we need from Quay:
+quay_puller_robot_account_name: "svc0041+svc0041_puller"
+
+# This is the transformation that Quay itself suggests:
+quay_puller_secret_name: >-
+  {{ quay_puller_robot_account_name | regex_replace('[_+]', '-') }}-pull-secret
