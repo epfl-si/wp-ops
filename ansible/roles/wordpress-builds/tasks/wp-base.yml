@@ -12,6 +12,19 @@
         wp-base-webhook.py: >-
           {{ lookup("template", "wp-base-webhook.py") }}
 
+- name: "`Secret/quay-credentials`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: quay-credentials
+        namespace: "{{ inventory_namespace }}"
+      type: Opaque
+      stringData:
+        QUAY_API_HOSTNAME: "{{ ansible_quay_hostname }}"
+        QUAY_API_BEARER_TOKEN: "{{ ansible_quay_bearer_token }}"
+
 - epfl_si.quay.robot_account_permission:
     robot_account_name: "{{ quay_puller_robot_account_name }}"
     organization: "{{ tekton_handyman_image_mirrored.organization }}"
@@ -41,6 +54,9 @@
             containers:
               - name: webhook-handler
                 image: "{{ tekton_handyman_image.mirrored }}"
+                envFrom:
+                  - secretRef:
+                      name: quay-credentials
                 ports:
                   - name: tekton-webhook
                     containerPort: 8080
