@@ -7,8 +7,11 @@
       metadata:
         name: builder-pull-secret
         namespace: "{{ inventory_namespace }}"
-      data:
-        .dockerconfigjson: "{{ builder_pull_secret_config | to_json | b64encode }}"
+      stringData:
+        .dockerconfigjson: >-
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, catalog_builder_robot_account_name,
+                                                  token=quay_botfather_token)
+          | epfl_si.quay.format_docker_config_json | string }}
 
 - name: Service Account for Build Config
   kubernetes.core.k8s:
