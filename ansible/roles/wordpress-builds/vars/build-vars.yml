@@ -1,3 +1,8 @@
 isas_fsd_catalog_git_uri: https://github.com/epfl-si/isas-fsd-catalog
 
 build_robot_account_name: svc0041+builder_robot_account
+
+github_organization_name: epfl-si
+webhook_destination_hostname: wp-base-webhook-128-178-211-2.nip.io
+github_user: "{{ build_secrets.github.webhooks.user }}"
+github_user_api_token: "{{ build_secrets.github.webhooks.token | eyaml(build_secrets.eyaml_keys) }}"

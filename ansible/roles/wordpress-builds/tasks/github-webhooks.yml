@@ -1,0 +1,35 @@
+- name: "Configure GitHub's webhooks"
+  community.general.github_webhook:
+    repository: "{{ github_organization_name }}/{{ item }}"
+    url: "https://{{ webhook_destination_hostname }}/"
+    content_type: json
+    insecure_ssl: true
+    events:
+      - push
+      - pull_request
+    user: "{{ github_user }}"
+    token: "{{ github_user_api_token }}"
+  with_items:
+    # TODO: parse the list from the wp-base's install-wordpress.sh script
+    - wordpress.plugin.accred
+    - wordpress.plugin.tequila
+    - wp-gutenberg-epfl
+    - wp-plugin-enlighter
+    - wp-plugin-epfl-404
+    - wp-plugin-epfl-cache-control
+    - wp-plugin-epfl-coming-soon
+    - wp-plugin-epfl-content-filter
+    - wp-plugin-epfl-courses-se
+    - wp-plugin-epfl-diploma-verification
+    - wp-plugin-epfl-intranet
+    - wp-plugin-epfl-library
+    - wp-plugin-epfl-menus
+    - wp-plugin-epfl-partner-universities
+    - wp-plugin-epfl-remote-content
+    - wp-plugin-epfl-restauration
+    - wp-plugin-epfl-settings
+    - wpforms-epfl-payonline
+    # Must use plugins
+    - wp-mu-plugins
+    # Theme
+    - wp-theme-2018
