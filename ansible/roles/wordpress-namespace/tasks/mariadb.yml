@@ -15,7 +15,7 @@
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
+        name: "{{ _mariadb_name }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
@@ -37,11 +37,13 @@
           limits:
             memory: 1Gi
         rootPasswordSecretKeyRef:
-          name: mariadb
+          name: "{{ _mariadb_name }}"
           key: root-password
           generate: true
         metrics:
           enabled: true
+  vars:
+    _mariadb_name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
 
 - name: "Backup/{{ mariadb_name }} (Backups scheduling)"
   with_sequence: >-
