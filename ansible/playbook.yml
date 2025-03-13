@@ -33,14 +33,14 @@
   roles:
     - role: roles/quay-consumer-namespace
 
-- name: OLM catalog image
+- name: Cloud builds for WordPress
   hosts: namespace/svc0041t-wordpress
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
   roles:
-    - role: roles/olm-catalog
+    - role: roles/wordpress-builds
 
 - name: WordPress namespaces
   hosts: all_namespaces
