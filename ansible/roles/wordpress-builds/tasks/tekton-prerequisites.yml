@@ -1,3 +1,41 @@
+- name: "`tekton` ServiceAccount - Answers webhooks, starts `PipelineRun`s"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: tekton
+        namespace: "{{ inventory_namespace }}"
+
+- name: "Role for the `tekton` ServiceAccount"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: tekton
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ["tekton.dev"]
+          resources: ["pipelineruns"]
+          verbs: ["create", "get", "list", "patch"]
+
+- name: "RoleBinding for the `tekton` ServiceAccount"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: tekton
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: tekton
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: tekton
+
 - name: "Mirror {{ tekton_handyman_image.original }} to Quay"
   epfl_si.quay.quay_repository:
     organization: "{{ tekton_handyman_image_mirrored.organization }}"

@@ -1,0 +1,103 @@
+- name: "`ConfigMap/tekton-scripts`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: tekton-scripts
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: tekton-webhook
+      data:
+        wp-base-webhook.py: >-
+          {{ lookup("template", "wp-base-webhook.py") }}
+
+- epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ quay_puller_robot_account_name }}"
+    organization: "{{ tekton_handyman_image_mirrored.organization }}"
+    repository_name: "{{ tekton_handyman_image_mirrored.shortname }}"
+    permission: read
+
+- name: "`Deployment/tekton-webhook`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: tekton-webhook
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: tekton-webhook
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: tekton-webhook
+        template:
+          metadata:
+            labels:
+              app: tekton-webhook
+          spec:
+            containers:
+              - name: webhook-handler
+                image: "{{ tekton_handyman_image.mirrored }}"
+                ports:
+                  - name: tekton-webhook
+                    containerPort: 8080
+                command: [ "python3", "/tekton-scripts/wp-base-webhook.py" ]
+                volumeMounts:
+                  - name: tekton-scripts
+                    mountPath: /tekton-scripts
+                resources:
+                  requests:
+                    cpu: '{{ _request_cpu }}'
+            volumes:
+              - name: tekton-scripts
+                configMap:
+                  name: tekton-scripts
+            imagePullSecrets:
+              - name: "{{ quay_puller_secret_name }}"
+  vars:
+    _request_cpu: "100m"
+
+- name: "`Service/tekton-webhook`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: tekton-webhook
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: tekton-webhook
+      spec:
+        type: ClusterIP
+        selector:
+          app: tekton-webhook
+        ports:
+        - name: tekton-webhook
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+
+- name: "`Route/tekton-webhook`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: tekton-webhook
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: tekton-webhook
+          route: public
+      spec:
+        host: "{{ webhook_destination_hostname }}"
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+        to:
+          kind: Service
+          name: tekton-webhook
+        port:
+          targetPort: tekton-webhook
