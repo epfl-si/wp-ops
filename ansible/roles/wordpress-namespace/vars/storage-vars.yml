@@ -1,7 +1,9 @@
 storage_nas:
   test:
+    # https://portal-xaas-its.epfl.ch/automation/#/service/catalog/consume/deployment/0b46d3e4-8611-4d05-8d36-4c5882bf9502
     nfs_server: nas-app-ma-nfs1.epfl.ch
     path: /svc0041_si_openshift_app_wwp_test_app
   production:
+    # https://portal-xaas-its.epfl.ch/automation/#/service/catalog/consume/deployment/34b83d2a-d460-44ef-b785-9ae395e4e3d2
     nfs_server: nas-app-ma-nfs2.epfl.ch
     path: /svc0041_wordpress_app
