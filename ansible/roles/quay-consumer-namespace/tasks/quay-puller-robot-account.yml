@@ -1,0 +1,23 @@
+- tags: always
+  include_vars: ../../../vars/quay-vars.yml
+
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_secrets
+
+- name: "`Secret/{{ quay_puller_robot_account_name }}`"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ quay_puller_secret_name }}"
+        namespace: "{{ inventory_namespace }}"
+      type: kubernetes.io/dockerconfigjson
+      stringData:
+        .dockerconfigjson: >-
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, quay_puller_robot_account_name,
+                                                  token=quay_botfather_token)
+          | epfl_si.quay.format_docker_config_json | string }}
