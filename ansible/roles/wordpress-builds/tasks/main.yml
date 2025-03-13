@@ -8,6 +8,7 @@
   with_items:
     - build-vars.yml
     - ../../../vars/quay-vars.yml
+    - ../../../vars/storage-vars.yml
 
 - tags: always
   include_vars:
