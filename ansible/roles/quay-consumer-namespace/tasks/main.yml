@@ -1,0 +1,7 @@
+- include_tasks:
+     file: quay-puller-robot-account.yml
+     apply:
+       tags:
+          - quay
+  tags:
+    - quay

@@ -1,6 +1,15 @@
+ansible_quay_hostname: quay-its.epfl.ch
+
+quay_organization: svc0041
+
 # Robot account whose credentials will be used to pull (almost) everything we need from Quay:
 quay_puller_robot_account_name: "svc0041+svc0041_puller"
 
 # This is the transformation that Quay itself suggests:
 quay_puller_secret_name: >-
   {{ quay_puller_robot_account_name | regex_replace('[_+]', '-') }}-pull-secret
+
+# `quay_secrets` is supposed to be loaded out of ./quay-secrets.yml for this to work:
+quay_botfather_token: >-
+  {{ quay_secrets.quay.org_admin_token
+  | eyaml(quay_secrets.eyaml_keys) }}
