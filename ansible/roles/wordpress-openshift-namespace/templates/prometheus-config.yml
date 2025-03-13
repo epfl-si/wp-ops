@@ -41,10 +41,3 @@ scrape_configs:
       - refresh_interval: 300s
         files:
           - /prometheus-config/dynamic/*.json
-
-  # Metrics for menu-api-siblings
-  - job_name: menu_api_siblings
-    honor_labels: true
-    static_configs:
-      - targets:
-        - '{{ menu_api_container_name }}:{{ menu_api_container_port }}'
