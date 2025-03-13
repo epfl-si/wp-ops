@@ -42,6 +42,11 @@
           generate: true
         metrics:
           enabled: true
+          exporter:
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
 
 - name: "Backup/{{ mariadb_name }} (Backups scheduling)"
   with_sequence: >-
