@@ -4,7 +4,15 @@
 # (through the same Quay instance) in both test and production namespaces.
 
 - tags: always
-  include_vars: catalog-vars.yml
+  include_vars: "{{ item }}"
+  with_items:
+    - catalog-vars.yml
+    - ../../../vars/quay-vars.yml
+
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_secrets
 
 - name: "Build Config Prerequisites"
   include_tasks:
