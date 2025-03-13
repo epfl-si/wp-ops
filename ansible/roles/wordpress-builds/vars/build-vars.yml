@@ -6,3 +6,16 @@ github_organization_name: epfl-si
 webhook_destination_hostname: wp-base-webhook-128-178-211-2.nip.io
 github_user: "{{ build_secrets.github.webhooks.user }}"
 github_user_api_token: "{{ build_secrets.github.webhooks.token | eyaml(build_secrets.eyaml_keys) }}"
+
+# ansible_quay_hostname is found in ../../../vars/quay-vars.yml
+ansible_quay_bearer_token: >-
+  {{ build_secrets.tekton.quay_api.bearer_token | eyaml(build_secrets.eyaml_keys) }}
+
+quay_mirror_robot_account: svc0041+mirrorist
+
+tekton_handyman_image:
+  original: quay.io/openshift/origin-cli:latest
+  mirrored: quay-its.epfl.ch/svc0041/origin-cli:latest
+
+tekton_handyman_image_mirrored: >-
+  {{ tekton_handyman_image.mirrored | parse_docker_image_name }}

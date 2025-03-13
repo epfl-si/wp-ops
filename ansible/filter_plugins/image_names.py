@@ -24,10 +24,13 @@ class FilterModule(object):
             uri_parts = ["docker.io"] + uri_parts
         uri = "/".join(uri_parts)
 
-        shortname = uri_parts[-1]
+        shortname = uri_parts[2]
 
-        ret = dict(shortname=shortname, uri=uri, tag=tag,
-                    qualified="%s:%s" % (uri, tag))
+        ret = dict(uri=uri,
+                   registry=uri_parts[0], organization=uri_parts[1],
+                   shortname=shortname,
+                   tag=tag,
+                   qualified="%s:%s" % (uri, tag))
         if mirrored_base is not None:
             ret["mirrored"]="%s/%s:%s" % (mirrored_base, shortname, tag)
 
