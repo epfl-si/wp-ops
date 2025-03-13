@@ -36,3 +36,12 @@
     - catalog
     - catalog.image
     - images.catalog
+
+- name: "Configure GitHub's webhooks"
+  include_tasks:
+    file: github-webhooks.yml
+    apply:
+      tags:
+        - webhooks
+  tags:
+    - webhooks
