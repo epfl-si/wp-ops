@@ -22,12 +22,20 @@
     import_tasks:
       file: tasks/k8s-login.yml
 
-# TODO: We should integrate with Quay here. At a minimum we need to create
-# one `imagePullSecret` for every namespace.
+- name: Quay integration
+  # Like above, members of the all_wordpress_namespaces are OpenShift
+  # namespaces, rather than hosts
+  hosts: all_namespaces
+  gather_facts: no    # Ansible facts are useless for this play
+  vars_files: ansible-k8s-credentials.yml
+  environment:
+    K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
+  roles:
+    - role: roles/quay-consumer-namespace
 
 - name: OLM catalog image
   hosts: namespace|svc0041t-wordpress
-  gather_facts: False
+  gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
@@ -35,10 +43,8 @@
     - role: roles/olm-catalog
 
 - name: WordPress namespaces
-  # Like above, members of the all_wordpress_namespaces are OpenShift
-  # (or RKE2) namespaces, rather than hosts
   hosts: all_namespaces
-  gather_facts: no    # Ansible facts are useless for this play
+  gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
