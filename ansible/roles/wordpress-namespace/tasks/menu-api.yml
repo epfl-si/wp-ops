@@ -1,4 +1,4 @@
-- include_vars: image-vars.yml
+- include_vars: ../../../vars/quay-vars.yml
   tags: always
 
 - name: ConfigMap/menu-api
@@ -120,7 +120,7 @@
                 configMap:
                   name: menu-api
             imagePullSecrets:
-              - name: "{{ image_pull_secret_name }}"
+              - name: "{{ quay_puller_secret_name }}"
   vars:
     _cpu_request: >-
       {{ "1" if inventory_deployment_stage == "production"
