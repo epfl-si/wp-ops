@@ -59,3 +59,12 @@
         - webhooks
   tags:
     - webhooks
+
+- name: "`wp-base` build-as-a-service"
+  include_tasks:
+    file: wp-base.yml
+    apply:
+      tags:
+        - wp-base
+  tags:
+    - wp-base
