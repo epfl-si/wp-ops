@@ -1,5 +1,5 @@
 - tags: always
-  include_vars: storage-vars.yml
+  include_vars: ../../../vars/storage-vars.yml
 
 - when: _storage_managed
   name: PersistentVolume/wordpress-data
