@@ -6,7 +6,7 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
-    - catalog-vars.yml
+    - build-vars.yml
     - ../../../vars/quay-vars.yml
 
 - tags: always
@@ -23,7 +23,7 @@
   tags:
     - images
 
-- name: "Images and builds"
+- name: "`isas-fsd-catalog` cloud build"
   include_tasks:
     file: isas-fsd-catalog.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit:
