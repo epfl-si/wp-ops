@@ -1,0 +1,112 @@
+- include_vars: image-vars.yml
+  tags: always
+
+- name: Deployment/wp-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wp-redirector
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: wp-redirector
+          app.kubernetes.io/managed-by: Ansible
+          app.kubernetes.io/name: wp-redirector
+          app.kubernetes.io/version: redirector-001
+          team: isas-fsd
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: wp-redirector
+        strategy:
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              app: wp-redirector
+              version: redirector-001
+          spec:
+            containers:
+              - name: apache
+                # FIXME: we need to mirror the httpd image on quay
+                # image: "quay-its.epfl.ch/svc0041/httpd:{{ apache_deployment_images_tag }}"
+                # image: "httpd:{{ apache_deployment_images_tag }}"
+                image: "quay-its.epfl.ch/svc0041/apache-tmp:redirector-002"
+                command: [httpd-foreground, -C, "PidFile /tmp/httpd.pid"]
+                resources:
+                  limits: "{{ _limits_serving_for_prod_only }}"
+                  requests:
+                    cpu: '{{ _request_cpu_serving }}'
+                    memory: '{{ _request_ram }}'
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                volumeMounts:
+                  - name: wordpress-apache-redirector
+                    # /usr/local/apache2/htdocs
+                    mountPath: /srv/subdomains
+                    readOnly: true
+            volumes:
+              - name: wordpress-apache-redirector
+                persistentVolumeClaim:
+                  claimName: wordpress-apache-redirector
+            imagePullSecrets:
+              - name: "{{ image_pull_secret_name }}"
+  vars:
+    _request_cpu_serving: >-
+      {{ "1" if inventory_deployment_stage == "production"
+      else "200m" }}
+    _request_cpu_monitoring: >-
+      {{ "100m" if inventory_deployment_stage == "production"
+      else _request_cpu_de_minimis }}
+    _request_ram: >-
+      {{ "1Gi" if inventory_deployment_stage == "production"
+      else _request_ram_de_minimis }}
+    _limits_serving_for_prod_only: >-
+      {{ {} if inventory_deployment_stage != "production"
+         else { "cpu": _request_cpu_serving, "memory": _request_ram } }}
+    _request_cpu_de_minimis: "20m"
+    _request_ram_de_minimis: "256Mi"
+
+- name: Service/wp-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: wp-redirector
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: wp-redirector
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: "80"
+          port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: wp-redirector
+        type: ClusterIP
+
+- name: PersistentVolumeClaim/wordpress-apache-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wordpress-apache-redirector
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: wordpress-nfs-apache-redirector
