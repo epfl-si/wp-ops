@@ -22,7 +22,7 @@
         storageClassName: ""
         nfs:
           server: "{{ storage_nas[inventory_deployment_stage].nfs_server }}"
-          path:  "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-data"
+          path: "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-data"
         claimRef:
           kind: PersistentVolumeClaim
           namespace: "{{ inventory_namespace }}"
@@ -30,8 +30,9 @@
 
 - name: NfsSubdirExternalProvisioner's
   with_items:
-   - data
-   - db
+    - data
+    - db
+    - apache-redirector
   kubernetes.core.k8s:
     state: present
     definition:
@@ -43,7 +44,7 @@
       spec:
         nfs:
           server: "{{ storage_nas[inventory_deployment_stage].nfs_server }}"
-          path:  "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-{{ item }}"
+          path: "{{ storage_nas[inventory_deployment_stage].path }}/wordpress-{{ item }}"
         storageClass:
           defaultClass: false
           name: "wordpress-nfs-{{ item }}"
