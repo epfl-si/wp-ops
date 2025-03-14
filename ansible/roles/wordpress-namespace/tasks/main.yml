@@ -47,13 +47,26 @@
         - wp
         - wp.web
         - wp.nginx
+  tags:
+    - wp
+    - wp.web
+    - wp.nginx
+
+- name: WordPress (Apache) redirector
+  include_tasks:
+    file: redirector.yml
+    apply:
+      tags:
+        - wp
+        - wp.redirector
+        - wp.apache
       vars:
         # For now, we manage Routes by hand (so as to revert them quickly if need be):
         _routing_managed: false
   tags:
     - wp
-    - wp.web
-    - wp.nginx
+    - wp.redirector
+    - wp.apache
 
 - name: "Menu API"
   include_tasks:

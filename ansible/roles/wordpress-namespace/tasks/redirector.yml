@@ -1,0 +1,96 @@
+- include_vars: image-vars.yml
+  tags: always
+
+- name: Deployment/apache-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: apache-redirector
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: apache-redirector
+          app.kubernetes.io/managed-by: Ansible
+          app.kubernetes.io/name: apache-redirector
+          app.kubernetes.io/version: "redirector-{{ apache_redirector_image_tag }}"
+          team: isas-fsd
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: apache-redirector
+        strategy:
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              app: apache-redirector
+              version: "redirector-{{ apache_redirector_image_tag }}"
+          spec:
+            containers:
+              - name: apache
+                image: "quay-its.epfl.ch/svc0041/apache-redirector:{{ apache_redirector_image_tag }}"
+                command:
+                  - httpd-foreground
+                  - -C
+                  - PidFile /tmp/httpd.pid
+                resources:
+                  requests:
+                    cpu: "200m"
+                    memory: "200Mi"
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                volumeMounts:
+                  - name: wordpress-apache-redirector
+                    mountPath: /srv/subdomains
+                    readOnly: true
+            volumes:
+              - name: wordpress-apache-redirector
+                persistentVolumeClaim:
+                  claimName: wordpress-apache-redirector
+            imagePullSecrets:
+              - name: "{{ image_pull_secret_name }}"
+
+- name: Service/apache-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: apache-redirector
+        namespace: "{{ inventory_namespace }}"
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: "80"
+          port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: apache-redirector
+        type: ClusterIP
+
+- name: PersistentVolumeClaim/wordpress-apache-redirector
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wordpress-apache-redirector
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            # This counts towards our OpenShift quota (despite the
+            # metering happening on different hardware altogether), so
+            # we want to pretend it costs almost nothing:
+            storage: 100Mi
+        storageClassName: wordpress-nfs-apache-redirector
