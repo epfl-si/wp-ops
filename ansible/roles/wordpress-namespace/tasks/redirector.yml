@@ -34,7 +34,7 @@
                 # FIXME: we need to mirror the httpd image on quay
                 # image: "quay-its.epfl.ch/svc0041/httpd:{{ apache_deployment_images_tag }}"
                 # image: "httpd:{{ apache_deployment_images_tag }}"
-                image: "quay-its.epfl.ch/svc0041/apache-tmp:redirector-002"
+                image: "quay-its.epfl.ch/svc0041/apache-tmp:redirector-004"
                 command: [httpd-foreground, -C, "PidFile /tmp/httpd.pid"]
                 resources:
                   limits: "{{ _limits_serving_for_prod_only }}"
