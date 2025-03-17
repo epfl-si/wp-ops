@@ -60,9 +60,6 @@
         - wp
         - wp.redirector
         - wp.apache
-      vars:
-        # For now, we manage Routes by hand (so as to revert them quickly if need be):
-        _routing_managed: false
   tags:
     - wp
     - wp.redirector
