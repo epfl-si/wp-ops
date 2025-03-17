@@ -74,23 +74,3 @@
         selector:
           app: apache-redirector
         type: ClusterIP
-
-- name: PersistentVolumeClaim/wordpress-apache-redirector
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: wordpress-apache-redirector
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        accessModes:
-          - ReadWriteMany
-        resources:
-          requests:
-            # This counts towards our OpenShift quota (despite the
-            # metering happening on different hardware altogether), so
-            # we want to pretend it costs almost nothing:
-            storage: 100Mi
-        storageClassName: wordpress-nfs-apache-redirector
