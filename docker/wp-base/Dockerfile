@@ -23,7 +23,6 @@ COPY ./wp-cli-config.yml /var/www/.wp-cli/config.yml
 RUN mkdir /var/www/.composer; \
     chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
 
-# Travis-specific arguments — See ../../.travis.yml
 RUN su -s /bin/sh www-data -c " \
     set -e -x;                                                            \
     wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
