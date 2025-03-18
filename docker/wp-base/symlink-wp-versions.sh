@@ -4,8 +4,9 @@ set -e -x
 
 cd /wp
 
-for version in *;   # Sorted by version since the 1970s
+for wp_content_dir in */wp-content;   # Sorted by version since the 1970s
 do
+    version="$(dirname "$wp_content_dir")"
     major="$(echo "$version" |cut -d. -f1)"         # e.g. 5
     majorminor="$(echo "$version" |cut -d. -f1-2)"  # e.g. 5.2
 

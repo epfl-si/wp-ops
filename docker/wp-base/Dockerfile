@@ -65,9 +65,8 @@ RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 ######################################################################
 
 # build wp-gutenberg-epfl
-RUN set -e -x; for wp in /wp/*; do                                         \
-  cd $wp;                                                                  \
-  (cd wp-content/plugins/wp-gutenberg-epfl;                                \
+RUN set -e -x; for wp in /wp/*/wp-content; do                              \
+  (cd $wp/plugins/wp-gutenberg-epfl;                                       \
       rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules);  \
   done
 
@@ -80,7 +79,7 @@ RUN set -e -x;   env; \
     git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build; \
     cd /tmp/elements_build; \
     yarn; yarn build; \
-    for wp in /wp/*; do cp -a dist/ $wp/wp-content/themes/wp-theme-2018/assets; done
+    for wp in /wp/*/wp-content; do cp -a dist/ $wp/themes/wp-theme-2018/assets; done
 
 ######################################################################
 # Symlinks in /wp
