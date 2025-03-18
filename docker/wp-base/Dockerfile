@@ -14,19 +14,13 @@ RUN PIPX_BIN_DIR=/usr/local/bin pipx install awscli
 # Install wp-cli
 ######################################################################
 
-# Download latest WP-CLI:
-RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN chmod 755 /usr/local/bin/wp
+COPY wp-cli-config.yml /wp/wp-cli/
+RUN curl -o /wp/wp-cli/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
-# Add Polylang-related extension packages to wp-cli
-COPY ./wp-cli-config.yml /var/www/.wp-cli/config.yml
-RUN mkdir /var/www/.composer; \
-    chown -R www-data:www-data /var/www/.wp-cli /var/www/.composer
+COPY wp.sh /usr/local/bin/wp
 
-RUN su -s /bin/sh www-data -c " \
-    set -e -x;                                                            \
-    wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
-    rm -f ~/.composer/auth.json"
+RUN mkdir /wp/wp-cli/packages; \
+    wp --allow-root package install https://github.com/epfl-si/polylang-cli/archive/master.zip
 
 ######################################################################
 # Install and patch WordPresses and dependencies
@@ -97,5 +91,3 @@ FROM scratch
 
 COPY --from=builder /wp /wp
 COPY --from=builder /usr/local/bin/wp /usr/local/bin/wp
-COPY --from=builder /var/www/.composer/ /var/www/.composer/
-COPY --from=builder /var/www/.wp-cli/ /var/www/.wp-cli/

@@ -1,2 +1,1 @@
-apache_modules:
-  - mod_rewrite
+path: "/wp/6"
