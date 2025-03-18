@@ -26,7 +26,6 @@ RUN mkdir /var/www/.composer; \
 RUN su -s /bin/sh www-data -c " \
     set -e -x;                                                            \
     wp package install https://github.com/epfl-si/polylang-cli/archive/master.zip ;     \
-    wp package install https://github.com/epfl-si/wp-cli/archive/master.zip;            \
     rm -f ~/.composer/auth.json"
 
 ######################################################################
