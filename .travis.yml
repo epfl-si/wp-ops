@@ -40,5 +40,10 @@ script:
   # Build the rest:
   for docker_dir in $(find docker -mindepth 1 -maxdepth 1 -type d \
                       | grep -v wp-base | xargs -t -n 1); do
+    # Unfortunately, the `docker login` command above is not good
+    # enough to pull (any? Mirrored?) images out of quay-its.epfl.ch
+    # from the Internet. As a stop-gap (pending INC0703315) we have to
+    # to this on top:
+    sed -i 's|quay-its.epfl.ch/svc0041/httpd|httpd|' $docker_dir/Dockerfile
     docker build "$docker_dir"
   done
