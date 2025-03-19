@@ -132,6 +132,13 @@
                   - name: php-fpm-metrics
                     containerPort: 9253
                     protocol: TCP
+                livenessProbe:
+                  httpGet:
+                    scheme: HTTP
+                    path: /metrics
+                    port: 9253
+                  initialDelaySeconds: 5
+                  timeoutSeconds: 3
                 args:
                   - --phpfpm.fix-process-count
                   - --log.level
