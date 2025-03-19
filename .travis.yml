@@ -7,14 +7,37 @@ sudo: required
 services:
 - docker
 
+env:
+  global:
+    # This sets EPFL_QUAY_TOKEN to the robot account's password for `docker login`.
+    #
+    # 💡 The line can be renewed with with:
+    #
+    #
+    #    travis login --pro --github-token aaabbbccc
+    #    travis encrypt --pro "EPFL_QUAY_TOKEN=dddeeefff"
+    #
+    # Where figuring out `aaabbbccc` (not the real token) is left as
+    # an exercise for the reader (it starts at
+    # https://github.com/settings/personal-access-tokens); and
+    # `dddeeefff` comes from
+    # https://quay-its.epfl.ch/organization/svc0041?tab=robots →
+    # svc0041+travis → Docker Login → the part after `-p=`, sans
+    # quotes.
+    secure: BjnhV+ZXpT43PPlvaCHya0SR/65dhbwhxxelfj2mCvwyxazEQqgBwHKlA9CTNxDRAYTW2xOBhJ3gbh/cTq2mE6Dd+zzIfGTl+NhDiSKzs6gXMjUd/2EGT/nX99N9OmL0rfWYwkrm1Vbh9koOS/JOsIhm7l/DffrIwtBicOlR1vH+mlqG+a4/6tUqBHQ+iQjeryU59J/fdlLbVp/9ra+Jlg5+b8ws3DOaM1A4lyDuumh4P+t4NSpSJj7FdGrseZsZc0YviUvWsg2pLVPlq+G8ahOvTDcYM4nH8yqicpiMeQLou3Tm/om3jdQGp8U7FtBjIeeyYF8iWo0UjiWM2gR5K4HWw+QPIV/reW8lFf96Mw7u5db8SJIRNuotqIjADcjrb6j+w+EIU9KnDCzU4p4iBVKH1xV3HM7dZol6Xl//YuXy9+A1BrMcwasiPp8vT3BFmj/GIuZH9X2voNiWO/fVKAxGBE0V20FlkDVj/JF/neOVNLrJf2M4rrllhVm0IqfCoqlcBwhm/SEqO3tKV41QVKNd1tnA8C7ZU8eV7GeiAa3pGm9IHV/cTeRorNLPdeaqEXRn8jCNBNi4NWOc+A4rM+rB116FQeGq71W/gIqZjb9fKlRa96ZDHtn5AWaieN9L1MFHB4744lwuRazRz9lS2/XXdRolBt+k8EaSOWpGtxo=
+
 script:
-# Build wp-base first (because other images depend on it)
 - |
   set -e -x
 
+  docker login -u='svc0041+travis' -p="$EPFL_QUAY_TOKEN" quay-its.epfl.ch
+
+  # Build wp-base first (because other images depend on it):
   docker build \
-     --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"         \
+     --build-arg "GITHUB_API_TOKEN=${GITHUB_API_TOKEN}"           \
      -t wp-base docker/wp-base
+
+  # Build the rest:
   for docker_dir in $(find docker -mindepth 1 -maxdepth 1 -type d \
                       | grep -v wp-base | xargs -t -n 1); do
     docker build "$docker_dir"
