@@ -72,9 +72,6 @@
                 ports:
                   - containerPort: 8000
                     protocol: TCP
-                  - name: php-fpm-metrics
-                    containerPort: 9253
-                    protocol: TCP
                   - name: nginx-metrics
                     containerPort: 9145
                     protocol: TCP
@@ -131,6 +128,10 @@
                     memory: '{{ _request_ram_de_minimis }}'
                   # This fits under the default (LimitRange-imposed) limits
                   # even for production; so we don't need `limits:` here.
+                ports:
+                  - name: php-fpm-metrics
+                    containerPort: 9253
+                    protocol: TCP
                 args:
                   - --phpfpm.fix-process-count
                   - --log.level
