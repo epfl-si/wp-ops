@@ -265,27 +265,3 @@
         selector:
           app: wp-nginx
         type: ClusterIP
-
-
-- when: _routing_managed
-  name: Ingress/wp-nginx
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: networking.k8s.io/v1
-      kind: Ingress
-      metadata:
-        name: wp-nginx
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        rules:
-          - host: "wpn.fsd.team"
-            http:
-              paths:
-                - pathType: Prefix
-                  path: /
-                  backend:
-                    service:
-                      name: wp-nginx
-                      port:
-                        number: 80
