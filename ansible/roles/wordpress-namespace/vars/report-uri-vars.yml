@@ -1,8 +1,15 @@
-report_uri_image_tag: "{{ 'prod' if inventory_namespace == 'wwp' else 'latest' }}"
-report_uri_image_os_path: "docker-registry.default.svc:5000/{{ inventory_namespace }}/report-uri:{{ report_uri_image_tag }}"
+
+_report_uri_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_prod/report-uri.yml') | from_yaml }}"
+_pull_robot_builder_secrets: "{{ _report_uri_secrets.quay.pull_robot_builder }}"
+_pull_robot_builder_credential: "{{ _pull_robot_builder_secrets.name }}:{{ _pull_robot_builder_secrets.token }}"
+report_uri_builder_pull_secret_config:
+  auths:
+    "quay-its.epfl.ch":
+      "auth": "{{ _pull_robot_builder_credential | b64encode }}"
+
 report_uri_git_uri: https://github.com/epfl-si/report-uri
-report_uri_base_image_name: node
-report_uri_base_image_tag: 20-alpine
-report_uri_base_mirrored_from: docker.io/{{ report_uri_base_image_name }}:{{ report_uri_base_image_name }}
-report_uri_base_mirrored_to: docker-registry.default.svc:5000/wwp-test/{{ report_uri_base_image_name }}:{{ report_uri_base_image_name }}
-report_uri_hostname: "{{ 'report-uri' if inventory_namespace == 'wwp' else 'report-uri-test' }}.epfl.ch"
+report_uri_hostname: "{{ 'report-uri' if inventory_namespace == 'svc0041p-wordpress' else 'report-uri-test' }}.epfl.ch"
+_report_uri_image_registry: "{{ ansible_quay_hostname }}/{{ quay_organization }}"
+_report_uri_image_name: report-uri
+_report_uri_image_tag: latest
+report_uri_image: "{{ _report_uri_image_registry }}/{{ _report_uri_image_name }}:{{ _report_uri_image_tag }}"

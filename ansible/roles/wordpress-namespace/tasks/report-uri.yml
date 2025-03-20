@@ -1,143 +1,180 @@
-- include_vars: report-uri-vars.yml
-  tags: always
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+  - ../../../vars/quay-vars.yml
+  - report-uri-vars.yml
 
-- name: "Pull {{ report_uri_base_mirrored_from }} into {{ report_uri_base_mirrored_to }}"
+- name: Report URI - Builder Pull Secret
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        name: report-uri-builder-pull-secret
+        namespace: "{{ inventory_namespace }}"
+      data:
+        .dockerconfigjson: "{{ report_uri_builder_pull_secret_config | to_json | b64encode }}"
+
+- name: Report URI - Service Account for Build Cloud
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: report-uri-builder
+        namespace: "{{ inventory_namespace }}"
+      secrets:
+        - name: report-uri-builder-pull-secret
+      # This is not supposed to be required (it worked without in
+      # OpenShift 4.14); but see
+      # https://access.redhat.com/solutions/7098226
+      imagePullSecrets:
+        - name: report-uri-builder-pull-secret
+
+- name: Report URI - Build Config
   when: >-
-    inventory_namespace == "wwp-test"
-  delegate_to: localhost
-  openshift_imagestream:
-    metadata:
-      name: "{{ report_uri_base_image_name }}"
-      namespace: "{{ inventory_namespace }}"
-    from: "{{ report_uri_base_mirrored_from }}"
-    tag: "{{ report_uri_base_image_tag }}"
+    "openshift_namespaces_test" in group_names
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: report-uri
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        serviceAccount: report-uri-builder
+        source:
+          type: Git
+          git:
+            uri: "{{ report_uri_git_uri }}"
+            ref: "main"
+        strategy:
+          type: Docker
+          dockerStrategy:
+            forcePull: true
+        triggers:
+          - type: ConfigChange
+        output:
+          to:
+            kind: DockerImage
+            name: "{{ report_uri_image }}"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
 
-- name: Report URI Build Config and Image Stream
-  when: >-
-    inventory_namespace == "wwp-test"
-  openshift_imagestream:
-    state: latest
-    metadata:
-      namespace: "{{ inventory_namespace }}"
-      name: report-uri
-    git:
-      repository: "{{ report_uri_git_uri }}"
-      ref: main
-    spec:
-      resources:
-        limits:
-          cpu: '1'
-          memory: 256M
-  register: _report_uri_imagestream
-
-- name: Report URI Deployment Config
-  openshift:
-    state: latest
-    apiVersion: apps.openshift.io/v1
-    kind: DeploymentConfig
-    metadata:
-      name: report-uri
-      namespace: "{{ inventory_namespace }}"
-    spec:
-      replicas: 1
-      selector:
-        deployment-config.name: report-uri
-      template:
-        metadata:
-          creationTimestamp: null
-          labels:
-            deployment-config.name: report-uri
-        spec:
-          containers:
-            - name: report-uri
-              imagePullPolicy: Always
-              readinessProbe:
-                tcpSocket:
-                  port: 5050
-                initialDelaySeconds: 2
-                timeoutSeconds: 5
-              livenessProbe:
-                tcpSocket:
-                  port: 5050
-                initialDelaySeconds: 2
-                timeoutSeconds: 5
-          dnsPolicy: ClusterFirst
-          restartPolicy: Always
-          schedulerName: default-scheduler
-          terminationGracePeriodSeconds: 30
-      triggers:
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - report-uri
-            from:
-              kind: ImageStreamTag
-              name: 'report-uri:{{ report_uri_image_tag }}'
-              namespace: "{{ inventory_namespace }}"
-
-- name: (Re-)Build Report URI in OpenShift
+- name: Report URI - Start build
+  when: >
+    "report-uri.startbuild" in ansible_run_tags 
+    and "openshift_namespaces_test" in group_names
   shell:
     cmd: "oc -n {{ inventory_namespace }} start-build --wait report-uri"
-  when:
-    - >
-      ( (_report_uri_imagestream | default({})) is changed )
-      or
-      "report-uri.rebuild" in ansible_run_tags
-    - >-
-      inventory_namespace == "wwp-test"
   tags:
-    - report-uri.rebuild
+    - report-uri.startbuild
 
-- name: Report URI Service
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: report-uri
-      namespace: "{{ inventory_namespace }}"
-    spec:
-      type: ClusterIP
-      ports:
-        - name: '80'
-          port: 80
-          protocol: TCP
-          targetPort: 5050
-      selector:
-        deployment-config.name: report-uri
-
-- name: Report URI Route
-  openshift:
-    state: latest
-    apiVersion: v1
-    kind: Route
-    metadata:
-      name: report-uri
-      namespace: '{{ inventory_namespace }}'
-      labels:
-        app: report-uri
-        epfl.ch/visibility: public
-    spec:
-      host: '{{ report_uri_hostname }}'
-      port:
-        targetPort: '80'
-      tls:
-        termination: edge
-      to:
-        kind: Service
+- name: Report URI - Service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          app: report-uri
         name: report-uri
-        weight: 100
-      wildcardPolicy: None
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        ports:
+          - name: '5050-tcp'
+            port: 5050
+            protocol: TCP
+            targetPort: 5050
+        selector:
+          app: report-uri
+        type: ClusterIP
 
-- name: "Promote wwp-test report-uri image to wwp"
-  when:
-    - >-
-      "report-uri.image.promote" in ansible_run_tags
-    - >-
-      inventory_namespace == "wwp"
-  tags: report-uri.image.promote
-  local_action:
-    module: shell
-    cmd: |
-      oc tag wwp-test/report-uri:latest wwp/report-uri:prod
+- name: Report URI - Route
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Route
+      metadata:
+        name: report-uri
+        namespace: '{{ inventory_namespace }}'
+        labels:
+          app: report-uri
+          route: public
+        annotations:
+          haproxy.router.openshift.io/balance: roundrobin
+          haproxy.router.openshift.io/disable_cookies: 'true'
+      spec:
+        host: '{{ report_uri_hostname }}'
+        to:
+          kind: Service
+          name: report-uri
+          weight: 100
+        port:
+          targetPort: '5050-tcp'
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+
+- name: Report URI - Deployment
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: report-uri
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        strategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxUnavailable: 0
+        selector:
+          matchLabels:
+            app: report-uri
+        template:
+          metadata:
+            labels:
+              app: report-uri
+          spec:
+            imagePullSecrets:
+              - name: "{{ quay_puller_secret_name }}"
+            containers:
+              - name: report-uri
+                image: "{{ report_uri_image }}"
+                imagePullPolicy: Always
+                resources:
+                  requests:
+                    cpu: "100m"
+                    memory: "64Mi"
+                readinessProbe:
+                  tcpSocket:
+                    port: 5050
+                  initialDelaySeconds: 2
+                  timeoutSeconds: 5
+                livenessProbe:
+                  tcpSocket:
+                    port: 5050
+                  initialDelaySeconds: 2
+                  timeoutSeconds: 5
+
+- name: Report URI - restart
+  when: >-
+    "report-uri.restart" in ansible_run_tags
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    definition:
+      metadata:
+        name: report-uri
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        template:
+          metadata:
+            annotations:
+              last-restart: "{{ lookup('pipe', 'date -u +%Y-%m-%dT%H:%M:%SZ') }}"
+  tags: report-uri.restart
