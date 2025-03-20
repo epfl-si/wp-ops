@@ -144,3 +144,17 @@
     - wp.grafana
     - wp.monitoring
     - monitoring
+
+- name: CSP Report URI
+  when:
+    - inventory_openshift is defined
+    - inventory_openshift.domain != "okd-test.fsd.team"
+  include_tasks:
+    file: report-uri.yml
+    apply:
+      tags:
+        - report-uri
+  tags:
+    - report-uri
+    - report-uri.startbuild
+    - report-uri.restart
