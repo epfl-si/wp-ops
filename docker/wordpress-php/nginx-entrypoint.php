@@ -180,12 +180,15 @@ define('DISALLOW_FILE_MODS', 1);
 define('EPFL_SITE_UPLOADS_DIR',
        '/wp-data/' . $_SERVER['WP_SITE_NAME'] . '/uploads');
 
-// Initialize WordPress' constants. This is best done using
-// `wp-settings.php`, rather than `load.php` and `index.php` which
-// both insist on loading a `wp-config.php` file.
-settings_before_wp_settings();
-
-require(ABSPATH . 'wp-settings.php');
-
 // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
-require($_SERVER["SCRIPT_FILENAME"]);
+if (array_key_exists("DOWNLOADS_PROTECTION_SCRIPT", $_SERVER)) {
+    require($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"]);
+} else {
+    // Initialize WordPress' constants. This is best done using
+    // `wp-settings.php`, rather than `load.php` and `index.php` which
+    // both insist on loading a `wp-config.php` file.
+
+    settings_before_wp_settings();
+    require(ABSPATH . 'wp-settings.php');
+    require($_SERVER["SCRIPT_FILENAME"]);
+}
