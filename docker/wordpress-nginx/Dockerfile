@@ -1,20 +1,33 @@
-FROM openresty/openresty:1.27.1.1-0-alpine-fat AS openresty
+FROM bitnami/nginx-ingress-controller:1.12.1 AS ingress
 FROM wp-base
-FROM rancher/nginx-ingress-controller:nginx-1.11.3-rancher1
+FROM openresty/openresty:1.27.1.1-3-alpine-fat
 
-USER 0
+RUN ln /usr/local/openresty/nginx/sbin/nginx /usr/bin/
 
+COPY --from=ingress /nginx-ingress-controller /nginx-ingress-controller
 # https://github.com/kubernetes/ingress-nginx/issues/3668
-RUN apk add --no-cache libcap && \
-    setcap -r /nginx-ingress-controller && \
-    apk del libcap
+RUN set -e -x; apk add libcap-setcap; \
+  setcap -r /nginx-ingress-controller; \
+  rm -rf /var/cache/apk/*
 
-# In OpenShift, getting permissions is hard mmkay
-RUN mkdir /var/run/openresty/
-RUN chmod 1777 /etc/ingress-controller/ssl/ /tmp/nginx/ \
-    /etc/ingress-controller/telemetry/ /etc/nginx/ \
-    /var/run/openresty/
+ENTRYPOINT /nginx-ingress-controller
+
+COPY --from=ingress /etc/nginx/nginx.conf /etc/nginx/nginx.conf
+RUN chown root:root /etc/nginx/nginx.conf
 RUN chmod 666 /etc/nginx/nginx.conf
+
+COPY --from=ingress /etc/nginx/lua /etc/nginx/lua
+
+RUN mkdir /tmp/nginx /etc/ingress-controller /etc/ingress-controller/telemetry
+RUN cp /usr/local/openresty/nginx/conf/mime.types /etc/nginx/
+# In OpenShift, getting permissions is hard mmkay.
+# 💡 Permission to write into /etc/nginx/lua/ is required for /etc/nginx/lua/cfg.json
+RUN chmod 1777 /tmp/nginx/ \
+    /etc/nginx/ \
+    /etc/nginx/lua/ \
+    /etc/ingress-controller/ \
+    /etc/ingress-controller/telemetry/ \
+    /var/run/openresty/
 
 ## Uncomment the following line if you want to test out your RBAC live:
 # COPY --from=bitnami/kubectl:latest /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
@@ -22,13 +35,9 @@ RUN chmod 666 /etc/nginx/nginx.conf
 COPY ./prometheus/prometheus.lua /etc/nginx/lua/prometheus.lua
 COPY ./prometheus/prometheus_keys.lua /etc/nginx/lua/prometheus_keys.lua
 COPY ./prometheus/prometheus_resty_counter.lua /etc/nginx/lua/prometheus_resty_counter.lua
-RUN chown www-data:www-data /etc/nginx/lua/prometheus.lua /etc/nginx/lua/prometheus_keys.lua /etc/nginx/lua/prometheus_resty_counter.lua
-
-USER 101
-
-COPY --from=openresty /usr/local/openresty/nginx/sbin/nginx /usr/bin/nginx
-COPY --from=openresty /usr/local/openresty /usr/local/openresty
 COPY --from=wp-base /wp /wp
 COPY nginx.tmpl /etc/nginx/template/
 COPY wordpress_fastcgi.conf /etc/nginx/template/
+
+# Do this last if you don't want your apk to use OpenResty's own libssl etc. (Hint: it won't work)
 ENV LD_LIBRARY_PATH=/usr/local/openresty/luajit/lib:/usr/local/openresty/pcre2/lib:/usr/local/openresty/openssl3/lib
