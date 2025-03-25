@@ -15,6 +15,7 @@
         namespace: "{{ inventory_namespace }}"
       data:
         allow-snippet-annotations: "true"
+        annotations-risk-level: Critical
         # Uncomment the next four lines to embug the nginx configuration
         # (see also similar comments elsewhere in the file):
         # nginx.tmpl: >-
