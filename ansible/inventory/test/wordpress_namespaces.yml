@@ -11,11 +11,11 @@ all_namespaces:
           vars:
             inventory_deployment_stage: test
           "hosts":   # Not real hosts, hence the scarequotes
-            namespace|svc0041t-wordpress:
+            namespace/svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
               inventory_openshift:
                 domain: ocpitst0001.xaas.epfl.ch
-            namespace|wordpress-test-in-okd:
+            namespace/wordpress-test-in-okd:
               inventory_namespace: wordpress-test
               inventory_has_cluster_admin: True
               inventory_has_only_one_worker_node: True
