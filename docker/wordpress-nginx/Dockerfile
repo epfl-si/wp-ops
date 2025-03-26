@@ -4,6 +4,8 @@ FROM openresty/openresty:1.27.1.1-3-alpine-fat
 
 RUN ln /usr/local/openresty/nginx/sbin/nginx /usr/bin/
 
+# Remove the "Welcome to OpenResty!" page
+RUN rm /usr/local/openresty/nginx/html/index.html
 COPY --from=ingress /nginx-ingress-controller /nginx-ingress-controller
 # https://github.com/kubernetes/ingress-nginx/issues/3668
 RUN set -e -x; apk add libcap-setcap; \
