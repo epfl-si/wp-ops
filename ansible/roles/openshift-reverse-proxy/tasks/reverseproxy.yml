@@ -1,5 +1,7 @@
 - name: "fallback-reverse-proxy Endpoint"
   # Required (for now) to trick HAProxy into doing its job; see https://access.redhat.com/solutions/6992561
+  when: 
+    - inventory_deployment_stage == "production"
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
@@ -19,6 +21,8 @@
 # TODO: at the end of https://go.epfl.ch/CHG0045724 we remove this one.
 
 - name: "fallback-reverse-proxy Route Inside"
+  when:
+    - inventory_deployment_stage == "production"
   kubernetes.core.k8s:
     definition:
       kind: Route
