@@ -187,12 +187,16 @@ settings_before_wp_settings();
 
 require(ABSPATH . 'wp-settings.php');
 
-// @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
 if (string_starts_with(uri_path(), "/wp-content/uploads")) {
-    require($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"]);
+    if (array_key_exists("DOWNLOADS_PROTECTION_SCRIPT", $_SERVER) &&
+        file_exists($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"])) {
+        // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
+        require($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"]);
+    }
 } 
 
 // Initialize WordPress' constants. This is best done using
 // wp-settings.php, rather than load.php and index.php which
 // both insist on loading a wp-config.php file.
+// @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
 require($_SERVER["SCRIPT_FILENAME"]);
