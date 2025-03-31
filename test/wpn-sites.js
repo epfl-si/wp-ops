@@ -2,7 +2,7 @@
 var url = require('url');
 
 let namespace = "svc0041p-wordpress"; // svc0041t-wordpress
-let hostname = "www.epfl.ch";
+const host = "inside.epfl.ch";
 
 // Function to fetch and filter the data
 async function fetchAndFilterSites() {
@@ -10,14 +10,12 @@ async function fetchAndFilterSites() {
     // Fetch data from the API
     const response = await fetch('https://wp-veritas.epfl.ch/api/v1/sites');
     const data = await response.json();
-    // filter on "www"
-    let filteredSites = data;
-    filteredSites = filteredSites.filter(site => site.openshiftEnv == 'www' && site.wpInfra);
-    // without the WPForms plugin
-    filteredSites = filteredSites.filter(site => !site.categories.includes('WPForms'))
-    filteredSites = filteredSites.filter(site => site.ansibleHost.indexOf("www__about") > -1);
 
-    filteredSites.sort((a, b) => b.url.length - a.url.length);
+    // Filter the sites where openshiftEnv is "www" or "labs"
+    // let filteredSites = data.filter(site => site.openshiftEnv !== '');
+
+    // filter on "labs"
+    let filteredSites = data.filter(site => site.openshiftEnv === 'inside');
     return filteredSites;
   } catch (error) {
     console.error('Error fetching or filtering sites:', error);
@@ -25,17 +23,11 @@ async function fetchAndFilterSites() {
 }
 
 const determinePlugins = (categories, openshiftEnv) => {
-  return JSON.stringify(categories || [])
-}
-
-const getName = (ansibleHost) => {
-  let name = ansibleHost.replaceAll("__","-").replaceAll("_", "-");
-  let index = 1;
-  while (name.length >= 50) {
-    name = name.split("-").slice(0, index).map(e => e[0]).concat(name.split("-").slice(index)).join("-");
-    index++;
-  }
-  return name;
+  const plugins = JSON.stringify(Object.fromEntries(categories.map((k) => [k, {}])),
+      null,
+      2
+  );
+  return `${plugins.replace(/\n/g, "\n    ")}`
 }
 
 const run = async () => {
@@ -45,13 +37,13 @@ const run = async () => {
     let path = site.url.replace(/https:\/\/.*?\.epfl\.ch/, '');
     path = path.replace(/\/$/, "");  // Removes the trailing slash
 
-    const siteYml = `apiVersion: wordpress.epfl.ch/v1
+    const siteYml = `apiVersion: wordpress.epfl.ch/v2
 kind: WordpressSite
 metadata:
-  name: ${getName(site.ansibleHost)}
+  name: ${site.ansibleHost.replaceAll("__","-").replaceAll("_", "-")}
   namespace: ${namespace}
 spec:
-  hostname: ${hostname}
+  hostname: ${host}
   path: ${path}
   owner:
     epfl:
@@ -62,6 +54,7 @@ spec:
     theme: wp-theme-2018
     languages: ${JSON.stringify(site.languages || [] )}
     plugins: ${determinePlugins(site.categories, site.openshiftEnv)}
+    downloadsProtectionScript: /wp/6/wp-content/plugins/epfl-intranet/inc/protect-medias.php
     debug: ${namespace=='svc0041p-wordpress' ? false : true}
   epfl:
     import:
@@ -70,8 +63,8 @@ spec:
         environment: ${site.openshiftEnv}
         ansibleHost: ${site.ansibleHost}
 `
-      console.log(siteYml);
-      console.log('---');
+    console.log(siteYml);
+    console.log('---');
   }
 }
 
