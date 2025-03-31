@@ -195,7 +195,4 @@ if (string_starts_with(uri_path(), $_SERVER["WP_ROOT_URI"] . "wp-content/uploads
     }
 } 
 
-// Initialize WordPress' constants. This is best done using
-// wp-settings.php, rather than load.php and index.php which
-// both insist on loading a wp-config.php file.
 require($_SERVER["SCRIPT_FILENAME"]);
