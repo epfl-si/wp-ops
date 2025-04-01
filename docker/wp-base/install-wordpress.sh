@@ -50,7 +50,7 @@ main () {
     ( cd "$targetdir"/wp-content/plugins/wordpress-importer ;
       git apply < /tmp/clearstatcache-wp-import.patch )
 
-    install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.5.4.zip
+    install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
     install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
 
     # Some of these plugins are commercial plugins that we pay for;
