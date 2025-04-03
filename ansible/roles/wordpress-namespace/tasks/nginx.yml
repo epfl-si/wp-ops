@@ -121,6 +121,12 @@
                   - name: smtp-password
                     mountPath: /secrets/
                     readOnly: true
+                env:
+                  - name: SEARCH_INSIDE_WP_API_HASHED_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: search-inside-secret
+                        key: wp_api_token
               - name: php-fpm-exporter
                 image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
                 resources:
