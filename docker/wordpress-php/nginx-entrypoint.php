@@ -192,7 +192,8 @@ if (string_starts_with(uri_path(), $_SERVER["WP_ROOT_URI"] . "wp-content/uploads
         file_exists($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"])) {
         // @WARNING Because of global variables business, the following needs to happen at the top level — Not in a function!!
         require($_SERVER["DOWNLOADS_PROTECTION_SCRIPT"]);
+        exit();
     }
-} 
+}
 
 require($_SERVER["SCRIPT_FILENAME"]);
