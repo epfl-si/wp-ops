@@ -1,13 +1,10 @@
 ---
-# tasks for WordPress OpenShift namespaces
 
-- name: "Images and builds"
+- tags:
+    - openshift.reverseproxy
+  name: Reverse-proxy as a service to OpenShift 3 (during rollover period)
   include_tasks:
-    file: images.yml
-    # Because `include_tasks` is dynamic, tags don't auto-inherit:
+    file: "reverseproxy.yml"
     apply:
       tags:
-        - images
-  tags:
-    - images
-    - images.catalog
+        - openshift.reverseproxy
