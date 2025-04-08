@@ -1,7 +1,7 @@
 - tags: always
   include_vars: grafana-vars.yml
 
-- name: "Deploy the WordPress Gragana dashboards"
+- name: "WordPress Grafana dashboards"
   when:
   - inventory_openshift is defined
   - inventory_openshift.domain != "okd-test.fsd.team"  # Meh
