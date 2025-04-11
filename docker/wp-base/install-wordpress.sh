@@ -83,25 +83,18 @@ main () {
         wp-plugin-epfl-library \
         wp-plugin-epfl-diploma-verification \
         wp-plugin-epfl-partner-universities \
-        ; do
-        install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
-    done
-
-    install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
-
-    for forked_plugin in \
         wp-plugin-epfl-404 \
         wp-gutenberg-epfl  \
         wp-plugin-epfl-courses-se \
         wp-plugin-epfl-restauration \
         wp-plugin-epfl-cache-control \
-        wordpress.plugin.accred ; do
-        install_plugin_git https://github.com/epfl-si/$forked_plugin \
-                           feature/upgradePHPAndWordpressVersion
+        wordpress.plugin.accred \
+        wp-plugin-epfl-menus \
+        ; do
+        install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
 
-    install_plugin_git https://github.com/epfl-si/wp-plugin-epfl-menus \
-                               feature/nginx
+    install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
@@ -138,7 +131,7 @@ install_themes () {
     (
         cd $targetdir/wp-content
         rm -rf themes
-        git clone -b WPN https://github.com/epfl-si/wp-theme-2018 themes
+        git clone https://github.com/epfl-si/wp-theme-2018 themes
     )
 }
 
@@ -146,7 +139,7 @@ install_mu_plugins () {
     (
         cd $targetdir/wp-content
         rm -rf mu-plugins
-        git clone -b WPN https://github.com/epfl-si/wp-mu-plugins mu-plugins
+        git clone https://github.com/epfl-si/wp-mu-plugins mu-plugins
     )
 }
 
