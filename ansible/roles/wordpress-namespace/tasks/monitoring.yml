@@ -44,11 +44,11 @@
                   {{ if .Alerts }}
                   {{ $first := index .Alerts 0 }}
                   {{ if eq $first.Status "firing" }}
-                  🔥 FIRING -- {{ $first.Annotations.summary }}
+                  🔥 FIRING — {{ $first.Annotations.summary }}
                   {{ $first.Annotations.description }}
                   Started at (UTC): {{ $first.StartsAt.Format "2006-01-02 15:04:05" }}
                   {{ else if eq $first.Status "resolved" }}
-                  ✅ RESOLVED -- {{ $first.Annotations.summary }}
+                  ✅ RESOLVED — {{ $first.Annotations.summary }}
                   {{ $first.Annotations.description }}
                   Started at (UTC): {{ $first.StartsAt.Format "2006-01-02 15:04:05" }}
                   Ended at (UTC): {{ $first.EndsAt.Format "2006-01-02 15:04:05" }}
@@ -105,10 +105,7 @@
                 annotations:
                   summary: "MenuAPI slow requests"
                   description: >-
-                    menu-api is returning slow requests at the 95th percentile on the route  
-                    {% raw -%}
-                    {{ $labels.route }}
-                    {%- endraw %},
+                    menu-api is returning slow requests at the 95th percentile on the route {% raw -%}{{ $labels.route }}{%- endraw %},
                     with a response time greater than {{ _menuapi_95_pct_threshold_read_requests }} seconds over the last five minutes.
                     This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
               - alert: MenuApiSlowRequestsForRefresh
@@ -121,10 +118,7 @@
                 annotations:
                   summary: "MenuAPI slow requests"
                   description: >-
-                    menu-api is returning slow requests for refresh at the 95th percentile on the route  
-                    {% raw -%}
-                    {{ $labels.route }}
-                    {%- endraw %},
+                    menu-api is returning slow requests for refresh at the 95th percentile on the route {% raw -%}{{ $labels.route }}{%- endraw %},
                     with a response time greater than {{ _menuapi_95_pct_threshold_update_requests }} seconds over the last five minutes.
                     This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
           - name: php-fpm-alerts
