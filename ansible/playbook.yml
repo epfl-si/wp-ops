@@ -34,7 +34,7 @@
     - role: roles/quay-consumer-namespace
 
 - name: OLM catalog image
-  hosts: namespace|svc0041t-wordpress
+  hosts: namespace/svc0041t-wordpress
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
