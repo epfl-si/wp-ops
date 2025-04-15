@@ -38,8 +38,8 @@
                   - PidFile /tmp/httpd.pid
                 resources:
                   requests:
-                    cpu: "200m"
-                    memory: "200Mi"
+                    cpu: "20m"
+                    memory: "400Mi"
                 ports:
                   - containerPort: 8080
                     protocol: TCP
