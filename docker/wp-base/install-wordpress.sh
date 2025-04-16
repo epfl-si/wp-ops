@@ -96,6 +96,8 @@ main () {
 
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
 
+    install_language_pack "fr_FR"
+
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
 }
@@ -240,6 +242,13 @@ plugin_canonical_name () {
         wordpress.plugin.*) echo "$plugin_dir" | cut -d. -f3- ;;
         *) echo "$plugin_dir" ;;
     esac
+}
+
+# Install the specified language pack, e.g. fr_FR
+install_language_pack () {
+    curl -s -L -o /tmp/${1}.zip https://downloads.wordpress.org/translation/core/${version}/${1}.zip
+    mkdir -p ${targetdir}/wp-content/languages/
+    unzip /tmp/${1}.zip -d ${targetdir}/wp-content/languages/
 }
 
 main
