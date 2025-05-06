@@ -79,10 +79,6 @@ function string_starts_with ($haystack, $needle) {
     return 0 === strpos($haystack, $needle);
 }
 
-function string_ends_with ($haystack, $needle) {
-    return substr($haystack, -strlen($needle)) === $needle;
-}
-
 function uri_path () {
     return strtok($_SERVER["REQUEST_URI"], '?');
 }
@@ -92,10 +88,6 @@ function chop_leading_slashes ($path) {
         $path = substr($path, 1);
     }
     return $path;
-}
-
-function path_has_component($path, $subpath) {
-    return false !== array_search($subpath, explode("/", $path));
 }
 
 function has_path_traversal ($path) {
@@ -121,23 +113,6 @@ function serve_go_away_and_exit () {
     http_response_code(429);
     print('Go away');
     exit();
-}
-
-function settings_before_wp_settings () {
-    if (path_has_component(uri_path(), "wp-admin")) {
-        // In the “normal” loading flow, all PHP scripts under `/wp-admin` ensure
-        // to `define("WP_ADMIN", true);` before loading settings:
-        define("WP_ADMIN", true);
-        if (path_has_component(uri_path(), "admin-ajax.php")) {
-            define("DOING_AJAX", true );
-        }
-    }
-
-    // We don't really support running on an empty database, but we
-    // kind of do. Well sort of.
-    if (string_ends_with(uri_path(), "wp-admin/install.php")) {
-        define( 'WP_INSTALLING', true );
-    }
 }
 
 ##########################################################################################
@@ -179,13 +154,6 @@ define('DISALLOW_FILE_MODS', 1);
 // inside the custom Ingress objects.
 define('EPFL_SITE_UPLOADS_DIR',
        '/wp-data/' . $_SERVER['WP_SITE_NAME'] . '/uploads');
-
-// Initialize WordPress' constants. This is best done using
-// `wp-settings.php`, rather than `load.php` and `index.php` which
-// both insist on loading a `wp-config.php` file.
-settings_before_wp_settings();
-
-require(ABSPATH . 'wp-settings.php');
 
 if (string_starts_with(uri_path(), $_SERVER["WP_ROOT_URI"] . "wp-content/uploads")) {
     if (array_key_exists("DOWNLOADS_PROTECTION_SCRIPT", $_SERVER) &&

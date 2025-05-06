@@ -34,16 +34,18 @@ RUN set -e -x; \
 
 COPY php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/local.ini
 
-# Band-aid for running WordPress outside of its installation directory
-# nginx-entrypoint.php takes care of the setup legwork
-RUN set -e -x;                                                     \
-    for wp in $(find /wp/ -mindepth 1 -maxdepth 1 -type d          \
-                -regextype egrep -regex '.*/[0-9.]+');             \
-    do echo "<?php # This wp-config.php intentionally left blank"  \
-            > $wp/wp-config.php; done
-
 RUN mkdir -p /wp/nginx-entrypoint/
 COPY nginx-entrypoint.php /wp/nginx-entrypoint/nginx-entrypoint.php
+
+# WordPress insists on loading wp-config.php, but in our Web serving
+# workflow, all the setup work is handled by nginx-entrypoint.php:
+COPY stub-wp-config.php /wp/6/wp-config.php
+RUN set -e -x;                                                     \
+    for wp in /wp/6*; do                                       \
+      if [ ! -f "$wp/wp-config.php" ]; then                        \
+        cp /wp/6/wp-config.php "$wp/wp-config.php" ;               \
+      fi;                                                          \
+    done
 
 EXPOSE 8080 8443
 
