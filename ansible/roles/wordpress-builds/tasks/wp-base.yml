@@ -143,7 +143,6 @@
             description: "Sequence number of the next build to push to Quay"
         workspaces:
           - name: shared-workspace
-          - name: dockerconfig
         tasks:
           - name: git-clone
             taskRef:
@@ -168,7 +167,17 @@
                 value: "docker/wp-base"
               - name: VERBOSE
                 value: "true"
-              # TODO: consume AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY out of some Secret and pass them as `--build-arg`s
+              # TODO: consume AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY out of some Secret:
+              # - name: BUILD_EXTRA_ARGS
+              #   value: |
+              #       --build-arg AWS_ACCESS_KEY_ID=xxxxxxx
+              #       --build-arg AWS_SECRET_ACCESS_KEY=yyyyyyy
+              # - name: PUSH_EXTRA_ARGS
+              #  value: |
+              #    --creds XXXXX
             workspaces:
             - name: source
               workspace: shared-workspace
+            - name: dockerconfig
+              secret:
+                secretName: builder-pull-secret
