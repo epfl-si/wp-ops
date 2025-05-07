@@ -70,7 +70,7 @@
         metrics:
           enabled: true
           exporter:
-            image: anonymous.apps.t-ocp-its-01.xaas.epfl.ch//svc0041/mysqld-exporter:v0.15.1
+            image: quay-its.epfl.ch/svc0041/mysqld-exporter:v0.15.1
             resources:
               requests:
                 cpu: 50m

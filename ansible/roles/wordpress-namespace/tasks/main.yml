@@ -1,5 +1,20 @@
 ---
 
+- name: Pull secrets for the `default` ServiceAccount
+  include_tasks:
+    file: pull-secrets.yml
+    apply:
+      tags:
+      - wp
+      - wp.pull-secrets
+      - wp.pullsecrets
+      - wp.pull
+  tags:
+    - wp
+    - wp.pull-secrets
+    - wp.pullsecrets
+    - wp.pull
+
 - name: Storage
   include_tasks:
     file: storage.yml
