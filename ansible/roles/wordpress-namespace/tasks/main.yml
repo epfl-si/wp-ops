@@ -95,6 +95,17 @@
     - wp.menus
     - menu_api
 
+- name: "wp-cron"
+  include_tasks:
+    file: wp-cron.yml
+    apply:
+      tags:
+        - wp
+        - wp.cron
+  tags:
+    - wp
+    - wp.cron
+
 - name: "WordPress operator"
   include_tasks:
     file: wp-operator.yml
