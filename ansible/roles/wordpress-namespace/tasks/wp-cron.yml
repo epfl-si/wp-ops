@@ -1,0 +1,83 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+- name: Deployment/wp-cron
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wp-cron
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: wp-cron
+        template:
+          metadata:
+            labels:
+              app: wp-cron
+          spec:
+            serviceAccountName: wp-cron
+            containers:
+              - name: wp-cron
+                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-001"
+                command:
+                  - sleep
+                  - infinity
+                resources:
+                  requests:
+                    cpu: '{{ _cpu_request }}'
+                    memory: 512Mi
+            imagePullSecrets:
+              - name: "{{ quay_puller_secret_name }}"
+  vars:
+    _cpu_request: >-
+      {{ "200m" if inventory_deployment_stage == "production"
+      else "50m" }}
+
+
+- name: ServiceAccount/wp-cron
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: wp-cron
+        namespace: "{{ inventory_namespace }}"
+
+- name: Role/wp-cron
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: wp-cron
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ['wordpress.epfl.ch']
+          resources:
+            - wordpresssites
+          verbs: ['get', 'list', 'watch']
+
+- name: RoleBinding/wp-cron
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: wp-cron
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: wp-cron
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: wp-cron
