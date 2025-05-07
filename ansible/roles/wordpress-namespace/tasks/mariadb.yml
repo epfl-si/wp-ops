@@ -4,6 +4,7 @@
   with_items:
     - mariadb-vars.yml
     - s3-secrets-vars.yml
+    - ../../../vars/quay-vars.yml
 
 - name: 'MariaDBOperator/mariadb-operator'
   kubernetes.core.k8s:
@@ -69,6 +70,7 @@
         metrics:
           enabled: true
           exporter:
+            image: anonymous.apps.t-ocp-its-01.xaas.epfl.ch//svc0041/mysqld-exporter:v0.15.1
             resources:
               requests:
                 cpu: 50m
