@@ -5,6 +5,32 @@
     - mariadb-vars.yml
     - s3-secrets-vars.yml
 
+- name: 'MariaDBOperator/mariadb-operator'
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: helm.mariadb.mmontes.io/v1alpha1
+      kind: MariadbOperator
+      metadata:
+        name: mariadb-operator
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        name: mariadb-operator
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100M
+        webhook:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100M
+        certController:
+         resources:
+           requests:
+             cpu: 100m
+             memory: 100M
+
 - name: "MariaDB/{{ mariadb_name }}-0x with StorageClass {{ mariadb_storage_class }}"
   with_sequence: >-
     {{ "1-" + number_of_mariadb|string if inventory_namespace == "svc0041p-wordpress"
