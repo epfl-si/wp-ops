@@ -23,10 +23,10 @@
             serviceAccountName: wp-cron
             containers:
               - name: wp-cron
-                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-001"
+                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-012"
                 command:
-                  - sleep
-                  - infinity
+                  - python3
+                  - /wp-cron.py
                 resources:
                   requests:
                     cpu: '{{ _cpu_request }}'
