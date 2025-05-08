@@ -1,4 +1,5 @@
 import time
+import argparse
 
 from wordpresses import WordpressSite
 
@@ -7,5 +8,18 @@ if __name__ == '__main__':
         print(wordpresssite.moniker)
         print(wordpresssite.run_cron())
 
-    print("All done. I am going to sleep", flush=True)
-    time.sleep(3600)
+    parser = argparse.ArgumentParser(description="Wordpress wp cron executor")
+    
+    parser.add_argument(
+        '--daemon',
+        action='store_true',
+        help='Run the program in daemon mode (forever)'
+    )
+    
+    args = parser.parse_args()
+
+    if args.daemon:
+        print("All done. I am going to sleep", flush=True)
+        time.sleep(3600)
+    else:
+        exit(0)
