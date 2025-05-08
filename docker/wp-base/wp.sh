@@ -8,8 +8,8 @@ configure_ingress () {
     trap "rm -rf '$wp_tmpdir'" EXIT INT TERM
 
     export WP_CONFIG_PATH="$wp_tmpdir/wp-config.php"
-    kubectl get -o yaml ingress/"$1" | \
-        perl -ne 'next unless m/fastcgi_param (WP_DB_\S*?)\s+(\S*)/; print "$1=$2\n"' | \
+    kubectl get -o jsonpath="{.metadata.annotations['nginx\.ingress\.kubernetes\.io/configuration-snippet'] }" ingress/"$1" | \
+        perl -ne 'next unless m/^fastcgi_param (WP_DB_\S*?)\s+(\S*)/; print "$1=$2\n"' | \
     (
         eval "$(cat)"
         cat > "$WP_CONFIG_PATH" <<EOF
