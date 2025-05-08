@@ -1,49 +1,6 @@
 - include_vars: ../../../vars/quay-vars.yml
   tags: always
 
-- name: Deployment/wp-cron
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: wp-cron
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        replicas: 1
-        selector:
-          matchLabels:
-            app: wp-cron
-        template:
-          metadata:
-            labels:
-              app: wp-cron
-          spec:
-            serviceAccountName: wp-cron
-            containers:
-              - name: wp-cron
-                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-018"
-                env:
-                  - name: K8S_NAMESPACE
-                    valueFrom:
-                      fieldRef:
-                        fieldPath: metadata.namespace
-                command:
-                  - python3
-                  - /wp-cron.py
-                resources:
-                  requests:
-                    cpu: '{{ _cpu_request }}'
-                    memory: 512Mi
-            imagePullSecrets:
-              - name: "{{ quay_puller_secret_name }}"
-  vars:
-    _cpu_request: >-
-      {{ "200m" if inventory_deployment_stage == "production"
-      else "50m" }}
-
-
 - name: ServiceAccount/wp-cron
   kubernetes.core.k8s:
     state: present
@@ -90,3 +47,47 @@
         apiGroup: rbac.authorization.k8s.io
         kind: Role
         name: wp-cron
+
+- name: CronJob/wp-cron
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: wp-cron
+        namespace:  "{{ inventory_namespace }}"
+      spec:
+        schedule: "18 * * * *"
+        timeZone: "Europe/Zurich"
+        jobTemplate:
+          spec:
+            template:
+              metadata:
+                labels:
+                  app: wp-cron
+              spec:
+                serviceAccountName: wp-cron
+                containers:
+                  - name: wp-cron
+                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-019"
+                    env:
+                      - name: K8S_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                    command:
+                      - python3
+                      - /wp-cron.py
+                    resources:
+                      requests:
+                        cpu: '{{ _cpu_request }}'
+                        memory: 512Mi
+                imagePullSecrets:
+                  - name: "{{ quay_puller_secret_name }}"
+                restartPolicy: OnFailure
+        concurrencyPolicy: Forbid
+  vars:
+    _cpu_request: >-
+      {{ "200m" if inventory_deployment_stage == "production"
+      else "50m" }}
