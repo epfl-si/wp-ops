@@ -23,7 +23,7 @@
             serviceAccountName: wp-cron
             containers:
               - name: wp-cron
-                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-013"
+                image: "quay-its.epfl.ch/svc0041/wp-cron:2025-015"
                 env:
                   - name: K8S_NAMESPACE
                     valueFrom:
@@ -67,6 +67,10 @@
         - apiGroups: ['wordpress.epfl.ch']
           resources:
             - wordpresssites
+          verbs: ['get', 'list', 'watch']
+        - apiGroups: ['networking.k8s.io']
+          resources:
+            - ingresses
           verbs: ['get', 'list', 'watch']
 
 - name: RoleBinding/wp-cron

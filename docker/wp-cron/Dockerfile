@@ -31,4 +31,4 @@ RUN pip3 install -r ./requirements.txt --break-system-packages
 COPY --from=wp-base /wp /wp
 COPY --from=wp-base /usr/local/bin/wp /usr/local/bin/wp
 
-ADD wp-cron.py /
+ADD wp-cron.py wordpresses.py /
