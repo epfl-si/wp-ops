@@ -5,8 +5,7 @@ from pprint import pprint
 from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
 from kubernetes.client.exceptions import ApiException
-
-
+from wordpresses import WordpressSite
 class classproperty:
     def __init__(self, func):
         self.fget = func
@@ -108,15 +107,18 @@ if __name__ == '__main__':
     try:
         ingresses = get_ingresses()
         wordpresssites = get_wordpress_sites()
-        bag_ingress = BagOfIngresses(ingresses)
-        bag_wp = BagOfWordpressSites(wordpresssites)
-
-        for uid, ingress in bag_ingress.items():
-            wp = bag_wp.lookup(uid)
-            print(f"{ingress['metadata']['name']} -> {wp['metadata']['name']}")
-
     except ApiException as e:
         print("Exception when calling CustomObjectsApi->list_namespaced_custom_object: %s\n" % e, flush=True)
+        exit()
+
+    bag_ingress = BagOfIngresses(ingresses)
+    bag_wp = BagOfWordpressSites(wordpresssites)
+
+    for uid, ingress in bag_ingress.items():
+        wp = bag_wp.lookup(uid)
+        wordpresssite = WordpressSite(ingress=ingress, wp=wp)
+        print(f"{ingress['metadata']['name']} -> {wp['metadata']['name']}")
+        print(wordpresssite.run_cron())
 
     print("All done. I am going to sleep", flush=True)
     time.sleep(3600)
