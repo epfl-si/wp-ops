@@ -5,9 +5,6 @@ from pprint import pprint
 from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
 from kubernetes.client.exceptions import ApiException
-from kubernetes.leaderelection import leaderelection
-from kubernetes.leaderelection.resourcelock.configmaplock import ConfigMapLock
-from kubernetes.leaderelection import electionconfig
 
 
 class classproperty:
