@@ -61,7 +61,11 @@ if __name__ == '__main__':
         namespace = os.getenv('K8S_NAMESPACE')
         plural = "wordpresssites"
         api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, namespace, plural)
-        pprint(api_response)
+        wordpress_sites = api_response['items']
+        for wp_site in wordpress_sites:
+          wp_site_name = wp_site['metadata']['name']
+          pprint(wp_site_name)
+        
     except ApiException as e:
         print("Exception when calling CustomObjectsApi->list_namespaced_custom_object: %s\n" % e, flush=True)
     
