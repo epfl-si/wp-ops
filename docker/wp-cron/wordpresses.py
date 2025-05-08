@@ -86,17 +86,16 @@ class BagOfIngresses (_BagBase):
 
 class WordpressSite:
     @classmethod
-    def _get_custom_resource_items (group, version, plural):
-        namespace = os.getenv('K8S_NAMESPACE')
-        api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, namespace, plural)
-        return api_response['items']
-        
-    @classmethod
     def all (cls):
+        def get_custom_resource_items (group, version, plural):
+            namespace = os.getenv('K8S_NAMESPACE')
+            api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, namespace, plural)
+            return api_response['items']
+
         try:
-            ingresses = cls._get_custom_resource_items(
+            ingresses = get_custom_resource_items(
                 "networking.k8s.io", "v1", "ingresses")
-            wordpresssites = cls._get_custom_resource_items(
+            wordpresssites = get_custom_resource_items(
                 "wordpress.epfl.ch", "v2", "wordpresssites")
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->list_namespaced_custom_object: %s\n" % e, flush=True)
@@ -115,14 +114,19 @@ class WordpressSite:
     def __init__(self, ingress, wp):
         self._ingress = ingress
         self._wp = wp
-    
+
+    @property
+    def moniker (self):
+        return f"{self._ingress['metadata']['name']} -> {self._wp['metadata']['name']}"
+
+    def _ingress_name(self):
+        return self._ingress['metadata']['name']
+
     def run_cron(self):
         try:
-            subprocess.run(['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now'], check=True)
+            cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
+            subprocess.run(cmdline, check=True)
             return True
         except subprocess.CalledProcessError as e:
             print(f"Error running wp cron: {e}")
             return False
-
-    def _ingress_name(self):
-        return self._ingress['metadata']['name']
