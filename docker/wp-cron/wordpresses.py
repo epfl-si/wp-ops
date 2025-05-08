@@ -125,6 +125,8 @@ class WordpressSite:
     def run_cron(self):
         try:
             cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
+            if 'DEBUG' in os.environ:
+                cmdline.insert(0, 'echo')
             subprocess.run(cmdline, check=True)
             return True
         except subprocess.CalledProcessError as e:
