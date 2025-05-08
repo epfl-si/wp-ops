@@ -58,7 +58,7 @@
         name: wp-cron
         namespace:  "{{ inventory_namespace }}"
       spec:
-        schedule: "18 * * * *"
+        schedule: "7 * * * *"
         timeZone: "Europe/Zurich"
         jobTemplate:
           spec:
