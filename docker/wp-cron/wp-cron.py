@@ -1,3 +1,4 @@
+import os
 import time
 from pprint import pprint
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     try:
         group = "wordpress.epfl.ch"
         version = "v2"
-        namespace = "svc0041t-wordpress"
+        namespace = os.getenv('K8S_NAMESPACE')
         plural = "wordpresssites"
         api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, namespace, plural)
         pprint(api_response)
