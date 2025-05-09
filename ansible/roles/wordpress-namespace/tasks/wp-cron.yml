@@ -70,7 +70,7 @@
                 serviceAccountName: wp-cron
                 containers:
                   - name: wp-cron
-                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-019"
+                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-023"
                     env:
                       - name: K8S_NAMESPACE
                         valueFrom:

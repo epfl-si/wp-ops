@@ -153,6 +153,19 @@
     - wp.grafana
     - grafana
 
+- name: Pushgateway
+  include_tasks:
+    file: pushgateway.yml
+    apply:
+      tags:
+        - wp
+        - wp.monitoring
+        - wp.pushgateway
+  tags:
+    - wp
+    - wp.monitoring
+    - wp.pushgateway
+
 - name: Monitoring
   when:
   - inventory_openshift is defined
