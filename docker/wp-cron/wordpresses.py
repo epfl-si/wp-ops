@@ -116,7 +116,7 @@ class WordpressSite:
     def __init__(self, ingress, wp):
         self._ingress = ingress
         self._wp = wp
-        self._pushgateway = Pushgateway("pushgateway")
+        self._pushgateway = Pushgateway("pushgateway:9091")
 
     def set_pushgateway(self, host_port):
         self._pushgateway = Pushgateway(host_port)

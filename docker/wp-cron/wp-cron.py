@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--pushgateway',
         type=str,
-        default="pushgateway",
+        default="pushgateway:9091",
         help='The pushgateway service host and port'
     )
 
