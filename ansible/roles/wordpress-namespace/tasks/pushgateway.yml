@@ -1,0 +1,45 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+- name: Pushgateway - Deployment
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: pushgateway
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: pushgateway
+        template:
+          metadata:
+            labels:
+              app: pushgateway
+          spec:
+            imagePullSecrets:
+              - name: "{{ quay_puller_secret_name }}"
+            containers:
+              - name: pushgateway
+                image: quay-its.epfl.ch/svc0041/pushgateway:latest
+                ports:
+                  - containerPort: 9091
+                    name: metrics
+                resources:
+                  requests:
+                    cpu: "100m"
+                    memory: "64Mi"
+                readinessProbe:
+                  httpGet:
+                    path: /-/ready
+                    port: 9091
+                  initialDelaySeconds: 2
+                  timeoutSeconds: 5
+                livenessProbe:
+                  httpGet:
+                    path: /-/healthy
+                    port: 9091
+                  initialDelaySeconds: 2
+                  timeoutSeconds: 5
