@@ -5,6 +5,8 @@ from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
 from kubernetes.client.exceptions import ApiException
 
+from pushgateway import Pushgateway
+
 class classproperty:
     def __init__(self, func):
         self.fget = func
@@ -114,15 +116,28 @@ class WordpressSite:
     def __init__(self, ingress, wp):
         self._ingress = ingress
         self._wp = wp
+        self._pushgateway = Pushgateway("pushgateway")
+
+    def set_pushgateway(self, host_port):
+        self._pushgateway = Pushgateway(host_port)
 
     @property
     def moniker (self):
-        return f"{self._ingress['metadata']['name']} -> {self._wp['metadata']['name']}"
+        return f"{self._wp['metadata']['name']}"
 
     def _ingress_name(self):
         return self._ingress['metadata']['name']
 
     def run_cron(self):
+        self._pushgateway.record_start(self)
+        try:
+            self._do_run_cron()
+            self._pushgateway.record_success(self)
+        except Exception as e:
+            print(e)
+            self._pushgateway.record_failure(self)
+
+    def _do_run_cron(self):
         try:
             cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
             if 'DEBUG' in os.environ:

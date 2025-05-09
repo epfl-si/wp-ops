@@ -19,7 +19,7 @@ RUN set -e -x; apt-get -qy update; \
         python3 \
         python3-pip \
      && rm -rf /var/lib/apt/lists/*; # from 1.12GB to 869MB
-     
+
 RUN set -e -x; cd /usr/local/bin/ ; \
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" ; \
     chmod +x kubectl
@@ -31,4 +31,4 @@ RUN pip3 install -r ./requirements.txt --break-system-packages
 COPY --from=wp-base /wp /wp
 COPY --from=wp-base /usr/local/bin/wp /usr/local/bin/wp
 
-ADD wp-cron.py wordpresses.py /
+ADD wp-cron.py wordpresses.py pushgateway.py /
