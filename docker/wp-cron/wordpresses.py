@@ -134,16 +134,11 @@ class WordpressSite:
             self._do_run_cron()
             self._pushgateway.record_success(self)
         except Exception as e:
-            print(e)
+            print(f"Error running wp cron: {e}")
             self._pushgateway.record_failure(self)
 
     def _do_run_cron(self):
-        try:
-            cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
-            if 'DEBUG' in os.environ:
-                cmdline.insert(0, 'echo')
-            subprocess.run(cmdline, check=True)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Error running wp cron: {e}")
-            return False
+        cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
+        if 'DEBUG' in os.environ:
+            cmdline.insert(0, 'echo')
+        subprocess.run(cmdline, check=True)
