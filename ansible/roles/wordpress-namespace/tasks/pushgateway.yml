@@ -43,3 +43,20 @@
                     port: 9091
                   initialDelaySeconds: 2
                   timeoutSeconds: 5
+
+- name: PodMonitor/pushgateway
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: PodMonitor
+      metadata:
+        name: pushgateway
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: pushgateway
+        jobLabel: app
+        podMetricsEndpoints:
+          - port: metrics
