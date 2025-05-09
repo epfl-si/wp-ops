@@ -4,19 +4,27 @@ import argparse
 from wordpresses import WordpressSite
 
 if __name__ == '__main__':
-    for wordpresssite in WordpressSite.all():
-        print(wordpresssite.moniker)
-        print(wordpresssite.run_cron())
-
     parser = argparse.ArgumentParser(description="Wordpress wp cron executor")
-    
+
     parser.add_argument(
         '--daemon',
         action='store_true',
         help='Run the program in daemon mode (forever)'
     )
-    
+
+    parser.add_argument(
+        '--pushgateway',
+        type=str,
+        default="pushgateway",
+        help='The pushgateway service host and port'
+    )
+
     args = parser.parse_args()
+
+    for wordpresssite in WordpressSite.all():
+        wordpresssite.set_pushgateway(args.pushgateway)
+        print(wordpresssite.moniker)
+        print(wordpresssite.run_cron())
 
     if args.daemon:
         print("All done. I am going to sleep", flush=True)

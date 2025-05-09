@@ -60,3 +60,23 @@
         jobLabel: app
         podMetricsEndpoints:
           - port: metrics
+
+- name: Service/pushgateway
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: pushgateway
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: pushgateway
+      spec:
+        ports:
+          - port: 9091
+            protocol: TCP
+            targetPort: 9091
+        selector:
+          app: pushgateway
+        type: ClusterIP
