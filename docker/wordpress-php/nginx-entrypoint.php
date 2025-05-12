@@ -61,13 +61,6 @@ function get_wp_entrypoint () {
 
     $entrypoint_path = substr($entrypoint_path, strlen($to_chop));
 
-    if  (( isset($_SERVER['HTTP_X_EPFL_INTERNAL']) && strtoupper($_SERVER['HTTP_X_EPFL_INTERNAL']) != 'TRUE') 
-        && ( strpos($entrypoint_path, 'wp-admin') !== false || $_SERVER['HTTP_HOST'] === 'inside.epfl.ch' ))
-    {
-        header('Location: https://www.epfl.ch/campus/services/en/vpn-error/', true, 302);
-        exit();
-    }
-
     if ( substr($entrypoint_path, -4) === '.php' ) {
         return chop_leading_slashes($entrypoint_path);
     } elseif ( basename($entrypoint_path) === 'wp-admin' ) {
@@ -139,6 +132,12 @@ if (! $entrypoint_path) {
 $_SERVER["SCRIPT_FILENAME"] = ABSPATH . $entrypoint_path;
 if (! file_exists($_SERVER["SCRIPT_FILENAME"])) {
     serve_404_and_exit();
+}
+
+if (is_dir("/wp/nginx-entrypoint.d")) {
+    foreach (glob('/wp/nginx-entrypoint.d/*.php') as $file) {
+        require $file;
+    }
 }
 
 setup_db();

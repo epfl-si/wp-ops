@@ -36,6 +36,7 @@ COPY php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/local.ini
 
 RUN mkdir -p /wp/nginx-entrypoint/
 COPY nginx-entrypoint.php /wp/nginx-entrypoint/nginx-entrypoint.php
+COPY nginx-entrypoint.d /wp/
 
 # WordPress insists on loading wp-config.php, but in our Web serving
 # workflow, all the setup work is handled by nginx-entrypoint.php:
