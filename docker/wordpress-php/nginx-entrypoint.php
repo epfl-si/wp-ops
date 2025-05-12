@@ -61,6 +61,14 @@ function get_wp_entrypoint () {
 
     $entrypoint_path = substr($entrypoint_path, strlen($to_chop));
 
+    if (
+        ( isset($_SERVER['HTTP_X_EPFL_INTERNAL']) && strpos($entrypoint_path, 'wp-admin') !== false )
+        || $_SERVER['HTTP_HOST'] === 'inside.epfl.ch'
+    ) {
+        header('Location: https://www.epfl.ch/campus/services/en/vpn-error/', true, 302);
+        exit();
+    }
+
     if ( substr($entrypoint_path, -4) === '.php' ) {
         return chop_leading_slashes($entrypoint_path);
     } elseif ( basename($entrypoint_path) === 'wp-admin' ) {
