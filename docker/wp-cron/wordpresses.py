@@ -1,5 +1,6 @@
 import os
 import subprocess
+import datetime
 
 from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
@@ -87,18 +88,23 @@ class BagOfIngresses (_BagBase):
 
 
 class WordpressSite:
+
+    _namespace = os.getenv('K8S_NAMESPACE')
+    _group = "wordpress.epfl.ch"
+    _version = "v2"
+    _plural = "wordpresssites"
+
     @classmethod
     def all (cls):
         def get_custom_resource_items (group, version, plural):
-            namespace = os.getenv('K8S_NAMESPACE')
-            api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, namespace, plural)
+            api_response = KubernetesAPI.custom.list_namespaced_custom_object(group, version, cls._namespace, plural)
             return api_response['items']
 
         try:
             ingresses = get_custom_resource_items(
                 "networking.k8s.io", "v1", "ingresses")
             wordpresssites = get_custom_resource_items(
-                "wordpress.epfl.ch", "v2", "wordpresssites")
+                cls._group, cls._version, cls._plural)
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->list_namespaced_custom_object: %s\n" % e, flush=True)
             return []
@@ -132,6 +138,7 @@ class WordpressSite:
         self._pushgateway.record_start(self)
         try:
             self._do_run_cron()
+            self._patch_last_cron_job_run_time()
             self._pushgateway.record_success(self)
         except Exception as e:
             print(f"Error running wp cron: {e}")
@@ -142,3 +149,18 @@ class WordpressSite:
         if 'DEBUG' in os.environ:
             cmdline.insert(0, 'echo')
         subprocess.run(cmdline, check=True)
+
+    def _patch_last_cron_job_run_time (self):
+        try:
+            api_response = KubernetesAPI.custom.patch_namespaced_custom_object_status(
+                self._group,
+                self._version,
+                self._namespace,
+                self._plural,
+                self._wp['metadata']['name'],
+                {'status': {'wordpresssite': {'lastCronJobRuntime': datetime.datetime.now().isoformat()}}}
+            )
+            return api_response['items']
+        except ApiException as e:
+            print("Exception when calling CustomObjectsApi->patch_namespaced_custom_object_status: %s\n" % e, flush=True)
+            return []
