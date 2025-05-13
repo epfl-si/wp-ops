@@ -1,53 +1,6 @@
 - include_vars: ../../../vars/quay-vars.yml
   tags: always
 
-- name: ServiceAccount/wp-cron
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: ServiceAccount
-      metadata:
-        name: wp-cron
-        namespace: "{{ inventory_namespace }}"
-
-- name: Role/wp-cron
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: rbac.authorization.k8s.io/v1
-      kind: Role
-      metadata:
-        name: wp-cron
-        namespace: "{{ inventory_namespace }}"
-      rules:
-        - apiGroups: ['wordpress.epfl.ch']
-          resources:
-            - wordpresssites
-          verbs: ['get', 'list', 'watch']
-        - apiGroups: ['networking.k8s.io']
-          resources:
-            - ingresses
-          verbs: ['get', 'list', 'watch']
-
-- name: RoleBinding/wp-cron
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: rbac.authorization.k8s.io/v1
-      kind: RoleBinding
-      metadata:
-        name: wp-cron
-        namespace: "{{ inventory_namespace }}"
-      subjects:
-        - kind: ServiceAccount
-          name: wp-cron
-          namespace: "{{ inventory_namespace }}"
-      roleRef:
-        apiGroup: rbac.authorization.k8s.io
-        kind: Role
-        name: wp-cron
-
 - name: CronJob/wp-cron
   kubernetes.core.k8s:
     state: present
@@ -67,6 +20,8 @@
                 labels:
                   app: wp-cron
               spec:
+                # The serviceAccount is managed by the OLM controller in wp-operator/operator-namespaced.yaml,
+                # because it requires rights that a human operator doesn't have
                 serviceAccountName: wp-cron
                 containers:
                   - name: wp-cron
