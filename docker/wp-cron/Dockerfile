@@ -16,6 +16,7 @@ RUN set -e -x; apt-get -qy update; \
         mariadb-client \
         php-cli \
         php-mysql \
+        php-curl \
         python3 \
         python3-pip \
      && rm -rf /var/lib/apt/lists/*; # from 1.12GB to 869MB
