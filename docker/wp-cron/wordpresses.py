@@ -1,6 +1,7 @@
 import os
 import subprocess
 import datetime
+import logging
 
 from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
@@ -105,8 +106,8 @@ class WordpressSite:
                 "networking.k8s.io", "v1", "ingresses")
             wordpresssites = get_custom_resource_items(
                 cls._group, cls._version, cls._plural)
-        except ApiException as e:
-            print("Exception when calling CustomObjectsApi->list_namespaced_custom_object: %s\n" % e, flush=True)
+        except ApiException:
+            logging.exception("when calling CustomObjectsApi->list_namespaced_custom_object")
             return []
 
         bag_ingress = BagOfIngresses(ingresses)
@@ -140,8 +141,8 @@ class WordpressSite:
             self._do_run_cron()
             self._patch_last_cron_job_run_time()
             self._pushgateway.record_success(self)
-        except Exception as e:
-            print(f"Error running wp cron: {e}")
+        except Exception:
+            logging.exception("Error running wp cron")
             self._pushgateway.record_failure(self)
 
     def _do_run_cron(self):
@@ -161,6 +162,6 @@ class WordpressSite:
                 {'status': {'wordpresssite': {'lastCronJobRuntime': datetime.datetime.now().isoformat()}}}
             )
             return api_response['items']
-        except ApiException as e:
-            print("Exception when calling CustomObjectsApi->patch_namespaced_custom_object_status: %s\n" % e, flush=True)
+        except ApiException:
+            logging.exception("when calling CustomObjectsApi->patch_namespaced_custom_object_status")
             return []
