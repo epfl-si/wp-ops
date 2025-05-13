@@ -153,7 +153,7 @@ class WordpressSite:
 
     def _patch_last_cron_job_run_time (self):
         try:
-            api_response = KubernetesAPI.custom.patch_namespaced_custom_object_status(
+            KubernetesAPI.custom.patch_namespaced_custom_object_status(
                 self._group,
                 self._version,
                 self._namespace,
@@ -161,7 +161,6 @@ class WordpressSite:
                 self._wp['metadata']['name'],
                 {'status': {'wordpresssite': {'lastCronJobRuntime': datetime.datetime.now().isoformat()}}}
             )
-            return api_response['items']
         except ApiException:
             logging.exception("when calling CustomObjectsApi->patch_namespaced_custom_object_status")
-            return []
+            raise
