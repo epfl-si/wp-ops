@@ -91,6 +91,7 @@ main () {
         wordpress.plugin.accred \
         wp-plugin-epfl-translate \
         wp-plugin-epfl-menus \
+        wp-plugin-pushgateway \
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
