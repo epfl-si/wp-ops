@@ -10,9 +10,23 @@
  * set to `TRUE`.
  */
 
-if  (( isset($_SERVER['HTTP_X_EPFL_INTERNAL']) && strtoupper($_SERVER['HTTP_X_EPFL_INTERNAL']) != 'TRUE') 
-    && ( strpos($entrypoint_path, 'wp-admin') !== false || $_SERVER['HTTP_HOST'] === 'inside.epfl.ch' ))
-{
+namespace EPFL\RequestFiltering;
+
+function is_permitted_traffic ($entrypoint_path) {
+    if (! isset($_SERVER['HTTP_X_EPFL_INTERNAL'])) {
+        return true;    // Development
+    } else if ($_SERVER['HTTP_X_EPFL_INTERNAL'] == 'TRUE') {
+        return true;    // Allow everyting from inside EPFL
+    } else if ($_SERVER['HTTP_HOST'] === 'inside.epfl.ch') {
+        return false;
+    } else if (strpos($entrypoint_path, 'wp-admin') !== false) {
+        return false;   // No approaching the back-office from outside; use VPN
+    } else {
+        return true;
+    }
+}
+
+if (! is_permitted_traffic($entrypoint_path)) {
     header('Location: https://www.epfl.ch/campus/services/en/vpn-error/', true, 302);
     exit();
 }
