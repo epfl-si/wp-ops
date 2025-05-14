@@ -2,6 +2,7 @@ import os
 import subprocess
 import datetime
 import logging
+import json
 
 from kubernetes import client, config
 from kubernetes.dynamic import DynamicClient
@@ -139,7 +140,7 @@ class WordpressSite:
         self._pushgateway.record_start(self)
         try:
             self._do_run_cron()
-            self._patch_last_cron_job_run_time()
+            self._patch_wordpresssite_status()
             self._pushgateway.record_success(self)
         except Exception:
             logging.exception("Error running wp cron")
@@ -147,11 +148,19 @@ class WordpressSite:
 
     def _do_run_cron(self):
         cmdline = ['wp', f'--ingress={self._ingress_name()}', 'cron', 'event', 'run', '--due-now']
+        self._do_run_wp(cmdline)
+
+    def _do_run_wp(self, cmdline, **kwargs):
         if 'DEBUG' in os.environ:
             cmdline.insert(0, 'echo')
-        subprocess.run(cmdline, check=True)
+        return subprocess.run(cmdline, check=True, **kwargs)
 
-    def _patch_last_cron_job_run_time (self):
+    def _patch_wordpresssite_status (self):
+        """
+        Patch the Wordpresssite CR status with:
+            lastCronJobRuntime: The last cron job run time
+            plugins: The active plugins on the site
+        """
         try:
             KubernetesAPI.custom.patch_namespaced_custom_object_status(
                 self._group,
@@ -159,8 +168,27 @@ class WordpressSite:
                 self._namespace,
                 self._plural,
                 self._wp['metadata']['name'],
-                {'status': {'wordpresssite': {'lastCronJobRuntime': datetime.datetime.now().isoformat()}}}
+                self._status_struct()
             )
         except ApiException:
             logging.exception("when calling CustomObjectsApi->patch_namespaced_custom_object_status")
             raise
+
+    def _status_struct(self):
+        if 'DEBUG' in os.environ:
+            out = {'plugins': {'toto': {}, 'tutu': {}}}
+        else:
+            cmdline = ['wp', f'--ingress={self._ingress_name()}', 'eval', '''echo(json_encode(apply_filters('wp_operator_status',[]), JSON_PRETTY_PRINT));''']
+            result = self._do_run_wp(cmdline, capture_output=True, text=True)
+            logging.info(result.stdout)
+            out = json.loads(result.stdout)
+        return {
+            'status': {
+                'wordpresssite': {
+                    'lastCronJobRuntime': datetime.datetime.now().isoformat(),
+                    **out
+                }
+            }
+        }
+
+
