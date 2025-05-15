@@ -51,10 +51,6 @@ main () {
       git apply < /tmp/clearstatcache-wp-import.patch )
 
     install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
-    # 20250401 (not an April Fool's joke...): we are not sure why there is this `did_action`
-    # escape... But we did determine that short-circuiting it cures WPN-336.
-    sed -i.orig 's|! did_action...pll_language_defined...|true|' "$targetdir"/wp-content/plugins/polylang/frontend/choose-lang-url.php
-
     install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
 
     # Some of these plugins are commercial plugins that we pay for;
