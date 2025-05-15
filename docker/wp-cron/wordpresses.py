@@ -117,7 +117,7 @@ class WordpressSite:
         ret = []
         for uid, ingress in bag_ingress.items():
             wp = bag_wp.lookup(uid)
-            ret.append(cls(wp, ingress))
+            ret.append(cls(wp=wp, ingress=ingress))
 
         return ret
 
