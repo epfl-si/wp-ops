@@ -181,6 +181,8 @@ class WordpressSite:
             cmdline = ['wp', f'--ingress={self._ingress_name()}', 'eval', '''echo(json_encode(apply_filters('wp_operator_status',[]), JSON_PRETTY_PRINT));''']
             result = self._do_run_wp(cmdline, capture_output=True, text=True)
             out = json.loads(result.stdout)
+            if out == []:
+                out = {}
         return {
             'status': {
                 'wordpresssite': {
