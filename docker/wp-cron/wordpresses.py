@@ -36,9 +36,28 @@ class KubernetesAPI:
       self._dynamic = DynamicClient(client.ApiClient())
       self._networking = client.NetworkingV1Api()
 
+      class ApiClientForJsonPatch(client.ApiClient):
+          """As seen in https://github.com/kubernetes-client/python/issues/1216#issuecomment-691116322"""
+          def call_api(self, resource_path, method,
+                       path_params=None, query_params=None, header_params=None,
+                       body=None, post_params=None, files=None,
+                       response_type=None, auth_settings=None, async_req=None,
+                       _return_http_data_only=None, collection_formats=None,
+                       _preload_content=True, _request_timeout=None):
+              header_params['Content-Type'] = self.select_header_content_type(['application/json-patch+json'])
+              return super().call_api(resource_path, method, path_params, query_params, header_params, body,
+                                      post_params, files, response_type, auth_settings, async_req, _return_http_data_only,
+                                      collection_formats, _preload_content, _request_timeout)
+
+      self._custom_jsonpatch = client.CustomObjectsApi(ApiClientForJsonPatch())
+
   @classproperty
   def custom(cls):
     return cls.__get()._custom
+
+  @classproperty
+  def custom_jsonpatch(cls):
+    return cls.__get()._custom_jsonpatch
 
   @classproperty
   def core(cls):
@@ -162,19 +181,24 @@ class WordpressSite:
             plugins: The active plugins on the site
         """
         try:
-            KubernetesAPI.custom.patch_namespaced_custom_object_status(
-                self._group,
-                self._version,
-                self._namespace,
-                self._plural,
-                self._wp['metadata']['name'],
-                self._status_struct()
-            )
+            KubernetesAPI.custom_jsonpatch.patch_namespaced_custom_object_status(
+                group=self._group,
+                version=self._version,
+                plural=self._plural,
+                namespace=self._namespace,
+                name=self._wp['metadata']['name'],
+                body=[
+                    {
+                        "op": "replace",
+                        "path": "/status/wordpresssite",
+                        "value": self._status_wordpresssite_struct()
+                    }
+                ])
         except ApiException:
             logging.exception("when calling CustomObjectsApi->patch_namespaced_custom_object_status")
             raise
 
-    def _status_struct(self):
+    def _status_wordpresssite_struct(self):
         if 'DEBUG' in os.environ:
             out = {'plugins': {'toto': {}, 'tutu': {}}}
         else:
@@ -184,12 +208,8 @@ class WordpressSite:
             if out == []:
                 out = {}
         return {
-            'status': {
-                'wordpresssite': {
-                    'lastCronJobRuntime': datetime.datetime.now().isoformat(),
-                    **out
-                }
-            }
+            'lastCronJobRuntime': datetime.datetime.now().isoformat(),
+            **out
         }
 
 
