@@ -40,6 +40,19 @@
         EPFL_MIGRATION_ACCESSSECRET: "{{ s3_epfl_migration_credentials.accessSecret }}"
         RESTIC_PASSWORD: "{{ s3_epfl_migration_credentials.resticPassword }}"
 
+- name: "Deployment/wp-operator (on the “prod” image)"
+  when: >-
+    inventory_deployment_stage == "production"
+  kubernetes.core.k8s_json_patch:
+      api_version: apps/v1
+      kind: Deployment
+      name: wp-operator
+      namespace: "{{ inventory_namespace }}"
+      patch:
+       - op: replace
+         path: /spec/template/spec/containers/0/image
+         value: anonymous.apps.t-ocp-its-01.xaas.epfl.ch/svc0041/wp-operator:prod
+
 - name: "Deployment/wp-operator: no CPU limit"
   # Temporary band-aid until we get rid of that in the OLM metadata,
   # and re-push properly:
