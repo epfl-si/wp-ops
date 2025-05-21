@@ -189,7 +189,7 @@ class WordpressSite:
                 name=self._wp['metadata']['name'],
                 body=[
                     {
-                        "op": "replace",
+                        "op": "add",
                         "path": "/status/wordpresssite",
                         "value": self._status_wordpresssite_struct()
                     }
