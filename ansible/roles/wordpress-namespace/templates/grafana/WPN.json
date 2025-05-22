@@ -1,539 +1,802 @@
 {% raw %}
 {
-  "annotations":{
-    "list":[
+  "annotations": {
+    "list": [
       {
-        "builtIn":1,
-        "datasource":{
-          "type":"grafana",
-          "uid":"-- Grafana --"
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
         },
-        "enable":true,
-        "hide":true,
-        "iconColor":"rgba(0, 211, 255, 1)",
-        "name":"Annotations & Alerts",
-        "type":"dashboard"
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
     ]
   },
-  "description":"The ✰✰✰✰✰ dashboard of the WPN project",
-  "editable":true,
-  "fiscalYearStartMonth":0,
-  "graphTooltip":0,
-  "id":41,
-  "links":[
-    
-  ],
-  "panels":[
+  "description": "The ✰✰✰✰✰ dashboard of the WPN project",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 50,
+  "links": [],
+  "panels": [
     {
-      "datasource":{
-        "type":"prometheus",
-        "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
       },
-      "fieldConfig":{
-        "defaults":{
-          "color":{
-            "mode":"thresholds"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "mappings":[
-            
-          ],
-          "max":5,
-          "min":0,
-          "thresholds":{
-            "mode":"absolute",
-            "steps":[
+          "mappings": [],
+          "max": 5,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "color":"green",
-                "value":null
+                "color": "green",
+                "value": null
               },
               {
-                "color":"semi-dark-red",
-                "value":0
+                "color": "semi-dark-red",
+                "value": 0
               },
               {
-                "color":"semi-dark-orange",
-                "value":0.5
+                "color": "semi-dark-orange",
+                "value": 0.5
               },
               {
-                "color":"semi-dark-green",
-                "value":1.5
+                "color": "semi-dark-green",
+                "value": 1.5
               },
               {
-                "color":"semi-dark-yellow",
-                "value":3.5
+                "color": "semi-dark-yellow",
+                "value": 3.5
               }
             ]
           }
         },
-        "overrides":[
-          
-        ]
+        "overrides": []
       },
-      "gridPos":{
-        "h":8,
-        "w":5,
-        "x":0,
-        "y":0
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 0,
+        "y": 0
       },
-      "id":6,
-      "links":[
+      "id": 6,
+      "links": [
         {
-          "targetBlank":true,
-{% endraw %}
-          "title":"{{ (inventory_openshift.domain | split('.'))[0] }}",
-          "url":"https://console-openshift-console.apps.{{ inventory_openshift.domain }}/k8s/ns/{{ inventory_namespace }}/core~v1~Pod?name=wp-nginx"
-{% raw %}
+          "targetBlank": true,
+          "title": "ocpitsp0001",
+          "url": "https://console-openshift-console.apps.ocpitsp0001.xaas.epfl.ch/k8s/ns/svc0041p-wordpress/core~v1~Pod?name=wp-nginx"
         }
       ],
-      "options":{
-        "minVizHeight":75,
-        "minVizWidth":75,
-        "orientation":"auto",
-        "reduceOptions":{
-          "calcs":[
-            "lastNotNull"
-          ],
-          "fields":"",
-          "values":false
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "showThresholdLabels":false,
-        "showThresholdMarkers":true,
-        "sizing":"auto",
-        "text":{
-          "valueSize":150
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "text": {
+          "valueSize": 150
         }
       },
-      "pluginVersion":"11.5.1",
-      "targets":[
+      "pluginVersion": "11.5.1",
+      "targets": [
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "disableTextWrap":false,
-          "editorMode":"code",
-{% endraw %}
-          "expr":"count(kube_pod_status_phase{namespace=\"{{ inventory_namespace }}\", pod=~\"wp-nginx.*\", phase=\"Running\"})",
-{% raw %}
-          "fullMetaSearch":false,
-          "includeNullMetadata":true,
-          "range":true,
-          "refId":"A",
-          "useBackend":false
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "count(kube_pod_status_phase{namespace=\"svc0041p-wordpress\", pod=~\"wp-nginx.*\", phase=\"Running\"})",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "range": true,
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title":"Running Pods (wp-nginx)",
-      "type":"gauge"
+      "title": "Running Pods (wp-nginx)",
+      "type": "gauge"
     },
     {
-      "datasource":{
-        "type":"prometheus",
-        "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
       },
-      "fieldConfig":{
-        "defaults":{
-          "color":{
-            "mode":"thresholds"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "fieldMinMax":false,
-          "mappings":[
-            
-          ],
-          "thresholds":{
-            "mode":"absolute",
-            "steps":[
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "color":"green",
-                "value":null
+                "color": "green",
+                "value": null
               }
             ]
           }
         },
-        "overrides":[
-          
-        ]
+        "overrides": []
       },
-      "gridPos":{
-        "h":8,
-        "w":12,
-        "x":5,
-        "y":0
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 5,
+        "y": 0
       },
-      "id":9,
-      "options":{
-        "colorMode":"background",
-        "graphMode":"area",
-        "justifyMode":"center",
-        "orientation":"auto",
-        "percentChangeColorMode":"standard",
-        "reduceOptions":{
-          "calcs":[
-            "lastNotNull"
-          ],
-          "fields":"",
-          "values":false
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "showPercentChange":false,
-        "textMode":"auto",
-        "wideLayout":true
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion":"11.5.1",
-      "targets":[
+      "pluginVersion": "11.5.1",
+      "targets": [
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "editorMode":"code",
-          "expr":"sum(last_over_time(mysql_global_status_acl_database_grants[1h]))",
-          "legendFormat":"Databases",
-          "range":true,
-          "refId":"A"
+          "editorMode": "code",
+          "expr": "sum(last_over_time(mysql_global_status_acl_database_grants[1h]))",
+          "legendFormat": "Databases",
+          "range": true,
+          "refId": "A"
         },
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "editorMode":"code",
-          "expr":"count(openshift_route_status{route=~\"wp-route.*|wordpress\"})",
-          "hide":false,
-          "instant":false,
-          "legendFormat":"WP-Routes",
-          "range":true,
-          "refId":"B"
+          "editorMode": "code",
+          "expr": "count(openshift_route_status{route=~\"wp-route.*|wordpress\"})",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "WP-Routes",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title":"",
-      "type":"stat"
+      "title": "",
+      "type": "stat"
     },
     {
-      "datasource":{
-        "type":"prometheus",
-        "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
       },
-      "fieldConfig":{
-        "defaults":{
-          "color":{
-            "mode":"thresholds"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "mappings":[
-            
-          ],
-          "max":120,
-          "min":0,
-          "thresholds":{
-            "mode":"absolute",
-            "steps":[
+          "mappings": [],
+          "max": 120,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "color":"green",
-                "value":null
+                "color": "green",
+                "value": null
               }
             ]
           }
         },
-        "overrides":[
-          
-        ]
+        "overrides": []
       },
-      "gridPos":{
-        "h":8,
-        "w":7,
-        "x":17,
-        "y":0
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 17,
+        "y": 0
       },
-      "id":8,
-      "options":{
-        "displayMode":"lcd",
-        "legend":{
-          "calcs":[
-            
-          ],
-          "displayMode":"list",
-          "placement":"bottom",
-          "showLegend":false
+      "id": 8,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        "maxVizHeight":300,
-        "minVizHeight":16,
-        "minVizWidth":8,
-        "namePlacement":"auto",
-        "orientation":"auto",
-        "reduceOptions":{
-          "calcs":[
-            "lastNotNull"
-          ],
-          "fields":"",
-          "values":false
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "showUnfilled":true,
-        "sizing":"auto",
-        "valueMode":"color"
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
-      "pluginVersion":"11.5.1",
-      "targets":[
+      "pluginVersion": "11.5.1",
+      "targets": [
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "editorMode":"code",
-          "expr":"last_over_time(mysql_global_status_acl_database_grants[1h])",
-          "legendFormat":"{{target}}",
-          "range":true,
-          "refId":"A"
+          "editorMode": "code",
+          "expr": "last_over_time(mysql_global_status_acl_database_grants[1h])",
+          "legendFormat": "{{target}}",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "title":"MariaDB Balancing",
-      "type":"bargauge"
+      "title": "MariaDB Balancing",
+      "type": "bargauge"
     },
     {
-      "collapsed":false,
-      "gridPos":{
-        "h":1,
-        "w":24,
-        "x":0,
-        "y":8
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
       },
-      "id":3,
-      "panels":[
-        
-      ],
-      "title":"Network",
-      "type":"row"
+      "id": 10,
+      "panels": [],
+      "title": "Sites stats",
+      "type": "row"
     },
     {
-      "datasource":{
-        "type":"prometheus",
-        "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
       },
-      "fieldConfig":{
-        "defaults":{
-          "color":{
-            "mode":"palette-classic"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
           },
-          "custom":{
-            "axisBorderShow":false,
-            "axisCenteredZero":false,
-            "axisColorMode":"text",
-            "axisLabel":"",
-            "axisPlacement":"auto",
-            "barAlignment":0,
-            "barWidthFactor":0.6,
-            "drawStyle":"line",
-            "fillOpacity":0,
-            "gradientMode":"none",
-            "hideFrom":{
-              "legend":false,
-              "tooltip":false,
-              "viz":false
-            },
-            "insertNulls":false,
-            "lineInterpolation":"linear",
-            "lineWidth":1,
-            "pointSize":5,
-            "scaleDistribution":{
-              "type":"linear"
-            },
-            "showPoints":"auto",
-            "spanNulls":false,
-            "stacking":{
-              "group":"A",
-              "mode":"none"
-            },
-            "thresholdsStyle":{
-              "mode":"off"
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             }
           },
-          "mappings":[
-            
-          ],
-          "thresholds":{
-            "mode":"absolute",
-            "steps":[
-              {
-                "color":"green",
-                "value":null
-              },
-              {
-                "color":"red",
-                "value":80
-              }
-            ]
-          }
+          "fieldMinMax": false,
+          "mappings": [],
+          "unit": "pages"
         },
-        "overrides":[
-          
-        ]
+        "overrides": []
       },
-      "gridPos":{
-        "h":8,
-        "w":12,
-        "x":0,
-        "y":9
+      "gridPos": {
+        "h": 10,
+        "w": 4,
+        "x": 0,
+        "y": 9
       },
-      "id":4,
-      "options":{
-        "legend":{
-          "calcs":[
-            
-          ],
-          "displayMode":"list",
-          "placement":"bottom",
-          "showLegend":true
+      "id": 14,
+      "options": {
+        "displayLabels": ["name"],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
         },
-        "tooltip":{
-          "hideZeros":false,
-          "mode":"single",
-          "sort":"none"
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion":"11.5.1",
-      "targets":[
+      "pluginVersion": "11.5.1",
+      "targets": [
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "editorMode":"code",
-{% endraw %}
-          "expr":"sum(irate(container_network_receive_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (pod)\n",
-{% raw %}
-          "range":true,
-          "refId":"A"
+          "editorMode": "code",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "title":"Receive bandwith",
-      "type":"timeseries"
+      "title": "Languages distribution (pages)",
+      "type": "piechart"
     },
     {
-      "datasource":{
-        "type":"prometheus",
-        "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
       },
-      "fieldConfig":{
-        "defaults":{
-          "color":{
-            "mode":"palette-classic"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
           },
-          "custom":{
-            "axisBorderShow":false,
-            "axisCenteredZero":false,
-            "axisColorMode":"text",
-            "axisLabel":"",
-            "axisPlacement":"auto",
-            "barAlignment":0,
-            "barWidthFactor":0.6,
-            "drawStyle":"line",
-            "fillOpacity":0,
-            "gradientMode":"none",
-            "hideFrom":{
-              "legend":false,
-              "tooltip":false,
-              "viz":false
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "insertNulls":false,
-            "lineInterpolation":"linear",
-            "lineWidth":1,
-            "pointSize":5,
-            "scaleDistribution":{
-              "type":"linear"
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
             },
-            "showPoints":"auto",
-            "spanNulls":false,
-            "stacking":{
-              "group":"A",
-              "mode":"none"
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
             },
-            "thresholdsStyle":{
-              "mode":"off"
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
-          "mappings":[
-            
-          ],
-          "thresholds":{
-            "mode":"absolute",
-            "steps":[
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "color":"green",
-                "value":null
+                "color": "green",
+                "value": null
               },
               {
-                "color":"red",
-                "value":80
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "pages"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 4,
+        "y": 9
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "format": "time_series",
+          "legendFormat": "pages-{{language}}",
+          "range": true,
+          "refId": "pages"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "format": "time_series",
+          "hide": false,
+          "legendFormat": "posts-{{language}}",
+          "range": true,
+          "refId": "posts"
+        }
+      ],
+      "title": "Post and page count",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               }
             ]
           }
         },
-        "overrides":[
-          
-        ]
+        "overrides": []
       },
-      "gridPos":{
-        "h":8,
-        "w":12,
-        "x":12,
-        "y":9
+      "gridPos": {
+        "h": 10,
+        "w": 4,
+        "x": 16,
+        "y": 9
       },
-      "id":5,
-      "options":{
-        "legend":{
-          "calcs":[
-            
-          ],
-          "displayMode":"list",
-          "placement":"bottom",
-          "showLegend":true
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "tooltip":{
-          "hideZeros":false,
-          "mode":"single",
-          "sort":"none"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion":"11.5.1",
-      "targets":[
+      "pluginVersion": "11.5.1",
+      "targets": [
         {
-          "datasource":{
-            "type":"prometheus",
-            "uid":"73a57e8b-7679-4a18-915c-292f143448c7"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
-          "editorMode":"code",
-{% endraw %}
-          "expr":"sum(irate(container_network_transmit_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{{ inventory_namespace }}\"}[5m])) by (pod)",
-{% raw %}
-          "legendFormat":"__auto",
-          "range":true,
-          "refId":"A"
+          "editorMode": "code",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"})",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "title":"Transmit bandwith",
-      "type":"timeseries"
+      "title": "Pages number",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 4,
+        "x": 20,
+        "y": 9
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"svc0041p-wordpress\"})",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Posts number",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 3,
+      "panels": [],
+      "title": "Network",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(irate(container_network_receive_bytes_total{pod=~\"wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)\n",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Receive bandwith",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(irate(container_network_transmit_bytes_total{pod=~\"wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Transmit bandwith",
+      "type": "timeseries"
     }
   ],
-  "preload":false,
-  "refresh":"30s",
-  "schemaVersion":40,
-  "tags":[
-    
-  ],
-  "templating":{
-    "list":[
-      
-    ]
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
   },
-  "time":{
-    "from":"now-12h",
-    "to":"now"
+  "time": {
+    "from": "now-12h",
+    "to": "now"
   },
-  "timepicker":{
-    
-  },
-  "timezone":"browser",
-  "title":"✰ WPN ✰",
-  "uid":"wpngrfndshbrda",
-  "version":2,
-  "weekStart":""
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "✰ WPN ✰",
+  "uid": "wpngrfndshbrda",
+  "version": 41,
+  "weekStart": ""
 }
 {% endraw %}
