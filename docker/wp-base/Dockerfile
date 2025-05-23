@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qy update
 RUN apt-get -qy install curl
+RUN apt -qy install rsync
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get -qy install \
     php-cli php-curl php-gd php-ldap php-mbstring php-mysql php-xml php-zip \
