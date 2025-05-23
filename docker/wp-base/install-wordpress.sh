@@ -133,7 +133,15 @@ install_themes () {
     (
         cd $targetdir/wp-content
         rm -rf themes
+        git clone -b dist/frontend https://github.com/epfl-si/elements.git elements
         git clone https://github.com/epfl-si/wp-theme-2018 themes
+        rsync -av --progress ./elements/ themes/wp-theme-2018/assets/ \
+          --exclude node_modules \
+          --exclude .git \
+          --exclude 'package.json' \
+          --exclude '.nojekyll' \
+          --exclude '*.map'
+        rm -rf elements
     )
 }
 
