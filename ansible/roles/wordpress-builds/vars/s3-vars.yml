@@ -1,0 +1,2 @@
+s3_build_credentials: >-
+  {{ lookup('file', '/keybase/team/epfl_wp_test/s3-assets-credentials.sh') | replace("=", ": ")  | from_yaml }}
