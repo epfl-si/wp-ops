@@ -42,6 +42,15 @@
   roles:
     - role: roles/olm-catalog
 
+- name: WordPress builds
+  hosts: openshift_namespaces_test
+  gather_facts: no
+  vars_files: ansible-k8s-credentials.yml
+  environment:
+    K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
+  roles:
+    - role: roles/wordpress-builds
+
 - name: WordPress namespaces
   hosts: all_namespaces
   gather_facts: no
