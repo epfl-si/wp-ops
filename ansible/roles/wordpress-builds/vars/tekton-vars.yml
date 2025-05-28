@@ -1,0 +1,9 @@
+# Tekton dependencies
+oc_cli_image_name: origin-cli
+oc_cli_image_tag: latest
+oc_cli_image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/{{ oc_cli_image_name }}:{{ oc_cli_image_tag }}"
+
+
+wp_base_builder_service_account: wp-base-builder
+run_pipeline_wp_base_build: run-pipeline-wp-base-build
+pipeline_name: wp-base-build
