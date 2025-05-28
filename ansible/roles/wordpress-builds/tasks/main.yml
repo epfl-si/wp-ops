@@ -1,0 +1,32 @@
+- name: wp-base/RBAC
+  include_tasks:
+    file: rbac.yml
+    apply:
+      tags:
+        - wp.base.build
+        - wp.base.rbac
+  tags:
+    - wp.base.build
+    - wp.base.rbac
+
+- name: wp-base/Secrets
+  include_tasks:
+    file: secrets.yml
+    apply:
+      tags:
+        - wp.base.build
+        - wp.base.secrets
+  tags:
+    - wp.base.build
+    - wp.base.secrets
+
+- name: wp-base/Tekton
+  include_tasks:
+    file: tekton.yml
+    apply:
+      tags:
+        - wp.base.build
+        - wp.base.tekton
+  tags:
+    - wp.base.build
+    - wp.base.tekton

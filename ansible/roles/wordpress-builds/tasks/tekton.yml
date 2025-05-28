@@ -1,0 +1,128 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - s3-vars.yml
+    - tekton-vars.yml
+
+- name: wp-base/Tekton - Required asks for building
+  kubernetes.core.k8s:
+    namespace:  "{{ inventory_namespace }}"
+    src: "{{ item }}"
+  with_items:
+    - https://api.hub.tekton.dev/v1/resource/tekton/task/git-clone/0.9/raw
+    - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
+
+- name: wp-base/Tekton - Pipeline
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: tekton.dev/v1
+      kind: Pipeline
+      metadata:
+        name: "{{ pipeline_name }}"
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        params:
+          - name: next-build-id
+            description: "Sequence number of the next build to push to Quay"
+        workspaces:
+          - name: shared-workspace
+          - name: dockerconfig
+        tasks:
+          - name: git-clone
+            taskRef:
+              kind: Task
+              name: git-clone
+            params:
+              - name: url
+                value: https://github.com/epfl-si/wp-ops
+            workspaces:
+              - name: output
+                workspace: shared-workspace
+          # TODO: substitute FROM lines with `sed(1)`
+          - name: build
+            runAfter: [git-clone]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:2025-$(params.next-build-id)"
+              - name: CONTEXT
+                value: "docker/wp-base"
+              - name: VERBOSE
+                value: "true"
+              - name: BUILD_EXTRA_ARGS
+                value: >-
+                  --build-arg
+                  AWS_ACCESS_KEY_ID={{ s3_build_credentials.AWS_ACCESS_KEY_ID }}
+                  --build-arg
+                  AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+
+- name: wp-base/Tekton - CronJob
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: "{{ run_pipeline_wp_base_build }}"
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app.kubernetes.io/component: 'cronjob'
+          app.kubernetes.io/name: 'wp-base-build'
+      spec:
+        timeZone: "Europe/Zurich"
+        schedule: "*/10 * * * *"
+        concurrencyPolicy: Forbid
+        jobTemplate:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                serviceAccountName: "{{ wp_base_builder_service_account }}"
+                restartPolicy: Never
+                containers:
+                  - name: trigger-oc-pipelinerun
+                    image: "{{ oc_cli_image }}"
+                    command:
+                      - /bin/sh
+                      - -c
+                      - |
+                        oc apply -f - <<EOF
+                        ---
+                        apiVersion: v1
+                        kind: PersistentVolumeClaim
+                        metadata:
+                          name: tekton-scratch
+                          namespace: "{{ inventory_namespace }}"
+                        spec:
+                          accessModes:
+                            - ReadWriteOnce
+                          storageClassName: wordpress-nfs-build
+                          resources:
+                            requests:
+                              storage: 50Mi
+                        ---
+                        apiVersion: tekton.dev/v1beta1
+                        kind: PipelineRun
+                        metadata:
+                          name: "{{ run_pipeline_wp_base_build }}-$(date -u +%Y%m%d-%H%Mz)"
+                          namespace: "{{ inventory_namespace }}"
+                        spec:
+                          timeout: "2h"
+                          serviceAccountName: "{{ wp_base_builder_service_account }}"
+                          pipelineRef:
+                            name: "{{ pipeline_name }}"
+                          params:
+                            - name: next-build-id
+                              value: 136-auto
+                          workspaces:
+                            - name: shared-workspace
+                              persistentVolumeClaim:
+                                claimName: tekton-scratch
+                            - name: dockerconfig
+                              secret:
+                                secretName: tekton-push
+                        EOF
