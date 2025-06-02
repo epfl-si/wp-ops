@@ -41,13 +41,7 @@ COPY nginx-entrypoint.d/* /wp/nginx-entrypoint.d/
 
 # WordPress insists on loading wp-config.php, but in our Web serving
 # workflow, all the setup work is handled by nginx-entrypoint.php:
-COPY stub-wp-config.php /wp/6/wp-config.php
-RUN set -e -x;                                                     \
-    for wp in /wp/6*; do                                       \
-      if [ ! -f "$wp/wp-config.php" ]; then                        \
-        cp /wp/6/wp-config.php "$wp/wp-config.php" ;               \
-      fi;                                                          \
-    done
+COPY stub-wp-config.php /wp/wp-config.php
 
 EXPOSE 8080 8443
 
