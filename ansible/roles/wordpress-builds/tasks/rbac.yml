@@ -44,20 +44,3 @@
         kind: Role
         name: "{{ wp_base_builder_service_account }}-role"
         apiGroup: rbac.authorization.k8s.io
-
-- name: wp-base/Tekton - RoleBinding for `anyuid`
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: rbac.authorization.k8s.io/v1
-      kind: RoleBinding
-      metadata:
-        name: allow-anyuid
-        namespace: "{{ inventory_namespace }}"
-      roleRef:
-        apiGroup: rbac.authorization.k8s.io
-        kind: ClusterRole
-        name: pipelines-scc-clusterrole
-      subjects:
-          - kind: ServiceAccount
-            name: "{{ wp_base_builder_service_account }}"
-            namespace: "{{ inventory_namespace }}"
