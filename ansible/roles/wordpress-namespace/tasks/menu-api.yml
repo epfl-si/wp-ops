@@ -94,7 +94,7 @@
                 image: "quay-its.epfl.ch/svc0041/menu-api:2025-023"
                 resources:
                   limits:
-                    memory: 1Gi
+                    memory: 512Mi
                   requests:
                     cpu: '{{ _cpu_request }}'
                     memory: 512Mi
@@ -122,9 +122,7 @@
             imagePullSecrets:
               - name: "{{ quay_puller_secret_name }}"
   vars:
-    _cpu_request: >-
-      {{ "1" if inventory_deployment_stage == "production"
-      else "500m" }}
+    _cpu_request: "160m"
 
 - name: Service/menu-api
   kubernetes.core.k8s:
