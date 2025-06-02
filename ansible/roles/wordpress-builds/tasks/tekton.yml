@@ -60,6 +60,8 @@
             workspaces:
               - name: source
                 workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
 
 - name: wp-base/Tekton - CronJob
   kubernetes.core.k8s:
