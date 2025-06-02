@@ -112,7 +112,7 @@
                           namespace: "{{ inventory_namespace }}"
                         spec:
                           timeout: "2h"
-                          serviceAccountName: "{{ wp_base_builder_service_account }}"
+                          serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:
