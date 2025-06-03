@@ -28,18 +28,30 @@
           - name: shared-workspace
           - name: dockerconfig
         tasks:
-          - name: git-clone
-            taskRef:
-              kind: Task
-              name: git-clone
-            params:
-              - name: url
-                value: https://github.com/epfl-si/wp-ops
+          - name: prep
+            taskSpec:
+              steps:
+              - name: sed
+                image: public.ecr.aws/bitnami/git:latest
+                script: |
+                    set -e -x
+                    rm -rf /workspace/source/wp-ops
+                    git clone https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
+                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
+                      /workspace/source/wp-ops/docker/*/Dockerfile
+                    sed -i 's;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
+                      /workspace/source/wp-ops/docker/*/Dockerfile
+                    sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
+                      /workspace/source/wp-ops/docker/*/Dockerfile
+                    sed -i 's;FROM ubuntu:jammy;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:jammy;g' \
+                      /workspace/source/wp-ops/docker/*/Dockerfile
             workspaces:
-              - name: output
+              - name: source
                 workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
           - name: build-wp-base
-            runAfter: [git-clone]
+            runAfter: [prep]
             taskRef:
               kind: Task
               name: buildah
@@ -47,7 +59,7 @@
               - name: IMAGE
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id)"
               - name: CONTEXT
-                value: "docker/wp-base"
+                value: "wp-ops/docker/wp-base"
               - name: VERBOSE
                 value: "true"
               - name: BUILD_EXTRA_ARGS
@@ -61,25 +73,8 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
-          - name: update-dockerfile
-            runAfter: [ git-clone ]
-            taskSpec:
-              steps:
-              - name: sed
-                image: ubuntu:jammy
-                script: |
-                    set -e -x
-                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id) AS wp-base;g' \
-                      /workspace/source/docker/wordpress-nginx/Dockerfile
-                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id) AS wp-base;g' \
-                      /workspace/source/docker/wordpress-php/Dockerfile
-            workspaces:
-              - name: source
-                workspace: shared-workspace
-              - name: dockerconfig
-                workspace: dockerconfig
           - name: build-wp-nginx
-            runAfter: [ build-wp-base, update-dockerfile ]
+            runAfter: [ build-wp-base ]
             taskRef:
               kind: Task
               name: buildah
@@ -87,7 +82,7 @@
               - name: IMAGE
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
               - name: CONTEXT
-                value: "docker/wordpress-nginx"
+                value: "wp-ops/docker/wordpress-nginx"
               - name: VERBOSE
                 value: "true"
             workspaces:
@@ -96,7 +91,7 @@
               - name: dockerconfig
                 workspace: dockerconfig
           - name: build-wp-php
-            runAfter: [ build-wp-nginx ]
+            runAfter: [ build-wp-base ]
             taskRef:
               kind: Task
               name: buildah
@@ -104,7 +99,7 @@
               - name: IMAGE
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
               - name: CONTEXT
-                value: "docker/wordpress-php"
+                value: "wp-ops/docker/wordpress-php"
               - name: VERBOSE
                 value: "true"
             workspaces:
@@ -116,8 +111,8 @@
             runAfter: [ build-wp-nginx, build-wp-php ]
             taskSpec:
               steps:
-                - name: sed
-                  image: ubuntu:jammy
+                - name: rollout
+                  image: public.ecr.aws/bitnami/kubectl:latest
                   script: |
                     kubectl patch deployment wp-nginx --patch='{"spec":{"template":{"spec":{
                         "containers":[
@@ -192,7 +187,7 @@
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
-                                claimName: tekton-scratch
+                                claimName: tekton-scratch # TODO we need to change PVC for each build
                             - name: dockerconfig
                               secret:
                                 secretName: tekton-push
