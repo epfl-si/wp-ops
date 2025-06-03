@@ -1,3 +1,4 @@
+FROM wp-base
 FROM ubuntu:jammy
 
 ARG PHP_VERSION=8.2
