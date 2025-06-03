@@ -200,7 +200,7 @@
       else _request_ram_de_minimis }}
     _limits_serving_for_prod_only: >-
       {{ {} if inventory_deployment_stage != "production"
-         else { "cpu": _request_cpu_serving, "memory": _request_ram } }}
+         else { "memory": _request_ram } }}
     _request_cpu_de_minimis: "20m"
     _request_ram_de_minimis: "256Mi"
     _affinity_spread_out_on_cluster:
