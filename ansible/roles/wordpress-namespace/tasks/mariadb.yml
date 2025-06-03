@@ -60,9 +60,9 @@
             cpu: >-
               {{ "500m" if inventory_deployment_stage == "production"
                  else "50m" }}
-            memory: 750Mi
+            memory: 2Gi
           limits:
-            memory: 1Gi
+            memory: 2Gi
         rootPasswordSecretKeyRef:
           name: mariadb
           key: root-password
