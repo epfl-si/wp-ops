@@ -38,15 +38,14 @@
             workspaces:
               - name: output
                 workspace: shared-workspace
-          # TODO: substitute FROM lines with `sed(1)`
-          - name: build
+          - name: build-wp-base
             runAfter: [git-clone]
             taskRef:
               kind: Task
               name: buildah
             params:
               - name: IMAGE
-                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:2025-$(params.next-build-id)"
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id)"
               - name: CONTEXT
                 value: "docker/wp-base"
               - name: VERBOSE
@@ -62,6 +61,76 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
+          - name: update-dockerfile
+            runAfter: [ git-clone ]
+            taskSpec:
+              steps:
+              - name: sed
+                image: ubuntu:jammy
+                script: |
+                    set -e -x
+                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id) AS wp-base;g' \
+                      /workspace/source/docker/wordpress-nginx/Dockerfile
+                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id) AS wp-base;g' \
+                      /workspace/source/docker/wordpress-php/Dockerfile
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: build-wp-nginx
+            runAfter: [ build-wp-base, update-dockerfile ]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+              - name: CONTEXT
+                value: "docker/wordpress-nginx"
+              - name: VERBOSE
+                value: "true"
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: build-wp-php
+            runAfter: [ build-wp-nginx ]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+              - name: CONTEXT
+                value: "docker/wordpress-php"
+              - name: VERBOSE
+                value: "true"
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: patch-deployment
+            runAfter: [ build-wp-nginx, build-wp-php ]
+            taskSpec:
+              steps:
+                - name: sed
+                  image: ubuntu:jammy
+                  script: |
+                    kubectl patch deployment wp-nginx --patch='{"spec":{"template":{"spec":{
+                        "containers":[
+                          {
+                            "name": "nginx",
+                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+                          },
+                          {
+                            "name": "php",
+                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+                          }
+                        ]
+                    }}}}'
 
 - name: wp-base/Tekton - CronJob
   kubernetes.core.k8s:
@@ -119,7 +188,7 @@
                             name: "{{ pipeline_name }}"
                           params:
                             - name: next-build-id
-                              value: 136-auto
+                              value: 2025-136-auto
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
