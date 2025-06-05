@@ -5,4 +5,4 @@ nginx_runner_bitnami_image:
 nginx_runner_bitnami_image_mirrored: >-
   {{ nginx_runner_bitnami_image.mirrored | parse_docker_image_name }}
 
-nginx_runner_mirrorist_quay_robot_account: svc0041+mirrorist
+mirrorist_quay_robot_account: svc0041+mirrorist
