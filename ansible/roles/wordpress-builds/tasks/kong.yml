@@ -26,3 +26,16 @@
       {{ kong_image | split(":") | first }}
     _mirrored_from_tag: >-
       {{ kong_image | split(":") | last | string }}
+
+- name: "Access matrix to {{ kong_image | split(":") | first }}"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ item.robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ kong_image_mirrored.shortname }}"
+    permission: "{{ item.permission }}"
+  with_items:
+    - robot_account: "{{ mirrorist_quay_robot_account }}"
+      permission: write
+    - robot_account: "{{ quay_puller_robot_account_name }}"
+      permission: read
