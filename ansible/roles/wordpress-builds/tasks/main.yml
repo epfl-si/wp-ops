@@ -20,6 +20,15 @@
     - wp.base.build
     - wp.base.secrets
 
+- name: wp-builds/Mirror
+  include_tasks:
+    file: mirrors.yml
+    apply:
+      tags:
+        - wp.base.mirrors
+  tags:
+    - wp.base.mirrors
+
 - name: wp-base/Tekton
   include_tasks:
     file: tekton.yml
