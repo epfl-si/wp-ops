@@ -13,3 +13,7 @@ quay_puller_secret_name: >-
 quay_botfather_token: >-
   {{ quay_secrets.quay.org_admin_token
   | eyaml(quay_secrets.eyaml_keys) }}
+
+# 💡 runner_credentials comes (you guessed it) from ./runner-credentials.yml
+ansible_quay_bearer_token: >-
+  {{ runner_credentials.quay_api.bearer_token | eyaml(runner_credentials.eyaml_keys) }}

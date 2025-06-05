@@ -1,0 +1,26 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - mirrors-vars.yml
+    - ../../vars/quay-vars.yml
+
+- tags: always
+  include_vars:
+    name: runner_credentials
+    file: ../../vars/runner-credentials.yml
+
+- name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
+  epfl_si.quay.quay_repository:
+    organization: "{{ nginx_runner_bitnami_image_mirrored.organization }}"
+    name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
+    description: "Mirrored from {{ _mirrored_from_short }}"
+    visibility: public
+    mirror:
+      from: "{{ _mirrored_from_short }}"
+      robot_account: "{{ nginx_runner_mirrorist_quay_robot_account }}"
+      tags: ["{{ _mirrored_from_tag }}"]
+  vars:
+    _mirrored_from_short: >-
+      {{ nginx_runner_bitnami_image.original | split(":") | first }}
+    _mirrored_from_tag: >-
+      {{ nginx_runner_bitnami_image.original | split(":") | last }}
