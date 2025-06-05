@@ -56,7 +56,7 @@
 
 - name: Web server
   vars:
-    wp-nginx-fruits:
+    wp-nginx-flavors:
       - wp-nginx-apple
       - wp-nginx-grapes
       - wp-nginx-kiwi
@@ -66,9 +66,9 @@
       - wp-nginx-rc
   include_tasks:
     file: nginx.yml
-    loop: "{{ wp-nginx-fruits }}"
+    loop: "{{ wp-nginx-flavors }}"
     loop_control:
-      loop_var: wp-nginx-fruit
+      loop_var: wp-nginx-flavor
     apply:
       tags:
         - wp
