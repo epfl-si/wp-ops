@@ -1,0 +1,5 @@
+kong_image: kong:3.6
+_kong_image_mirrored: >-
+  {{ ansible_quay_hostname }}/{{ quay_organization }}/{{ kong_image }}
+kong_image_mirrored: >-
+  {{ _kong_image_mirrored | parse_docker_image_name }}
