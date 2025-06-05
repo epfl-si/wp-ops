@@ -10,6 +10,8 @@ all_namespaces:
         openshift_namespaces_prod:
           vars:
             inventory_deployment_stage: production
+            wp-nginx-flavors:
+              - wp-nginx
           "hosts":   # Not real hosts, hence the scarequotes
             namespace/svc0041p-wordpress:
               inventory_namespace: svc0041p-wordpress

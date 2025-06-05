@@ -4,14 +4,14 @@
   - image-vars.yml
   - ../../../vars/quay-vars.yml
 
-- name: ConfigMap/{{ wp-nginx-flavor }}
+- name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: "{{ wp-nginx-flavor }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
       data:
         allow-snippet-annotations: "true"
@@ -51,17 +51,23 @@
             affinity: >-
               {{ {} if ( inventory_has_only_one_worker_node | default(False) )
               else _affinity_spread_out_on_cluster }}
-            serviceAccountName: "{{ wp-nginx-flavor }}"
+            serviceAccountName: wp-nginx
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: "quay-its.epfl.ch/svc0041/wp-nginx:{{ wp-nginx-flavor }}-{{ nginx_deployment_images_tag }}"
+                image: >-
+                  {{ 
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" ~ wp_nginx_flavor 
+                    if env == "test" else 
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" ~ nginx_deployment_images_tag 
+                  }}
+                imagePullPolicy: "{{ 'IfNotPresent' if env == 'prod' else 'Always' }}"
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
                   - --controller-class=epfl.ch/ingress-wordpress
                   - --watch-namespace=$(POD_NAMESPACE)
-                  - --configmap=$(POD_NAMESPACE)/{{ wp-nginx-flavor }}
+                  - --configmap=$(POD_NAMESPACE)/wp-nginx
                   - --watch-ingress-without-class=false
                   - --http-port=8000
                   - --https-port=8443
@@ -232,6 +238,7 @@
         selector:
           matchLabels:
             app: "{{ wp-nginx-flavor }}"
+  when: inventory_deployment_stage == "production"
 
 - name: PodMonitor/{{ wp-nginx-flavor }}
   kubernetes.core.k8s:
@@ -249,15 +256,16 @@
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
+  when: inventory_deployment_stage == "production"
 
-- name: Service/{{ wp-nginx-flavor }}
+- name: Service/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: Service
       metadata:
-        name: "{{ wp-nginx-flavor }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
         labels:
           app: "{{ wp-nginx-flavor }}"

@@ -10,6 +10,14 @@ all_namespaces:
         openshift_namespaces_test:
           vars:
             inventory_deployment_stage: test
+            wp-nginx-flavors:
+              - wp-nginx-apple
+              - wp-nginx-grapes
+              - wp-nginx-kiwi
+              - wp-nginx-lemon
+              - wp-nginx-orange
+              - wp-nginx-alpha
+              - wp-nginx-rc
           "hosts":   # Not real hosts, hence the scarequotes
             namespace/svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
