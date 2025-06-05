@@ -18,7 +18,7 @@
     visibility: public
     mirror:
       from: "{{ _mirrored_from_short }}"
-      robot_account: "{{ nginx_runner_mirrorist_quay_robot_account }}"
+      robot_account: "{{ mirrorist_quay_robot_account }}"
       tags: ["{{ _mirrored_from_tag }}"]
   vars:
     _mirrored_from_short: >-
@@ -26,10 +26,10 @@
     _mirrored_from_tag: >-
       {{ nginx_runner_bitnami_image.original | split(":") | last }}
 
-- name: "Grant access to {{ nginx_runner_mirrorist_quay_robot_account }} to do its job"
+- name: "Grant access to {{ mirrorist_quay_robot_account }} to do its job"
   run_once: true
   epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ nginx_runner_mirrorist_quay_robot_account }}"
+    robot_account_name: "{{ mirrorist_quay_robot_account }}"
     organization: "{{ quay_organization }}"
     repository_name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
     permission: write
