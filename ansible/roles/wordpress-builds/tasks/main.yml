@@ -39,3 +39,14 @@
   tags:
     - wp.base.build
     - wp.base.tekton
+
+- name: Kong reverse proxy for blue/green(/red/yellow/orange) testing
+  include_tasks:
+    file: kong.yml
+    apply:
+      tags:
+        - wp.base.build
+        - wp.base.kong
+  tags:
+    - wp.base.build
+    - wp.base.kong
