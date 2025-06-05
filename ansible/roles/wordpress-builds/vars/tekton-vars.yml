@@ -9,5 +9,13 @@ wp_base_builder_service_account: wp-base-builder
 # CAP_SETFCAP (which we couldn't do ourselves); see
 # https://docs.redhat.com/en/documentation/openshift_container_platform/4.8/html/cicd/pipelines#about-taskrun_understanding-openshift-pipelines
 wp_base_builder_buildah_service_account: pipeline
+
+
+# Tekton for Release Candidate build
 run_pipeline_wp_base_build: run-pipeline-wp-base-build
 pipeline_name: wp-base-build
+
+
+# Tekton for PR's builds
+pipeline_name_for_pr: wp-base-build-for-pr
+run_pipeline_wp_base_build_for_pr: run-pipeline-wp-base-build-for-pr
