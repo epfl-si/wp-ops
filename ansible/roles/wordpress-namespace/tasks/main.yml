@@ -55,8 +55,20 @@
     - msmtp
 
 - name: Web server
+  vars:
+    wp-nginx-fruits:
+      - wp-nginx-apple
+      - wp-nginx-grapes
+      - wp-nginx-kiwi
+      - wp-nginx-lemon
+      - wp-nginx-orange
+      - wp-nginx-alpha
+      - wp-nginx-rc
   include_tasks:
     file: nginx.yml
+    loop: "{{ wp-nginx-fruits }}"
+    loop_control:
+      loop_var: wp-nginx-fruit
     apply:
       tags:
         - wp
