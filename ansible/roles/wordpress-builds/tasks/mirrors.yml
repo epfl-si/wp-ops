@@ -9,14 +9,8 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
-- name: "Grant access to {{ nginx_runner_mirrorist_quay_robot_account }} to do its job"
-  epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ nginx_runner_mirrorist_quay_robot_account }}"
-    organization: "{{ quay_organization }}"
-    repository_name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
-    permission: write
-
 - name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
+  run_once: true
   epfl_si.quay.quay_repository:
     organization: "{{ quay_organization }}"
     name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
@@ -31,3 +25,11 @@
       {{ nginx_runner_bitnami_image.original | split(":") | first }}
     _mirrored_from_tag: >-
       {{ nginx_runner_bitnami_image.original | split(":") | last }}
+
+- name: "Grant access to {{ nginx_runner_mirrorist_quay_robot_account }} to do its job"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ nginx_runner_mirrorist_quay_robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
+    permission: write
