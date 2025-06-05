@@ -4,14 +4,14 @@
   - image-vars.yml
   - ../../../vars/quay-vars.yml
 
-- name: ConfigMap/wp-nginx
+- name: ConfigMap/{{ wp-nginx-fruit }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: wp-nginx
+        name: "{{ wp-nginx-fruit }}"
         namespace: "{{ inventory_namespace }}"
       data:
         allow-snippet-annotations: "true"
@@ -24,14 +24,14 @@
         #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
 
 
-- name: Deployment/wp-nginx
+- name: Deployment/{{ wp-nginx-fruit }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: wp-nginx
+        name: "{{ wp-nginx-fruit }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         replicas: >-
@@ -39,29 +39,29 @@
           else 1 }}
         selector:
           matchLabels:
-            app: wp-nginx
+            app: "{{ wp-nginx-fruit }}"
         strategy:
           type: RollingUpdate
         template:
           metadata:
             labels:
-              app: wp-nginx
-              version: "{{ nginx_deployment_images_tag }}"
+              app: "{{ wp-nginx-fruit }}"
+              version: "{{ wp-nginx-fruit }}-{{ nginx_deployment_images_tag }}"
           spec:
             affinity: >-
               {{ {} if ( inventory_has_only_one_worker_node | default(False) )
               else _affinity_spread_out_on_cluster }}
-            serviceAccountName: wp-nginx
+            serviceAccountName: "{{ wp-nginx-fruit }}"
             automountServiceAccountToken: false
             containers:
               - name: nginx
-                image: "quay-its.epfl.ch/svc0041/wp-nginx:{{ nginx_deployment_images_tag }}"
+                image: "quay-its.epfl.ch/svc0041/wp-nginx:{{ wp-nginx-fruit }}-{{ nginx_deployment_images_tag }}"
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
                   - --controller-class=epfl.ch/ingress-wordpress
                   - --watch-namespace=$(POD_NAMESPACE)
-                  - --configmap=$(POD_NAMESPACE)/wp-nginx
+                  - --configmap=$(POD_NAMESPACE)/{{ wp-nginx-fruit }}
                   - --watch-ingress-without-class=false
                   - --http-port=8000
                   - --https-port=8443
@@ -87,7 +87,7 @@
                     readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
-                  # - name: wp-nginx
+                  # - name: "{{ wp-nginx-fruit }}"
                   #   mountPath: /etc/nginx/template
                   #   readOnly: true
                 env:
@@ -161,9 +161,9 @@
                   claimName: wordpress-data
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
-              # - name: wp-nginx
+              # - name: "{{ wp-nginx-fruit }}"
               #   configMap:
-              #     name: wp-nginx
+              #     name: "{{ wp-nginx-fruit }}"
               - name: kube-api-access
                 projected:
                   defaultMode: 420
@@ -208,59 +208,59 @@
          requiredDuringSchedulingIgnoredDuringExecution:
            - labelSelector:
                matchLabels:
-                 app: wp-nginx
+                 app: "{{ wp-nginx-fruit }}"
              topologyKey: kubernetes.io/hostname
          preferredDuringSchedulingIgnoredDuringExecution:
            - weight: 100
              podAffinityTerm:
                labelSelector:
                  matchLabels:
-                   app: wp-nginx
+                   app: "{{  wp-nginx-fruit }}"
                topologyKey: topology.kubernetes.io/zone
 
-- name: PodDisruptionBudget/wp-nginx
+- name: PodDisruptionBudget/{{ wp-nginx-fruit }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: policy/v1
       kind: PodDisruptionBudget
       metadata:
-        name: wp-nginx
+        name: "{{ wp-nginx-fruit }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         minAvailable: 1
         selector:
           matchLabels:
-            app: wp-nginx
+            app: "{{ wp-nginx-fruit }}"
 
-- name: PodMonitor/wp-nginx
+- name: PodMonitor/{{ wp-nginx-fruit }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: monitoring.coreos.com/v1
       kind: PodMonitor
       metadata:
-        name: wp-nginx
+        name: "{{ wp-nginx-fruit }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         selector:
           matchLabels:
-            app: wp-nginx
+            app: "{{ wp-nginx-fruit }}"
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
 
-- name: Service/wp-nginx
+- name: Service/{{ wp-nginx-fruit }}
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: Service
       metadata:
-        name: wp-nginx
+        name: "{{ wp-nginx-fruit }}"
         namespace: "{{ inventory_namespace }}"
         labels:
-          app: wp-nginx
+          app: "{{ wp-nginx-fruit }}"
         annotations:
           authors: isas-fsd
       spec:
@@ -270,5 +270,5 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: wp-nginx
+          app: "{{ wp-nginx-fruit }}"
         type: ClusterIP
