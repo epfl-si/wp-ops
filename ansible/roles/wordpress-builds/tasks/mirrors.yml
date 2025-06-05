@@ -9,6 +9,13 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
+- name: "Grant access to {{ nginx_runner_mirrorist_quay_robot_account }} to do its job"
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ nginx_runner_mirrorist_quay_robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
+    permission: write
+
 - name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
   epfl_si.quay.quay_repository:
     organization: "{{ quay_organization }}"
