@@ -1,0 +1,28 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - quay-vars.yml
+    - kong-vars.yml
+    - mirrors-vars.yml
+
+- tags: always
+  include_vars:
+    name: runner_credentials
+    file: ../../vars/runner-credentials.yml
+
+- name: "Mirror the Kong image"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "{{ kong_image_mirrored.shortname }}"
+    organization: "{{ quay_organization }}"
+    description: "Mirrored from {{ kong_image }}"
+    visibility: public
+    mirror:
+      from: "{{ _mirrored_from_short }}"
+      robot_account: "{{ mirrorist_quay_robot_account }}"
+      tags: ["{{ _mirrored_from_tag }}"]
+  vars:
+    _mirrored_from_short: >-
+      {{ kong_image | split(":") | first }}
+    _mirrored_from_tag: >-
+      {{ kong_image | split(":") | last | string }}
