@@ -11,7 +11,7 @@
 
 - name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
   epfl_si.quay.quay_repository:
-    organization: "{{ nginx_runner_bitnami_image_mirrored.organization }}"
+    organization: "{{ quay_organization }}"
     name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
     description: "Mirrored from {{ _mirrored_from_short }}"
     visibility: public
