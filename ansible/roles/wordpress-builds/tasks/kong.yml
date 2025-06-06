@@ -39,3 +39,57 @@
       permission: write
     - robot_account: "{{ quay_puller_robot_account_name }}"
       permission: read
+
+- name: "`ConfigMap/kong-fruit-salad`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: "kong-fruit-salad"
+        namespace: "{{ inventory_namespace }}"
+      data:
+        kong.yml: "{{ lookup('template', 'kong.yml' ) }}"
+
+- name: "`Deployment/kong-fruit-salad`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: kong-fruit-salad
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: kong-fruit-salad
+        template:
+          metadata:
+            labels:
+              app: kong-fruit-salad
+          spec:
+            containers:
+              - name: kong
+                image: "{{ kong_image_mirrored.qualified }}"
+                resources:
+                  requests:
+                    cpu: "20m"
+                    memory: "400Mi"
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                env:
+                  - name: KONG_DATABASE
+                    value: "off"
+                  - name: KONG_PLUGINS
+                    value: bundled
+                  - name: KONG_DECLARATIVE_CONFIG
+                    value: /kongfig/kong.yml
+                volumeMounts:
+                  - mountPath: /kongfig
+                    name: kong-fruit-salad
+            volumes:
+              - name: kong-fruit-salad
+                configMap:
+                  name: kong-fruit-salad
