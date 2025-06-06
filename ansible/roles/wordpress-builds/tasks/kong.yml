@@ -41,6 +41,7 @@
       permission: read
 
 - name: "`ConfigMap/kong-fruit-salad`"
+  register: _kong_configmap
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
@@ -52,6 +53,7 @@
         kong.yml: "{{ lookup('template', 'kong.yml' ) }}"
 
 - name: "`Deployment/kong-fruit-salad`"
+  register: _kong_deployment
   kubernetes.core.k8s:
     definition:
       apiVersion: apps/v1
@@ -93,6 +95,21 @@
               - name: kong-fruit-salad
                 configMap:
                   name: kong-fruit-salad
+
+- tags: wp.base.kong.restart
+  when: >-
+    (
+      (_kong_configmap | default({}) is changed)
+      and not
+      (_kong_deployment | default({}) is changed)
+    )
+    or ("wp.base.kong.restart" in ansible_run_tags)
+  name: "Redeploy Kong"
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      kubectl -n {{ inventory_namespace }} rollout restart deploy/kong-fruit-salad
 
 - name: Service/kong-fruit-salad
   kubernetes.core.k8s:
