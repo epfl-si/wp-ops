@@ -93,3 +93,47 @@
               - name: kong-fruit-salad
                 configMap:
                   name: kong-fruit-salad
+
+- name: Service/kong-fruit-salad
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: kong-fruit-salad
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: kong-fruit-salad
+      spec:
+        type: ClusterIP
+        ports:
+        - name: "https"
+          port: 8443
+          protocol: TCP
+          targetPort: 8443
+        selector:
+          app: kong-fruit-salad
+
+- name: Route/kong-pomme
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: kong-pomme
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: kong-fruit-salad
+          route: private
+      spec:
+        host: wpn-pomme.epfl.ch
+        to:
+          kind: Service
+          name: kong-fruit-salad
+        port:
+          targetPort: https
+        tls:
+          termination: passthrough
+          insecureEdgeTerminationPolicy: Redirect
