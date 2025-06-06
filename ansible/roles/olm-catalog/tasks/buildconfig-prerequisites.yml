@@ -9,7 +9,7 @@
         namespace: "{{ inventory_namespace }}"
       stringData:
         .dockerconfigjson: >-
-          {{ lookup("epfl_si.quay.robot_account", quay_organization, catalog_builder_robot_account_name,
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, builder_robot_account_name,
                                                   token=quay_botfather_token)
           | epfl_si.quay.format_docker_config_json | string }}
 

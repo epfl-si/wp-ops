@@ -13,3 +13,5 @@ quay_puller_secret_name: >-
 quay_botfather_token: >-
   {{ quay_secrets.quay.org_admin_token
   | eyaml(quay_secrets.eyaml_keys) }}
+
+builder_robot_account_name: svc0041+builder_robot_account
