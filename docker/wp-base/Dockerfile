@@ -49,8 +49,11 @@ RUN set -e -x; cd /tmp;                                                  \
         version=$(jq -r 'keys[] | select(match("^'${lineage}'"))'        \
                   < /tmp/wordpress-versions.json                         \
                  | sort -n -r |head -1) ;                                \
-        /tmp/install-wordpress.sh /wp "$version";                        \
+        /tmp/install-wordpress.sh /wp;                                   \
     done
+
+# TODO: remove this once all the Ingress objects have been rewritten.
+RUN ln -s . /wp/6
 
 RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 
@@ -74,13 +77,6 @@ RUN set -e -x;   env; \
     cd /tmp/elements_build; \
     yarn; yarn build; \
     for wp in /wp/*/wp-content; do cp -a dist/ $wp/themes/wp-theme-2018/assets; done
-
-######################################################################
-# Symlinks in /wp
-######################################################################
-# We do that last for simplicity, at a small cost in build time
-COPY symlink-wp-versions.sh /tmp
-RUN sh /tmp/symlink-wp-versions.sh && rm /tmp/symlink-wp-versions.sh
 
 ######################################################################
 # Copy global error pages
