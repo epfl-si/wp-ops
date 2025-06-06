@@ -43,7 +43,7 @@
     - role: roles/olm-catalog
 
 - name: WordPress builds
-  hosts: openshift_namespaces_test
+  hosts: namespace/svc0041t-wordpress
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
