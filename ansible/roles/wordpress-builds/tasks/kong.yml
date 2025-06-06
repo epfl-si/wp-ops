@@ -147,7 +147,7 @@
                   - name: KONG_DATABASE
                     value: "off"
                   - name: KONG_PLUGINS
-                    value: bundled
+                    value: bundled,epfl-rewrite-hostnames,epfl-hijack-tequila
                   - name: KONG_DECLARATIVE_CONFIG
                     value: /kongfig/kong.yml
                 volumeMounts:
