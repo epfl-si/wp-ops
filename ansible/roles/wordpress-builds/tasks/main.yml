@@ -50,4 +50,5 @@
   tags:
     - wp.base.build
     - wp.base.kong
+    - wp.base.kong.rebuild
     - wp.base.kong.restart

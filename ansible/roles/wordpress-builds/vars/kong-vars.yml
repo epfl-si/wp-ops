@@ -1,5 +1,12 @@
-kong_image: kong:3.6
-_kong_image_mirrored: >-
-  {{ ansible_quay_hostname }}/{{ quay_organization }}/{{ kong_image }}
-kong_image_mirrored: >-
-  {{ _kong_image_mirrored | parse_docker_image_name }}
+kong_base_image: >-
+  {{ ("kong:%s" % kong_base_image_version)
+     | parse_docker_image_name }}
+_kong_base_image_mirrored: >-
+  {{ ansible_quay_hostname }}/{{ quay_organization }}/kong:{{ kong_base_image_version }}
+kong_base_image_mirrored: >-
+  {{ _kong_base_image_mirrored | parse_docker_image_name }}
+
+_kong_fruit_salad_image: >-
+  {{ ansible_quay_hostname }}/{{ quay_organization }}/kong-fruit-salad:{{ kong_base_image_version }}
+kong_fruit_salad_image: >-
+  {{ _kong_fruit_salad_image | parse_docker_image_name }}
