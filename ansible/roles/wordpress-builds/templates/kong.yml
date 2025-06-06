@@ -12,3 +12,23 @@ services:
       config:
         remove:
           headers: ["Accept-Encoding"]
+    - name: epfl-rewrite-hostnames  # Custom plugin, see ../../../../docker/kong-fruit-salad/epfl-rewrite-hostnames/
+      config:
+        hostname_inside: "wpn-test.epfl.ch"
+    - name: epfl-hijack-tequila     # Ditto
+      config:
+        service: "Kong Fruit Salad"
+        allowedrequesthosts: "10.180.21.0/24"
+        request:
+          - name
+          - firstname
+          - displayname
+          - username
+          - email
+          - uniqueid
+          - personaltitle
+          - title
+          - title-en
+          - group
+          - droit.WordPress.Admin
+          - droit.WordPress.Editor
