@@ -1,0 +1,14 @@
+_format_version: "3.0"
+services:
+- name: wpn-pomme
+  url: http://wp-nginx/
+  routes:
+  - name: wpn-pomme
+    hosts:
+    - wpn-pomme.epfl.ch
+    strip_path: false
+    plugins:
+    - name: request-transformer
+      config:
+        remove:
+          headers: ["Accept-Encoding"]
