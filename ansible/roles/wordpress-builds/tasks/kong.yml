@@ -1,6 +1,7 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
+    - ../../vars/versions.yml
     - quay-vars.yml
     - kong-vars.yml
     - mirrors-vars.yml
@@ -10,35 +11,95 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
-- name: "Mirror the Kong image"
+- name: "Mirror the Kong base image"
   run_once: true
   epfl_si.quay.quay_repository:
-    name: "{{ kong_image_mirrored.shortname }}"
+    name: "{{ kong_base_image_mirrored.shortname }}"
     organization: "{{ quay_organization }}"
-    description: "Mirrored from {{ kong_image }}"
+    description: "Mirrored from {{ kong_base_image }}"
     visibility: public
     mirror:
-      from: "{{ _mirrored_from_short }}"
+      from: "{{ kong_base_image.uri }}"
       robot_account: "{{ mirrorist_quay_robot_account }}"
-      tags: ["{{ _mirrored_from_tag }}"]
-  vars:
-    _mirrored_from_short: >-
-      {{ kong_image | split(":") | first }}
-    _mirrored_from_tag: >-
-      {{ kong_image | split(":") | last | string }}
+      tags: ["{{ kong_base_image_version | string }}"]
 
-- name: "Access matrix to {{ kong_image | split(":") | first }}"
+- name: "Access matrix to {{ kong_base_image_mirrored.uri }}"
   run_once: true
   epfl_si.quay.robot_account_permission:
     robot_account_name: "{{ item.robot_account }}"
     organization: "{{ quay_organization }}"
-    repository_name: "{{ kong_image_mirrored.shortname }}"
+    repository_name: "{{ kong_base_image_mirrored.shortname }}"
     permission: "{{ item.permission }}"
   with_items:
     - robot_account: "{{ mirrorist_quay_robot_account }}"
       permission: write
     - robot_account: "{{ quay_puller_robot_account_name }}"
       permission: read
+
+- name: "{{ kong_fruit_salad_image.uri }}"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "{{ kong_fruit_salad_image.shortname }}"
+    organization: "{{ quay_organization }}"
+    description: "Kong + EPFL-specific Lua plugins"
+    visibility: public
+
+- name: "Access matrix to {{ kong_fruit_salad_image.uri }}"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ item.robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ kong_fruit_salad_image.shortname }}"
+    permission: "{{ item.permission }}"
+  with_items:
+    - robot_account: "{{ builder_robot_account_name }}"
+      permission: write
+    - robot_account: "{{ quay_puller_robot_account_name }}"
+      permission: read
+
+- name: "`BuildConfig/kong-fruit-salad`"
+  register: _kong_buildconfig
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: kong-fruit-salad
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        source:
+          type: Git
+          git:
+            uri: "https://github.com/epfl-si/wp-ops"
+            ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
+          contextDir: docker/kong-fruit-salad
+        strategy:
+          type: Docker
+          dockerStrategy:
+            from:   # Override the Dockerfile's `FROM` line
+              kind: DockerImage
+              name: "{{ kong_base_image_mirrored.qualified }}"
+        output:
+          to:
+            kind: DockerImage
+            name: "{{ kong_fruit_salad_image.qualified }}"
+        serviceAccount: builder   # Has push permission on the above
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+
+- name: Build kong-fruit-salad now
+  tags: wp.base.kong.rebuild
+  when: >-
+    (_kong_buildconfig | default({}) is changed)
+    or "wp.base.kong.rebuild" in ansible_run_tags
+  register: _kong_build
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      oc -n {{ inventory_namespace }} start-build --wait kong-fruit-salad
 
 - name: "`ConfigMap/kong-fruit-salad`"
   register: _kong_configmap
@@ -73,7 +134,8 @@
           spec:
             containers:
               - name: kong
-                image: "{{ kong_image_mirrored.qualified }}"
+                image: "{{ kong_fruit_salad_image.qualified }}"
+                imagePullPolicy: Always
                 resources:
                   requests:
                     cpu: "20m"
@@ -99,7 +161,11 @@
 - tags: wp.base.kong.restart
   when: >-
     (
-      (_kong_configmap | default({}) is changed)
+      (
+        (_kong_configmap | default({}) is changed)
+        or
+        (_kong_build | default({}) is changed)
+      )
       and not
       (_kong_deployment | default({}) is changed)
     )
