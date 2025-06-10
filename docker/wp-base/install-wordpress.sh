@@ -17,7 +17,7 @@ set -e -x
 #      environment variables
 ###################################################################
 
-targetdir="$1/$2"
+targetdir="$1"
 version="$2"
 major="$(echo "$version" | cut -d. -f1)"
 minor="$(echo "$version" | cut -d. -f2)"
