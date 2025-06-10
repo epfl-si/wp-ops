@@ -3,6 +3,7 @@
   with_items:
   - image-vars.yml
   - ../../../vars/quay-vars.yml
+  - nginx-vars.yml
 
 - name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
@@ -23,15 +24,15 @@
         # wordpress_fastcgi.conf: >-
         #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
 
-
-- name: Deployment/{{ wp-nginx-flavor }}
+- name: "Deployment/fruit-salad"
+  loop: "{{ wp_nginx_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: "{{ wp-nginx-flavor }}"
+        name: "{{ item }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         replicas: >-
@@ -39,14 +40,14 @@
           else 1 }}
         selector:
           matchLabels:
-            app: "{{ wp-nginx-flavor }}"
+            app: "{{ item }}"
         strategy:
           type: RollingUpdate
         template:
           metadata:
             labels:
-              app: "{{ wp-nginx-flavor }}"
-              version: "{{ wp-nginx-flavor }}-{{ nginx_deployment_images_tag }}"
+              app: "{{ item }}"
+              version: "{{ item }}-{{ nginx_deployment_images_tag }}"
           spec:
             affinity: >-
               {{ {} if ( inventory_has_only_one_worker_node | default(False) )
@@ -57,7 +58,7 @@
               - name: nginx
                 image: >-
                   {{ 
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + wp_nginx_flavor 
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + item 
                     if inventory_deployment_stage == "test" else 
                     "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
                   }}
@@ -93,7 +94,7 @@
                     readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
-                  # - name: "{{ wp-nginx-flavor }}"
+                  # - name: "{{ item }}"
                   #   mountPath: /etc/nginx/template
                   #   readOnly: true
                 env:
@@ -167,9 +168,9 @@
                   claimName: wordpress-data
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
-              # - name: "{{ wp-nginx-flavor }}"
+              # - name: "{{ item }}"
               #   configMap:
-              #     name: "{{ wp-nginx-flavor }}"
+              #     name: "{{ item }}"
               - name: kube-api-access
                 projected:
                   defaultMode: 420
@@ -214,61 +215,62 @@
          requiredDuringSchedulingIgnoredDuringExecution:
            - labelSelector:
                matchLabels:
-                 app: "{{ wp-nginx-flavor }}"
+                 app: "{{ item }}"
              topologyKey: kubernetes.io/hostname
          preferredDuringSchedulingIgnoredDuringExecution:
            - weight: 100
              podAffinityTerm:
                labelSelector:
                  matchLabels:
-                   app: "{{  wp-nginx-flavor }}"
+                   app: "{{ item }}"
                topologyKey: topology.kubernetes.io/zone
 
-- name: PodDisruptionBudget/{{ wp-nginx-flavor }}
+- name: PodDisruptionBudget/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: policy/v1
       kind: PodDisruptionBudget
       metadata:
-        name: "{{ wp-nginx-flavor }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
       spec:
         minAvailable: 1
         selector:
           matchLabels:
-            app: "{{ wp-nginx-flavor }}"
+            app: wp-nginx
   when: inventory_deployment_stage == "production"
 
-- name: PodMonitor/{{ wp-nginx-flavor }}
+- name: PodMonitor/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: monitoring.coreos.com/v1
       kind: PodMonitor
       metadata:
-        name: "{{ wp-nginx-flavor }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
       spec:
         selector:
           matchLabels:
-            app: "{{ wp-nginx-flavor }}"
+            app: wp-nginx
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
   when: inventory_deployment_stage == "production"
 
-- name: Service/wp-nginx
+- name: "Service/fruit-salad"
+  loop: "{{ wp_nginx_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: Service
       metadata:
-        name: wp-nginx
+        name: "{{ item }}"
         namespace: "{{ inventory_namespace }}"
         labels:
-          app: "{{ wp-nginx-flavor }}"
+          app: "{{ item }}"
         annotations:
           authors: isas-fsd
       spec:
@@ -278,5 +280,5 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: "{{ wp-nginx-flavor }}"
+          app: "{{ item }}"
         type: ClusterIP
