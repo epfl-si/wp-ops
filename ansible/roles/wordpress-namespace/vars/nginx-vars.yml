@@ -1,0 +1,11 @@
+wp-nginx-flavors-prod:
+  - wp-nginx
+wp-nginx-flavors-test:
+  - wp-nginx-apple
+  - wp-nginx-grapes
+  - wp-nginx-kiwi
+  - wp-nginx-lemon
+  - wp-nginx-orange
+  - wp-nginx-alpha
+  - wp-nginx-rc
+wp-nginx-flavors: "{{ wp-nginx-flavors-prod if inventory_deployment_stage == 'production' else wp-nginx-flavors-test }}"
