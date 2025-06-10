@@ -57,9 +57,6 @@
 - name: Web server
   include_tasks:
     file: nginx.yml
-    loop: "{{ wp-nginx-flavors }}"
-    loop_control:
-      loop_var: wp-nginx-flavor
     apply:
       tags:
         - wp
