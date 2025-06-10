@@ -57,11 +57,11 @@
               - name: nginx
                 image: >-
                   {{ 
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" ~ wp_nginx_flavor 
-                    if env == "test" else 
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" ~ nginx_deployment_images_tag 
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + wp_nginx_flavor 
+                    if inventory_deployment_stage == "test" else 
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
                   }}
-                imagePullPolicy: "{{ 'IfNotPresent' if env == 'prod' else 'Always' }}"
+                imagePullPolicy: "{{ 'IfNotPresent' if inventory_deployment_stage == 'production' else 'Always' }}"
                 command:
                   - /nginx-ingress-controller
                   - --disable-leader-election
