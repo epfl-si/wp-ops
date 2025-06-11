@@ -57,10 +57,10 @@
             containers:
               - name: nginx
                 image: >-
-                  {{ 
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + item 
-                    if inventory_deployment_stage == "test" else 
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
+                  {{
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + item
+                    if inventory_deployment_stage == "test" else
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag
                   }}
                 imagePullPolicy: "{{ 'IfNotPresent' if inventory_deployment_stage == 'production' else 'Always' }}"
                 command:
@@ -111,7 +111,12 @@
                   - name: MENU_API_HOST
                     value: "menu-api"
               - name: php
-                image: "quay-its.epfl.ch/svc0041/wp-php:{{ nginx_deployment_images_tag }}"
+                image: >-
+                  {{
+                    "quay-its.epfl.ch/svc0041/wp-php:" + item
+                    if inventory_deployment_stage == "test" else
+                    "quay-its.epfl.ch/svc0041/wp-php:" + nginx_deployment_images_tag
+                  }}
                 resources:
                   limits: "{{ _limits_serving_for_prod_only }}"
                   requests:
