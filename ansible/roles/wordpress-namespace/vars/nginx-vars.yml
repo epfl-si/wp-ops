@@ -8,4 +8,8 @@ wp_nginx_flavors_test:
   - wp-nginx-orange
   - wp-nginx-alpha
   - wp-nginx-rc
-wp_nginx_flavors: "{{ wp_nginx_flavors_prod if inventory_deployment_stage == 'production' else wp_nginx_flavors_test }}"
+wp_nginx_flavors: >-
+  "{{ 
+    (inventory_deployment_stage == 'production') |
+    ternary(wp_nginx_flavors_prod, wp_nginx_flavors_test + wp_nginx_flavors_prod)
+  }}"

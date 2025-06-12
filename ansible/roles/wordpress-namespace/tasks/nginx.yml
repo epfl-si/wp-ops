@@ -58,9 +58,9 @@
               - name: nginx
                 image: >-
                   {{
+                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
+                    if item == "wp-nginx" else
                     "quay-its.epfl.ch/svc0041/wp-nginx:" + item
-                    if inventory_deployment_stage == "test" else
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag
                   }}
                 imagePullPolicy: "{{ 'IfNotPresent' if inventory_deployment_stage == 'production' else 'Always' }}"
                 command:
@@ -113,9 +113,9 @@
               - name: php
                 image: >-
                   {{
-                    "quay-its.epfl.ch/svc0041/wp-php:" + item
-                    if inventory_deployment_stage == "test" else
                     "quay-its.epfl.ch/svc0041/wp-php:" + nginx_deployment_images_tag
+                    if item == "wp-nginx" else
+                    "quay-its.epfl.ch/svc0041/wp-php:" + item
                   }}
                 resources:
                   limits: "{{ _limits_serving_for_prod_only }}"
