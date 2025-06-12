@@ -24,6 +24,8 @@
         params:
           - name: next-build-id
             description: "Sequence number of the next build to push to Quay"
+          - name: target-deployment
+            description: "Name of the Deployment to update"
         workspaces:
           - name: shared-workspace
           - name: dockerconfig
@@ -114,18 +116,23 @@
                 - name: rollout
                   image: public.ecr.aws/bitnami/kubectl:latest
                   script: |
-                    kubectl patch deployment wp-nginx --patch='{"spec":{"template":{"spec":{
-                        "containers":[
-                          {
-                            "name": "nginx",
-                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
-                          },
-                          {
-                            "name": "php",
-                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
-                          }
-                        ]
-                    }}}}'
+                    case "$(params.next-build-id)" in 
+                      *[0-9]*)
+                        kubectl patch deployment $(params.target-deployment) --patch='{"spec":{"template":{"spec":{
+                            "containers":[
+                              {
+                                "name": "nginx",
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+                              },
+                              {
+                                "name": "php",
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+                              }
+                            ]
+                        }}}}' ;;
+                      *)
+                        kubectl rollout restart deployment $(params.target-deployment) ;;
+                    esac
 
 - name: wp-base/Tekton - CronJob
   kubernetes.core.k8s:
@@ -184,6 +191,8 @@
                           params:
                             - name: next-build-id
                               value: 2025-136-auto
+                            - name: target-deployment
+                              value: wp-nginx
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
