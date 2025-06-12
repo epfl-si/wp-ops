@@ -128,3 +128,6 @@
               key: accessSecret
             tls:
               enabled: true
+
+- name: "Restore nightly sites from prod to test"
+  ansible.builtin.include_tasks: restore-sites-prod-to-test.yml
