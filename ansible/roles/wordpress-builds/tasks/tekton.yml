@@ -119,23 +119,18 @@
                 - name: rollout
                   image: public.ecr.aws/bitnami/kubectl:latest
                   script: |
-                    case "$(params.next-build-id)" in 
-                      *[0-9]*)
-                        kubectl patch deployment $(params.target-deployment) --patch='{"spec":{"template":{"spec":{
-                            "containers":[
-                              {
-                                "name": "nginx",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
-                              },
-                              {
-                                "name": "php",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
-                              }
-                            ]
-                        }}}}' ;;
-                      *)
-                        kubectl rollout restart deployment $(params.target-deployment) ;;
-                    esac
+                    kubectl patch deployment $(params.target-deployment) --patch='{"spec":{"template":{"spec":{
+                        "containers":[
+                          {
+                            "name": "nginx",
+                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+                          },
+                          {
+                            "name": "php",
+                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+                          }
+                        ]
+                    }}}}'
 
 - name: wp-base/Tekton - CronJob for Release Candidate
   kubernetes.core.k8s:
