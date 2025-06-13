@@ -32,7 +32,7 @@
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: "{{ item }}"
+        name: "{{ _item_name }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         replicas: >-
@@ -40,14 +40,14 @@
           else 1 }}
         selector:
           matchLabels:
-            app: "{{ item }}"
+            app: "{{ _item_name }}"
         strategy:
           type: RollingUpdate
         template:
           metadata:
             labels:
-              app: "{{ item }}"
-              version: "{{ item }}-{{ nginx_deployment_images_tag }}"
+              app: "{{ _item_name }}"
+              version: "{{ _item_name }}-{{ nginx_deployment_images_tag }}"
           spec:
             affinity: >-
               {{ {} if ( inventory_has_only_one_worker_node | default(False) )
@@ -59,7 +59,7 @@
                 image: >-
                   {{
                     "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
-                    if item == "wp-nginx" else
+                    if _item_name == "wp-nginx" else
                     "quay-its.epfl.ch/svc0041/wp-nginx:" + item
                   }}
                 imagePullPolicy: "{{ 'IfNotPresent' if inventory_deployment_stage == 'production' else 'Always' }}"
@@ -94,7 +94,7 @@
                     readOnly: true
                   # Uncomment the next three lines to embug the nginx configuration
                   # (see also similar comments elsewhere in the file):
-                  # - name: "{{ item }}"
+                  # - name: "{{ _item_name }}"
                   #   mountPath: /etc/nginx/template
                   #   readOnly: true
                 env:
@@ -114,7 +114,7 @@
                 image: >-
                   {{
                     "quay-its.epfl.ch/svc0041/wp-php:" + nginx_deployment_images_tag
-                    if item == "wp-nginx" else
+                    if _item_name == "wp-nginx" else
                     "quay-its.epfl.ch/svc0041/wp-php:" + item
                   }}
                 resources:
@@ -173,9 +173,9 @@
                   claimName: wordpress-data
               # Uncomment the next three lines to embug the nginx configuration
               # (see also similar comments elsewhere in the file):
-              # - name: "{{ item }}"
+              # - name: "{{ _item_name }}"
               #   configMap:
-              #     name: "{{ item }}"
+              #     name: "{{ _item_name }}"
               - name: kube-api-access
                 projected:
                   defaultMode: 420
@@ -201,6 +201,8 @@
                 secret:
                   secretName: smtp-password
   vars:
+    _item_name:  >-
+      {{ "wp-nginx" if item == "wp-nginx" else "wp-nginx-" + item  }}
     _request_cpu_serving: >-
       {{ "1" if inventory_deployment_stage == "production"
       else "200m" }}
@@ -220,14 +222,14 @@
          requiredDuringSchedulingIgnoredDuringExecution:
            - labelSelector:
                matchLabels:
-                 app: "{{ item }}"
+                 app: "{{ _item_name }}"
              topologyKey: kubernetes.io/hostname
          preferredDuringSchedulingIgnoredDuringExecution:
            - weight: 100
              podAffinityTerm:
                labelSelector:
                  matchLabels:
-                   app: "{{ item }}"
+                   app: "{{ _item_name }}"
                topologyKey: topology.kubernetes.io/zone
 
 - name: PodDisruptionBudget/wp-nginx
@@ -272,10 +274,10 @@
       apiVersion: v1
       kind: Service
       metadata:
-        name: "{{ item }}"
+        name: "{{ _item_name }}"
         namespace: "{{ inventory_namespace }}"
         labels:
-          app: "{{ item }}"
+          app: "{{ _item_name }}"
         annotations:
           authors: isas-fsd
       spec:
@@ -285,5 +287,8 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: "{{ item }}"
+          app: "{{ _item_name }}"
         type: ClusterIP
+  vars:
+    _item_name:  >-
+      {{ "wp-nginx" if item == "wp-nginx" else "wp-nginx-" + item  }}
