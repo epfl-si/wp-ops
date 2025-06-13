@@ -206,7 +206,7 @@
       {{ "wp-nginx" if item == "wp-nginx" else "wp-nginx-" + item  }}
     _request_cpu_serving: >-
       {{ "1" if inventory_deployment_stage == "production"
-      else "200m" }}
+      else "10m" }}
     _request_cpu_monitoring: >-
       {{ "100m" if inventory_deployment_stage == "production"
       else _request_cpu_de_minimis }}
