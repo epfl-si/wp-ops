@@ -134,7 +134,7 @@
                         kubectl rollout restart deployment $(params.target-deployment) ;;
                     esac
 
-- name: wp-base/Tekton - CronJob
+- name: wp-base/Tekton - CronJob for Release Candidate
   kubernetes.core.k8s:
     definition:
       apiVersion: batch/v1
@@ -147,7 +147,7 @@
           app.kubernetes.io/name: "{{ pipeline_name }}"
       spec:
         timeZone: "Europe/Zurich"
-        schedule: "*/10 * * * *"
+        schedule: "01 * * * *"
         concurrencyPolicy: Forbid
         jobTemplate:
           spec:
@@ -181,7 +181,7 @@
                         apiVersion: tekton.dev/v1beta1
                         kind: PipelineRun
                         metadata:
-                          name: "{{ run_pipeline_wp_base_build }}-$(date -u +%Y%m%d-%H%Mz)"
+                          name: "{{ run_pipeline_wp_base_build }}-rc-$(date -u +%Y%m%d-%H%Mz)"
                           namespace: "{{ inventory_namespace }}"
                         spec:
                           timeout: "2h"
@@ -192,7 +192,7 @@
                             - name: next-build-id
                               value: 2025-136-auto
                             - name: target-deployment
-                              value: wp-nginx
+                              value: wp-nginx-rc
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
