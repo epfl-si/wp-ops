@@ -26,6 +26,12 @@
             description: "Sequence number of the next build to push to Quay"
           - name: target-deployment
             description: "Name of the Deployment to update"
+          - name: repos
+            type: array
+            default: []
+            description: "List af all repositories to clone on a branch"
+          - name: branch_name
+            description: "Branch name to use in the clone command"
         workspaces:
           - name: shared-workspace
           - name: dockerconfig
@@ -35,10 +41,13 @@
               steps:
               - name: sed
                 image: public.ecr.aws/bitnami/git:latest
+                args: [
+                  "$(params.repos[*])",
+                ]
                 script: |
                     set -e -x
                     rm -rf /workspace/source/wp-ops
-                    git clone https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
+                    git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
                     sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i 's;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
@@ -191,10 +200,6 @@
                               value: 2025-136-auto
                             - name: target-deployment
                               value: wp-nginx-rc
-                            - name: repos
-                              value: []
-                            - name: branch_name
-                              value: master
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
