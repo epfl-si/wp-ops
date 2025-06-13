@@ -69,28 +69,25 @@ main () {
         install_plugin_s3 wp-media-folder.5.9.13.zip
     fi
 
-    for homemade_or_forked_plugin in \
-        wp-plugin-epfl-coming-soon wordpress.plugin.tequila \
-        wp-plugin-epfl-settings \
-        wp-plugin-epfl-remote-content \
-        wp-plugin-epfl-content-filter \
-        wp-plugin-enlighter \
-        wp-plugin-epfl-intranet  \
-        wp-plugin-epfl-library \
-        wp-plugin-epfl-diploma-verification \
-        wp-plugin-epfl-partner-universities \
-        wp-plugin-epfl-404 \
-        wp-gutenberg-epfl  \
-        wp-plugin-epfl-courses-se \
-        wp-plugin-epfl-restauration \
-        wp-plugin-epfl-cache-control \
-        wordpress.plugin.accred \
-        wp-plugin-epfl-translate \
-        wp-plugin-epfl-menus \
-        wp-plugin-pushgateway \
-        ; do
-        install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
-    done
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-coming-soon"
+    install_plugin_git "https://github.com/epfl-si/wordpress.plugin.tequila"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-settings"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-remote-content"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-content-filter"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-enlighter"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-intranet"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-library"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-diploma-verification"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-partner-universities"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-404"
+    install_plugin_git "https://github.com/epfl-si/wp-gutenberg-epfl"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-courses-se"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-restauration"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-cache-control"
+    install_plugin_git "https://github.com/epfl-si/wordpress.plugin.accred"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-translate"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-epfl-menus"
+    install_plugin_git "https://github.com/epfl-si/wp-plugin-pushgateway"
 
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
 
