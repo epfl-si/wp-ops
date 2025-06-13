@@ -48,6 +48,7 @@
             labels:
               app: "{{ _item_name }}"
               version: "{{ _item_name }}-{{ nginx_deployment_images_tag }}"
+              self-service-flavor: "{{ item if item in wp_nginx_fruit else '' }}"
           spec:
             affinity: >-
               {{ {} if ( inventory_has_only_one_worker_node | default(False) )
