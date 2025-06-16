@@ -42,13 +42,15 @@
 
 - name: Kong reverse proxy for blue/green(/red/yellow/orange) testing
   include_tasks:
-    file: kong.yml
+    file: continuous-integration.yml
     apply:
       tags:
-        - wp.base.build
-        - wp.base.kong
+        - wp.ci
+        - wp.continuous-integration
+        - wp.continuous-integration.kong
   tags:
-    - wp.base.build
-    - wp.base.kong
-    - wp.base.kong.rebuild
-    - wp.base.kong.restart
+        - wp.ci
+        - wp.continuous-integration
+        - wp.continuous-integration.kong
+        - wp.continuous-integration.kong.rebuild
+        - wp.continuous-integration.kong.restart
