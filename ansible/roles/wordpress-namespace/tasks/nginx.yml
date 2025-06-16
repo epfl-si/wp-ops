@@ -3,7 +3,6 @@
   with_items:
   - image-vars.yml
   - ../../../vars/quay-vars.yml
-  - nginx-vars.yml
 
 - name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
@@ -24,214 +23,23 @@
         # wordpress_fastcgi.conf: >-
         #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
 
-- name: "Deployment/fruit-salad"
-  loop: "{{ wp_nginx_flavors }}"
+- name: "Deployment/wp-nginx"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: "{{ _item_name }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
-      spec:
-        replicas: >-
-          {{ 2 if inventory_deployment_stage == "production"
-          else 1 }}
-        selector:
-          matchLabels:
-            app: "{{ _item_name }}"
-        strategy:
-          type: RollingUpdate
-        template:
-          metadata:
-            labels:
-              app: "{{ _item_name }}"
-              version: "{{ _item_name }}-{{ nginx_deployment_images_tag }}"
-              self-service-flavor: "{{ item if item in wp_nginx_fruit else '' }}"
-          spec:
-            affinity: >-
-              {{ {} if ( inventory_has_only_one_worker_node | default(False) )
-              else _affinity_spread_out_on_cluster }}
-            serviceAccountName: wp-nginx
-            automountServiceAccountToken: false
-            containers:
-              - name: nginx
-                image: >-
-                  {{
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + nginx_deployment_images_tag 
-                    if _item_name == "wp-nginx" else
-                    "quay-its.epfl.ch/svc0041/wp-nginx:" + item
-                  }}
-                imagePullPolicy: "{{ 'IfNotPresent' if inventory_deployment_stage == 'production' else 'Always' }}"
-                command:
-                  - /nginx-ingress-controller
-                  - --disable-leader-election
-                  - --controller-class=epfl.ch/ingress-wordpress
-                  - --watch-namespace=$(POD_NAMESPACE)
-                  - --configmap=$(POD_NAMESPACE)/wp-nginx
-                  - --watch-ingress-without-class=false
-                  - --http-port=8000
-                  - --https-port=8443
-                resources:
-                  limits: "{{ _limits_serving_for_prod_only }}"
-                  requests:
-                    cpu: '{{ _request_cpu_serving }}'
-                    memory: '{{ _request_ram }}'
-                ports:
-                  - containerPort: 8000
-                    protocol: TCP
-                  - name: nginx-metrics
-                    containerPort: 9145
-                    protocol: TCP
-                volumeMounts:
-                  - name: wordpress-data
-                    mountPath: /wp-data/
-                    readOnly: true
-                  - name: fpm-socket
-                    mountPath: /run/php-fpm
-                  - name: kube-api-access
-                    mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-                    readOnly: true
-                  # Uncomment the next three lines to embug the nginx configuration
-                  # (see also similar comments elsewhere in the file):
-                  # - name: "{{ _item_name }}"
-                  #   mountPath: /etc/nginx/template
-                  #   readOnly: true
-                env:
-                  - name: POD_NAME
-                    valueFrom:
-                      fieldRef:
-                        apiVersion: v1
-                        fieldPath: metadata.name
-                  - name: POD_NAMESPACE
-                    valueFrom:
-                      fieldRef:
-                        apiVersion: v1
-                        fieldPath: metadata.namespace
-                  - name: MENU_API_HOST
-                    value: "menu-api"
-              - name: php
-                image: >-
-                  {{
-                    "quay-its.epfl.ch/svc0041/wp-php:" + nginx_deployment_images_tag
-                    if _item_name == "wp-nginx" else
-                    "quay-its.epfl.ch/svc0041/wp-php:" + item
-                  }}
-                resources:
-                  limits: "{{ _limits_serving_for_prod_only }}"
-                  requests:
-                    cpu: '{{ _request_cpu_serving }}'
-                    memory: '{{ _request_ram }}'
-                volumeMounts:
-                  - name: wordpress-data
-                    mountPath: /wp-data/
-                  - name: fpm-socket
-                    mountPath: /run/php-fpm
-                  - name: wordpress-authentication
-                    mountPath: /wp-nonces
-                    readOnly: true
-                  - name: smtp-password
-                    mountPath: /secrets/
-                    readOnly: true
-                env:
-                  - name: SEARCH_INSIDE_WP_API_HASHED_TOKEN
-                    valueFrom:
-                      secretKeyRef:
-                        name: search-inside-secret
-                        key: wp_api_token
-              - name: php-fpm-exporter
-                image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
-                resources:
-                  requests:
-                    cpu: '{{ _request_cpu_monitoring }}'
-                    memory: '{{ _request_ram_de_minimis }}'
-                  # This fits under the default (LimitRange-imposed) limits
-                  # even for production; so we don't need `limits:` here.
-                ports:
-                  - name: php-fpm-metrics
-                    containerPort: 9253
-                    protocol: TCP
-                livenessProbe:
-                  httpGet:
-                    scheme: HTTP
-                    path: /metrics
-                    port: 9253
-                  initialDelaySeconds: 5
-                  timeoutSeconds: 3
-                args:
-                  - --phpfpm.fix-process-count
-                  - --log.level
-                  - debug
-            imagePullSecrets:
-              - name: "{{ quay_puller_secret_name }}"
-            restartPolicy: Always
-            volumes:
-              - name: fpm-socket
-                emptyDir: {}
-              - name: wordpress-data
-                persistentVolumeClaim:
-                  claimName: wordpress-data
-              # Uncomment the next three lines to embug the nginx configuration
-              # (see also similar comments elsewhere in the file):
-              # - name: "{{ _item_name }}"
-              #   configMap:
-              #     name: "{{ _item_name }}"
-              - name: kube-api-access
-                projected:
-                  defaultMode: 420
-                  sources:
-                  - serviceAccountToken:
-                      expirationSeconds: 3600
-                      path: token
-                  - configMap:
-                      items:
-                      - key: ca.crt
-                        path: ca.crt
-                      name: kube-root-ca.crt
-                  - downwardAPI:
-                      items:
-                      - fieldRef:
-                          apiVersion: v1
-                          fieldPath: metadata.namespace
-                        path: namespace
-              - name: wordpress-authentication
-                secret:
-                  secretName: wordpress-authentication
-              - name: smtp-password
-                secret:
-                  secretName: smtp-password
-  vars:
-    _item_name:  >-
-      {{ "wp-nginx" if item == "wp-nginx" else "wp-nginx-" + item  }}
-    _request_cpu_serving: >-
-      {{ "1" if inventory_deployment_stage == "production"
-      else "10m" }}
-    _request_cpu_monitoring: >-
-      {{ "100m" if inventory_deployment_stage == "production"
-      else _request_cpu_de_minimis }}
-    _request_ram: >-
-      {{ "1Gi" if inventory_deployment_stage == "production"
-      else _request_ram_de_minimis }}
-    _limits_serving_for_prod_only: >-
-      {{ {} if inventory_deployment_stage != "production"
-         else { "memory": _request_ram } }}
-    _request_cpu_de_minimis: "20m"
-    _request_ram_de_minimis: "256Mi"
-    _affinity_spread_out_on_cluster:
-       podAntiAffinity:
-         requiredDuringSchedulingIgnoredDuringExecution:
-           - labelSelector:
-               matchLabels:
-                 app: "{{ _item_name }}"
-             topologyKey: kubernetes.io/hostname
-         preferredDuringSchedulingIgnoredDuringExecution:
-           - weight: 100
-             podAffinityTerm:
-               labelSelector:
-                 matchLabels:
-                   app: "{{ _item_name }}"
-               topologyKey: topology.kubernetes.io/zone
+      spec: >-
+        {{ lookup("template", "nginx-deployment-spec.yaml",
+                  template_vars=dict(
+                      image_tag=nginx_deployment_images_tag,
+                      app_label="wp-nginx",
+                      additional_pod_labels=dict(version="nginx-" +
+                                                 nginx_deployment_images_tag)))
+        | from_yaml }}
 
 - name: PodDisruptionBudget/wp-nginx
   kubernetes.core.k8s:
@@ -247,9 +55,9 @@
         selector:
           matchLabels:
             app: wp-nginx
-  when: inventory_deployment_stage == "production"
 
 - name: PodMonitor/wp-nginx
+  when: inventory_deployment_stage == "production"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -265,20 +73,18 @@
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
-  when: inventory_deployment_stage == "production"
 
-- name: "Service/fruit-salad"
-  loop: "{{ wp_nginx_flavors }}"
+- name: "Service/wp-nginx"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: Service
       metadata:
-        name: "{{ _item_name }}"
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
         labels:
-          app: "{{ _item_name }}"
+          app: wp-nginx
         annotations:
           authors: isas-fsd
       spec:
@@ -288,8 +94,5 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: "{{ _item_name }}"
+          app: wp-nginx
         type: ClusterIP
-  vars:
-    _item_name:  >-
-      {{ "wp-nginx" if item == "wp-nginx" else "wp-nginx-" + item  }}
