@@ -1,5 +1,5 @@
 # Tekton dependencies
-oc_cli_image_name: origin-cli
+oc_cli_image_name: origin-cli # OC base image
 oc_cli_image_tag: latest
 oc_cli_image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/{{ oc_cli_image_name }}:{{ oc_cli_image_tag }}"
 
