@@ -41,16 +41,15 @@ RUN chmod +x /tmp/install-wordpress.sh
 # (in a cloud build).
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
 
-ARG WORDPRESS_VERSION_LINEAGES="6.7"
+ARG WORDPRESS_VERSION="6.7"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-RUN set -e -x; cd /tmp;                                                  \
-    for lineage in ${WORDPRESS_VERSION_LINEAGES}; do                     \
-        version=$(jq -r 'keys[] | select(match("^'${lineage}'"))'        \
-                  < /tmp/wordpress-versions.json                         \
-                 | sort -n -r |head -1) ;                                \
-        /tmp/install-wordpress.sh /wp "$version";                        \
-    done
+RUN set -e -x; cd /tmp;                                                   \
+    version=$(case "$WORDPRESS_VERSION" in                                \
+      latest) jq -r 'keys[]';;                                            \
+      *)      jq -r 'keys[] | select(match("^'${WORDPRESS_VERSION}'"))';; \
+    esac < /tmp/wordpress-versions.json | sort -n -r | head -1);          \
+    /tmp/install-wordpress.sh /wp "$version"
 
 RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 
