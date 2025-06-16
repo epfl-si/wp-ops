@@ -5,11 +5,60 @@
     - quay-vars.yml
     - kong-vars.yml
     - mirrors-vars.yml
+    - continuous-integration-vars.yml
 
 - tags: always
   include_vars:
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
+
+- name: "Continuous integration targets (“fruit salad”): Deployments"
+  loop: "{{ wp_nginx_flavors }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ _deployment_name }}"
+        namespace: "{{ inventory_namespace }}"
+      spec: >-
+        {{ lookup("template", "../../wordpress-namespace/templates/nginx-deployment-spec.yaml",
+                  template_vars=dict(
+                      image_tag=item,
+                      app_label=_deployment_name,
+                      additional_pod_labels=({ "self-service-flavor": item }
+                                             if item in wp_nginx_fruit else {})
+                      ))
+        | from_yaml }}
+  vars:
+    _deployment_name: "wp-nginx-{{ item }}"
+
+- name: "Continuous integration targets (“fruit salad”): Services"
+  loop: "{{ wp_nginx_flavors }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ _service_name }}"
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: "{{ _service_name }}"
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: "80"
+          port: 80
+          protocol: TCP
+          targetPort: 8000
+        selector:
+          app: "{{ _deployment_name }}"
+        type: ClusterIP
+  vars:
+    _service_name: "wp-nginx-{{ item }}"
 
 - name: "Mirror the Kong base image"
   run_once: true
@@ -90,7 +139,7 @@
             memory: "256Mi"
 
 - name: Build kong-fruit-salad now
-  tags: wp.base.kong.rebuild
+  tags: wp.continuous-integration.kong.rebuild
   when: >-
     (_kong_buildconfig | default({}) is changed)
     or "wp.base.kong.rebuild" in ansible_run_tags
@@ -158,7 +207,7 @@
                 configMap:
                   name: kong-fruit-salad
 
-- tags: wp.base.kong.restart
+- tags: wp.continuous-integration.kong.restart
   when: >-
     (
       (
