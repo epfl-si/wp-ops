@@ -186,19 +186,21 @@
                             [
                               {
                                 "name": "nginx",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params._TAG)"
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params._deploy-tag)"
                               },
                               {
                                 "name": "php",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params._TAG)"
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params._deploy-tag)"
                               }
                             ]
                           }
                         }
                       }
                     }'
+              params:
+                - name: _deploy-tag
             params:
-              - name: _TAG
+              - name: _deploy-tag
                 value: $(tasks.prep.results.build-tag)
 
 - name: wp-base/Tekton - CronJob for Release Candidate
