@@ -1,0 +1,132 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+- name: ConfigMap/wp-continuous-integration
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: wp-continuous-integration
+        namespace: "{{ inventory_namespace }}"
+      data:
+        wp-continuous-integration-config.yaml: |
+          REPOSITORIES:
+            - wp-mu-plugins
+            - wp-theme-2018
+            - wp-plugin-epfl-coming-soon
+            - wordpress.plugin.tequila
+            - wp-plugin-epfl-settings
+            - wp-plugin-epfl-remote-content
+            - wp-plugin-epfl-content-filter
+            - wp-plugin-enlighter
+            - wp-plugin-epfl-intranet
+            - wp-plugin-epfl-library
+            - wp-plugin-epfl-diploma-verification
+            - wp-plugin-epfl-partner-universities
+            - wp-plugin-epfl-404
+            - wp-gutenberg-epfl
+            - wp-plugin-epfl-courses-se
+            - wp-plugin-epfl-restauration
+            - wp-plugin-epfl-cache-control
+            - wordpress.plugin.accred
+            - wp-plugin-epfl-translate
+            - wp-plugin-epfl-menus
+            - wp-plugin-pushgateway
+          DEBUG: {{ _debug }}
+          NAMESPACE: "svc0041t-wordpress"
+  vars:
+    _debug: >-
+      {{ false if inventory_deployment_stage == "production"
+      else true }}
+  register: _wp-continuous-integration_config_map
+
+- name: Deployment/wp-continuous-integration
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wp-continuous-integration
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: wp-continuous-integration
+        template:
+          metadata:
+            labels:
+              app: wp-continuous-integration
+          spec:
+            serviceAccountName: wp-continuous-integration
+            containers:
+              - name: wp-continuous-integration
+                image: "quay-its.epfl.ch/svc0041/wp-continuous-integration:latest"
+                imagePullPolicy: Always
+                resources:
+                  limits:
+                    memory: 512Mi
+                  requests:
+                    cpu: '{{ _cpu_request }}'
+                    memory: 512Mi
+                volumeMounts:
+                  - name: wp-continuous-integration
+                    mountPath: /config/
+            volumes:
+              - name: wp-continuous-integration
+                configMap:
+                  name: wp-continuous-integration
+            imagePullSecrets:
+              - name: "{{ quay_puller_secret_name }}"
+  vars:
+    _cpu_request: "160m"
+
+- name: ServiceAccount/wp-continuous-integration
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: wp-continuous-integration
+        namespace: "{{ inventory_namespace }}"
+
+- name: Role/wp-continuous-integration
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: wp-continuous-integration
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ['tekton.dev']
+          resources:
+            - pipelineruns
+          verbs: ['*']
+        - apiGroups: ['']
+          resources:
+            - persistentvolumeclaims
+          verbs: ['*']
+
+- name: RoleBinding/wp-continuous-integration
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: wp-continuous-integration
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: wp-continuous-integration
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: wp-continuous-integration
