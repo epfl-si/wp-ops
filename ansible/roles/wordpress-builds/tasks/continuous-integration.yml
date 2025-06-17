@@ -13,7 +13,7 @@
     file: ../../vars/runner-credentials.yml
 
 - name: "Continuous integration targets (“fruit salad”): Deployments"
-  loop: "{{ wp_nginx_flavors }}"
+  loop: "{{ wp_nginx_ci_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -25,17 +25,17 @@
       spec: >-
         {{ lookup("template", "../../wordpress-namespace/templates/nginx-deployment-spec.yaml",
                   template_vars=dict(
-                      image_tag=item,
+                      image_tag=item.name,
                       app_label=_deployment_name,
-                      additional_pod_labels=({ "self-service-flavor": item }
-                                             if item in wp_nginx_fruit else {})
+                      additional_pod_labels=({ "self-service-flavor": item.name }
+                                             if item.fruit | default(False) else {})
                       ))
         | from_yaml }}
   vars:
-    _deployment_name: "wp-nginx-{{ item }}"
+    _deployment_name: "wp-nginx-{{ item.name }}"
 
 - name: "Continuous integration targets (“fruit salad”): Services"
-  loop: "{{ wp_nginx_flavors }}"
+  loop: "{{ wp_nginx_ci_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -58,7 +58,7 @@
           app: "{{ _deployment_name }}"
         type: ClusterIP
   vars:
-    _service_name: "wp-nginx-{{ item }}"
+    _service_name: "wp-nginx-{{ item.name }}"
 
 - name: "Mirror the Kong base image"
   run_once: true
