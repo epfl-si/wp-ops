@@ -25,7 +25,7 @@
 {%   set _request_ram = "256Mi" %}
 {% endif %}
 
-spec:
+# spec:
     replicas: >-
       {{ 2 if inventory_deployment_stage == "production"
       else 1 }}
