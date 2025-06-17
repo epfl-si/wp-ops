@@ -47,10 +47,12 @@
     apply:
       tags:
         - wp.ci
+        - wp.ci.kong
         - wp.continuous-integration
         - wp.continuous-integration.kong
   tags:
         - wp.ci
+        - wp.ci.kong
         - wp.continuous-integration
         - wp.continuous-integration.kong
         - wp.continuous-integration.kong.rebuild
