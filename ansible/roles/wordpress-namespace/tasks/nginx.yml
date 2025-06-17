@@ -37,7 +37,7 @@
                   template_vars=dict(
                       image_tag=nginx_deployment_images_tag,
                       app_label="wp-nginx",
-                      additional_pod_labels=dict(version="nginx-" +
+                      additional_pod_labels=dict(version="wp-nginx-" +
                                                  nginx_deployment_images_tag)))
         | from_yaml }}
 
