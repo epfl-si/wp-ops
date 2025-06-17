@@ -287,6 +287,17 @@
               - name: _deploy-tag
                 value: $(tasks.prep.results.build-tag)
 
+- name: "Credentials that let {{ wp_base_builder_buildah_service_account }} pull tekton-toolbox"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ wp_base_builder_buildah_service_account }}"
+        namespace: "{{ inventory_namespace }}"
+      imagePullSecrets:
+      - name: "{{ quay_puller_secret_name }}"
+
 - name: wp-base/Tekton - CronJob for Release Candidate
   kubernetes.core.k8s:
     definition:
