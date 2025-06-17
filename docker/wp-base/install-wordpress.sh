@@ -244,6 +244,33 @@ plugin_canonical_name () {
     esac
 }
 
+# This function is meant to make it easier to create a testing image. It unused in a pristine build.
+#
+# Append a call like
+#
+#      switch_repo_branch https://github.com/epfl-si/wp-theme-2018 feature/foo
+#
+# to the end of this script, and it will do exactly what it says on the tin.
+switch_repo_branch () {
+    local repo_url="$1"
+    local branch="$2"
+
+    local done gitconfig
+    for gitconfig in $(find "$targetdir" -path "*/.git/config"); do
+        if grep "url.*$repo_url" "$gitconfig"; then
+            cd "$(dirname "$(dirname "$gitconfig")")"
+            git checkout "$branch"
+            done=1
+            break
+        fi
+    done
+
+    if [ -z "$done" ]; then
+        echo >&2 "Could not find a repository containing $repo_url"
+        exit 1
+    fi
+}
+
 # Install the specified language pack, e.g. fr_FR
 install_language_pack () {
     curl -s -L -o /tmp/${1}.zip https://downloads.wordpress.org/translation/core/${version}/${1}.zip
