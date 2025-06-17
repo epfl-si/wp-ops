@@ -155,14 +155,15 @@
                     fi
                     case "$STEM" in
                       nightly*) TAG="$STEM" ;;
-                      *)        last="$(curl -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" https://quay-its.epfl.ch/api/v1/repository/svc0041/wp-nginx | jq '.tags
-                                    | to_entries
-                                    | map(select(.key | test("^'$STEM'-[0-9]+$")))
-                                    | sort_by(.key)
-                                    | last
-                                    | if . == null then "'$STEM'-001" else .key end')"
-                                  num="$(echo "$last" | sed -n 's/.*-\([0-9][0-9]*\)$/\1/p')"
-                                  TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
+                      *)        last="$(curl --silent -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" https://quay-its.epfl.ch/api/v1/repository/svc0041/wp-nginx \
+                                        | jq -r '.tags
+                                                 | to_entries
+                                                 | map(select(.key | test("^'$STEM'-[0-9]+$")))
+                                                 | sort_by(.key)
+                                                 | last
+                                                 | if . == null then "'$STEM'-000" else .key end')"
+                                 num="$(echo "$last" | sed -n 's/.*-\([0-9][0-9]*\)$/\1/p')"
+                                 TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
                     git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
