@@ -1,11 +1,14 @@
 _format_version: "3.0"
 services:
-- name: wpn-pomme
+{% for flavor in wp_nginx_ci_flavors %}
+{#   # Like in the Route objects in ../tasks/continuous-integration.yml: #}
+{%   set hostname = "wp-test-%s" % flavor.name %}
+- name: {{ hostname }}
   url: http://wp-nginx/
   routes:
-  - name: wpn-pomme
+  - name: {{ hostname }}
     hosts:
-    - wpn-pomme.epfl.ch
+    - {{ hostname }}.epfl.ch
     strip_path: false
     plugins:
     - name: request-transformer
@@ -32,3 +35,4 @@ services:
           - group
           - droit.WordPress.Admin
           - droit.WordPress.Editor
+{% endfor %}

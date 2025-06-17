@@ -55,7 +55,7 @@
           protocol: TCP
           targetPort: 8000
         selector:
-          app: "{{ _deployment_name }}"
+          app: "{{ _service_name }}"
         type: ClusterIP
   vars:
     _service_name: "wp-nginx-{{ item.name }}"
@@ -247,20 +247,20 @@
         selector:
           app: kong-fruit-salad
 
-- name: Route/kong-pomme
+- name: "Continuous integration targets (“fruit salad”): `Route`s (through Kong)"
+  loop: "{{ wp_nginx_ci_flavors }}"
   kubernetes.core.k8s:
-    state: present
     definition:
       apiVersion: route.openshift.io/v1
       kind: Route
       metadata:
-        name: kong-pomme
+        name: "{{ _route_name }}"
         namespace: "{{ inventory_namespace }}"
         labels:
-          app: kong-fruit-salad
-          route: private
+          app: "{{ _route_name }}"
+          route: public
       spec:
-        host: wpn-pomme.epfl.ch
+        host: "{{ _fqdn }}"
         to:
           kind: Service
           name: kong-fruit-salad
@@ -269,3 +269,6 @@
         tls:
           termination: passthrough
           insecureEdgeTerminationPolicy: Redirect
+  vars:
+    _route_name: "wp-nginx-{{ item.name }}"
+    _fqdn: "wp-test-{{ item.name }}.epfl.ch"  # Like in ../templates/kong.yml
