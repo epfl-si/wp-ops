@@ -259,7 +259,7 @@
                             {
                               "epfl":
                               {
-                                "built-from-branch": $(params.branch-name)
+                                "built-from-branch": "$(params.branch-name)"
                               }
                             }
                           },
