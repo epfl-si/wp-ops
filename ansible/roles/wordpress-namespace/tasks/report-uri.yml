@@ -149,8 +149,10 @@
                 imagePullPolicy: Always
                 resources:
                   requests:
-                    cpu: "100m"
-                    memory: "64Mi"
+                    cpu: "10m"
+                    memory: "256Mi"
+                  limits:
+                    memory: "256Mi"
                 readinessProbe:
                   tcpSocket:
                     port: 5050
