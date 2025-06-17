@@ -82,9 +82,9 @@
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
                     git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
-                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g' \
+                    sed -i "s;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       /workspace/source/wp-ops/docker/*/Dockerfile
-                    sed -i 's;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g' \
+                    sed -i "s;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
