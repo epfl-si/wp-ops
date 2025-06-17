@@ -22,7 +22,8 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         params:
-          - name: next-build-id
+          - name: explicit-tag
+            default: ''
             description: "Sequence number of the next build to push to Quay"
           - name: target-deployment
             description: "Name of the Deployment to update"
@@ -30,28 +31,56 @@
             type: array
             default: []
             description: "List af all repositories to clone on a branch"
-          - name: branch_name
+          - name: branch-name
             default: ''
             description: "Branch name to use in the clone command"
+          - name: commit-sha
+            default: ''
+            description: "Commit SHA of the built image"
+          - name: wordpress-version
+            default: ''
+            description: "Wordpress image used to build wp-base image"
         workspaces:
           - name: shared-workspace
           - name: dockerconfig
         tasks:
           - name: prep
             taskSpec:
+              results:
+                - name: build-tag
+                  description: "The generated tag"
               steps:
               - name: sed
                 image: public.ecr.aws/bitnami/git:latest
                 args: [
                   "$(params.repos[*])",
                 ]
+                env:
+                  - name: QUAY_API_BEARER_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: tekton-quay-credentials
+                        key: QUAY_API_BEARER_TOKEN
                 script: |
                     set -e -x
-                    rm -rf /workspace/source/wp-ops
+                    if [ -n "$(params.explicit-tag)" ]; then 
+                      TAG=echo "$(params.explicit-tag)"
+                    else
+                      last=curl -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" https://quay-its.epfl.ch/api/v1/repository/svc0041/wp-nginx | jq '.tags
+                        | to_entries
+                        | map(select(.key | test("^'$(date +%Y)'-[0-9]+$")))
+                        | sort_by(.key)
+                        | last
+                        | if . == null then "'$(date +%Y)'-001" else .key end'
+                      num=$(echo "$last" | cut -d- -f2)
+                      year=$(echo "$last" | cut -d- -f1)
+                      TAG=$(printf "%s-%d" "$year" $((num + 1)))
+                    fi
+                    echo "$TAG" > $(result.build-tag.path)
                     git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
-                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
+                    sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
-                    sed -i 's;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id);g' \
+                    sed -i 's;--from=wp-base;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
@@ -72,7 +101,7 @@
               name: buildah
             params:
               - name: IMAGE
-                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(params.next-build-id)"
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-base"
               - name: VERBOSE
@@ -83,6 +112,8 @@
                   AWS_ACCESS_KEY_ID={{ s3_build_credentials.AWS_ACCESS_KEY_ID }}
                   --build-arg
                   AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
+                  --build-arg
+                  WORDPRESS_VERSION='$(params.wordpress-version)'
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -95,7 +126,7 @@
               name: buildah
             params:
               - name: IMAGE
-                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wordpress-nginx"
               - name: VERBOSE
@@ -112,7 +143,7 @@
               name: buildah
             params:
               - name: IMAGE
-                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wordpress-php"
               - name: VERBOSE
@@ -129,18 +160,43 @@
                 - name: rollout
                   image: public.ecr.aws/bitnami/kubectl:latest
                   script: |
-                    kubectl patch deployment $(params.target-deployment) --patch='{"spec":{"template":{"spec":{
-                        "containers":[
+                    kubectl patch deployment $(params.target-deployment) --patch='{
+                      "spec":
+                      {
+                        "template":
+                        {
+                          "metadata":
                           {
-                            "name": "nginx",
-                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params.next-build-id)"
+                            "labels":
+                            {
+                              "epfl":
+                              {
+                                "built-from-repo": $(params.repos),
+                                "built-from-branch": $(params.branch-name),
+                                "build-from-commit-sha": $(params.commit-sha)
+                              }
+                            }
                           },
+                          "spec":
                           {
-                            "name": "php",
-                            "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params.next-build-id)"
+                            "containers":
+                            [
+                              {
+                                "name": "nginx",
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params._TAG)"
+                              },
+                              {
+                                "name": "php",
+                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params._TAG)"
+                              }
+                            ]
                           }
-                        ]
-                    }}}}'
+                        }
+                      }
+                    }'
+            params:
+              - name: _TAG
+                value: $(tasks.prep.results.build-tag)
 
 - name: wp-base/Tekton - CronJob for Release Candidate
   kubernetes.core.k8s:
