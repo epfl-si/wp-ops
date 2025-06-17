@@ -479,6 +479,17 @@
           resources:
             - persistentvolumeclaims
           verbs: ['create', 'delete', 'deletecollection', 'patch', 'update', 'get', 'list', 'watch']
+        - apiGroups: ['']
+          resources:
+            - secrets
+          resourceNames:
+            - wp-ci-github-app-secrets
+          verbs: ['get', 'list', 'watch']
+        - apiGroups: ['apps']
+          resources:
+            - replicasets
+            - deployments
+          verbs: ['get', 'list', 'watch']
 
 - name: RoleBinding/wp-continuous-integration
   kubernetes.core.k8s:
