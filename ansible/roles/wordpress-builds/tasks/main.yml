@@ -40,7 +40,6 @@
     - wp.base.build
     - wp.base.tekton
     - wp.base.tekton.toolbox.rebuild
-    - wp.base.tekton.wp_ci.rebuild
 
 - name: Kong reverse proxy for blue/green(/red/yellow/orange) testing
   include_tasks:
@@ -56,3 +55,5 @@
         - wp.continuous-integration.kong
         - wp.continuous-integration.kong.rebuild
         - wp.continuous-integration.kong.restart
+        - wp.continuous-integration.rebuild
+        - wp.continuous-integration.restart
