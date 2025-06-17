@@ -22,7 +22,7 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         params:
-          - name: explicit-tag
+          - name: explicit-stem
             default: ''
             description: "Sequence number of the next build to push to Quay"
           - name: target-deployment
@@ -63,20 +63,23 @@
                         key: QUAY_API_BEARER_TOKEN
                 script: |
                     set -e -x
-                    if [ -n "$(params.explicit-tag)" ]; then 
-                      TAG=echo "$(params.explicit-tag)"
+                    if [ -n "$(params.explicit-stem)" ]; then
+                      STEM="$(params.explicit-stem)"
                     else
-                      last=curl -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" https://quay-its.epfl.ch/api/v1/repository/svc0041/wp-nginx | jq '.tags
-                        | to_entries
-                        | map(select(.key | test("^'$(date +%Y)'-[0-9]+$")))
-                        | sort_by(.key)
-                        | last
-                        | if . == null then "'$(date +%Y)'-001" else .key end'
-                      num=$(echo "$last" | cut -d- -f2)
-                      year=$(echo "$last" | cut -d- -f1)
-                      TAG=$(printf "%s-%d" "$year" $((num + 1)))
+                      STEM="$(date +%Y)"
                     fi
-                    echo "$TAG" > $(result.build-tag.path)
+                    case "$STEM" in
+                      nightly*) TAG="$STEM" ;;
+                      *)        last="$(curl -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" https://quay-its.epfl.ch/api/v1/repository/svc0041/wp-nginx | jq '.tags
+                                    | to_entries
+                                    | map(select(.key | test("^'$STEM'-[0-9]+$")))
+                                    | sort_by(.key)
+                                    | last
+                                    | if . == null then "'$STEM'-001" else .key end')"
+                                  num="$(echo "$last" | sed -n 's/.*-\([0-9][0-9]*\)$/\1/p')"
+                                  TAG="$(printf "%s-%d" "$STEM" $((num + 1)))" ;;
+                    esac
+                    echo -n "$TAG" > $(results.build-tag.path)
                     git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
                     sed -i 's;FROM wp-base;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
