@@ -26,9 +26,8 @@
 {% endif %}
 
 # spec:
-    replicas: >-
-      {{ 2 if inventory_deployment_stage == "production"
-      else 1 }}
+    replicas: {{ 2 if inventory_deployment_stage == "production"
+                 else 1 }}
     selector:
       matchLabels:
         app: "{{ app_label }}"
