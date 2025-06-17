@@ -259,7 +259,6 @@
                             {
                               "epfl":
                               {
-                                "built-from-repo": $(params.repos),
                                 "built-from-branch": $(params.branch-name)
                               }
                             }
