@@ -155,9 +155,9 @@
       kind: CronJob
       metadata:
         name: restore-sites-from-prod-to-test
-        namespace:  "{{ inventory_namespace }}"
+        namespace: "{{ inventory_namespace }}"
       spec:
-        schedule: "17 1 * * *"
+        schedule: "17 5 * * *"
         timeZone: "Europe/Zurich"
         jobTemplate:
           spec:
