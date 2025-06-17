@@ -1,14 +1,13 @@
-wp_nginx_flavors:
-  - apple
-  - grapes
-  - kiwi
-  - lemon
-  - orange
-  - alpha
-  - rc
-wp_nginx_fruit:
-  - apple
-  - grapes
-  - kiwi
-  - lemon
-  - orange
+wp_nginx_ci_flavors:
+  - name: apple
+    fruit: true
+  - name: grapes
+    fruit: true
+  - name: kiwi
+    fruit: true
+  - name: lemon
+    fruit: true
+  - name: orange
+    fruit: true
+  - name: alpha
+  - name: rc
