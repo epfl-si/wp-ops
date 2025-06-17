@@ -4,7 +4,7 @@ services:
 {#   # Like in the Route objects in ../tasks/continuous-integration.yml: #}
 {%   set hostname = "wp-test-%s" % flavor.name %}
 - name: {{ hostname }}
-  url: http://wp-nginx/
+  url: http://wp-nginx-{{ flavor.name }}/
   routes:
   - name: {{ hostname }}
     hosts:
