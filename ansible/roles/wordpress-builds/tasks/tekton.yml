@@ -255,7 +255,7 @@
                         {
                           "metadata":
                           {
-                            "labels":
+                            "annotations":
                             {
                               "epfl/built-from-branch": "$(params.branch-name)"
                             }
