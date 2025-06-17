@@ -35,8 +35,9 @@
             default: ''
             description: "Branch name to use in the clone command"
           - name: commit-sha
-            default: ''
-            description: "Commit SHA of the built image"
+            type: array
+            default: []
+            description: "Commit SHAs of the built image"
           - name: wordpress-version
             default: ''
             description: "Wordpress image used to build wp-base image"
@@ -175,8 +176,7 @@
                               "epfl":
                               {
                                 "built-from-repo": $(params.repos),
-                                "built-from-branch": $(params.branch-name),
-                                "build-from-commit-sha": $(params.commit-sha)
+                                "built-from-branch": $(params.branch-name)
                               }
                             }
                           },
