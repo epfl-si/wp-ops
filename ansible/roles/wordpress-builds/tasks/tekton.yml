@@ -4,7 +4,7 @@
     - s3-vars.yml
     - tekton-vars.yml
 
-- name: wp-base/Tekton - Required asks for building
+- name: wp-base/Tekton - Required tasks for building
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
     src: "{{ item }}"
