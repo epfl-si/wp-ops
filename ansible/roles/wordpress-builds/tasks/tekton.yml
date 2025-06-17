@@ -257,10 +257,7 @@
                           {
                             "labels":
                             {
-                              "epfl":
-                              {
-                                "built-from-branch": "$(params.branch-name)"
-                              }
+                              "epfl/built-from-branch": "$(params.branch-name)"
                             }
                           },
                           "spec":
