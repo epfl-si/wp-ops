@@ -1,8 +1,91 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
+    - ../../../vars/quay-vars.yml
+    - mirrors-vars.yml
     - s3-vars.yml
     - tekton-vars.yml
+
+- tags: always
+  include_vars:
+    name: runner_credentials
+    file: ../../vars/runner-credentials.yml
+
+- name: "Mirror the Ubuntu base image"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "ubuntu"
+    organization: "{{ quay_organization }}"
+    description: "Mirrored from ubuntu:noble"
+    visibility: public
+    mirror:
+      from: "docker.io/library/ubuntu:noble"
+      robot_account: "{{ mirrorist_quay_robot_account }}"
+      tags: ["noble", "latest", "jammy", "focal"]
+
+- name: "tekton-toolbox on {{ ansible_quay_hostname }}"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "tekton-toolbox"
+    organization: "{{ quay_organization }}"
+    description: "Image with git, jq, bash etc. for Tekton tasks"
+    visibility: public
+
+- name: "Access matrix to {{ ansible_quay_hostname }}/{{ quay_organization }}/tekton-toolbox:latest"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ item.robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "tekton-toolbox"
+    permission: "{{ item.permission }}"
+  with_items:
+    - robot_account: "{{ builder_robot_account_name }}"
+      permission: write
+    - robot_account: "{{ quay_puller_robot_account_name }}"
+      permission: read
+
+- name: "`BuildConfig/tekton-toolbox`"
+  register: _tekton_toolbox_buildconfig
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: tekton-toolbox
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        source:
+          type: Git
+          git:
+            uri: "https://github.com/epfl-si/wp-ops"
+            ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
+          contextDir: docker/tekton-toolbox
+        strategy:
+          type: Docker
+          dockerStrategy:
+            from:   # Override the Dockerfile's `FROM` line
+              kind: DockerImage
+              name: "{{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:noble"
+        output:
+          to:
+            kind: DockerImage
+            name: "{{ ansible_quay_hostname }}/{{ quay_organization }}/tekton-toolbox:latest"
+        serviceAccount: builder
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+
+- name: Build tekton-toolbox now
+  tags: wp.base.tekton.toolbox.rebuild
+  when: >-
+    (_tekton_toolbox_buildconfig | default({}) is changed)
+    or "wp.base.tekton.toolbox.rebuild" in ansible_run_tags
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      oc -n {{ inventory_namespace }} start-build --wait tekton-toolbox
 
 - name: wp-base/Tekton - Required tasks for building
   kubernetes.core.k8s:
