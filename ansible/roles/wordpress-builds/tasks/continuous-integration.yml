@@ -22,6 +22,9 @@
       metadata:
         name: "{{ _deployment_name }}"
         namespace: "{{ inventory_namespace }}"
+        annotations: >-
+          {{ { "self-service-fruit": item.fruit }
+            if item.fruit | default(False) else {} }}
       spec: >-
         {{ lookup("template", "../../wordpress-namespace/templates/nginx-deployment-spec.yaml",
                   template_vars=dict(

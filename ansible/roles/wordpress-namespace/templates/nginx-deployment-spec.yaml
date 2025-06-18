@@ -7,6 +7,8 @@
 #                    bear, as a string
 #    - additional_pod_labels
 #                    A dict of keys and values to attach to the pod template
+#    - additional_deployment_annotations
+#                    A dict of keys and values to attach to the deployment
 #    - image_tag
 #                    The part of the image name after the colon, that the
 #                    serving containers will use
