@@ -4,6 +4,7 @@
     - ../../../vars/quay-vars.yml
     - mirrors-vars.yml
     - s3-vars.yml
+    - build-vars.yml
 
 - tags: always
   include_vars:
@@ -56,7 +57,7 @@
         output:
           to:
             kind: DockerImage
-            name: "{{ ansible_quay_hostname }}/{{ quay_organization }}/build-toolbox:latest"
+            name: "{{ build_toolbox_image }}"
         serviceAccount: builder
         resources:
           requests:

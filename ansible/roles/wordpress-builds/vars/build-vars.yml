@@ -1,0 +1,1 @@
+build_toolbox_image: '{{ ansible_quay_hostname }}/{{ quay_organization }}/build-toolbox'
