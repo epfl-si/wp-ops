@@ -20,7 +20,7 @@
     - wp.base.build
     - wp.base.secrets
 
-- name: wp-builds/Mirror
+- name: Mirror images used to build `FROM`
   include_tasks:
     file: mirrors.yml
     apply:
@@ -28,6 +28,19 @@
         - wp.base.mirrors
   tags:
     - wp.base.mirrors
+
+- name: Toolbox image
+  include_tasks:
+    file: toolbox.yml
+    apply:
+      tags:
+        - wp.toolbox
+        - wp.build.toolbox
+  tags:
+    - wp.toolbox
+    - wp.build.toolbox
+    - wp.toolbox.rebuild
+    - wp.build.toolbox.rebuild
 
 - name: wp-base/Tekton
   include_tasks:
