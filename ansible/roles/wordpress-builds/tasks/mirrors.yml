@@ -9,6 +9,18 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
+- name: "Mirror the Ubuntu base image"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "ubuntu"
+    organization: "{{ quay_organization }}"
+    description: "Mirrored from ubuntu:noble"
+    visibility: public
+    mirror:
+      from: "docker.io/library/ubuntu:noble"
+      robot_account: "{{ mirrorist_quay_robot_account }}"
+      tags: ["noble", "latest", "jammy", "focal"]
+
 - name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
   run_once: true
   epfl_si.quay.quay_repository:
