@@ -4,6 +4,7 @@
     - ../../../vars/quay-vars.yml
     - mirrors-vars.yml
     - s3-vars.yml
+    - build-vars.yml
     - tekton-vars.yml
 
 - tags: always
@@ -170,7 +171,7 @@
             taskSpec:
               steps:
                 - name: rollout
-                  image: public.ecr.aws/bitnami/kubectl:latest
+                  image: "{{ build_toolbox_image }}"
                   script: |
                     kubectl patch deployment $(params.target-deployment) --patch='{
                       "spec":
@@ -242,7 +243,7 @@
                 restartPolicy: Never
                 containers:
                   - name: trigger-oc-pipelinerun-rc
-                    image: "{{ oc_cli_image }}"
+                    image: "{{ build_toolbox_image }}"
                     command:
                       - /bin/sh
                       - -c
@@ -309,7 +310,7 @@
                 restartPolicy: Never
                 containers:
                   - name: trigger-oc-pipelinerun-alpha
-                    image: "{{ oc_cli_image }}"
+                    image: "{{ build_toolbox_image }}"
                     command:
                       - /bin/sh
                       - -c
