@@ -22,3 +22,4 @@ RUN set -e -x; export DEBIAN_FRONTEND=noninteractive; \
 ADD https://raw.githubusercontent.com/cptmorgan-rh/install-oc-tools/refs/heads/master/install-oc-tools.sh /usr/local/libexec/install-oc-tools.sh
 RUN chmod 755 /usr/local/libexec/install-oc-tools.sh
 RUN /usr/local/libexec/install-oc-tools.sh --latest
+RUN rm /usr/local/bin/kubectl    # given that “--latest” is only 1.32
