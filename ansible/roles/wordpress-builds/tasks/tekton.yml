@@ -219,20 +219,35 @@
       imagePullSecrets:
       - name: "{{ quay_puller_secret_name }}"
 
-- name: wp-base/Tekton - CronJob for Release Candidate
+- name: wp-base/Tekton - CronJob for periodic builds
+  with_items:
+    - suffix: rc
+      schedule: "30 * * * *"
+      params:
+      - name: target-deployment
+        value: wp-nginx-rc
+    - suffix: alpha
+      schedule: "0 * * * *"
+      params:
+      - name: explicit-stem
+        value: 'nightly-$(date -u +%Y%m%d)'
+      - name: target-deployment
+        value: wp-nginx-alpha
+      - name: wordpress-version
+        value: latest
   kubernetes.core.k8s:
     definition:
       apiVersion: batch/v1
       kind: CronJob
       metadata:
-        name: "{{ pipeline_name }}-rc"
+        name: "{{ pipeline_name }}-{{ item.suffix }}"
         namespace: "{{ inventory_namespace }}"
         labels:
           app.kubernetes.io/component: 'cronjob'
-          app.kubernetes.io/name: "{{ pipeline_name }}-rc"
+          app.kubernetes.io/name: "{{ pipeline_name }}-{{ item.suffix }}"
       spec:
         timeZone: "Europe/Zurich"
-        schedule: "30 * * * *"
+        schedule: "{{ item.schedule }}"
         concurrencyPolicy: Forbid
         jobTemplate:
           spec:
@@ -242,13 +257,13 @@
                 serviceAccountName: "{{ wp_base_builder_service_account }}"
                 restartPolicy: Never
                 containers:
-                  - name: trigger-oc-pipelinerun-rc
+                  - name: "trigger-oc-pipelinerun-{{ item.suffix }}"
                     image: "{{ build_toolbox_image }}"
                     command:
                       - /bin/sh
                       - -c
                       - |
-                        tekton_pvc_name="tekton-scratch-$(pwgen 5 1)-rc"
+                        tekton_pvc_name="tekton-scratch-$(pwgen 5 1)-{{ item.suffix }}"
                         oc apply -f - <<EOF
                         ---
                         apiVersion: v1
@@ -267,7 +282,7 @@
                         apiVersion: tekton.dev/v1beta1
                         kind: PipelineRun
                         metadata:
-                          name: "{{ pipeline_name }}-rc-$(date -u +%Y%m%d-%H%Mz)"
+                          name: "{{ pipeline_name }}-{{ item.suffix }}-$(date -u +%Y%m%d-%H%Mz)"
                           namespace: "{{ inventory_namespace }}"
                         spec:
                           timeout: "1h"
@@ -275,79 +290,7 @@
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:
-                            - name: target-deployment
-                              value: wp-nginx-rc
-                          workspaces:
-                            - name: shared-workspace
-                              persistentVolumeClaim:
-                                claimName: $tekton_pvc_name
-                            - name: dockerconfig
-                              secret:
-                                secretName: tekton-push
-                        EOF
-
-- name: wp-base/Tekton - CronJob for Alpha
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: batch/v1
-      kind: CronJob
-      metadata:
-        name: "{{ pipeline_name }}-alpha"
-        namespace: "{{ inventory_namespace }}"
-        labels:
-          app.kubernetes.io/component: 'cronjob'
-          app.kubernetes.io/name: "{{ pipeline_name }}-alpha"
-      spec:
-        timeZone: "Europe/Zurich"
-        schedule: "0 * * * *"
-        concurrencyPolicy: Forbid
-        jobTemplate:
-          spec:
-            backoffLimit: 0
-            template:
-              spec:
-                serviceAccountName: "{{ wp_base_builder_service_account }}"
-                restartPolicy: Never
-                containers:
-                  - name: trigger-oc-pipelinerun-alpha
-                    image: "{{ build_toolbox_image }}"
-                    command:
-                      - /bin/sh
-                      - -c
-                      - |
-                        tekton_pvc_name="tekton-scratch-$(pwgen 5 1)-alpha"
-                        oc apply -f - <<EOF
-                        ---
-                        apiVersion: v1
-                        kind: PersistentVolumeClaim
-                        metadata:
-                          name: $tekton_pvc_name
-                          namespace: "{{ inventory_namespace }}"
-                        spec:
-                          accessModes:
-                            - ReadWriteOnce
-                          storageClassName: wordpress-nfs-build
-                          resources:
-                            requests:
-                              storage: 50Mi
-                        ---
-                        apiVersion: tekton.dev/v1beta1
-                        kind: PipelineRun
-                        metadata:
-                          name: "{{ pipeline_name }}-alpha-$(date -u +%Y%m%d-%H%Mz)"
-                          namespace: "{{ inventory_namespace }}"
-                        spec:
-                          timeout: "1h"
-                          serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
-                          pipelineRef:
-                            name: "{{ pipeline_name }}"
-                          params:
-                            - name: explicit-stem
-                              value: nightly-$(date -u +%Y%m%d)
-                            - name: target-deployment
-                              value: wp-nginx-alpha
-                            - name: wordpress-version
-                              value: latest
+                            {{ item.params | to_yaml | indent(4) }}
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
