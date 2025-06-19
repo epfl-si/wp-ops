@@ -263,6 +263,7 @@
                       - /bin/sh
                       - -c
                       - |
+                        set -e -x
                         pvc_uid="$(pwgen 5 1 | tr 'A-Z' 'a-z')"
                         tekton_pvc_name="tekton-scratch-${pvc_uid}-{{ item.suffix }}"
                         oc apply -f - <<EOF
