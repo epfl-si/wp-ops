@@ -301,7 +301,7 @@
       apiVersion: batch/v1
       kind: CronJob
       metadata:
-        name: "{{ run_pipeline_wp_base_build }}-rc"
+        name: "{{ pipeline_name }}-rc"
         namespace: "{{ inventory_namespace }}"
         labels:
           app.kubernetes.io/component: 'cronjob'
@@ -343,7 +343,7 @@
                         apiVersion: tekton.dev/v1beta1
                         kind: PipelineRun
                         metadata:
-                          name: "{{ run_pipeline_wp_base_build }}-rc-$(date -u +%Y%m%d-%H%Mz)"
+                          name: "{{ pipeline_name }}-rc-$(date -u +%Y%m%d-%H%Mz)"
                           namespace: "{{ inventory_namespace }}"
                         spec:
                           timeout: "1h"
@@ -368,7 +368,7 @@
       apiVersion: batch/v1
       kind: CronJob
       metadata:
-        name: "{{ run_pipeline_wp_base_build }}-alpha"
+        name: "{{ pipeline_name }}-alpha"
         namespace: "{{ inventory_namespace }}"
         labels:
           app.kubernetes.io/component: 'cronjob'
@@ -410,7 +410,7 @@
                         apiVersion: tekton.dev/v1beta1
                         kind: PipelineRun
                         metadata:
-                          name: "{{ run_pipeline_wp_base_build }}-alpha-$(date -u +%Y%m%d-%H%Mz)"
+                          name: "{{ pipeline_name }}-alpha-$(date -u +%Y%m%d-%H%Mz)"
                           namespace: "{{ inventory_namespace }}"
                         spec:
                           timeout: "1h"

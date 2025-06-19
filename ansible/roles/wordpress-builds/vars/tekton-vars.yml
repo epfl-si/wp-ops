@@ -10,7 +10,4 @@ wp_base_builder_service_account: wp-base-builder
 # https://docs.redhat.com/en/documentation/openshift_container_platform/4.8/html/cicd/pipelines#about-taskrun_understanding-openshift-pipelines
 wp_base_builder_buildah_service_account: pipeline
 
-
-# Tekton for Release Candidate build
-run_pipeline_wp_base_build: run-pipeline-wp-base-build
 pipeline_name: wp-base-build
