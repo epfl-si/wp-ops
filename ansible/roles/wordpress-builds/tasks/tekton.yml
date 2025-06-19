@@ -263,7 +263,8 @@
                       - /bin/sh
                       - -c
                       - |
-                        tekton_pvc_name="tekton-scratch-$(pwgen 5 1)-{{ item.suffix }}"
+                        pvc_uid="$(pwgen 5 1 | tr 'A-Z' 'a-z')"
+                        tekton_pvc_name="tekton-scratch-${pvc_uid}-{{ item.suffix }}"
                         oc apply -f - <<EOF
                         ---
                         apiVersion: v1
@@ -290,7 +291,7 @@
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:
-                            {{ item.params | to_yaml | indent(4) }}
+                            {{ item.params | to_nice_yaml | indent(4) }}
                           workspaces:
                             - name: shared-workspace
                               persistentVolumeClaim:
