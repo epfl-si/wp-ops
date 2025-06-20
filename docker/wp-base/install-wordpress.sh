@@ -16,6 +16,15 @@ set -e -x
 # - (Optional) `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 #      environment variables
 ###################################################################
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --alpha)
+      alpha=1
+      shift ;;
+    *)
+      break ;;
+  esac
+done
 
 targetdir="$1/$2"
 version="$2"
@@ -38,7 +47,7 @@ main () {
     install_themes
     install_mu_plugins
 
-    install_tinymce_advanced_plugin /tmp/tinymce-advanced-versions.json
+    install_tinymce_advanced_plugin
     hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
@@ -50,8 +59,13 @@ main () {
     ( cd "$targetdir"/wp-content/plugins/wordpress-importer ;
       git apply < /tmp/clearstatcache-wp-import.patch )
 
-    install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
-    install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
+    if [ -n "$alpha" ]; then
+        install_plugin_wordpress_official polylang
+        install_plugin_wordpress_official redirection
+    else
+        install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
+        install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
+    fi
 
     # Some of these plugins are commercial plugins that we pay for;
     # others have been discontinued. We don't want them publicly
@@ -146,14 +160,19 @@ install_mu_plugins () {
 }
 
 install_tinymce_advanced_plugin () {
-    local versions_json_file="$1"
-    jq -r '.versions | to_entries as $versions | $versions
-          | map(select (.key | startswith("'$wpmajorminor'"))) as $matches
-          | if ($matches | length) == 0 then
-                 $versions | map(select(.key | match("^[0-9.]+$")))
-            else $matches end
-          | map(.value) | last ' < /tmp/tinymce-advanced-versions.json \
-      | xargs -t -i curl -o tinymce-advanced.zip {}
+    if [ -n "$alpha" ]; then
+        install_plugin_wordpress_official tinymce-advanced
+        return
+    fi
+
+    curl -sSL "https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json" \
+        | jq -r '.versions | to_entries as $versions | $versions
+            | map(select (.key | startswith("'$wpmajorminor'"))) as $matches
+            | if ($matches | length) == 0 then
+                   $versions | map(select(.key | match("^[0-9.]+$")))
+              else $matches end
+            | map(.value) | last ' \
+        | xargs -t -i curl -o tinymce-advanced.zip {}
 
     mkdir -p "$targetdir"/wp-content/plugins
     ( cd "$targetdir"/wp-content/plugins; unzip ~-/tinymce-advanced.zip )
