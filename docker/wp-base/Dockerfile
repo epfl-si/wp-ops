@@ -27,7 +27,6 @@ RUN mkdir /wp/wp-cli/packages; \
 ######################################################################
 
 ADD http://api.wordpress.org/core/stable-check/1.0/ /tmp/wordpress-versions.json
-ADD https://api.wordpress.org/plugins/info/1.0/tinymce-advanced.json /tmp/tinymce-advanced-versions.json
 
 ADD wordpress-TinyMCE-flickering-Firefox.patch.6 /tmp/
 ADD clearstatcache-wp-import.patch /tmp/
