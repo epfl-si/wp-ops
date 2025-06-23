@@ -43,15 +43,15 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuste
 ARG WORDPRESS_VERSION="6.7"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-RUN set -e -x; cd /tmp;                                                   \
-    version=$(case "$WORDPRESS_VERSION" in                                \
-      latest) jq -r 'keys[]';;                                            \
-      *)      jq -r 'keys[] | select(match("^'${WORDPRESS_VERSION}'"))';; \
-    esac < /tmp/wordpress-versions.json | sort -n -r | head -1);          \
-case "$WORDPRESS_VERSION" in                                              \
-    latest) /tmp/install-wordpress.sh --alpha /wp "$version";;                    \
-    *)      /tmp/install-wordpress.sh /wp "$version"                      \
-esac
+RUN set -e -x; cd /tmp;                                                     \
+    version="$(case "$WORDPRESS_VERSION" in                                 \
+      latest) jq -r 'keys[]' ;;                                             \
+      *)      jq -r 'keys[] | select(match("^'${WORDPRESS_VERSION}'"))' ;;  \
+    esac < /tmp/wordpress-versions.json | sort -n -r | head -1)";           \
+    case "$WORDPRESS_VERSION" in                                            \
+        latest) /tmp/install-wordpress.sh --alpha /wp "$version" ;;         \
+        *)      /tmp/install-wordpress.sh /wp "$version" ;;                 \
+    esac
 
 RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 
