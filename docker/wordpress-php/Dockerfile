@@ -1,4 +1,4 @@
-FROM wp-base
+FROM quay-its.epfl.ch/svc0041/wp-base:rc
 FROM ubuntu:jammy
 
 ARG PHP_VERSION=8.2
@@ -12,8 +12,8 @@ RUN set -e -x; \
     apt-get -qy autoremove ; \
     apt-get clean
 
-COPY --from=wp-base /wp /wp
-COPY --from=wp-base /usr/local/bin/wp /usr/local/bin/wp
+COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
+COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /usr/local/bin/wp /usr/local/bin/wp
 
 # We don't do the wp-cron out of the interactive Web server:
 RUN find /wp/ -name wp-cron.php -delete

@@ -1,5 +1,5 @@
 FROM bitnami/nginx-ingress-controller:1.12.1 AS ingress
-FROM wp-base
+FROM quay-its.epfl.ch/svc0041/wp-base:rc
 FROM openresty/openresty:1.27.1.1-3-alpine-fat
 
 RUN ln /usr/local/openresty/nginx/sbin/nginx /usr/bin/
@@ -37,7 +37,7 @@ RUN chmod 1777 /tmp/nginx/ \
 COPY ./prometheus/prometheus.lua /etc/nginx/lua/prometheus.lua
 COPY ./prometheus/prometheus_keys.lua /etc/nginx/lua/prometheus_keys.lua
 COPY ./prometheus/prometheus_resty_counter.lua /etc/nginx/lua/prometheus_resty_counter.lua
-COPY --from=wp-base /wp /wp
+COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 COPY nginx.tmpl /etc/nginx/template/
 COPY wordpress_fastcgi.conf /etc/nginx/template/
 
