@@ -25,7 +25,7 @@
                 serviceAccountName: wp-cron
                 containers:
                   - name: wp-cron
-                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-041"
+                    image: "quay-its.epfl.ch/svc0041/wp-cron:{{ _wp_cron_tag }}"
                     env:
                       - name: K8S_NAMESPACE
                         valueFrom:
@@ -46,3 +46,6 @@
     _cpu_request: >-
       {{ "200m" if inventory_deployment_stage == "production"
       else "50m" }}
+    _wp_cron_tag: >-
+      {{ "prod" if inventory_deployment_stage == "production"
+      else "latest" }}
