@@ -132,6 +132,43 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
+          - name: tag-wp-base-rc
+            runAfter: [ build-wp-base ]
+            taskSpec:
+              steps:
+                - name: tag-wp-base-rc
+                  image: "{{ build_toolbox_image }}"
+                  script: |
+                    set -e -x
+                    if [ -n "$(params.explicit-stem)" ]; then exit 0; fi
+
+                    curl_quay_api () {
+                        local uri="$1"; shift
+                         curl --silent \
+                           -H "Content-Type: application/json" \
+                           -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" \
+                           "$@" \
+                           "https://quay-its.epfl.ch/api/v1/$uri"
+                    }
+                    sha="$(curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/" -X GET \
+                            | jq -r '.tags[] | select(.name == "$(params._deploy-tag)") | .manifest_digest')"
+                    if [ -z "$sha" ]; then
+                       echo >&2 "Unable to find SHA for $(params._deploy-tag)"
+                       exit 1
+                    fi
+                    curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/rc" \
+                      -X PUT -d "{\"manifest_digest\": \"$sha\"}"
+                  env:
+                    - name: QUAY_API_BEARER_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          name: tekton-quay-credentials
+                          key: QUAY_API_BEARER_TOKEN
+              params:
+                - name: _deploy-tag
+            params:
+              - name: _deploy-tag
+                value: $(tasks.prep.results.build-tag)
           - name: build-wp-nginx
             runAfter: [ build-wp-base ]
             taskRef:
