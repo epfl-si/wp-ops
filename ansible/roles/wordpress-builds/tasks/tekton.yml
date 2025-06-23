@@ -222,12 +222,12 @@
 - name: wp-base/Tekton - CronJob for periodic builds
   with_items:
     - suffix: rc
-      schedule: "30 * * * *"
+      schedule: "0 1 * * *"
       params:
       - name: target-deployment
         value: wp-nginx-rc
     - suffix: alpha
-      schedule: "0 * * * *"
+      schedule: "0 1 * * *"
       params:
       - name: explicit-stem
         value: 'nightly-$(date -u +%Y%m%d)'
