@@ -48,7 +48,10 @@ RUN set -e -x; cd /tmp;                                                   \
       latest) jq -r 'keys[]';;                                            \
       *)      jq -r 'keys[] | select(match("^'${WORDPRESS_VERSION}'"))';; \
     esac < /tmp/wordpress-versions.json | sort -n -r | head -1);          \
-    /tmp/install-wordpress.sh /wp "$version"
+case "$WORDPRESS_VERSION" in                                              \
+    latest) /tmp/install-wordpress.sh --alpha /wp "$version";;                    \
+    *)      /tmp/install-wordpress.sh /wp "$version"                      \
+esac
 
 RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 
