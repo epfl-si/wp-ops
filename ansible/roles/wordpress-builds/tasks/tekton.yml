@@ -156,8 +156,15 @@
                        echo >&2 "Unable to find SHA for $(params._deploy-tag)"
                        exit 1
                     fi
-                    curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/rc" \
-                      -X PUT -d "{\"manifest_digest\": \"$sha\"}"
+                    result="$(curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/rc" \
+                      -X PUT -d "{\"manifest_digest\": \"$sha\"}")"
+                    echo "$result" >&2
+                    case "$result" in
+                      *Updated*)
+                        exit 0 ;;
+                      *)
+                        exit 1 ;;
+                    esac
                   env:
                     - name: QUAY_API_BEARER_TOKEN
                       valueFrom:
