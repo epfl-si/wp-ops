@@ -88,70 +88,23 @@
     - robot_account: "{{ quay_puller_robot_account_name }}"
       permission: read
 
-- name: "{{ kong_fruit_salad_image.uri }}"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    name: "{{ kong_fruit_salad_image.shortname }}"
-    organization: "{{ quay_organization }}"
-    description: "Kong + EPFL-specific Lua plugins"
-    visibility: public
-
-- name: "Access matrix to {{ kong_fruit_salad_image.uri }}"
-  run_once: true
-  epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ item.robot_account }}"
-    organization: "{{ quay_organization }}"
-    repository_name: "{{ kong_fruit_salad_image.shortname }}"
-    permission: "{{ item.permission }}"
-  with_items:
-    - robot_account: "{{ builder_robot_account_name }}"
-      permission: write
-    - robot_account: "{{ quay_puller_robot_account_name }}"
-      permission: read
-
-- name: "`BuildConfig/kong-fruit-salad`"
-  register: _kong_buildconfig
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
-      metadata:
-        name: kong-fruit-salad
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        source:
-          type: Git
-          git:
-            uri: "https://github.com/epfl-si/wp-ops"
-            ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
-          contextDir: docker/kong-fruit-salad
-        strategy:
-          type: Docker
-          dockerStrategy:
-            from:   # Override the Dockerfile's `FROM` line
-              kind: DockerImage
-              name: "{{ kong_base_image_mirrored.qualified }}"
-        output:
-          to:
-            kind: DockerImage
-            name: "{{ kong_fruit_salad_image.qualified }}"
-        serviceAccount: builder   # Has push permission on the above
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "256Mi"
-
-- name: Build kong-fruit-salad now
-  tags: wp.continuous-integration.kong.rebuild
-  when: >-
-    (_kong_buildconfig | default({}) is changed)
-    or "wp.base.kong.rebuild" in ansible_run_tags
-  register: _kong_build
-  shell:
-    cmd: |
-      set -e -x
-      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
-      oc -n {{ inventory_namespace }} start-build --wait kong-fruit-salad
+- name: "`kong-fruit-salad` cloud build"
+  tags:
+      - wp.continuous-integration.kong.rebuild
+  include_tasks:
+    file: _buildconfig.yml
+  vars:
+    buildconfig_name: kong-fruit-salad
+    buildconfig_description: Kong + EPFL-specific Lua plugins
+    buildconfig_base: "{{ kong_base_image_mirrored.qualified }}"
+    buildconfig_source:
+      type: Git
+      git:
+        uri: "https://github.com/epfl-si/wp-ops"
+        ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
+      contextDir: docker/kong-fruit-salad
+    buildconfig_rebuild_tags:
+      - wp.continuous-integration.kong.rebuild
 
 - name: "`ConfigMap/kong-fruit-salad`"
   register: _kong_configmap
