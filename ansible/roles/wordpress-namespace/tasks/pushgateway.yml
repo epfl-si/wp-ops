@@ -24,6 +24,7 @@
             containers:
               - name: pushgateway
                 image: quay-its.epfl.ch/svc0041/pushgateway:latest
+                imagePullPolicy: Always
                 ports:
                   - containerPort: 9091
                     name: metrics

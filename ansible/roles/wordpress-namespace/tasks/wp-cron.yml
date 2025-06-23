@@ -26,6 +26,7 @@
                 containers:
                   - name: wp-cron
                     image: "quay-its.epfl.ch/svc0041/wp-cron:{{ _wp_cron_tag }}"
+                    imagePullPolicy: Always
                     env:
                       - name: K8S_NAMESPACE
                         valueFrom:
