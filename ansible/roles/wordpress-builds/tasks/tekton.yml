@@ -150,14 +150,9 @@
                            "$@" \
                            "https://quay-its.epfl.ch/api/v1/$uri"
                     }
-                    sha="$(curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/" -X GET \
-                            | jq -r '.tags[] | select(.name == "$(params._deploy-tag)") | .manifest_digest')"
-                    if [ -z "$sha" ]; then
-                       echo >&2 "Unable to find SHA for $(params._deploy-tag)"
-                       exit 1
-                    fi
+
                     result="$(curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/rc" \
-                      -X PUT -d "{\"manifest_digest\": \"$sha\"}")"
+                      -X PUT -d '{"manifest_digest": "$(params._image-digest)"}')"
                     echo "$result" >&2
                     case "$result" in
                       *Updated*)
@@ -173,9 +168,12 @@
                           key: QUAY_API_BEARER_TOKEN
               params:
                 - name: _deploy-tag
+                - name: _image-digest
             params:
               - name: _deploy-tag
                 value: $(tasks.prep.results.build-tag)
+              - name: _image-digest
+                value: $(tasks.build-wp-base.results.IMAGE_DIGEST)
           - name: build-wp-nginx
             runAfter: [ build-wp-base ]
             taskRef:
