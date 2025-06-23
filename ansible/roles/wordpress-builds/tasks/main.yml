@@ -31,11 +31,24 @@
 
 - name: Toolbox image
   include_tasks:
-    file: toolbox.yml
+    file: _buildconfig.yml
     apply:
       tags:
-        - wp.toolbox
-        - wp.build.toolbox
+      - wp.toolbox
+      - wp.build.toolbox
+  vars:
+    buildconfig_name: build-toolbox
+    buildconfig_description: Image with git, jq, bash etc. for build-related tasks
+    buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:noble"
+    buildconfig_source:
+      type: Git
+      git:
+        uri: "https://github.com/epfl-si/wp-ops"
+        ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
+      contextDir: docker/build-toolbox
+    buildconfig_rebuild_tags:
+    - wp.toolbox.rebuild
+    - wp.build.toolbox.rebuild
   tags:
     - wp.toolbox
     - wp.build.toolbox
