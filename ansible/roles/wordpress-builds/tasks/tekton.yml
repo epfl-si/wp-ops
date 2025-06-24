@@ -142,7 +142,8 @@
                                  TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
-                    git clone https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
+
+                    git clone https://github.com/epfl-si/wp-ops wp-ops
                     (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
                     if [ -z "$(params.branch-name)" ]; then
                       (cd wp-ops; git checkout "$(params.branch-name)" || true)
@@ -358,14 +359,19 @@
                             requests:
                               storage: 50Mi
                         ---
-                        apiVersion: tekton.dev/v1beta1
+                        apiVersion: tekton.dev/v1
                         kind: PipelineRun
                         metadata:
                           name: "{{ pipeline_name }}-{{ item.suffix }}-$(date -u +%Y%m%d-%H%Mz)"
                           namespace: "{{ inventory_namespace }}"
                         spec:
-                          timeout: "1h"
-                          serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
+                          timeouts:
+                            pipeline: "1h"
+                          taskRunTemplate:
+                            serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
+                          taskRunSpecs:
+                            - pipelineTaskName: prep
+                              serviceAccountName: default
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:
