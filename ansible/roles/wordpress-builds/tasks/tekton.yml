@@ -12,7 +12,7 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
-- name: wp-base/Tekton - Required tasks for building
+- name: wp-base/Tekton - Off-the-shelf tasks
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
     src: "{{ item }}"
