@@ -122,6 +122,7 @@
       type: Git
       git:
         uri: "https://github.com/epfl-si/wp-operator"
+        ref: "feature/allowFieldsUpdate"   # TODO: remove upon merging
     buildconfig_rebuild_tags:
     - wp.operator.rebuild
   tags:
