@@ -155,9 +155,9 @@
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i 's;FROM ubuntu:jammy;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:jammy;g' \
                       /workspace/source/wp-ops/docker/*/Dockerfile
-                    for repo in "$@"; do
-                      echo "switch_repo_branch '$repo' '$(params.branch-name)'" >> /workspace/source/wp-ops/docker/wp-base/install-wordpress.sh
-                    done
+                    if [ -n "$(params.branch-name)" ]; then
+                      echo "try_git_switch '$(params.branch-name)'" >> wp-ops/docker/wp-base/install-wordpress.sh
+                    fi
             workspaces:
               - name: source
                 workspace: shared-workspace

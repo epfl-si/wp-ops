@@ -267,27 +267,17 @@ plugin_canonical_name () {
 #
 # Append a call like
 #
-#      switch_repo_branch https://github.com/epfl-si/wp-theme-2018 feature/foo
+#      try_git_switch feature/foo
 #
-# to the end of this script, and it will do exactly what it says on the tin.
-switch_repo_branch () {
+# to the end of this script, will try and switch all git checkouts to this branch
+# (and recover gracefully if the branch doesn't exixt).
+try_git_switch () {
     local repo_url="$1"
-    local branch="$2"
 
-    local done gitconfig
-    for gitconfig in $(find "$targetdir" -path "*/.git/config"); do
-        if grep "url.*$repo_url" "$gitconfig"; then
-            cd "$(dirname "$(dirname "$gitconfig")")"
-            git checkout "$branch"
-            done=1
-            break
-        fi
-    done
-
-    if [ -z "$done" ]; then
-        echo >&2 "Could not find a repository containing $repo_url"
-        exit 1
-    fi
+    find . -name .git | while read gitdir; do (
+        cd "$gitdir/.."
+        git checkout "$repo_url" || true
+    ); done
 }
 
 # Install the specified language pack, e.g. fr_FR
