@@ -20,6 +20,55 @@
     - https://api.hub.tekton.dev/v1/resource/tekton/task/git-clone/0.9/raw
     - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
 
+- name: "`Task/oci-retag`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: tekton.dev/v1
+      kind: Task
+      metadata:
+        name: oci-retag
+        namespace:  "{{ inventory_namespace }}"
+      spec:
+        description: |-
+          Tekton task to “re-tag” an image through the OCI Distribution API
+          (a.k.a. “docker push“, except there needs be no code from Docker,
+          inc. in use anywhere.)
+        params:
+        - name: tagFrom
+          description: The OCI tag or sha256 ref to copy from.
+          type: string
+          default: ""
+        - name: tagTo
+          description: The OCI tag to set.
+          type: string
+          default: ""
+        workspaces:
+        - name: dockerconfig
+          optional: false
+          description: A workspace to provide a .docker/config.json
+            file that grants access the container registry or registries.
+            The file should be placed at the root of the workspace with name
+            config.json or .dockerconfigjson.
+        steps:
+        - name: image-retag
+          env:
+          - name: TAG_FROM
+            value: $(params.tagFrom)
+          - name: TAG_TO
+            value: $(params.tagTo)
+          - name: WORKSPACES_DOCKERCONFIG_PATH
+            value: $(workspaces.dockerconfig.path)
+          image: "{{ build_toolbox_image }}"
+          imagePullPolicy: Always
+          script: |
+            #!/bin/bash
+            set -e -x
+
+            mkdir /tmp/docker-auth
+            cp "$WORKSPACES_DOCKERCONFIG_PATH"/.docker*json /tmp/docker-auth/config.json
+            DOCKER_CONFIG=/tmp/docker-auth \
+              skopeo copy "docker://$TAG_FROM" "docker://$TAG_TO"
+
 - name: wp-base/Tekton - Pipeline
   kubernetes.core.k8s:
     definition:
@@ -138,46 +187,23 @@
                 workspace: dockerconfig
           - name: tag-wp-base-rc
             runAfter: [ build-wp-base ]
-            taskSpec:
-              steps:
-                - name: tag-wp-base-rc
-                  image: "{{ build_toolbox_image }}"
-                  script: |
-                    set -e -x
-                    if [ -n "$(params.explicit-stem)" ]; then exit 0; fi
-
-                    curl_quay_api () {
-                        local uri="$1"; shift
-                         curl --silent \
-                           -H "Content-Type: application/json" \
-                           -H "Authorization: bearer $QUAY_API_BEARER_TOKEN" \
-                           "$@" \
-                           "https://quay-its.epfl.ch/api/v1/$uri"
-                    }
-
-                    result="$(curl_quay_api "repository/{{ quay_organization }}/wp-base/tag/rc" \
-                      -X PUT -d '{"manifest_digest": "$(params._image-digest)"}')"
-                    echo "$result" >&2
-                    case "$result" in
-                      *Updated*)
-                        exit 0 ;;
-                      *)
-                        exit 1 ;;
-                    esac
-                  env:
-                    - name: QUAY_API_BEARER_TOKEN
-                      valueFrom:
-                        secretKeyRef:
-                          name: tekton-quay-credentials
-                          key: QUAY_API_BEARER_TOKEN
-              params:
-                - name: _deploy-tag
-                - name: _image-digest
+            when:
+              - input: "$(params.explicit-stem)"
+                operator: in
+                values: [""]
+            taskRef:
+              kind: Task
+              name: oci-retag
             params:
-              - name: _deploy-tag
-                value: $(tasks.prep.results.build-tag)
-              - name: _image-digest
-                value: $(tasks.build-wp-base.results.IMAGE_DIGEST)
+              - name: tagFrom
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base@$(tasks.build-wp-base.results.IMAGE_DIGEST)
+              - name: tagTo
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:rc
+            workspaces:
+              - name: dockerconfig
+                workspace: dockerconfig
           - name: build-wp-nginx
             runAfter: [ build-wp-base ]
             taskRef:
