@@ -60,7 +60,7 @@
                   description: "The generated tag"
               steps:
               - name: sed
-                image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/build-toolbox:latest"
+                image: "{{ build_toolbox_image }}"
                 args: [
                   "$(params.repos[*])",
                 ]
