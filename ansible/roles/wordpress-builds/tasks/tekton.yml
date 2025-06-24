@@ -349,11 +349,6 @@
                         }
                       }
                     }' && kubectl rollout restart deploy/$(params.target-deployment)
-              params:
-                - name: _deploy-tag
-            params:
-              - name: _deploy-tag
-                value: $(tasks.prep.results.build-tag)
 
 - name: "Credentials that let {{ wp_base_builder_buildah_service_account }} pull the build-toolbox"
   kubernetes.core.k8s:
