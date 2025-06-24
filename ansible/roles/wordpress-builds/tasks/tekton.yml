@@ -103,6 +103,10 @@
               results:
                 - name: build-tag
                   description: "The generated tag"
+                - name: retag-image-php
+                  description: "The target name of the wp-php image to re-tag"
+                - name: retag-image-nginx
+                  description: "The target name of the wp-nginx image to re-tag"
               steps:
               - name: sed
                 image: "{{ build_toolbox_image }}"
@@ -135,6 +139,14 @@
                                  TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
+
+                    deploy="deployment/$(params.target-deployment)"
+                    if [ -n "$(kubectl get "$deploy" -o jsonpath="{ .metadata.annotations['self-service-fruit'] }")" ]; then
+                      kubectl get "$deploy" -o jsonpath='{ range .spec.template.spec.containers[*]} {.image }{ "\n" }{ end }' | \
+                        while read img; do case "$img" in
+                           *wp-nginx*) echo "$img" > $(results.retag-image-nginx.path) ;;
+                           *wp-php*) echo "$img" > $(results.retag-image-php.path) ;;
+                        esac; done
 
                     git clone https://github.com/epfl-si/wp-ops wp-ops
                     (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
@@ -276,11 +288,49 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
-          - name: patch-deployment
-            runAfter: [ build-wp-nginx, build-wp-php ]
+          - name: retag-wp-nginx
+            runAfter: [ build-wp-nginx ]
+            when:
+              - input: "$(tasks.prep.results.retag-image-nginx)"
+                operator: notin
+                values: [""]
+            taskRef:
+              kind: Task
+              name: oci-retag
+            params:
+              - name: tagFrom
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx@$(tasks.build-wp-nginx.results.IMAGE_DIGEST)
+              - name: tagTo
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.retag-image-nginx)
+            workspaces:
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: retag-wp-php
+            runAfter: [ build-wp-php ]
+            when:
+              - input: "$(tasks.prep.results.retag-image-php)"
+                operator: notin
+                values: [""]
+            taskRef:
+              kind: Task
+              name: oci-retag
+            params:
+              - name: tagFrom
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php@$(tasks.build-wp-php.results.IMAGE_DIGEST)
+              - name: tagTo
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.retag-image-php)
+            workspaces:
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: patch-and-rollout-deployment
+            runAfter: [ retag-wp-nginx, retag-wp-php ]
             taskSpec:
               steps:
-                - name: rollout
+                - name: patch-and-rollout
                   image: "{{ build_toolbox_image }}"
                   imagePullPolicy: Always
                   script: |
@@ -295,24 +345,10 @@
                             {
                               "epfl/built-from-branch": "$(params.branch-name)"
                             }
-                          },
-                          "spec":
-                          {
-                            "containers":
-                            [
-                              {
-                                "name": "nginx",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(params._deploy-tag)"
-                              },
-                              {
-                                "name": "php",
-                                "image": "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(params._deploy-tag)"
-                              }
-                            ]
                           }
                         }
                       }
-                    }'
+                    }' && kubectl rollout restart deploy/$(params.target-deployment)
               params:
                 - name: _deploy-tag
             params:
