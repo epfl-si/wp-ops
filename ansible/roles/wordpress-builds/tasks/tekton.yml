@@ -61,6 +61,7 @@
               steps:
               - name: sed
                 image: "{{ build_toolbox_image }}"
+                imagePullPolicy: Always
                 args: [
                   "$(params.repos[*])",
                 ]
@@ -214,6 +215,7 @@
               steps:
                 - name: rollout
                   image: "{{ build_toolbox_image }}"
+                  imagePullPolicy: Always
                   script: |
                     kubectl patch deployment $(params.target-deployment) --patch='{
                       "spec":
@@ -301,6 +303,7 @@
                 containers:
                   - name: "trigger-oc-pipelinerun-{{ item.suffix }}"
                     image: "{{ build_toolbox_image }}"
+                    imagePullPolicy: Always
                     command:
                       - /bin/sh
                       - -c
