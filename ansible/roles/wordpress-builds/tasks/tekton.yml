@@ -436,7 +436,7 @@
                             serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
                           taskRunSpecs:
                             - pipelineTaskName: prep
-                              serviceAccountName: default
+                              serviceAccountName: "{{ wp_base_builder_service_account }}"
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:

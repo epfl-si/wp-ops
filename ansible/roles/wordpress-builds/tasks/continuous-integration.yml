@@ -368,6 +368,15 @@
             containers:
               - name: wp-continuous-integration
                 image: "quay-its.epfl.ch/svc0041/wp-continuous-integration:latest"
+                command:
+                  - /app/node_modules/.bin/tsx
+                  - src/index.ts
+                  - -p
+                  - /config/wp-continuous-integration-config.yaml
+                  - --privileged-service-account
+                  - "{{ wp_base_builder_buildah_service_account }}"
+                  - --unprivileged-service-account
+                  - "{{ wp_base_builder_service_account }}"
                 imagePullPolicy: Always
                 resources:
                   limits:
