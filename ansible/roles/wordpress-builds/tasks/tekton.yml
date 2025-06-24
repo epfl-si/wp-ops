@@ -73,6 +73,8 @@
                         key: QUAY_API_BEARER_TOKEN
                 script: |
                     set -e -x
+                    cd /workspace/source/
+
                     if [ -n "$(params.explicit-stem)" ]; then
                       STEM="$(params.explicit-stem)"
                     else
