@@ -84,10 +84,6 @@
             description: "Sequence number of the next build to push to Quay"
           - name: target-deployment
             description: "Name of the Deployment to update"
-          - name: repos
-            type: array
-            default: []
-            description: "List af all repositories to clone on a branch"
           - name: branch-name
             default: ''
             description: "Branch name to use in the clone command"
@@ -111,9 +107,6 @@
               - name: sed
                 image: "{{ build_toolbox_image }}"
                 imagePullPolicy: Always
-                args: [
-                  "$(params.repos[*])",
-                ]
                 env:
                   - name: QUAY_API_BEARER_TOKEN
                     valueFrom:
