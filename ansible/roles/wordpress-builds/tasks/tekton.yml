@@ -144,6 +144,9 @@
                     echo -n "$TAG" > $(results.build-tag.path)
                     git clone https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
                     (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
+                    if [ -z "$(params.branch-name)" ]; then
+                      (cd wp-ops; git checkout "$(params.branch-name)" || true)
+                    fi
                     sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
