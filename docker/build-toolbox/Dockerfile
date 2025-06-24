@@ -3,7 +3,7 @@ FROM ubuntu:noble
 RUN set -e -x; export DEBIAN_FRONTEND=noninteractive; \
     apt -qy update; \
     apt -qy install apt-transport-https ca-certificates gnupg curl wget \
-            git jq pwgen ; \
+            git jq pwgen skopeo ; \
     apt-get clean
 
 # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
