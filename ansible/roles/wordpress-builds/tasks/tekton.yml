@@ -91,7 +91,8 @@
                                  TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
-                    git clone -b feature/wp-base-cloud-tekton-build https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
+                    git clone https://github.com/epfl-si/wp-ops /workspace/source/wp-ops
+                    (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
                     sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       /workspace/source/wp-ops/docker/*/Dockerfile
                     sed -i "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
