@@ -147,6 +147,7 @@
                            *wp-nginx*) echo "$img" > $(results.retag-image-nginx.path) ;;
                            *wp-php*) echo "$img" > $(results.retag-image-php.path) ;;
                         esac; done
+                    fi
 
                     git clone https://github.com/epfl-si/wp-ops wp-ops
                     (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
