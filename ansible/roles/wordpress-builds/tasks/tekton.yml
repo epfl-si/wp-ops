@@ -2,6 +2,7 @@
   include_vars: "{{ item }}"
   with_items:
     - ../../../vars/quay-vars.yml
+    - build-vars.yml
     - mirrors-vars.yml
     - s3-vars.yml
     - build-vars.yml
@@ -398,7 +399,7 @@
             backoffLimit: 0
             template:
               spec:
-                serviceAccountName: "{{ wp_base_builder_service_account }}"
+                serviceAccountName: "{{ build_service_account }}"
                 restartPolicy: Never
                 containers:
                   - name: "trigger-oc-pipelinerun-{{ item.suffix }}"
@@ -438,7 +439,7 @@
                             serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
                           taskRunSpecs:
                             - pipelineTaskName: prep
-                              serviceAccountName: "{{ wp_base_builder_service_account }}"
+                              serviceAccountName: "{{ build_service_account }}"
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:

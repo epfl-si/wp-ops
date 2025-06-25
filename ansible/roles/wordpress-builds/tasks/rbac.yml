@@ -1,16 +1,8 @@
 - tags: always
-  include_vars: tekton-vars.yml
-
-- name: wp-base/Image - Builder Service Account
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: ServiceAccount
-      metadata:
-        name: "{{ wp_base_builder_service_account }}"
-        namespace: "{{ inventory_namespace }}"
-      imagePullSecrets:
-        - name: svc0041-svc0041-puller-pull-secret
+  include_vars: "{{ item }}"
+  with_items:
+    - build-vars.yml
+    - tekton-vars.yml
 
 - name: wp-base/Tekton RBAC - Role
   kubernetes.core.k8s:
@@ -18,7 +10,7 @@
       apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
-        name: "{{ wp_base_builder_service_account }}-role"
+        name: "{{ build_service_account }}-role"
         namespace: "{{ inventory_namespace }}"
       rules:
         - apiGroups: ["tekton.dev"]
@@ -37,13 +29,13 @@
       apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:
-        name: "{{ wp_base_builder_service_account }}-rolebinding"
+        name: "{{ build_service_account }}-rolebinding"
         namespace: "{{ inventory_namespace }}"
       subjects:
         - kind: ServiceAccount
-          name: "{{ wp_base_builder_service_account }}"
+          name: "{{ build_service_account }}"
           namespace: "{{ inventory_namespace }}"
       roleRef:
         kind: Role
-        name: "{{ wp_base_builder_service_account }}-role"
+        name: "{{ build_service_account }}-role"
         apiGroup: rbac.authorization.k8s.io

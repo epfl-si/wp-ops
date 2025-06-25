@@ -1,3 +1,17 @@
+- tags: always
+  include_vars: build-vars.yml
+
+- name: "`ServiceAccount/{{ build_service_account }}`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ build_service_account }}"
+        namespace: "{{ inventory_namespace }}"
+      imagePullSecrets:
+        - name: svc0041-svc0041-puller-pull-secret
+
 - name: wp-base/RBAC
   include_tasks:
     file: rbac.yml
