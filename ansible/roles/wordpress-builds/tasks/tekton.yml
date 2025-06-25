@@ -198,7 +198,7 @@
                   --build-arg
                   AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
                   --build-arg
-                  WORDPRESS_VERSION='$(params.wordpress-version)'
+                  WORDPRESS_VERSION=$(params.wordpress-version)
             workspaces:
               - name: source
                 workspace: shared-workspace
