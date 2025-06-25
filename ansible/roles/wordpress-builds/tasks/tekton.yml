@@ -13,6 +13,16 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
+- tags: always
+  include_vars:
+    file: build-secrets.yml
+    name: build_secrets
+
+- tags: always
+  include_vars:
+    name: tekton_credentials
+    file: tekton-credentials.yml
+
 - name: "`Role/{{ build_service_account }}`"
   kubernetes.core.k8s:
     definition:
@@ -49,6 +59,24 @@
         name: "{{ build_service_account }}"
         apiGroup: rbac.authorization.k8s.io
 
+- name: wp-base/Secret - Push Secret
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        name: tekton-push
+        namespace: "{{ inventory_namespace }}"
+      data:
+        .dockerconfigjson: "{{ _tekton_push_secret_config | to_json | b64encode }}"
+  vars:
+    _quay_basic_auth: "{{ build_secrets.quay_push_credentials.name }}:{{ build_secrets.quay_push_credentials.password | eyaml(build_secrets.eyaml_keys) }}"
+    _tekton_push_secret_config:
+      auths:
+        "quay-its.epfl.ch":
+          "auth": "{{ _quay_basic_auth | b64encode }}"
+
 - name: wp-base/Tekton - Off-the-shelf tasks
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
@@ -56,6 +84,19 @@
   with_items:
     - https://api.hub.tekton.dev/v1/resource/tekton/task/git-clone/0.9/raw
     - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
+
+- name: "`Secret/tekton-quay-credentials`"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: tekton-quay-credentials
+        namespace: "{{ inventory_namespace }}"
+      type: Opaque
+      stringData:
+        QUAY_API_BEARER_TOKEN: "{{ tekton_credentials.quay_api.bearer_token | eyaml(tekton_credentials.eyaml_keys) }}"
 
 - name: "`Task/oci-retag`"
   kubernetes.core.k8s:
