@@ -12,17 +12,6 @@
       imagePullSecrets:
         - name: svc0041-svc0041-puller-pull-secret
 
-- name: wp-base/Secrets
-  include_tasks:
-    file: secrets.yml
-    apply:
-      tags:
-        - wp.base.build
-        - wp.base.secrets
-  tags:
-    - wp.base.build
-    - wp.base.secrets
-
 - name: Mirror images used to build `FROM`
   include_tasks:
     file: mirrors.yml

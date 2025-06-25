@@ -13,6 +13,25 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
+- tags: always
+  include_vars:
+    file: github-credentials.yml
+    name: github_credentials
+
+- name: "`Secret/wp-ci-github`"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: wp-ci-github
+        namespace: "{{ inventory_namespace }}"
+      type: Opaque
+      stringData:
+        APP_ID: "{{ github_credentials.id | string }}"
+        PRIVATE_KEY: "{{ github_credentials.private_key | eyaml(github_credentials.eyaml_keys) }}"
+
 - name: "Continuous integration targets (“fruit salad”): Deployments"
   loop: "{{ wp_nginx_ci_flavors }}"
   kubernetes.core.k8s:
@@ -449,7 +468,7 @@
           resources:
             - secrets
           resourceNames:
-            - wp-ci-github-app-secrets
+            - wp-ci-github
           verbs: ['get', 'list', 'watch']
         - apiGroups: ['apps']
           resources:
