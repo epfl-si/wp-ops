@@ -8,11 +8,6 @@
     - mirrors-vars.yml
     - continuous-integration-vars.yml
 
-- tags: always
-  include_vars:
-    name: runner_credentials
-    file: ../../vars/runner-credentials.yml
-
 - name: "Continuous integration targets (“fruit salad”): Deployments"
   loop: "{{ wp_nginx_ci_flavors }}"
   kubernetes.core.k8s:

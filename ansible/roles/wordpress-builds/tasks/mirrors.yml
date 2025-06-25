@@ -4,11 +4,6 @@
     - mirrors-vars.yml
     - ../../vars/quay-vars.yml
 
-- tags: always
-  include_vars:
-    name: runner_credentials
-    file: ../../vars/runner-credentials.yml
-
 - name: "Mirror the Ubuntu base image"
   run_once: true
   epfl_si.quay.quay_repository:
