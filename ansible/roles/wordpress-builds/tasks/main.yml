@@ -62,9 +62,12 @@
       tags:
         - wp.base.build
         - wp.base.tekton
+        - wp.tekton
   tags:
     - wp.base.build
     - wp.base.tekton
+    - wp.tekton
+    - wp.tekton.pipeline
     - wp.base.tekton.toolbox.rebuild
 
 - name: Kong reverse proxy for blue/green(/red/yellow/orange) testing
