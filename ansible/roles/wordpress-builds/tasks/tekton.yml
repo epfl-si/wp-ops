@@ -103,10 +103,10 @@
               results:
                 - name: build-tag
                   description: "The generated tag"
-                - name: tag-image-php-fruit
-                  description: "The target name of the wp-php image to re-tag"
-                - name: tag-image-nginx-fruit
-                  description: "The target name of the wp-nginx image to re-tag"
+                - name: retag-image-nginx
+                  description: "The target name (ending with :$FRUIT) of the wp-php image to re-tag"
+                - name: retag-image-php
+                  description: "The target name (ending with :$FRUIT) of the wp-nginx image to re-tag"
               steps:
               - name: sed
                 image: "{{ build_toolbox_image }}"
