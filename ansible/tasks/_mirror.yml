@@ -1,0 +1,43 @@
+# Tasks to mirror a publicly-available image into Quay
+#
+# Parameters:
+#
+#  - mirror_name             (mandatory)
+#        The name of the mirrored image (last URI component in Quay, sans `:`)
+#
+#  - mirror_from             (mandatory)
+#        The name of the original image (as a complete Docker-style image path, sans `:`)
+#
+#  - mirror_tags             (mandatory)
+#        The list of Docker tags to mirror
+#
+#  - mirror_visibility       (optional, default `public`)
+#        The Quay mirrored image's visibility flag
+#
+# Uses vars that start with quay_ from ../../../vars/quay-vars.yml
+
+- name: "Mirror {{ mirror_name }} on {{ ansible_quay_hostname }}"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "{{ mirror_name }}"
+    organization: "{{ quay_organization }}"
+    description: "Mirrored from {{ mirror_from }}"
+    visibility: >-
+      {{ mirror_visibility | default("public") }}
+    mirror:
+      from: "{{ mirror_from }}"
+      robot_account: "{{ quay_mirrorist_robot_account_name }}"
+      tags: "{{ mirror_tags }}"
+
+- name: "Access matrix to {{ ansible_quay_hostname }}/{{ quay_organization }}/{{ mirror_name }}"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ item.robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ mirror_name }}"
+    permission: "{{ item.permission }}"
+  with_items:
+    - robot_account: "{{ quay_mirrorist_robot_account_name }}"
+      permission: write
+    - robot_account: "{{ quay_puller_robot_account_name }}"
+      permission: read
