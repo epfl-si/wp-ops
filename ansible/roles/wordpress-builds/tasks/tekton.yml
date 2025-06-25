@@ -13,6 +13,42 @@
     name: runner_credentials
     file: ../../vars/runner-credentials.yml
 
+- name: "`Role/{{ build_service_account }}`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: "{{ build_service_account }}"
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ["tekton.dev"]
+          resources: ["pipelineruns"]
+          verbs: ["create", "get", "list", "patch"]
+        - apiGroups: [""]
+          resources: ["persistentvolumeclaims"]
+          verbs: ["create", "get", "list", "patch"]
+        - apiGroups: ["apps"]
+          resources: ["deployments"]
+          verbs: ["create", "get", "list", "patch"]
+
+- name: "`RoleBinding/{{ build_service_account }}`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: "{{ build_service_account }}"
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: "{{ build_service_account }}"
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        kind: Role
+        name: "{{ build_service_account }}"
+        apiGroup: rbac.authorization.k8s.io
+
 - name: wp-base/Tekton - Off-the-shelf tasks
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
