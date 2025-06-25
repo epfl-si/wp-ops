@@ -1,1 +1,3 @@
 build_toolbox_image: '{{ ansible_quay_hostname }}/{{ quay_organization }}/build-toolbox'
+
+build_service_account: wp-base-builder
