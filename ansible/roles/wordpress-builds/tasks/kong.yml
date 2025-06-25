@@ -1,0 +1,231 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - ../../vars/versions.yml
+    - build-vars.yml
+    - quay-vars.yml
+    - kong-vars.yml
+    - mirrors-vars.yml
+    - continuous-integration-vars.yml
+
+- tags: always
+  include_vars:
+    name: runner_credentials
+    file: ../../vars/runner-credentials.yml
+
+- name: "Continuous integration targets (“fruit salad”): Deployments"
+  loop: "{{ wp_nginx_ci_flavors }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ _deployment_name }}"
+        namespace: "{{ inventory_namespace }}"
+        annotations: >-
+          {{ { "self-service-fruit": item.fruit }
+            if item.fruit | default(False) else {} }}
+      spec: >-
+        {{ lookup("template", "../../wordpress-namespace/templates/nginx-deployment-spec.yaml",
+                  template_vars=dict(
+                      image_tag=item.name,
+                      app_label=_deployment_name,
+                      additional_pod_labels=({ "self-service-flavor": item.name }
+                                             if item.fruit | default(False) else {})
+                      ))
+        | from_yaml }}
+  vars:
+    _deployment_name: "wp-nginx-{{ item.name }}"
+
+- name: "Continuous integration targets (“fruit salad”): Services"
+  loop: "{{ wp_nginx_ci_flavors }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ _service_name }}"
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: "{{ _service_name }}"
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+        - name: "80"
+          port: 80
+          protocol: TCP
+          targetPort: 8000
+        selector:
+          app: "{{ _service_name }}"
+        type: ClusterIP
+  vars:
+    _service_name: "wp-nginx-{{ item.name }}"
+
+- name: "Mirror the Kong base image"
+  run_once: true
+  epfl_si.quay.quay_repository:
+    name: "{{ kong_base_image_mirrored.shortname }}"
+    organization: "{{ quay_organization }}"
+    description: "Mirrored from {{ kong_base_image }}"
+    visibility: public
+    mirror:
+      from: "{{ kong_base_image.uri }}"
+      robot_account: "{{ mirrorist_quay_robot_account }}"
+      tags: ["{{ kong_base_image_version | string }}"]
+
+- name: "Access matrix to {{ kong_base_image_mirrored.uri }}"
+  run_once: true
+  epfl_si.quay.robot_account_permission:
+    robot_account_name: "{{ item.robot_account }}"
+    organization: "{{ quay_organization }}"
+    repository_name: "{{ kong_base_image_mirrored.shortname }}"
+    permission: "{{ item.permission }}"
+  with_items:
+    - robot_account: "{{ mirrorist_quay_robot_account }}"
+      permission: write
+    - robot_account: "{{ quay_puller_robot_account_name }}"
+      permission: read
+
+- name: "`kong-fruit-salad` cloud build"
+  tags:
+      - wp.build.kong.rebuild
+  include_tasks:
+    file: _buildconfig.yml
+  vars:
+    buildconfig_name: kong-fruit-salad
+    buildconfig_description: Kong + EPFL-specific Lua plugins
+    buildconfig_base: "{{ kong_base_image_mirrored.qualified }}"
+    buildconfig_source:
+      type: Git
+      git:
+        uri: "https://github.com/epfl-si/wp-ops"
+        ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
+      contextDir: docker/kong-fruit-salad
+    buildconfig_rebuild_tags:
+      - wp.build.kong.rebuild
+
+- name: "`ConfigMap/kong-fruit-salad`"
+  register: _kong_configmap
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: "kong-fruit-salad"
+        namespace: "{{ inventory_namespace }}"
+      data:
+        kong.yml: "{{ lookup('template', 'kong.yml' ) }}"
+
+- name: "`Deployment/kong-fruit-salad`"
+  register: _kong_deployment
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: kong-fruit-salad
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: kong-fruit-salad
+        template:
+          metadata:
+            labels:
+              app: kong-fruit-salad
+          spec:
+            containers:
+              - name: kong
+                image: "{{ kong_fruit_salad_image.qualified }}"
+                imagePullPolicy: Always
+                resources:
+                  requests:
+                    cpu: "20m"
+                    memory: "400Mi"
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                env:
+                  - name: KONG_DATABASE
+                    value: "off"
+                  - name: KONG_PLUGINS
+                    value: bundled,epfl-rewrite-hostnames,epfl-hijack-tequila
+                  - name: KONG_DECLARATIVE_CONFIG
+                    value: /kongfig/kong.yml
+                volumeMounts:
+                  - mountPath: /kongfig
+                    name: kong-fruit-salad
+            volumes:
+              - name: kong-fruit-salad
+                configMap:
+                  name: kong-fruit-salad
+
+- tags: wp.build.kong.restart
+  when: >-
+    (
+      (
+        (_kong_configmap | default({}) is changed)
+        or
+        (_kong_build | default({}) is changed)
+      )
+      and not
+      (_kong_deployment | default({}) is changed)
+    )
+    or ("wp.build.kong.restart" in ansible_run_tags)
+  name: "Redeploy Kong"
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      kubectl -n {{ inventory_namespace }} rollout restart deploy/kong-fruit-salad
+
+- name: Service/kong-fruit-salad
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: kong-fruit-salad
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: kong-fruit-salad
+      spec:
+        type: ClusterIP
+        ports:
+        - name: "https"
+          port: 8443
+          protocol: TCP
+          targetPort: 8443
+        selector:
+          app: kong-fruit-salad
+
+- name: "Continuous integration targets (“fruit salad”): `Route`s (through Kong)"
+  loop: "{{ wp_nginx_ci_flavors }}"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: "{{ _route_name }}"
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: "{{ _route_name }}"
+          route: public
+      spec:
+        host: "{{ _fqdn }}"
+        to:
+          kind: Service
+          name: kong-fruit-salad
+        port:
+          targetPort: https
+        tls:
+          termination: passthrough
+          insecureEdgeTerminationPolicy: Redirect
+  vars:
+    _route_name: "wp-nginx-{{ item.name }}"
+    _fqdn: "wp-test-{{ item.name }}.epfl.ch"  # Like in ../templates/kong.yml
