@@ -34,11 +34,6 @@
     - s3-vars.yml
     - build-vars.yml
 
-- tags: always
-  include_vars:
-    name: runner_credentials
-    file: ../../vars/runner-credentials.yml
-
 - name: "{{ buildconfig_name }} on {{ ansible_quay_hostname }}"
   run_once: true
   epfl_si.quay.quay_repository:

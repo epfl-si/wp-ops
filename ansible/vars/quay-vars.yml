@@ -9,13 +9,10 @@ quay_puller_robot_account_name: "svc0041+svc0041_puller"
 quay_puller_secret_name: >-
   {{ quay_puller_robot_account_name | regex_replace('[_+]', '-') }}-pull-secret
 
-# `quay_secrets` is supposed to be loaded out of ./quay-secrets.yml for this to work:
+# `quay_secrets` is supposed to be loaded out of ./quay-secrets.yml for these to work:
 quay_botfather_token: >-
-  {{ quay_secrets.quay.org_admin_token
-  | eyaml(quay_secrets.eyaml_keys) }}
-
-# 💡 runner_credentials comes (you guessed it) from ./runner-credentials.yml
+  {{ quay_secrets.quay.org_admin_token | eyaml(quay_secrets.eyaml_keys) }}
 ansible_quay_bearer_token: >-
-  {{ runner_credentials.quay_api.bearer_token | eyaml(runner_credentials.eyaml_keys) }}
+  {{ quay_secrets.quay.org_admin_token | eyaml(quay_secrets.eyaml_keys) }}
 
 builder_robot_account_name: svc0041+builder_robot_account

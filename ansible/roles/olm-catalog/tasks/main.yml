@@ -9,6 +9,7 @@
     - catalog-vars.yml
     - ../../../vars/quay-vars.yml
 
+# Required for quay-vars.yml, above:
 - tags: always
   include_vars:
     file: ../../../vars/quay-secrets.yml

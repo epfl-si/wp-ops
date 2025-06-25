@@ -1,5 +1,14 @@
 - tags: always
-  include_vars: build-vars.yml
+  include_vars: "{{ item }}"
+  with_items:
+    - build-vars.yml
+    - quay-vars.yml
+
+# Required for quay-vars.yml, above:
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_credentials
 
 - name: "`ServiceAccount/{{ build_service_account }}`"
   kubernetes.core.k8s:
