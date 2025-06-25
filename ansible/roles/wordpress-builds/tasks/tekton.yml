@@ -141,11 +141,13 @@
                     echo -n "$TAG" > $(results.build-tag.path)
 
                     deploy="deployment/$(params.target-deployment)"
+                    : > "$(results.retag-image-nginx.path)"
+                    : > "$(results.retag-image-php.path)"
                     if [ -n "$(kubectl get "$deploy" -o jsonpath="{ .metadata.annotations['self-service-fruit'] }")" ]; then
                       kubectl get "$deploy" -o jsonpath='{ range .spec.template.spec.containers[*]} {.image }{ "\n" }{ end }' | \
                         while read img; do case "$img" in
-                           *wp-nginx*) echo -n "$img" > $(results.retag-image-nginx.path) ;;
-                           *wp-php*) echo -n "$img" > $(results.retag-image-php.path) ;;
+                           *wp-nginx*) echo -n "$img" > "$(results.retag-image-nginx.path)" ;;
+                           *wp-php*) echo -n "$img" > "$(results.retag-image-php.path)" ;;
                         esac; done
                     fi
 
