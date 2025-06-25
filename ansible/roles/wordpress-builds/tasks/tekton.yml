@@ -140,14 +140,14 @@
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
 
-                    deploy="deployment/$(params.target-deployment)"
                     : > "$(results.retag-image-nginx.path)"
                     : > "$(results.retag-image-php.path)"
-                    if [ -n "$(kubectl get "$deploy" -o jsonpath="{ .metadata.annotations['self-service-fruit'] }")" ]; then
-                      kubectl get "$deploy" -o jsonpath='{ range .spec.template.spec.containers[*]} {.image }{ "\n" }{ end }' | \
+                    if [ -n "$(params.target-deployment)" ]; then
+                      kubectl get "deployment/$(params.target-deployment)" -o jsonpath='{ range .spec.template.spec.containers[*]} {.image }{ "\n" }{ end }' | \
                         while read img; do case "$img" in
-                           *wp-nginx*) echo -n "$img" > "$(results.retag-image-nginx.path)" ;;
-                           *wp-php*) echo -n "$img" > "$(results.retag-image-php.path)" ;;
+                          *-[0-9][0-9][0-9])   :  ;;    # This image is pinned to a specific built; don't touch it
+                          *wp-nginx*) echo -n "$img" > "$(results.retag-image-nginx.path)" ;;
+                          *wp-php*) echo -n "$img" > "$(results.retag-image-php.path)" ;;
                         esac; done
                     fi
 
@@ -291,7 +291,7 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
-          - name: tag-wp-nginx-fruit
+          - name: tag-wp-nginx
             runAfter: [ build-wp-nginx ]
             when:
               - input: "$(tasks.prep.results.retag-image-nginx)"
@@ -309,7 +309,7 @@
             workspaces:
               - name: dockerconfig
                 workspace: dockerconfig
-          - name: tag-wp-php-fruit
+          - name: tag-wp-php
             runAfter: [ build-wp-php ]
             when:
               - input: "$(tasks.prep.results.retag-image-php)"
@@ -328,7 +328,7 @@
               - name: dockerconfig
                 workspace: dockerconfig
           - name: patch-and-rollout-deployment
-            runAfter: [ tag-wp-nginx-fruit, tag-wp-php-fruit ]
+            runAfter: [ tag-wp-nginx, tag-wp-php ]
             taskSpec:
               steps:
                 - name: patch-and-rollout
