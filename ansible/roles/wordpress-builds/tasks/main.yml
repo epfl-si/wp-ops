@@ -67,16 +67,27 @@
     file: continuous-integration.yml
     apply:
       tags:
+        - wp.build
+        - wp.build.kong
+  tags:
+        - wp.build
+        - wp.build.kong
+        - wp.build.kong.rebuild
+        - wp.build.kong.restart
+
+- name: GitHub continuous integration poller / webhook
+  include_tasks:
+    file: continuous-integration.yml
+    apply:
+      tags:
         - wp.ci
-        - wp.ci.kong
+        - wp.build.ci
         - wp.continuous-integration
-        - wp.continuous-integration.kong
   tags:
         - wp.ci
-        - wp.ci.kong
+        - wp.build.ci
+        - wp.build.ci.rebuild
+        - wp.build.ci.restart
         - wp.continuous-integration
-        - wp.continuous-integration.kong
-        - wp.continuous-integration.kong.rebuild
-        - wp.continuous-integration.kong.restart
         - wp.continuous-integration.rebuild
         - wp.continuous-integration.restart
