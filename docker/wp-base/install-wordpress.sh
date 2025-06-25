@@ -274,7 +274,7 @@ plugin_canonical_name () {
 try_git_switch () {
     local repo_url="$1"
 
-    find . -name .git | while read gitdir; do (
+    find "$targetdir" -name .git | while read gitdir; do (
         cd "$gitdir/.."
         git checkout "$repo_url" || true
     ); done
