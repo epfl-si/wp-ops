@@ -2,6 +2,7 @@
   include_vars: "{{ item }}"
   with_items:
     - ../../vars/versions.yml
+    - build-vars.yml
     - quay-vars.yml
     - kong-vars.yml
     - mirrors-vars.yml
@@ -376,7 +377,7 @@
                   - --privileged-service-account
                   - "{{ wp_base_builder_buildah_service_account }}"
                   - --unprivileged-service-account
-                  - "{{ wp_base_builder_service_account }}"
+                  - "{{ build_service_account }}"
                 imagePullPolicy: Always
                 resources:
                   limits:

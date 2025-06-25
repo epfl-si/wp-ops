@@ -4,7 +4,6 @@ oc_cli_image_tag: latest
 oc_cli_image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/{{ oc_cli_image_name }}:{{ oc_cli_image_tag }}"
 
 
-wp_base_builder_service_account: wp-base-builder
 # Provisioned by the OpenShift operator for running as UID 0 and
 # CAP_SETFCAP (which we couldn't do ourselves); see
 # https://docs.redhat.com/en/documentation/openshift_container_platform/4.8/html/cicd/pipelines#about-taskrun_understanding-openshift-pipelines
