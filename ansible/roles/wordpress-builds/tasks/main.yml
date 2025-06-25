@@ -20,23 +20,35 @@
         namespace: "{{ inventory_namespace }}"
       imagePullSecrets:
         - name: svc0041-svc0041-puller-pull-secret
+  tags:
+    - wp.build
+    - wp.build.serviceaccount
 
 - name: Mirror images used to build `FROM`
   include_tasks:
     file: mirrors.yml
     apply:
       tags:
-        - wp.base.mirrors
+        - wp.build
+        - wp.build.mirrors
   tags:
-    - wp.base.mirrors
+    - wp.build
+    - wp.build.mirrors
 
 - name: Toolbox image
   include_tasks:
     file: _buildconfig.yml
     apply:
       tags:
-      - wp.toolbox
+      - wp.build
       - wp.build.toolbox
+      - wp.toolbox
+  tags:
+    - wp.build
+    - wp.toolbox
+    - wp.build.toolbox
+    - wp.toolbox.rebuild
+    - wp.build.toolbox.rebuild
   vars:
     buildconfig_name: build-toolbox
     buildconfig_description: Image with git, jq, bash etc. for build-related tasks
@@ -50,26 +62,21 @@
     buildconfig_rebuild_tags:
     - wp.toolbox.rebuild
     - wp.build.toolbox.rebuild
-  tags:
-    - wp.toolbox
-    - wp.build.toolbox
-    - wp.toolbox.rebuild
-    - wp.build.toolbox.rebuild
 
 - name: wp-base/Tekton
   include_tasks:
     file: tekton.yml
     apply:
       tags:
-        - wp.base.build
-        - wp.base.tekton
+        - wp.build
         - wp.tekton
+        - wp.build.tekton
   tags:
-    - wp.base.build
-    - wp.base.tekton
+    - wp.build
     - wp.tekton
+    - wp.build.tekton
     - wp.tekton.pipeline
-    - wp.base.tekton.toolbox.rebuild
+    - wp.build.tekton.pipeline
 
 - name: Kong reverse proxy for blue/green(/red/yellow/orange) testing
   include_tasks:
@@ -90,10 +97,12 @@
     apply:
       tags:
         - wp.ci
+        - wp.build
         - wp.build.ci
         - wp.continuous-integration
   tags:
         - wp.ci
+        - wp.build
         - wp.build.ci
         - wp.build.ci.rebuild
         - wp.build.ci.restart

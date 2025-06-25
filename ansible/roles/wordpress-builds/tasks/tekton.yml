@@ -143,7 +143,9 @@
             DOCKER_CONFIG=/tmp/docker-auth \
               skopeo copy "docker://$TAG_FROM" "docker://$TAG_TO"
 
-- tags: wp.tekton.pipeline
+- tags:
+    - wp.tekton.pipeline
+    - wp.build.tekton.pipeline
   name: wp-base/Tekton - Pipeline
   kubernetes.core.k8s:
     definition:
