@@ -9,11 +9,6 @@
 
 - tags: always
   include_vars:
-    name: runner_credentials
-    file: ../../vars/runner-credentials.yml
-
-- tags: always
-  include_vars:
     file: github-credentials.yml
     name: github_credentials
 
