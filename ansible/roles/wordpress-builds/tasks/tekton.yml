@@ -303,8 +303,7 @@
                 value: >-
                   {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx@$(tasks.build-wp-nginx.results.IMAGE_DIGEST)
               - name: tagTo
-                value: >-
-                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.retag-image-nginx)
+                value: "$(tasks.prep.results.retag-image-nginx)"
             workspaces:
               - name: dockerconfig
                 workspace: dockerconfig
@@ -322,8 +321,7 @@
                 value: >-
                   {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php@$(tasks.build-wp-php.results.IMAGE_DIGEST)
               - name: tagTo
-                value: >-
-                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.retag-image-php)
+                value: "$(tasks.prep.results.retag-image-php)"
             workspaces:
               - name: dockerconfig
                 workspace: dockerconfig
