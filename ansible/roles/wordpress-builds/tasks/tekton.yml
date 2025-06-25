@@ -150,12 +150,12 @@
 
                     git clone https://github.com/epfl-si/wp-ops wp-ops
                     (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
-                    if [ -z "$(params.branch-name)" ]; then
+                    if [ -n "$(params.branch-name)" ]; then
                       (cd wp-ops; git checkout "$(params.branch-name)" || true)
                     fi
 
                     git clone https://github.com/epfl-si/wp-operator.git
-                    if [ -z "$(params.branch-name)" ]; then
+                    if [ -n "$(params.branch-name)" ]; then
                       (cd wp-operator; git checkout "$(params.branch-name)" || true)
                     fi
 
