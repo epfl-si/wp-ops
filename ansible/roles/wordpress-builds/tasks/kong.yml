@@ -60,29 +60,13 @@
     _service_name: "wp-nginx-{{ item.name }}"
 
 - name: "Mirror the Kong base image"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    name: "{{ kong_base_image_mirrored.shortname }}"
-    organization: "{{ quay_organization }}"
-    description: "Mirrored from {{ kong_base_image }}"
-    visibility: public
-    mirror:
-      from: "{{ kong_base_image.uri }}"
-      robot_account: "{{ mirrorist_quay_robot_account }}"
-      tags: ["{{ kong_base_image_version | string }}"]
-
-- name: "Access matrix to {{ kong_base_image_mirrored.uri }}"
-  run_once: true
-  epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ item.robot_account }}"
-    organization: "{{ quay_organization }}"
-    repository_name: "{{ kong_base_image_mirrored.shortname }}"
-    permission: "{{ item.permission }}"
-  with_items:
-    - robot_account: "{{ mirrorist_quay_robot_account }}"
-      permission: write
-    - robot_account: "{{ quay_puller_robot_account_name }}"
-      permission: read
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: "{{ kong_base_image_mirrored.shortname }}"
+    mirror_tags:
+      - "{{ kong_base_image_version | string }}"
+    mirror_from: "{{ kong_base_image.uri }}"
 
 - name: "`kong-fruit-salad` cloud build"
   tags:

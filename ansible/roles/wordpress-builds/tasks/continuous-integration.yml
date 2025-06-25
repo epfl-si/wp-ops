@@ -27,16 +27,12 @@
         PRIVATE_KEY: "{{ github_credentials.private_key | eyaml(github_credentials.eyaml_keys) }}"
 
 - name: "Mirror the Node:22-alpine base image"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    name: "node"
-    organization: "{{ quay_organization }}"
-    description: "Mirrored from Node:22-alpine"
-    visibility: public
-    mirror:
-      from: "docker.io/library/node:22-alpine"
-      robot_account: "{{ mirrorist_quay_robot_account }}"
-      tags: ["22-alpine"]
+  include_tasks:
+    file: ../../tasks/_mirror.yml
+  vars:
+    mirror_name: "node"
+    mirror_from: "docker.io/library/node"
+    mirror_tags: ["22-alpine"]
 
 - name: "wp-continuous-integration on {{ ansible_quay_hostname }}"
   run_once: true

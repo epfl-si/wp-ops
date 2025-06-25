@@ -4,39 +4,18 @@
     - mirrors-vars.yml
     - ../../vars/quay-vars.yml
 
-- name: "Mirror the Ubuntu base image"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    name: "ubuntu"
-    organization: "{{ quay_organization }}"
-    description: "Mirrored from ubuntu:noble"
-    visibility: public
-    mirror:
-      from: "docker.io/library/ubuntu:noble"
-      robot_account: "{{ mirrorist_quay_robot_account }}"
-      tags: ["noble", "latest", "jammy", "focal"]
-
-- name: "Mirror {{ nginx_runner_bitnami_image.original }} to Quay"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    organization: "{{ quay_organization }}"
-    name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
-    description: "Mirrored from {{ _mirrored_from_short }}"
-    visibility: public
-    mirror:
-      from: "{{ _mirrored_from_short }}"
-      robot_account: "{{ mirrorist_quay_robot_account }}"
-      tags: ["{{ _mirrored_from_tag }}"]
+- name: "Mirror the Ubuntu images we use as base"
+  include_tasks:
+    file: _mirror.yml
   vars:
-    _mirrored_from_short: >-
-      {{ nginx_runner_bitnami_image.original | split(":") | first }}
-    _mirrored_from_tag: >-
-      {{ nginx_runner_bitnami_image.original | split(":") | last }}
+    mirror_name: ubuntu
+    mirror_from: "docker.io/library/ubuntu"
+    mirror_tags: ["noble", "latest", "jammy", "focal"]
 
-- name: "Grant access to {{ mirrorist_quay_robot_account }} to do its job"
-  run_once: true
-  epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ mirrorist_quay_robot_account }}"
-    organization: "{{ quay_organization }}"
-    repository_name: "{{ nginx_runner_bitnami_image_mirrored.shortname }}"
-    permission: write
+- name: "Mirror the wp-nginx base image"
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: nginx-ingress-controller
+    mirror_from: docker.io/bitnami/nginx-ingress-controller
+    mirror_tags: ["1.12.1"]

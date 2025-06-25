@@ -4,6 +4,7 @@ quay_organization: svc0041
 
 # Robot account whose credentials will be used to pull (almost) everything we need from Quay:
 quay_puller_robot_account_name: "svc0041+svc0041_puller"
+quay_mirrorist_robot_account_name: svc0041+mirrorist
 
 # This is the transformation that Quay itself suggests:
 quay_puller_secret_name: >-
