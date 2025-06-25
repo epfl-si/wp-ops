@@ -34,68 +34,21 @@
     mirror_from: "docker.io/library/node"
     mirror_tags: ["22-alpine"]
 
-- name: "wp-continuous-integration on {{ ansible_quay_hostname }}"
-  run_once: true
-  epfl_si.quay.quay_repository:
-    name: "wp-continuous-integration"
-    organization: "{{ quay_organization }}"
-    description: "Image with node for wp-continuous-integration"
-    visibility: public
-
-- name: "Access matrix to {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-continuous-integration:latest"
-  run_once: true
-  epfl_si.quay.robot_account_permission:
-    robot_account_name: "{{ item.robot_account }}"
-    organization: "{{ quay_organization }}"
-    repository_name: "wp-continuous-integration"
-    permission: "{{ item.permission }}"
-  with_items:
-    - robot_account: "{{ builder_robot_account_name }}"
-      permission: write
-    - robot_account: "{{ quay_puller_robot_account_name }}"
-      permission: read
-
-- name: "`BuildConfig/wp-continuous-integration`"
-  register: _tekton_wp_ci_buildconfig
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: build.openshift.io/v1
-      kind: BuildConfig
-      metadata:
-        name: wp-continuous-integration
-        namespace: "{{ inventory_namespace }}"
-      spec:
-        source:
-          type: Git
-          git:
-            uri: "https://github.com/epfl-si/wp-continuous-integration"
-        strategy:
-          type: Docker
-          dockerStrategy:
-            from:   # Override the Dockerfile's `FROM` line
-              kind: DockerImage
-              name: "{{ ansible_quay_hostname }}/{{ quay_organization }}/node:22-alpine"
-        output:
-          to:
-            kind: DockerImage
-            name: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-continuous-integration:latest"
-        serviceAccount: builder
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "256Mi"
-
-- name: Build wp-continuous-integration now
-  tags: wp.continuous-integration.rebuild
-  when: >-
-    (_tekton_wp_ci_buildconfig | default({}) is changed)
-    or "wp.continuous-integration.rebuild" in ansible_run_tags
-  shell:
-    cmd: |
-      set -e -x
-      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
-      oc -n {{ inventory_namespace }} start-build --wait wp-continuous-integration
-  register: _wp_continuous_integration_build
+- name: "Build wp-continuous-integration"
+  include_tasks:
+    file: _buildconfig.yml
+  vars:
+    buildconfig_name: wp-continuous-integration
+    buildconfig_description: Node webhook / polling agent for GitHub pull requests
+    buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/node:22-alpine"
+    buildconfig_source:
+      type: Git
+      git:
+        uri: "https://github.com/epfl-si/wp-continuous-integration"
+    buildconfig_rebuild_tags:
+      - wp.build.ci.rebuild
+      - wp.ci.rebuild
+      - wp.continuous-integration.rebuild
 
 - name: ConfigMap/wp-continuous-integration
   kubernetes.core.k8s:
