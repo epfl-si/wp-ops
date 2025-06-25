@@ -12,17 +12,6 @@
       imagePullSecrets:
         - name: svc0041-svc0041-puller-pull-secret
 
-- name: wp-base/RBAC
-  include_tasks:
-    file: rbac.yml
-    apply:
-      tags:
-        - wp.base.build
-        - wp.base.rbac
-  tags:
-    - wp.base.build
-    - wp.base.rbac
-
 - name: wp-base/Secrets
   include_tasks:
     file: secrets.yml
