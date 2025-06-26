@@ -164,9 +164,6 @@
           - name: branch-name
             default: ''
             description: "Branch name to use in the clone command"
-          - name: commit-sha
-            default: ''
-            description: "Commit SHAs of the built image for each repo"
           - name: wordpress-version
             default: ''
             description: "Wordpress image used to build wp-base image"
@@ -419,8 +416,7 @@
                           {
                             "annotations":
                             {
-                              "epfl/built-from-branch": "$(params.branch-name)",
-                              "epfl/build-from-sha": "$(params.commit-sha)"
+                              "epfl/built-from-branch": "$(params.branch-name)"
                             }
                           }
                         }
