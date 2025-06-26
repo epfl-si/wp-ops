@@ -57,7 +57,6 @@
       type: Git
       git:
         uri: "https://github.com/epfl-si/wp-ops"
-        ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
       contextDir: docker/build-toolbox
     buildconfig_rebuild_tags:
     - wp.toolbox.rebuild

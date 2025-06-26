@@ -228,7 +228,6 @@
                     fi
 
                     git clone https://github.com/epfl-si/wp-ops wp-ops
-                    (cd wp-ops; git checkout feature/wp-base-cloud-tekton-build )     # TODO: remove upon merging that branch
                     if [ -n "$(params.branch-name)" ]; then
                       (cd wp-ops; git checkout "$(params.branch-name)" || true)
                     fi

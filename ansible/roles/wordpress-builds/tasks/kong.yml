@@ -81,7 +81,6 @@
       type: Git
       git:
         uri: "https://github.com/epfl-si/wp-ops"
-        ref: "feature/wp-base-cloud-tekton-build"   # TODO: remove upon merging
       contextDir: docker/kong-fruit-salad
     buildconfig_rebuild_tags:
       - wp.build.kong.rebuild
