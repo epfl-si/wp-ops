@@ -130,4 +130,6 @@
               enabled: true
 
 - name: "Restore nightly sites from prod to test"
+  when: >-
+    inventory_deployment_stage == "test"
   include_tasks: restore-sites-prod-to-test.yml
