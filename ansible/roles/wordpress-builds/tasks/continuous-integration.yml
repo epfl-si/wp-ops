@@ -190,6 +190,10 @@
           resources:
             - persistentvolumeclaims
           verbs: ['create', 'delete', 'deletecollection', 'patch', 'update', 'get', 'list', 'watch']
+        - apiGroups: [ '' ]
+          resources:
+            - pods
+          verbs: [ 'create', 'delete', 'deletecollection', 'patch', 'update', 'get', 'list', 'watch' ]
         - apiGroups: ['']
           resources:
             - secrets
