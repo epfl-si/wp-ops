@@ -42,6 +42,19 @@
     - wp
     - wp.mariadb
 
+- name: Backup all WordpressSite kind
+  include_tasks:
+    file: backup-wordpresssites.yml
+    apply:
+      tags:
+        - wp
+        - wp.backup
+        - wp.backup_wordpresssites
+  tags:
+    - wp
+    - wp.backup
+    - wp.backup_wordpresssites
+
 - name: Serving secrets (for plugins, outgoing SMTP etc.)
   include_tasks:
     file: secrets.yml

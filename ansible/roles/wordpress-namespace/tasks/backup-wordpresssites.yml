@@ -1,0 +1,81 @@
+- tags: always
+  include_vars: ../../../vars/quay-vars.yml
+
+- name: ServiceAccount/backup-wordpresssite
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: backup-wordpresssite
+        namespace: "{{ inventory_namespace }}"
+
+- name: Role/backup-wordpresssite
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: backup-wordpresssite
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ['wordpress.epfl.ch']
+          resources:
+            - wordpresssites
+          verbs: ['get', 'list']
+
+- name: RoleBinding/backup-wordpresssite
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: backup-wordpresssite
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: backup-wordpresssite
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: backup-wordpresssite
+
+- name: CronJob/backup-wordpresssite
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: backup-wordpresssite
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        schedule: "25 * * * *"
+        timeZone: "Europe/Zurich"
+        jobTemplate:
+          spec:
+            template:
+              metadata:
+                labels:
+                  app: backup-wordpresssite-cron
+              spec:
+                serviceAccountName: backup-wordpresssite
+                containers:
+                  - name: backup-wordpresssite-cron
+                    image: "quay-its.epfl.ch/svc0041/wp-backup-wordpresssites:2025-001"
+                    imagePullPolicy: Always
+                    command: ["/bin/bash"]
+                    args: ["/wordpresssites-backup.sh"]
+                    resources:
+                        requests:
+                          cpu: "50m"
+                          memory: "512Mi"
+                        limits:
+                          memory: "512Mi"
+                    envFrom:
+                      - secretRef:
+                          name: s3-backup-credentials
+                imagePullSecrets:
+                  - name: "{{ quay_puller_secret_name }}"
+                restartPolicy: OnFailure
+        concurrencyPolicy: Forbid
