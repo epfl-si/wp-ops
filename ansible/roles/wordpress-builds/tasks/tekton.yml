@@ -237,6 +237,8 @@
                     dockerfiles="$(find . -name Dockerfile)"
                     sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       $dockerfiles
+                    sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-cron:latest;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:$TAG;g" \
+                      $dockerfiles                    
                     sed -i "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       $dockerfiles
                     sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
@@ -339,6 +341,23 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-cron"
+              - name: VERBOSE
+                value: "true"
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: build-wp-backup-wordpresssites
+            runAfter: [ build-wp-cron ]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-backup-wordpresssites:$(tasks.prep.results.build-tag)"
+              - name: CONTEXT
+                value: "wp-ops/docker/wp-backup"
               - name: VERBOSE
                 value: "true"
             workspaces:

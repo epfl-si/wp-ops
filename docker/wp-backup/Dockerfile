@@ -1,4 +1,4 @@
-FROM quay-its.epfl.ch/svc0041/wp-cron:2025-274
+FROM quay-its.epfl.ch/svc0041/wp-cron:latest
 
 RUN apt-get -qy update
 RUN apt-get -qy install unzip
