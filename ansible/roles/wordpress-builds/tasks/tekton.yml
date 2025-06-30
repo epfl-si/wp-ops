@@ -241,7 +241,7 @@
                       $dockerfiles
                     sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
                       $dockerfiles
-                    sed -i 's;FROM ubuntu:jammy;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:jammy;g' \
+                    sed -i 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
                       $dockerfiles
                     if [ -n "$(params.branch-name)" ]; then
                       echo "try_git_switch '$(params.branch-name)'" >> wp-ops/docker/wp-base/install-wordpress.sh
