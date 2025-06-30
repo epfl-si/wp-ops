@@ -50,7 +50,7 @@
         name: backup-wordpresssite
         namespace: "{{ inventory_namespace }}"
       spec:
-        schedule: "25 * * * *"
+        schedule: "24 0 * * *"
         timeZone: "Europe/Zurich"
         jobTemplate:
           spec:
@@ -62,7 +62,7 @@
                 serviceAccountName: backup-wordpresssite
                 containers:
                   - name: backup-wordpresssite-cron
-                    image: "quay-its.epfl.ch/svc0041/wp-backup-wordpresssites:2025-001"
+                    image: "quay-its.epfl.ch/svc0041/wp-backup-wordpresssites:feature-wpsites-backup-001"
                     imagePullPolicy: Always
                     command: ["/bin/bash"]
                     args: ["/wordpresssites-backup.sh"]
