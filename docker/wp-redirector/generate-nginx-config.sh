@@ -3,7 +3,7 @@
 CONFIG_FILE="/config/redirects.txt"
 NGINX_CONF="/etc/nginx/nginx.conf"
 
-echo "Generating optimized nginx config from $CONFIG_FILE"
+echo "Generating nginx config from $CONFIG_FILE"
 
 # Base nginx config with map
 cat > $NGINX_CONF << 'EOF'
@@ -27,7 +27,6 @@ http {
     sendfile on;
     keepalive_timeout 65;
 
-    # Map for redirects - much more efficient than multiple server blocks
     map $host $redirect_destination {
         default "";
 EOF
@@ -42,8 +41,6 @@ if [ -f "$CONFIG_FILE" ]; then
         destination=$(echo "$destination" | xargs)
         
         echo "Adding redirect: $source -> $destination"
-        
-        # Add map entry
         echo "        $source $destination;" >> $NGINX_CONF
         ((count++))
     done < "$CONFIG_FILE"
@@ -51,14 +48,13 @@ if [ -f "$CONFIG_FILE" ]; then
     echo "Added $count redirects to map"
 else
     echo "Config file not found, using default"
-    echo "        test.local example.com;" >> $NGINX_CONF
+	exit 1
 fi
 
 # Close map and add single server block
 cat >> $NGINX_CONF << 'EOF'
     }
 
-    # Single server block handles all redirects
     server {
         listen 80;
         server_name _;
@@ -68,14 +64,7 @@ cat >> $NGINX_CONF << 'EOF'
             return 200 'OK';
             add_header Content-Type text/plain;
         }
-        
-        # Reload endpoint (dummy for compatibility)
-        location = /reload {
-            return 200 'Map-based config active';
-            add_header Content-Type text/plain;
-        }
-        
-        # Main redirect logic
+
         location / {
             # If we have a redirect destination, do it
             if ($redirect_destination != "") {
@@ -83,7 +72,7 @@ cat >> $NGINX_CONF << 'EOF'
             }
             
             # No redirect configured
-            return 200 'Nginx Redirect Server - No redirect configured for host: $host';
+            return 200 'WP-Redirector - No redirect configured for host: $host';
             add_header Content-Type text/plain;
         }
     }

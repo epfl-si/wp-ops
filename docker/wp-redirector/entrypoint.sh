@@ -2,10 +2,8 @@
 
 echo "Starting nginx redirect server..."
 
-# Generate initial config
 /usr/local/bin/generate-nginx-config.sh
 
-# Watch for config changes in background
 if [ -f /config/redirects.txt ]; then
     echo "Starting config file watcher..."
     (
