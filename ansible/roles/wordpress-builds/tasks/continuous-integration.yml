@@ -83,6 +83,7 @@
             - wp-plugin-epfl-translate
             - wp-plugin-epfl-menus
             - wp-plugin-pushgateway
+            - wp-ops          
           DEBUG: {{ _debug }}
           NAMESPACE: "svc0041t-wordpress"
   vars:
