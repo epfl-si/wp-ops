@@ -194,7 +194,7 @@
         - apiGroups: [ '' ]
           resources:
             - pods
-          verbs: [ 'create', 'delete', 'deletecollection', 'patch', 'update', 'get', 'list', 'watch' ]
+          verbs: ['create', 'delete', 'deletecollection', 'patch', 'update', 'get', 'list', 'watch']
         - apiGroups: ['']
           resources:
             - secrets
