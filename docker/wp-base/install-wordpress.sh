@@ -265,7 +265,7 @@ plugin_canonical_name () {
 
 # This function is meant to make it easier to create a testing image. It unused in a pristine build.
 #
-# Append a call like
+# Appending a call like
 #
 #      try_git_switch feature/foo
 #
