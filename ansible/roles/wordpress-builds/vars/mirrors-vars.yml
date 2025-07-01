@@ -1,8 +1,0 @@
-nginx_runner_bitnami_image:
-  original: bitnami/nginx-ingress-controller:1.12.1
-  mirrored: "{{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1"
-
-nginx_runner_bitnami_image_mirrored: >-
-  {{ nginx_runner_bitnami_image.mirrored | parse_docker_image_name }}
-
-mirrorist_quay_robot_account: svc0041+mirrorist
