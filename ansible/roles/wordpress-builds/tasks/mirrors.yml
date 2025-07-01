@@ -18,7 +18,7 @@
   vars:
     mirror_name: nginx-ingress-controller
     mirror_from: docker.io/bitnami/nginx-ingress-controller
-    mirror_tags: ["1.12.1"]
+    mirror_tags: ["1", "1.12", "1.12.?", "latest"]
 
 - name: "Mirror the openresty image"
   include_tasks:
