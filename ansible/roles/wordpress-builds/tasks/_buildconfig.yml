@@ -30,7 +30,6 @@
   include_vars: "{{ item }}"
   with_items:
     - ../../../vars/quay-vars.yml
-    - mirrors-vars.yml
     - s3-vars.yml
     - build-vars.yml
 

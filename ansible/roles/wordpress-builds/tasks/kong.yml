@@ -5,7 +5,6 @@
     - build-vars.yml
     - quay-vars.yml
     - kong-vars.yml
-    - mirrors-vars.yml
     - continuous-integration-vars.yml
 
 - name: "Continuous integration targets (“fruit salad”): Deployments"

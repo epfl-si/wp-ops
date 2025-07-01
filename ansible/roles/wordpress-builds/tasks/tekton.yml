@@ -3,7 +3,6 @@
   with_items:
     - ../../../vars/quay-vars.yml
     - build-vars.yml
-    - mirrors-vars.yml
     - s3-vars.yml
     - build-vars.yml
     - continuous-integration-vars.yml

@@ -4,7 +4,6 @@
     - ../../vars/versions.yml
     - build-vars.yml
     - quay-vars.yml
-    - mirrors-vars.yml
     - continuous-integration-vars.yml
 
 - tags: always

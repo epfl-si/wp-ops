@@ -1,7 +1,6 @@
 - tags: always
   include_vars: "{{ item }}"
   with_items:
-    - mirrors-vars.yml
     - ../../vars/quay-vars.yml
 
 - name: "Mirror the Ubuntu images we use as base"
