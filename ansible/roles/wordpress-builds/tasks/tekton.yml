@@ -239,7 +239,7 @@
                       $dockerfiles
                     sed -i "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       $dockerfiles
-                    sed -i 's;FROM bitnami/nginx-ingress-controller:1.12.1;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/bitnami-nginx-ingress-controller:1.12.1;g' \
+                    sed -i 's;FROM bitnami/nginx-ingress-controller:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/nginx-ingress-controller:;g' \
                       $dockerfiles
                     sed -i 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
                       $dockerfiles
