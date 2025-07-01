@@ -63,7 +63,7 @@
                 containers:
                   - name: backup-wordpresssite-cron
                     image: "quay-its.epfl.ch/svc0041/wp-backup-wordpresssites:feature-wpsites-backup-001"
-                    imagePullPolicy: Always
+                    imagePullPolicy: IfNotPresent
                     command: ["/bin/bash"]
                     args: ["/wordpresssites-backup.sh"]
                     resources:
