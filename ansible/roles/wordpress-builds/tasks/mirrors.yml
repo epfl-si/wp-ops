@@ -19,3 +19,11 @@
     mirror_name: nginx-ingress-controller
     mirror_from: docker.io/bitnami/nginx-ingress-controller
     mirror_tags: ["1.12.1"]
+
+- name: "Mirror the openresty image"
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: openresty
+    mirror_from: openresty/openresty
+    mirror_tags: ["1.27.1.1-3-alpine-fat"]
