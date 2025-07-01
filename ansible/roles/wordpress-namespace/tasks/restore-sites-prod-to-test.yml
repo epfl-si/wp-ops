@@ -46,103 +46,6 @@
         kind: Role
         name: restore-sites-prod-to-test
 
-- name: ConfigMap/restore-sites-prod-to-test
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: restore-sites-prod-to-test
-        namespace: "{{ inventory_namespace }}"
-      data:
-        ingresses: |
-          www
-          www-campus
-          www-campus-services
-          www-campus-services-website
-          www-campus-services-website-canari
-        script: |
-          #!/bin/bash
-
-          # if no ingress(es) given then takes default ingresses
-          if [ $# -eq 0 ]; then
-              readarray -t ingresses < "/restore/ingresses.txt"
-          else
-            ingresses=("$@")
-          fi
-
-          readarray -t prod_dbs < "/restore/dbs.txt" # TODO : temporary solution, after will use api from WP-Veritas
-
-          i=0
-          date="$(date +%Y%m%d%H%m%S)"
-
-          # restore each db from prod to test
-          for ingress in "${ingresses[@]}"; do
-
-              echo "Ingress : $ingress"
-
-              mariadb_test_host=$(kubectl get ingress/$ingress -o yaml | grep WP_DB_HOST | tr -s ' ' | cut -d ' ' -f 4 | tr -d ';')
-              echo "MariaDB test host : $mariadb_test_host"
-              mariadb_prod_host="${prod_dbs[i]}" # TODO : temporary solution, after will use api from WP-Veritas
-              echo "MariaDB prod host : $mariadb_prod_host"
-
-              echo "Applying restore ..."
-              kind_restore=$(mktemp)
-              cat <<EOF > "$kind_restore"
-          apiVersion: k8s.mariadb.com/v1alpha1
-          kind: Restore
-          metadata:
-            name: "restore-db-$ingress-$date"
-            namespace: svc0041t-wordpress
-          spec:
-            mariaDbRef:
-              name: "$mariadb_test_host"
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "256Mi"
-              limits:
-                memory: "256Mi"
-            s3:
-              bucket: svc0041-f09a145f151acfe768583301e0389e65
-              prefix: "MariaDB-$mariadb_prod_host"
-              endpoint: s3.epfl.ch
-              accessKeyIdSecretKeyRef:
-                name: s3-prod-ro-credentials
-                key: keyId
-              secretAccessKeySecretKeyRef:
-                name: s3-prod-ro-credentials
-                key: accessSecret
-              tls:
-                enabled: true
-            database: "wp-db-$ingress"
-            targetRecoveryTime: # if empty then takes last restore
-            args:
-              - --verbose
-          EOF
-
-              pod=$(kubectl apply -f "$kind_restore" -o name)
-              kubectl wait --for=condition=complete "$pod" --timeout=10m
-
-              # delete resources
-              kubectl delete -f "$kind_restore"
-              rm "$kind_restore"
-
-              echo "Replace 'www.epfl.ch' by 'wpn-test.epfl.ch'"
-              wp --ingress=$ingress search-replace "https://www.epfl.ch" "https://wpn-test.epfl.ch"
-
-              i=$((i+1))
-          done
-
-          # update menu
-          kubectl rollout restart deployment menu-api
-        dbs: | # TODO : temporary solution, after will use api from WP-Veritas
-          mariadb-03
-          mariadb-05
-          mariadb-05
-          mariadb-05
-          mariadb-01
-
 - name: CronJob/restore-sites-from-prod-to-test
   kubernetes.core.k8s:
     definition:
@@ -164,29 +67,15 @@
                 serviceAccountName: restore-sites-prod-to-test
                 containers:
                   - name: restore-sites-from-prod-to-test-cron
-                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-041"
+                    image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:feature-wpsites-backup-014"
                     command: ["/bin/bash"]
-                    args: ["/restore/restore_sites_prod_to_test.sh"]
-                    volumeMounts:
-                      - name: restore
-                        mountPath: /restore
+                    args: ["/restore_sites_prod_to_test.sh"]
                     resources:
                         requests:
                           cpu: "50m"
                           memory: "512Mi"
                         limits:
                           memory: "512Mi"
-                volumes:
-                  - name: restore
-                    configMap:
-                      name: restore-sites-prod-to-test
-                      items:
-                        - key: "script"
-                          path: "restore_sites_prod_to_test.sh"
-                        - key: "ingresses"
-                          path: "ingresses.txt"
-                        - key: "dbs"
-                          path: "dbs.txt"
                 imagePullSecrets:
                   - name: "{{ quay_puller_secret_name }}"
                 restartPolicy: OnFailure

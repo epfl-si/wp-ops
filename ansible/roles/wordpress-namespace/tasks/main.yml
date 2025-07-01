@@ -49,11 +49,11 @@
       tags:
         - wp
         - wp.backup
-        - wp.backup_wordpresssites
+        - wp.backup.wordpresssites
   tags:
     - wp
     - wp.backup
-    - wp.backup_wordpresssites
+    - wp.backup.wordpresssites
 
 - name: Serving secrets (for plugins, outgoing SMTP etc.)
   include_tasks:
