@@ -26,4 +26,4 @@
   vars:
     mirror_name: openresty
     mirror_from: openresty/openresty
-    mirror_tags: ["1.27.1.1-3-alpine-fat"]
+    mirror_tags: ["1.27.*-alpine-fat", "alpine-fat"]
