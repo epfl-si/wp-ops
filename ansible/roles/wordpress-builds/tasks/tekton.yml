@@ -243,6 +243,8 @@
                       $dockerfiles
                     sed -i 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
                       $dockerfiles
+                    sed -i 's;FROM openresty/openresty:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/openresty:;g' \
+                      $dockerfiles
                     if [ -n "$(params.branch-name)" ]; then
                       echo "try_git_switch '$(params.branch-name)'" >> wp-ops/docker/wp-base/install-wordpress.sh
                     fi
