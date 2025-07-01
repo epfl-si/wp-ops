@@ -68,7 +68,7 @@
                 serviceAccountName: restore-sites-prod-to-test
                 containers:
                   - name: restore-sites-from-prod-to-test-cron
-                    image: "quay-its.epfl.ch/svc0041/wp-cron:2025-280"
+                    image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:feature-wpsites-backup-002"
                     command: ["/bin/bash"]
                     args: ["/restore_sites_prod_to_test.sh"]
                     resources:

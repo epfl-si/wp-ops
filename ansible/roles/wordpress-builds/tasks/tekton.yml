@@ -355,7 +355,7 @@
               name: buildah
             params:
               - name: IMAGE
-                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-backup-wordpresssites:$(tasks.prep.results.build-tag)"
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-backup"
               - name: VERBOSE
