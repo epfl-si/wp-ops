@@ -14,6 +14,9 @@
 #  - mirror_visibility       (optional, default `public`)
 #        The Quay mirrored image's visibility flag
 #
+#  - mirror_sync_interval    (optional, default `86400`)
+#        The Quay mirrored image's sync interval
+#
 # Uses vars that start with quay_ from ../../../vars/quay-vars.yml
 
 - name: "Mirror {{ mirror_name }} on {{ ansible_quay_hostname }}"
@@ -28,6 +31,7 @@
       from: "{{ mirror_from }}"
       robot_account: "{{ quay_mirrorist_robot_account_name }}"
       tags: "{{ mirror_tags }}"
+      sync_interval: "{{ mirror_sync_interval | default('86400') }}"
 
 - name: "Access matrix to {{ ansible_quay_hostname }}/{{ quay_organization }}/{{ mirror_name }}"
   run_once: true
