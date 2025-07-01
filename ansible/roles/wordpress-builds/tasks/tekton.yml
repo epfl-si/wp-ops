@@ -348,7 +348,7 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
-          - name: build-wp-backup-wordpresssites
+          - name: build-wp-s3
             runAfter: [ build-wp-cron ]
             taskRef:
               kind: Task
@@ -357,7 +357,7 @@
               - name: IMAGE
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
-                value: "wp-ops/docker/wp-backup"
+                value: "wp-ops/docker/wp-s3"
               - name: VERBOSE
                 value: "true"
             workspaces:

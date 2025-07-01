@@ -46,7 +46,6 @@
         kind: Role
         name: restore-sites-prod-to-test
 
-
 - name: CronJob/restore-sites-from-prod-to-test
   kubernetes.core.k8s:
     definition:
