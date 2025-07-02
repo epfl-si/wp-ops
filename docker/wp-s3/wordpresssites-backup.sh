@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 date=$(date '+%Y-%m-%dT%H:%M:%S')
 file_name="/tmp/backup.$date.yml"

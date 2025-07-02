@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # To run:
 # default (5 sites below): no params
@@ -8,7 +8,6 @@ echo "Start of db restore"
 
 # if no url(s) given then takes default urls
 if [ $# -eq 0 ]; then
-    readarray -t urls < "/restore/urls.txt"
     urls=("https://www.epfl.ch/" "https://www.epfl.ch/campus/" "https://www.epfl.ch/campus/services/" "https://www.epfl.ch/campus/services/website/" "https://www.epfl.ch/campus/services/website/canari/")
 else
     urls=("$@")
