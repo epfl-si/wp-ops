@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# To run :
-# default (5 sites below) : no params
-# other sites : url of sites
+# To run:
+# default (5 sites below): no params
+# other sites: url of sites
 
 echo "Start of db restore"
 
