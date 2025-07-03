@@ -41,9 +41,9 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuste
 ARG WORDPRESS_VERSION="6.7"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-RUN set -e -x; case "$WORDPRESS_VERSION" in                                 \
-        latest) /tmp/install-wordpress.sh /wp --alpha ;;                    \
-        *)      /tmp/install-wordpress.sh /wp "$WORDPRESS_VERSION" ;;       \
+RUN set -e -x; case $WORDPRESS_VERSION in                                 \
+        latest) /tmp/install-wordpress.sh /wp --alpha ;;                  \
+        *)      /tmp/install-wordpress.sh /wp $WORDPRESS_VERSION ;;       \
     esac
 
 # TODO: remove this once all the Ingress objects have been rewritten.
