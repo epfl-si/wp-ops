@@ -26,8 +26,6 @@ RUN mkdir /wp/wp-cli/packages; \
 # Install and patch WordPresses and dependencies
 ######################################################################
 
-ADD http://api.wordpress.org/core/stable-check/1.0/ /tmp/wordpress-versions.json
-
 ADD wordpress-TinyMCE-flickering-Firefox.patch.6 /tmp/
 ADD clearstatcache-wp-import.patch /tmp/
 
@@ -43,20 +41,15 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuste
 ARG WORDPRESS_VERSION="6.7"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-RUN set -e -x; cd /tmp;                                                     \
-    version="$(case "$WORDPRESS_VERSION" in                                 \
-      latest) jq -r 'keys[]' ;;                                             \
-      *)      jq -r 'keys[] | select(match("^'${WORDPRESS_VERSION}'"))' ;;  \
-    esac < /tmp/wordpress-versions.json | sort -n -r | head -1)";           \
-    case "$WORDPRESS_VERSION" in                                            \
-        latest) /tmp/install-wordpress.sh --alpha /wp "$version" ;;         \
-        *)      /tmp/install-wordpress.sh /wp "$version" ;;                 \
+RUN set -e -x; case "$WORDPRESS_VERSION" in                                 \
+        latest) /tmp/install-wordpress.sh /wp --alpha ;;                    \
+        *)      /tmp/install-wordpress.sh /wp "$WORDPRESS_VERSION" ;;       \
     esac
 
 # TODO: remove this once all the Ingress objects have been rewritten.
 RUN ln -s . /wp/6
 
-RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
+RUN rm /tmp/*.patch* /tmp/*.sh
 
 ######################################################################
 # Build and install JavaScript / CSS assets

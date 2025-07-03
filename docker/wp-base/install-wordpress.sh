@@ -36,6 +36,8 @@ S3_URL=https://s3.epfl.ch/
 S3_BASEDIR=s3://svc0041-c1561ba80625465c2a53f01693922e7c
 
 main () {
+    version="$(pick_version)"
+
     mkdir -p "$targetdir"
     wp --allow-root --path="$targetdir" core download --version="$version"
     delete_stock_wp_content
@@ -114,6 +116,16 @@ main () {
 
     chown -R root:root "$targetdir"
     chmod -R u=rwX,g=rX,o=rX "$targetdir"
+}
+
+pick_version () {
+    curl http://api.wordpress.org/core/stable-check/1.0/ | \
+        if [ -n "$alpha" ]; then
+            jq -r 'keys[]'
+        else
+            jq -r 'keys[] | select(match("^'"$version"'"))'
+        fi | \
+            sort -n -r | head -1
 }
 
 delete_stock_wp_content () {
