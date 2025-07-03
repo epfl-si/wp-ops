@@ -240,9 +240,11 @@ http {
 				location {{ $path }} {
 					include "/etc/nginx/template/wordpress_fastcgi.conf";
 
+					{{ if (not (contains $location.ConfigurationSnippet "/wp-admin {")) }}
 					location = {{ $path }}wp-admin {
 						return 301 https://{{ buildServerName $server.Hostname }}{{ $path }}wp-admin/;
 					}
+					{{ end }}
 
 					location ~ (wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/ {
 						rewrite .*/((wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/.*) /$1 break;
