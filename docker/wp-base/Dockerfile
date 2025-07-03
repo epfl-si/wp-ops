@@ -63,10 +63,8 @@ RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 ######################################################################
 
 # build wp-gutenberg-epfl
-RUN set -e -x; for wp in /wp/*/wp-content; do                              \
-  (cd $wp/plugins/wp-gutenberg-epfl;                                       \
-      rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules);  \
-  done
+RUN cd /wp/wp-content/plugins/wp-gutenberg-epfl;                            \
+      rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules
 
 # build epfl-elements
 ARG ELEMENTS_GIT_REPOSITORY=""
