@@ -163,9 +163,9 @@
           - name: branch-name
             default: ''
             description: "Branch name to use in the clone command"
-          - name: wordpress-version
+          - name: wordpress-version-override
             default: ''
-            description: "Wordpress image used to build wp-base image"
+            description: "Override WordPress version in the wp-base image"
         workspaces:
           - name: shared-workspace
           - name: dockerconfig
@@ -173,6 +173,8 @@
           - name: prep
             taskSpec:
               results:
+                - name: build-extra-args
+                  description: "The extra build arguments to pass to Buildah"
                 - name: build-tag
                   description: "The generated tag"
                 - name: retag-image-nginx
@@ -211,6 +213,18 @@
                                  TAG="$(printf "%s-%03d" "$STEM" $((num + 1)))" ;;
                     esac
                     echo -n "$TAG" > $(results.build-tag.path)
+
+                    cat > "$(results.build-extra-args.path)" <<BUILD_SECRETS
+                    --build-arg
+                    AWS_ACCESS_KEY_ID={{ s3_build_credentials.AWS_ACCESS_KEY_ID }}
+                    --build-arg
+                    AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
+                    BUILD_SECRETS
+                    if [ -n "$(params.wordpress-version-override)"; then
+                       echo "--build-arg WORDPRESS_VERSION=$(params.wordpress-version-override)" \
+                            >> "$(results.build-extra-args.path)"
+                    fi
+                    perl -i -0pe 's/\n/ /g' "$(results.build-extra-args.path)"
 
                     : > "$(results.retag-image-nginx.path)"
                     : > "$(results.retag-image-php.path)"
@@ -267,13 +281,7 @@
               - name: VERBOSE
                 value: "true"
               - name: BUILD_EXTRA_ARGS
-                value: >-
-                  --build-arg
-                  AWS_ACCESS_KEY_ID={{ s3_build_credentials.AWS_ACCESS_KEY_ID }}
-                  --build-arg
-                  AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
-                  --build-arg
-                  WORDPRESS_VERSION=$(params.wordpress-version)
+                value: "$(tasks.prep.results.build-extra-args)"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -468,7 +476,7 @@
         value: 'nightly-$(date -u +%Y%m%d)'
       - name: target-deployment
         value: wp-nginx-alpha
-      - name: wordpress-version
+      - name: wordpress-version-override
         value: latest
   kubernetes.core.k8s:
     definition:
