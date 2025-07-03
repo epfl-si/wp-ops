@@ -55,10 +55,6 @@ RUN set -e -x; for wp in /wp/wp-content; do \
       WP_CONTENT_DIR=$wp /tmp/wp-sbom.sh > $wp/../wp-admin/wordpress_sbom.txt; \
     done
 
-
-# TODO: remove this once all the Ingress objects have been rewritten.
-RUN ln -s . /wp/6
-
 RUN rm /tmp/*.patch* /tmp/*.sh
 
 ######################################################################
