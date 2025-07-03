@@ -66,17 +66,6 @@ RUN rm /tmp/*.patch* /tmp/*.sh /tmp/*.json
 RUN cd /wp/wp-content/plugins/wp-gutenberg-epfl;                            \
       rm -rf build; npm i --no-fund; npm run build; rm -rf node_modules
 
-# build epfl-elements
-ARG ELEMENTS_GIT_REPOSITORY=""
-ARG ELEMENTS_GIT_REF="dev"
-RUN set -e -x;   env; \
-    if [ -z "$ELEMENTS_GIT_REPOSITORY" ]; then exit 0; fi; \
-    rm -rf /wp/*/wp-content/themes/wp-theme-2018/assets; \
-    git clone "$ELEMENTS_GIT_REPOSITORY" -b "$ELEMENTS_GIT_REF" /tmp/elements_build; \
-    cd /tmp/elements_build; \
-    yarn; yarn build; \
-    for wp in /wp/*/wp-content; do cp -a dist/ $wp/themes/wp-theme-2018/assets; done
-
 ######################################################################
 # Copy global error pages
 ######################################################################
