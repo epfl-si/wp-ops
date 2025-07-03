@@ -46,6 +46,16 @@ RUN set -e -x; case $WORDPRESS_VERSION in                                 \
         *)      /tmp/install-wordpress.sh /wp $WORDPRESS_VERSION ;;       \
     esac
 
+######################################################################
+# Generate the Software Bill of Materials (SBOM) of the WordPress installation
+######################################################################
+COPY wp-sbom.sh /tmp
+RUN chmod +x /tmp/wp-sbom.sh
+RUN set -e -x; for wp in /wp/wp-content; do \
+      WP_CONTENT_DIR=$wp /tmp/wp-sbom.sh > $wp/../wp-admin/wordpress_sbom.txt; \
+    done
+
+
 # TODO: remove this once all the Ingress objects have been rewritten.
 RUN ln -s . /wp/6
 
