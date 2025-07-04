@@ -38,6 +38,8 @@ S3_BASEDIR=s3://svc0041-c1561ba80625465c2a53f01693922e7c
 main () {
     version="$(pick_version)"
 
+    cd /tmp
+
     mkdir -p "$targetdir"
     wp --allow-root --path="$targetdir" core download --version="$version"
     delete_stock_wp_content
