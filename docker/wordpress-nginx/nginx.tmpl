@@ -240,16 +240,6 @@ http {
 				location {{ $path }} {
 					include "/etc/nginx/template/wordpress_fastcgi.conf";
 
-					location ~ (wp-content/uploads)/ {
-						{{ if (contains $location.ConfigurationSnippet "fastcgi_param DOWNLOADS_PROTECTION_SCRIPT") }}
-						fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
-						{{ else }}
-						rewrite .*/(wp-content/uploads/(.*)) /$2 break;
-						root /wp-data/wpn-test-demo/uploads/;
-						add_header Cache-Control "129600, public";
-						{{ end }}
-					}
-
 					{{/* TODO: this “if” clause is temporary, and can be removed (i.e.
 					     we will always want the snippet inside) once all Ingresses
 					     have been converted to the “slim” format, as per
@@ -262,6 +252,21 @@ http {
 					     such as regex-based locations, come before the ConfigurationSnippet;
 					     whereas last-one-wins statements, such as `fastcgi_param`, come after
 					     it. */}}
+					{{ if not (contains $location.ConfigurationSnippet "wp-content/uploads") }}
+					location ~ (wp-content/uploads)/ {
+						{{ $uploads_dirname := (index $ing.Annotations "wordpress.epfl.ch/nginx-uploads-dirname") }}
+                                                {{ if not (empty $uploads_dirname) }}
+						rewrite .*/(wp-content/uploads/(.*)) /$2 break;
+						root /wp-data/{{ $uploads_dirname }}/uploads;
+						add_header Cache-Control "129600, public";
+						{{ else }}
+						fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+						{{ end }}
+					}
+					{{ end }}
+
+					{{/* TODO: likewise this “if” clause will become always true, and therefore
+                                             will need to be removed, after completing the migration. */}}
 					{{ if (not (contains $location.ConfigurationSnippet "/wp-admin {")) }}
 					location = {{ $path }}wp-admin {
 						return 301 https://{{ buildServerName $server.Hostname }}{{ $path }}wp-admin/;
