@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e -x
+set -o pipefail
 
 ###################################################################
 # Install EPFL-flavored WordPress, plugins and themes
