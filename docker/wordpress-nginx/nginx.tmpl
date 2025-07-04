@@ -50,6 +50,9 @@ http {
 	real_ip_recursive on;
 
 	include /etc/nginx/mime.types;
+	types {
+		application/yaml  yaml yml;
+	}
 
 	client_body_temp_path /tmp/nginx/client_body;
 	proxy_temp_path       /tmp/nginx/proxy;
