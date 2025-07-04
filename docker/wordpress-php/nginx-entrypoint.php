@@ -155,11 +155,14 @@ define('DISALLOW_FILE_MODS', 1);
 
 // Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the
 // corresponding filter in our mu-plugins.
-// 💡 `$_SERVER['WP_SITE_NAME']` flows from the WordPressSite object's
-// Kubernetes name, through the operator-prepared nginx snippets
-// inside the custom Ingress objects.
+// 💡 `$_SERVER['WP_UPLOADS_DIRNAME']` is transmitted by the operator
+// (via the Ingress object). $_SERVER['WP_SITE_NAME'] used to be
+// used for the same purpose, and can still be found in “old-form”
+// Ingress objects.
 define('EPFL_SITE_UPLOADS_DIR',
-       '/wp-data/' . $_SERVER['WP_SITE_NAME'] . '/uploads');
+       '/wp-data/' .
+       ( array_key_exists('WP_UPLOADS_DIRNAME', $_SERVER) ? $_SERVER['WP_UPLOADS_DIRNAME'] : $_SERVER['WP_SITE_NAME'] ) .
+       '/uploads');
 
 if (string_starts_with(uri_path(), $_SERVER["WP_ROOT_URI"] . "wp-content/uploads")) {
     if (array_key_exists("DOWNLOADS_PROTECTION_SCRIPT", $_SERVER) &&
