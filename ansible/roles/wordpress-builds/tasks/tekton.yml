@@ -220,7 +220,7 @@
                     --build-arg
                     AWS_SECRET_ACCESS_KEY={{ s3_build_credentials.AWS_SECRET_ACCESS_KEY }}
                     BUILD_SECRETS
-                    if [ -n "$(params.wordpress-version-override)"; then
+                    if [ -n "$(params.wordpress-version-override)" ]; then
                        echo "--build-arg WORDPRESS_VERSION=$(params.wordpress-version-override)" \
                             >> "$(results.build-extra-args.path)"
                     fi
