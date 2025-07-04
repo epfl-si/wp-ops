@@ -1,5 +1,8 @@
 - tags: always
-  include_vars: ../../../vars/quay-vars.yml
+  include_vars: "{{ item }}"
+  with_items:
+    - ../../../vars/quay-vars.yml
+    - s3-secrets-vars.yml
 
 - name: ServiceAccount/backup-wordpresssite
   kubernetes.core.k8s:
@@ -72,6 +75,9 @@
                           memory: "512Mi"
                         limits:
                           memory: "512Mi"
+                    env:
+                      - name: bucket_name
+                        value: "{{ s3_backup_credentials.bucket_name }}"
                     envFrom:
                       - secretRef:
                           name: s3-backup-credentials
