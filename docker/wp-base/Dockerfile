@@ -51,9 +51,8 @@ RUN set -e -x; case $WORDPRESS_VERSION in                                 \
 ######################################################################
 COPY wp-sbom.sh /tmp
 RUN chmod +x /tmp/wp-sbom.sh
-RUN set -e -x; for wp in /wp/wp-content; do \
-      WP_CONTENT_DIR=$wp /tmp/wp-sbom.sh > $wp/../wp-admin/wordpress_sbom.txt; \
-    done
+RUN set -e -x;  \
+      WP_CONTENT_DIR=/wp/wp-content /tmp/wp-sbom.sh > /wp/wp-admin/wordpress_sbom.txt
 
 RUN rm /tmp/*.patch* /tmp/*.sh
 
