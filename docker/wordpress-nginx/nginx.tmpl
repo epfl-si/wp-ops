@@ -240,6 +240,16 @@ http {
 				location {{ $path }} {
 					include "/etc/nginx/template/wordpress_fastcgi.conf";
 
+					location ~ (wp-content/uploads)/ {
+						{{ if (contains $location.ConfigurationSnippet "fastcgi_param DOWNLOADS_PROTECTION_SCRIPT") }}
+						fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+						{{ else }}
+						rewrite .*/(wp-content/uploads/(.*)) /$2 break;
+						root /wp-data/wpn-test-demo/uploads/;
+						add_header Cache-Control "129600, public";
+						{{ end }}
+					}
+
 					{{/* TODO: this “if” clause is temporary, and can be removed (i.e.
 					     we will always want the snippet inside) once all Ingresses
 					     have been converted to the “slim” format, as per
