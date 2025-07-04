@@ -236,7 +236,7 @@ http {
 				{{ end }}
 			{{ else if and (not (empty $location.ConfigurationSnippet)) (not (empty $ing.Service)) }}
 
-{{/* Render the nginx config for is the “main” Location object passed by the controller. */}}
+{{/* Render the nginx config for the “main” Location object passed by the controller. */}}
 				location {{ $path }} {
 					include "/etc/nginx/template/wordpress_fastcgi.conf";
 
