@@ -28,9 +28,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 targetdir="$1"
-version="$2"
-major="$(echo "$version" | cut -d. -f1)"
-minor="$(echo "$version" | cut -d. -f2)"
+version="$2"   # But see below
 
 S3_REGION=us-east-1
 S3_URL=https://s3.epfl.ch/
@@ -38,6 +36,8 @@ S3_BASEDIR=s3://svc0041-c1561ba80625465c2a53f01693922e7c
 
 main () {
     version="$(pick_version)"
+    major="$(echo "$version" | cut -d. -f1)"
+    minor="$(echo "$version" | cut -d. -f2)"
 
     cd /tmp
 
