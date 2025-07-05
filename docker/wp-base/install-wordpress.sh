@@ -17,18 +17,20 @@ set -o pipefail
 # - (Optional) `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 #      environment variables
 ###################################################################
+declare -a positional_args
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --alpha)
       alpha=1
       shift ;;
     *)
-      break ;;
+      positional_args+=("$1")
+      shift ;;
   esac
 done
 
-targetdir="$1"
-version="$2"   # But see below
+targetdir="${positional_args[0]}"
+version="${positional_args[1]}"   # But see below
 
 S3_REGION=us-east-1
 S3_URL=https://s3.epfl.ch/
