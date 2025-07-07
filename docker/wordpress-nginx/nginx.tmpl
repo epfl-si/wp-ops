@@ -243,19 +243,6 @@ http {
 				location {{ $path }} {
 					include "/etc/nginx/template/wordpress_fastcgi.conf";
 
-					{{/* TODO: this “if” clause is temporary, and can be removed (i.e.
-					     we will always want the snippet inside) once all Ingresses
-					     have been converted to the “slim” format, as per
-					     https://github.com/epfl-si/wp-operator/pull/59 et al.
-
-					     Note how everything else here is carefully crafted to clash “the
-					     right way” with the “long-form” Ingresses, so that everything just
-					     works (if a tad slower) during the migration period. nginx
-					     configuration snippets that are honored on a first-one-wins basis,
-					     such as regex-based locations, come before the ConfigurationSnippet;
-					     whereas last-one-wins statements, such as `fastcgi_param`, come after
-					     it. */}}
-					{{ if not (contains $location.ConfigurationSnippet "wp-content/uploads") }}
 					location ~ (wp-content/uploads)/ {
 						{{ $uploads_dirname := (index $ing.Annotations "wordpress.epfl.ch/nginx-uploads-dirname") }}
                                                 {{ if not (empty $uploads_dirname) }}
@@ -266,15 +253,10 @@ http {
 						fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
 						{{ end }}
 					}
-					{{ end }}
 
-					{{/* TODO: likewise this “if” clause will become always true, and therefore
-                                             will need to be removed, after completing the migration. */}}
-					{{ if (not (contains $location.ConfigurationSnippet "/wp-admin {")) }}
 					location = {{ $path }}wp-admin {
 						return 301 https://{{ buildServerName $server.Hostname }}{{ $path }}wp-admin/;
 					}
-					{{ end }}
 
                                         {{ $plain_file_whitelist_re := "(wp-bom[.]yaml|(wp-includes|wp-admin|wp-content/(plugins|mu-plugins|themes))/)" }}
 					location ~ {{ $plain_file_whitelist_re }} {
