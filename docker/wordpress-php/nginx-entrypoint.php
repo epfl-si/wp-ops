@@ -160,9 +160,7 @@ define('DISALLOW_FILE_MODS', 1);
 // used for the same purpose, and can still be found in “old-form”
 // Ingress objects.
 define('EPFL_SITE_UPLOADS_DIR',
-       '/wp-data/' .
-       ( array_key_exists('WP_UPLOADS_DIRNAME', $_SERVER) ? $_SERVER['WP_UPLOADS_DIRNAME'] : $_SERVER['WP_SITE_NAME'] ) .
-       '/uploads');
+       '/wp-data/' . $_SERVER['WP_UPLOADS_DIRNAME'] . '/uploads');
 
 if (string_starts_with(uri_path(), $_SERVER["WP_ROOT_URI"] . "wp-content/uploads")) {
     if (array_key_exists("DOWNLOADS_PROTECTION_SCRIPT", $_SERVER) &&
