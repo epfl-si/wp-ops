@@ -168,7 +168,7 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
-          "expr": "sum(last_over_time(mysql_global_status_acl_database_grants[1h]))",
+          "expr": "sum(last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).svc0041p-wordpress.svc.cluster.local'}[1h]))",
           "legendFormat": "Databases",
           "range": true,
           "refId": "A"
@@ -252,7 +252,7 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
-          "expr": "last_over_time(mysql_global_status_acl_database_grants[1h])",
+          "expr": "last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).svc0041p-wordpress.svc.cluster.local'}[1h])",
           "legendFormat": "{{target}}",
           "range": true,
           "refId": "A"
