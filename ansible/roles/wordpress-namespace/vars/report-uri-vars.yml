@@ -1,5 +1,5 @@
 
-_report_uri_secrets: "{{ lookup('file', '/keybase/team/epfl_wp_prod/report-uri.yml') | from_yaml }}"
+_report_uri_secrets: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_prod/report-uri.yml') | from_yaml }}"
 _pull_robot_builder_secrets: "{{ _report_uri_secrets.quay.pull_robot_builder }}"
 _pull_robot_builder_credential: "{{ _pull_robot_builder_secrets.name }}:{{ _pull_robot_builder_secrets.token }}"
 report_uri_builder_pull_secret_config:

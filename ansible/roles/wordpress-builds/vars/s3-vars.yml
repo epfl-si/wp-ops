@@ -1,2 +1,2 @@
 s3_build_credentials: >-
-  {{ lookup('file', '/keybase/team/epfl_wp_test/s3-assets-credentials.sh') | regex_replace("^(.*?)=(.*)$", "\1: \2", multiline=True) | from_yaml }}
+  {{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_test/s3-assets-credentials.sh') | regex_replace("^(.*?)=(.*)$", "\1: \2", multiline=True) | from_yaml }}
