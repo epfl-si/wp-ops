@@ -1,5 +1,5 @@
 image_pull_secret_name: "svc0041-svc0041-puller-pull-secret"
 
-nginx_deployment_images_tag: "2025-297"
+nginx_deployment_images_tag: "2025-395"
 
 apache_redirector_image_tag: "2025-007"
