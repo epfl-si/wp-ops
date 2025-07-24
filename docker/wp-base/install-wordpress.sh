@@ -69,9 +69,11 @@ main () {
     if [ -n "$alpha" ]; then
         install_plugin_wordpress_official polylang
         install_plugin_wordpress_official redirection
+        install_plugin_wordpress_official activitypub
     else
         install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
         install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
+        install_plugin_zip activitypub https://downloads.wordpress.org/plugin/activitypub.6.0.2.zip
     fi
 
     # Some of these plugins are commercial plugins that we pay for;
