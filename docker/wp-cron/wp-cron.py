@@ -25,7 +25,7 @@ if __name__ == '__main__':
     for wordpresssite in WordpressSite.all():
         wordpresssite.set_pushgateway(args.pushgateway)
         print(wordpresssite.moniker)
-        print(wordpresssite.run_cron())
+        wordpresssite.run_cron()
     
     Sitemap.create()
 
