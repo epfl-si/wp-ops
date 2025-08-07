@@ -2,6 +2,7 @@ import time
 import argparse
 
 from wordpresses import WordpressSite
+from sitemap import Sitemap
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Wordpress wp cron executor")
@@ -24,7 +25,9 @@ if __name__ == '__main__':
     for wordpresssite in WordpressSite.all():
         wordpresssite.set_pushgateway(args.pushgateway)
         print(wordpresssite.moniker)
-        wordpresssite.run_cron()
+        print(wordpresssite.run_cron())
+    
+    Sitemap.create()
 
     if args.daemon:
         print("All done. I am going to sleep", flush=True)
