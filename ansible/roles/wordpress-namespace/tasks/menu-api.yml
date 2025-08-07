@@ -23,6 +23,7 @@
           LABS_LINK_URL_FR: "https://{{ _wp_host_base_url }}/labs/fr/laboratoires/"
           LABS_LINK_URL_EN: "https://{{ _wp_host_base_url }}/labs/en/laboratories/"
           ROOT_LINK_URL: "https://{{ _wp_host_base_url }}/"
+          SITEMAP_LOCATION: "./data/sitemap.xml"
           ASSOC_BREADCRUMB_EN: |
             https://{{ _wp_host_base_url }}/campus/en/campusenglish/
             https://{{ _wp_host_base_url }}/campus/associations/en/student-associations/
