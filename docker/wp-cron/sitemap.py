@@ -1,10 +1,4 @@
 import requests
-import datetime
 
-class Sitemap:
-
-    @classmethod
-    def create(cls):
-        hour = datetime.datetime.now().hour
-        if hour == 1:
-            requests.get("https://menu-api:3001/generateSitemap")
+if __name__ == '__main__':
+    requests.get("http://localhost:3001/generateSitemap")
