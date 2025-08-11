@@ -175,14 +175,14 @@ class WordpressSite:
         return subprocess.run(cmdline, check=True, **kwargs)
 
     def _patch_wordpresssite_status (self):
-        if 'DEBUG' in os.environ:
-            subprocess.run(['echo', 'run', '_patch_wordpresssite_status', 'for', self._wp["metadata"]["name"]], check=True)
-            return
         """
         Patch the Wordpresssite CR status with:
             lastCronJobRuntime: The last cron job run time
             plugins: The active plugins on the site
         """
+        if 'DEBUG' in os.environ:
+            print(f'run _patch_wordpresssite_status for {self._wp["metadata"]["name"]}')
+            return
         try:
             KubernetesAPI.custom_jsonpatch.patch_namespaced_custom_object_status(
                 group=self._group,
