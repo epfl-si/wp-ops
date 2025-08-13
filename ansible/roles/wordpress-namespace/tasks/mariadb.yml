@@ -133,3 +133,111 @@
   when: >-
     inventory_deployment_stage == "test"
   include_tasks: restore-sites-prod-to-test.yml
+
+
+- name: "MariaDB/{{ mariadb_name }}-index with StorageClass {{ mariadb_storage_class }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: k8s.mariadb.com/v1alpha1
+      kind: MariaDB
+      metadata:
+        name: "{{ mariadb_name }}-index"
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        storage:
+          size: 1Gi
+          storageClassName: "{{ mariadb_storage_class }}"
+          volumeClaimTemplate:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: "{{ mariadb_storage_class }}"
+        resources:
+          requests:
+            cpu: >-
+              {{ "500m" if inventory_deployment_stage == "production"
+                 else "50m" }}
+            memory: 200Mi
+          limits:
+            memory: 2Gi
+        rootPasswordSecretKeyRef:
+          name: mariadb
+          key: root-password
+          generate: true
+        metrics:
+          enabled: true
+          exporter:
+            image: quay-its.epfl.ch/svc0041/mysqld-exporter:v0.15.1
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+
+- name: "Backup/{{ mariadb_name }} (Backups scheduling)"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: k8s.mariadb.com/v1alpha1
+      kind: Backup
+      metadata:
+        name: "{{ mariadb_name }}-index"
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        mariaDbRef:
+          name: "{{ mariadb_name }}-index"
+        schedule:
+          cron: "0 6 * * *"
+          suspend: false
+        args:
+          # Note: our volume comes from a NetApp share that has
+          #       snapshotting acitvated. This means that `.snapshot` folders
+          #       pop up randomly in every directory, causing this error:
+          #
+          #         `mariadb-dump: Got error: 1102: "Incorrect database name
+          #           '#mysql50#.snapshot'" when selecting the database`
+          #
+          #       The following line works around that.
+          - '--ignore-database=#mysql50#.snapshot'
+        resources:
+          limits:
+            cpu: 300m
+            memory: 512Mi
+          requests:
+            cpu: >-
+              {{ "200m" if inventory_deployment_stage == "production"
+                 else "50m" }}
+            memory: 64Mi
+        # This is the default:
+        maxRetention: 720h
+        storage:
+          s3:
+            bucket: "{{ s3_backup_credentials.bucket_name }}"
+            prefix: "MariaDB-{{ mariadb_name }}-index"
+            endpoint: s3.epfl.ch
+            accessKeyIdSecretKeyRef:
+              name: s3-backup-credentials
+              key: keyId
+            secretAccessKeySecretKeyRef:
+              name: s3-backup-credentials
+              key: accessSecret
+            tls:
+              enabled: true
+
+- name: "Backup/{{ mariadb_name }} (Backups scheduling)"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: k8s.mariadb.com/v1alpha1
+      kind: Database
+      metadata:
+        name: "{{ _db_index_name }}"
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        characterSet: utf8mb4
+        collate: utf8mb4_unicode_ci
+        mariaDbRef:
+          name: "{{ mariadb_name }}-index"
+          waitForIt: true
