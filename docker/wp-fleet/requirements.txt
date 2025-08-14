@@ -1,0 +1,3 @@
+kubernetes
+requests
+mariadb
