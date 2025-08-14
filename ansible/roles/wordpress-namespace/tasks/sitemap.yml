@@ -45,31 +45,3 @@
     _wp_cron_tag: >-
       {{ "prod" if inventory_deployment_stage == "production"
       else "latest" }}
-
-- name: Sitemap - Route
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: Route
-      metadata:
-        name: sitemap
-        namespace: '{{ inventory_namespace }}'
-        labels:
-          app: sitemap
-          route: public
-      spec:
-        host: '{{ _wp_host_base_url }}'
-        path: "/sitemap.xml"
-        to:
-          kind: Service
-          name: apache-redirector
-          weight: 100
-        port:
-          targetPort: '80'
-        tls:
-          termination: edge
-        wildcardPolicy: None
-  vars:
-    _wp_host_base_url: >-
-      {{ "www.epfl.ch" if inventory_deployment_stage == "production"
-      else "wpn-test.epfl.ch" }}
