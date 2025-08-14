@@ -2,5 +2,8 @@
 mariadb_name: mariadb
 mariadb_storage_class: wordpress-nfs-db
 number_of_mariadb: 5
-_db_index_name: wp-db-index
 _fleet_name: wp-fleet
+
+_keybase_team_wp: "{{ 'epfl_wp_prod' if inventory_namespace == 'svc0041p-wordpress' else 'epfl_wp_test' }}"
+_fleet_secrets: "{{ lookup('pipe', 'keybase fs read /keybase/team/{{ _keybase_team_wp }}/fleet-secrets.yml') | from_yaml }}"
+_fleet_db_password: "{{ _fleet_secrets.db_password }}"
