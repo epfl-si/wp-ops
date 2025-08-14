@@ -135,14 +135,14 @@
   include_tasks: restore-sites-prod-to-test.yml
 
 
-- name: "MariaDB/{{ mariadb_name }}-index with StorageClass {{ mariadb_storage_class }}"
+- name: "MariaDB/{{ mariadb_name }}-fleet with StorageClass {{ mariadb_storage_class }}"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: "{{ mariadb_name }}-index"
+        name: "{{ mariadb_name }}-fleet"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
@@ -176,18 +176,18 @@
                 cpu: 50m
                 memory: 64Mi
 
-- name: "Backup/{{ mariadb_name }} (Backups scheduling)"
+- name: "Backup/{{ mariadb_name }}-fleet (Backups scheduling)"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Backup
       metadata:
-        name: "{{ mariadb_name }}-index"
+        name: "{{ mariadb_name }}-fleet"
         namespace: "{{ inventory_namespace }}"
       spec:
         mariaDbRef:
-          name: "{{ mariadb_name }}-index"
+          name: "{{ mariadb_name }}-fleet"
         schedule:
           cron: "0 6 * * *"
           suspend: false
@@ -215,7 +215,7 @@
         storage:
           s3:
             bucket: "{{ s3_backup_credentials.bucket_name }}"
-            prefix: "MariaDB-{{ mariadb_name }}-index"
+            prefix: "MariaDB-{{ mariadb_name }}-fleet"
             endpoint: s3.epfl.ch
             accessKeyIdSecretKeyRef:
               name: s3-backup-credentials
@@ -226,18 +226,18 @@
             tls:
               enabled: true
 
-- name: "Backup/{{ mariadb_name }} (Backups scheduling)"
+- name: "Database/{{ _fleet_name }}"
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Database
       metadata:
-        name: "{{ _db_index_name }}"
+        name: "{{ _fleet_name }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         characterSet: utf8mb4
         collate: utf8mb4_unicode_ci
         mariaDbRef:
-          name: "{{ mariadb_name }}-index"
+          name: "{{ mariadb_name }}-fleet"
           waitForIt: true
