@@ -116,5 +116,17 @@ class WordpressSite:
         return self._database['metadata']['name']
 
     @property
+    def database (self):
+        return self._database
+
+    @property
+    def wp (self):
+        return self._wp
+
+    @property
     def mariadb_name (self):
-        return self._backup['spec']['mariaDbRef']['name']
+        return self._database['spec']['mariaDbRef']['name']
+
+    @property
+    def backup (self):
+        return self._backup
