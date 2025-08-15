@@ -135,14 +135,17 @@
   include_tasks: restore-sites-prod-to-test.yml
 
 
-- name: "MariaDB/{{ mariadb_name }}-fleet with StorageClass {{ mariadb_storage_class }}"
+- name: "MariaDB/{{ mariadb_name }}-[fleet/restore] with StorageClass {{ mariadb_storage_class }}"
+  with_items:
+    - fleet
+    - restore
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: MariaDB
       metadata:
-        name: "{{ mariadb_name }}-fleet"
+        name: "{{ mariadb_name }}-{{ item }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
@@ -227,19 +230,25 @@
               enabled: true
 
 - name: "Database/{{ _fleet_name }}"
+  with_items:
+    - fleet
+    - restore
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Database
       metadata:
-        name: "{{ _fleet_name }}"
+        name: >-
+          {{ "wp-fleet" if item == "fleet"
+          else "wp-fleet-restore" }}
         namespace: "{{ inventory_namespace }}"
       spec:
+        name: "{{ _fleet_name }}"
         characterSet: utf8mb4
         collate: utf8mb4_unicode_ci
         mariaDbRef:
-          name: "{{ mariadb_name }}-fleet"
+          name: "{{ mariadb_name }}-{{ item }}"
           waitForIt: true
 
 - name: "Secret/{{ _fleet_name }}"
@@ -256,19 +265,22 @@
         password: "{{ _fleet_db_password | b64encode }}"
 
 - name: "User/{{ _fleet_name }}"
+  with_items:
+    - fleet
+    - restore
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: User
       metadata:
-        name: "{{ _fleet_name }}"
+        name: "wp-{{ item }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         cleanupPolicy: Delete
         host: '%'
         mariaDbRef:
-          name: "{{ mariadb_name }}-fleet"
+          name: "{{ mariadb_name }}-{{ item }}"
           waitForIt: true
         maxUserConnections: 10
         passwordSecretKeyRef:
@@ -276,22 +288,25 @@
           name: "{{ _fleet_name }}"
 
 - name: "Grant/{{ _fleet_name }}"
+  with_items:
+    - fleet
+    - restore
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: k8s.mariadb.com/v1alpha1
       kind: Grant
       metadata:
-        name: "{{ _fleet_name }}"
+        name: "wp-{{ item }}"
         namespace: "{{ inventory_namespace }}"
       spec:
         database: "{{ _fleet_name }}"
         grantOption: false
         host: '%'
         mariaDbRef:
-          name: "{{ mariadb_name }}-fleet"
+          name: "{{ mariadb_name }}-{{ item }}"
           waitForIt: true
         privileges:
           - ALL PRIVILEGES
         table: '*'
-        username: "{{ _fleet_name }}"
+        username: "wp-{{ item }}"
