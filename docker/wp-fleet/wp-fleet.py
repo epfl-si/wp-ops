@@ -6,8 +6,7 @@ if __name__ == '__main__':
     MariaDB.create_table()
 
     for wordpresssite in WordpressSite.all():
-        print(wordpresssite.moniker, wordpresssite.database_name, wordpresssite.mariadb_name)
-        MariaDB.upsert()
+        MariaDB.upsert(wordpresssite.wp, wordpresssite.database, wordpresssite.backup)
 
     MariaDB.commit_and_close()
 

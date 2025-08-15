@@ -1,3 +1,4 @@
+import json
 import os
 import mariadb
 
@@ -35,7 +36,6 @@ class MariaDB:
     def connection(self):
         try:
             db_password = os.getenv("MARIADB_PASSWORD")
-            print(db_password)
             db_host = os.getenv("MARIADB_HOST")
             return mariadb.connect(
                 user="wp-fleet",
@@ -54,23 +54,75 @@ class MariaDB:
             cls.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS sites_index (
             uid varchar(64) PRIMARY KEY,
+            name varchar(255) NOT NULL,
             path VARCHAR(255) NOT NULL,
             hostname varchar(255) NOT NULL,
             mariadb varchar(100) NOT NULL,
             database varchar(255) NOT NULL,
-            s3_bucket varchar(255) NOT NULL,
-            s3_secret varchar(255) NOT NULL,
-            wp_cr varchar(255) NOT NULL,
-            wp_cr_restore varchar(255) NOT NULL
+            wp_cr JSON NOT NULL,
+            wp_cr_restore JSON NOT NULL
             )''')
         except mariadb.Error as e:
             print(f"Error: {e}")
 
     @classmethod
-    def upsert(cls):
-        pass
+    def upsert(cls, wordpresssite, database, backup):
+        wp = {'apiVersion': wordpresssite['apiVersion'], 'kind': "WordpressSite"}
+        wp['metadata'] = {'name': wordpresssite['metadata']['name'], 'namespace': wordpresssite['metadata']['namespace']}
+        wp['metadata']['labels'] = {}
+        wp['metadata']['labels']['app.kubernetes.io/managed-by'] = 'wp-veritas'
+        wp['spec'] = wordpresssite['spec']
+        try:
+            wp = replace_in_dict(wp, '"', '\\"')
+            wp = replace_in_dict(wp, "'", "''")
+            wp_cr = json.dumps(wp, indent=2, ensure_ascii=False)
+
+            restore = wp
+            restore['restore'] = {}
+            restore['restore']['s3'] = {}
+            restore['restore']['s3']['bucket'] = backup['spec']['storage']['s3']['bucket']
+            restore['restore']['s3']['endpoint'] = backup['spec']['storage']['s3']['endpoint']
+            restore['restore']['s3']['secretKeyName'] = backup['spec']['storage']['s3']['accessKeyIdSecretKeyRef']['name']
+            restore['restore']['s3']['wordpresssiteSource'] = wordpresssite['metadata']['name']
+            restore_cr = json.dumps(restore, indent=2, ensure_ascii=False)
+
+            cls.cursor.execute(f'''
+           INSERT INTO sites_index (uid,name,hostname,path,mariadb,database,wp_cr,wp_cr_restore) 
+           values (
+           '{wordpresssite["metadata"]["uid"]}',
+           '{wordpresssite["metadata"]["name"]}',
+           '{wordpresssite["spec"]["hostname"]}',
+           '{wordpresssite["spec"]["path"]}',
+           '{database["spec"]["mariaDbRef"]["name"]}',
+           '{database["metadata"]["name"]}',
+           '{wp_cr}',
+           '{restore_cr}'
+           )
+           ON DUPLICATE KEY UPDATE
+           name = values(name),
+           hostname = values(hostname),
+           path = values(path),
+           mariadb = values(mariadb),
+           database = values(database),
+           wp_cr = values(wp_cr),
+           wp_cr_restore = values(wp_cr_restore)
+           ''')
+        except mariadb.Error as e:
+            print(wp)
+            print(f"Error: {e}")
 
     @classmethod
     def commit_and_close(cls):
         cls.conn.commit()
         cls.conn.close()
+
+
+def replace_in_dict(obj, old, new):
+    if isinstance(obj, dict):
+        return {k: replace_in_dict(v, old, new) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_in_dict(item, old, new) for item in obj]
+    elif isinstance(obj, str):
+        return obj.replace(old, new)
+    else:
+        return obj
