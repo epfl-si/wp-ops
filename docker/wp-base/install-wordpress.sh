@@ -58,8 +58,12 @@ main () {
     hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook very-simple-meta-description \
-        ewww-image-optimizer wordpress-importer ; do
+        daggerhart-openid-connect-generic \
+        ewww-image-optimizer \
+        flowpaper-lite-pdf-flipbook \
+        very-simple-meta-description \
+        wordpress-importer
+        ; do
         install_plugin_wordpress_official "$official_plugin"
     done
 
@@ -92,7 +96,9 @@ main () {
 
     for homemade_or_forked_plugin in \
         wordpress.plugin.accred \
+        wordpress.plugin.accred.entra \
         wordpress.plugin.tequila \
+        wp-epfl-openid-configuration \
         wp-gutenberg-epfl \
         wp-plugin-enlighter \
         wp-plugin-epfl-404 \
