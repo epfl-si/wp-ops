@@ -91,23 +91,24 @@ main () {
     fi
 
     for homemade_or_forked_plugin in \
-        wp-plugin-epfl-coming-soon wordpress.plugin.tequila \
-        wp-plugin-epfl-settings \
-        wp-plugin-epfl-remote-content \
-        wp-plugin-epfl-content-filter \
-        wp-plugin-enlighter \
-        wp-plugin-epfl-intranet  \
-        wp-plugin-epfl-library \
-        wp-plugin-epfl-diploma-verification \
-        wp-plugin-epfl-partner-universities \
-        wp-plugin-epfl-404 \
-        wp-gutenberg-epfl  \
-        wp-plugin-epfl-courses-se \
-        wp-plugin-epfl-restauration \
-        wp-plugin-epfl-cache-control \
         wordpress.plugin.accred \
-        wp-plugin-epfl-translate \
+        wordpress.plugin.tequila \
+        wp-gutenberg-epfl \
+        wp-plugin-enlighter \
+        wp-plugin-epfl-404 \
+        wp-plugin-epfl-cache-control \
+        wp-plugin-epfl-coming-soon \
+        wp-plugin-epfl-content-filter \
+        wp-plugin-epfl-courses-se \
+        wp-plugin-epfl-diploma-verification \
+        wp-plugin-epfl-intranet \
+        wp-plugin-epfl-library \
         wp-plugin-epfl-menus \
+        wp-plugin-epfl-partner-universities \
+        wp-plugin-epfl-remote-content \
+        wp-plugin-epfl-restauration \
+        wp-plugin-epfl-settings \
+        wp-plugin-epfl-translate \
         wp-plugin-pushgateway \
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
