@@ -113,8 +113,7 @@
               {{ "200m" if inventory_deployment_stage == "production"
                  else "50m" }}
             memory: 64Mi
-        # This is the default:
-        maxRetention: 720h
+        maxRetention: 8760h
         storage:
           s3:
             bucket: "{{ s3_backup_credentials.bucket_name }}"
