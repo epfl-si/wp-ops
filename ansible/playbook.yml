@@ -33,8 +33,10 @@
   roles:
     - role: roles/quay-consumer-namespace
 
-- name: OLM catalog image
-  hosts: namespace/svc0041t-wordpress
+- name: OLM catalog
+  hosts:
+    - namespace/svc0041t-wordpress
+    - openshift_namespaces_olm
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:

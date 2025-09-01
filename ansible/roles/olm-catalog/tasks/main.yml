@@ -16,6 +16,7 @@
     name: quay_secrets
 
 - name: "Build Config Prerequisites"
+  when: inventory_has_olm_catalog_build | default(False)
   include_tasks:
     file: buildconfig-prerequisites.yml
     apply:
@@ -25,6 +26,7 @@
     - images
 
 - name: "Images and builds"
+  when: inventory_has_olm_catalog_build | default(False)
   include_tasks:
     file: isas-fsd-catalog.yml
     # Because `include_tasks` is dynamic, tags don't auto-inherit:
@@ -37,3 +39,15 @@
     - catalog
     - catalog.image
     - images.catalog
+
+- name: "Catalog install"
+  when: inventory_has_olm_catalog | default(False)
+  include_tasks:
+    file: catalog-install.yml
+    apply:
+      tags:
+        - catalog
+        - catalog.install
+  tags:
+    - catalog
+    - catalog.install
