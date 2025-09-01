@@ -13,6 +13,7 @@ all_namespaces:
           "hosts":   # Not real hosts, hence the scarequotes
             namespace/svc0041t-wordpress:
               inventory_namespace: svc0041t-wordpress
+              inventory_has_olm_catalog_build: true
               inventory_openshift:
                 domain: ocpitst0001.xaas.epfl.ch
             namespace/wordpress-test-in-okd:
@@ -22,3 +23,17 @@ all_namespaces:
               inventory_openshift:
                 domain: okd-test.fsd.team
                 insecure: true
+        openshift_namespaces_olm:
+          vars:
+            inventory_has_olm_catalog: true
+          "hosts":
+            namespace/openshift-marketplace-okd:
+              inventory_namespace: openshift-marketplace
+              inventory_openshift:
+                domain: okd-test.fsd.team
+                insecure: true
+            namespace/fsd-operators-test:
+              inventory_namespace: fsd-operators
+              inventory_openshift:
+                domain: ocpitst0001.xaas.epfl.ch
+

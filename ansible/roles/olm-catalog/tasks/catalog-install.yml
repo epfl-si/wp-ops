@@ -1,0 +1,61 @@
+- tags: always
+  include_vars: ../../../vars/quay-vars.yml
+
+# Required for quay-vars.yml, above:
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_secrets
+
+- name: "`Secret/{{ quay_puller_robot_account_name }}`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ quay_puller_secret_name }}"
+        namespace: "{{ inventory_namespace }}"
+      type: kubernetes.io/dockerconfigjson
+      stringData:
+        .dockerconfigjson: >-
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, quay_puller_robot_account_name,
+                                                  token=quay_botfather_token)
+          | epfl_si.quay.format_docker_config_json | string }}
+
+- name: "CatalogSource"
+  # We don’t have permission to change that in the real OpenShift (even in test); see INC0677582
+  when: >-
+    "okd" in inventory_hostname
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: CatalogSource
+      metadata:
+        name: isas-fsd-catalog
+        namespace: "{{ inventory_namespace }}"
+        # annotations:
+        #   olm.catalogImageTemplate:
+        #     "<registry>/<namespace>/<index_image_name>:v{kube_major_version}.{kube_minor_version}.{kube_patch_version}"
+      spec:
+        sourceType: grpc
+        grpcPodConfig:
+          securityContextConfig: restricted
+          extractContent:
+            cacheDir: /tmp/cache
+            catalogDir: /configs
+        # anonymous.apps.t-ocp-its-01.xaas.epfl.ch is a (temporary, from the `.t-` part)
+        # mirroring proxy of quay-its.epfl.ch; see https://go.epfl.ch/INC0674050
+        image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/isas-fsd-catalog:latest"
+        secrets:
+          - "{{ quay_puller_secret_name }}"
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        displayName: ISAS-FSD Catalog
+        publisher: isas-fsd
+        updateStrategy:
+          registryPoll:
+            interval: 20m
