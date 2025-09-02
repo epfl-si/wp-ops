@@ -44,6 +44,15 @@
   roles:
     - role: roles/olm-catalog
 
+- name: OLM controller (cluster-wide)
+  hosts: olm_controller_openshift_namespaces
+  gather_facts: no
+  vars_files: ansible-k8s-credentials.yml
+  environment:
+    K8S_AUTH_KUBECONFIG: "{{ k8s_auth_kubeconfig }}"
+  roles:
+    - role: roles/olm-controller
+
 - name: WordPress builds
   hosts: namespace/svc0041t-wordpress
   gather_facts: no
