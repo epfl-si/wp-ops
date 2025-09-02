@@ -1,5 +1,14 @@
-- include_vars: s3-secrets-vars.yml
-  tags: always
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+  - ../../../vars/quay-vars.yml
+  - s3-secrets-vars.yml
+
+# Required for quay-vars.yml, above:
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_secrets
 
 - name: ConfigMap/wp-backups
   kubernetes.core.k8s:
@@ -39,6 +48,25 @@
         EPFL_MIGRATION_KEYID: "{{ s3_epfl_migration_credentials.keyId }}"
         EPFL_MIGRATION_ACCESSSECRET: "{{ s3_epfl_migration_credentials.accessSecret }}"
         RESTIC_PASSWORD: "{{ s3_epfl_migration_credentials.resticPassword }}"
+
+- name: Pull secret for the OLM operator
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        # Name must match the one that the operator Deployment
+        # wants to use; see
+        # https://github.com/epfl-si/wp-operator/blob/main/operator-namespaced.yaml
+        name: wp-operator-pull
+        namespace: "{{ inventory_namespace }}"
+      stringData:
+        .dockerconfigjson: >-
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, quay_puller_robot_account_name,
+                                                  token=quay_botfather_token)
+          | epfl_si.quay.format_docker_config_json | string }}
+  
 
 - name: "Deployment/wp-operator (on the “prod” image)"
   when: >-
