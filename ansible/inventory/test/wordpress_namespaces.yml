@@ -32,8 +32,3 @@ all_namespaces:
               inventory_openshift:
                 domain: okd-test.fsd.team
                 insecure: true
-            namespace/fsd-operators-test:
-              inventory_namespace: fsd-operators
-              inventory_openshift:
-                domain: ocpitst0001.xaas.epfl.ch
-
