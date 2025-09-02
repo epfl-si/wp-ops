@@ -43,8 +43,6 @@
           extractContent:
             cacheDir: /tmp/cache
             catalogDir: /configs
-        # anonymous.apps.t-ocp-its-01.xaas.epfl.ch is a (temporary, from the `.t-` part)
-        # mirroring proxy of quay-its.epfl.ch; see https://go.epfl.ch/INC0674050
         image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/isas-fsd-catalog:latest"
         secrets:
           - "{{ quay_puller_secret_name }}"
