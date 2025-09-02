@@ -1,0 +1,53 @@
+# Run the OLM controller. Or rather, allow it to run by providing its
+# imagePullSecret; everything else is clickops.
+
+- tags: always
+  include_vars: ../../../vars/quay-vars.yml
+
+# Required for quay-vars.yml, above:
+- tags: always
+  include_vars:
+    file: ../../../vars/quay-secrets.yml
+    name: quay_secrets
+
+- tags:
+  - olm
+  - olm.pullsecret
+  - olm.pull-secret
+  name: Pull secret for the OLM controller
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        # Name must match the one that the controller Deployment
+        # wants to use; see
+        # https://github.com/epfl-si/wp-operator/blob/main/olm/controller-deployment-and-rbac.yaml
+        name: wordpress-olm-controller-image-pull
+        namespace: "{{ inventory_namespace }}"
+      stringData:
+        .dockerconfigjson: >-
+          {{ lookup("epfl_si.quay.robot_account", quay_organization, quay_puller_robot_account_name,
+                                                  token=quay_botfather_token)
+          | epfl_si.quay.format_docker_config_json | string }}
+  
+
+- tags:
+  - olm
+  - olm.install
+  ansible.builtin.pause:
+    prompt: |
+      🛑 Please ensure that the OLM operator is installed in your cluster(s).
+
+      - OKD: go to
+        https://console-openshift-console.apps.okd-test.fsd.team/k8s/ns/openshift-operators/clusterserviceversions/
+
+        If you don't see WordPress operator, then go to
+
+        https://console-openshift-console.apps.okd-test.fsd.team/operatorhub/ns/openshift-operators?keyword=wordpress
+
+        and install it from there. 
+
+      - OpenShift 4: file a ticket similar to https://go.epfl.ch/INC0735773
+        (unless you have reason to believe it is already the case)
