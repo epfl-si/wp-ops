@@ -36,7 +36,7 @@
 - name: OLM catalog
   hosts:
     - namespace/svc0041t-wordpress
-    - openshift_namespaces_olm
+    - olm_catalog_openshift_namespaces
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
