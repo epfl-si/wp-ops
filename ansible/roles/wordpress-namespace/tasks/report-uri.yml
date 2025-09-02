@@ -34,7 +34,7 @@
 
 - name: Report URI - Build Config
   when: >-
-    "openshift_namespaces_test" in group_names
+    "wp_namespaces_test" in group_names
   kubernetes.core.k8s:
     definition:
       apiVersion: build.openshift.io/v1
@@ -67,7 +67,7 @@
 - name: Report URI - Start build
   when: >
     "report-uri.startbuild" in ansible_run_tags 
-    and "openshift_namespaces_test" in group_names
+    and "wp_namespaces_test" in group_names
   shell:
     cmd: "oc -n {{ inventory_namespace }} start-build --wait report-uri"
   tags:

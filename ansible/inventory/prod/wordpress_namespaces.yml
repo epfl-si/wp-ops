@@ -7,11 +7,13 @@ all_namespaces:
   children:
     openshift_namespaces:
       children:
-        openshift_namespaces_prod:
-          vars:
-            inventory_deployment_stage: production
-          "hosts":   # Not real hosts, hence the scarequotes
-            namespace/svc0041p-wordpress:
-              inventory_namespace: svc0041p-wordpress
-              inventory_openshift:
-                domain: ocpitsp0001.xaas.epfl.ch
+        wp_namespaces:
+          children:
+            openshift_namespaces_prod:
+              vars:
+                inventory_deployment_stage: production
+              "hosts":   # Not real hosts, hence the scarequotes
+                namespace/svc0041p-wordpress:
+                  inventory_namespace: svc0041p-wordpress
+                  inventory_openshift:
+                    domain: ocpitsp0001.xaas.epfl.ch
