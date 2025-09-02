@@ -13,6 +13,10 @@
           git:
             ref: "main"
             uri: "{{ isas_fsd_catalog_git_uri }}"
+          secrets:
+            - secret:
+                name: "{{ quay_puller_secret_name }}"
+              destinationDir: "pullSecret"
         strategy:
           type: Docker
           dockerStrategy:
