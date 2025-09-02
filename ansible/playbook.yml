@@ -63,7 +63,7 @@
     - role: roles/wordpress-builds
 
 - name: WordPress namespaces
-  hosts: all_namespaces
+  hosts: wp_namespaces
   gather_facts: no
   vars_files: ansible-k8s-credentials.yml
   environment:
