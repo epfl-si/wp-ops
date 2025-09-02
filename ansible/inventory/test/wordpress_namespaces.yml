@@ -23,7 +23,7 @@ all_namespaces:
               inventory_openshift:
                 domain: okd-test.fsd.team
                 insecure: true
-        openshift_namespaces_olm:
+        olm_catalog_openshift_namespaces:
           vars:
             inventory_has_olm_catalog: true
           "hosts":
