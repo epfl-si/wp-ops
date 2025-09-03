@@ -44,6 +44,8 @@
       metadata:
         name: "{{ mariadb_name }}-{{ '%02d' | format(item|int) }}"
         namespace: "{{ inventory_namespace }}"
+        labels:
+          wpAutoallocate: 'true'
       spec:
         storage:
           size: 1Gi
