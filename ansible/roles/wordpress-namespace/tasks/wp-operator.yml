@@ -3,12 +3,25 @@
   with_items:
   - ../../../vars/quay-vars.yml
   - s3-secrets-vars.yml
+  - mariadb-vars.yml
 
 # Required for quay-vars.yml, above:
 - tags: always
   include_vars:
     file: ../../../vars/quay-secrets.yml
     name: quay_secrets
+
+- name: ConfigMap/wp-operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: wp-operator-config
+        namespace: "{{ inventory_namespace }}"
+      data:
+        MARIADB-RESTORE: "{{ mariadb_name }}-restore"
 
 - name: Pull secret for the OLM operator
   kubernetes.core.k8s:
