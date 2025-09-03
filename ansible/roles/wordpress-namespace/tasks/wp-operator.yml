@@ -10,45 +10,6 @@
     file: ../../../vars/quay-secrets.yml
     name: quay_secrets
 
-- name: ConfigMap/wp-backups
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: wp-backups
-        namespace: "{{ inventory_namespace }}"
-      data:
-        S3_BACKUP_BUCKET: "{{ s3_backup_credentials.bucket_name }}"
-
-- name: ConfigMap/epfl-migration
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: epfl-migration
-        namespace: "{{ inventory_namespace }}"
-      data:
-        EPFL_MIGRATION_BUCKET: "{{ s3_epfl_migration_credentials.bucket_name }}"
-
-- name: Credentials required to restore from previous (OpenShift 3) production backups
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: epfl-migration
-        namespace: "{{ inventory_namespace }}"
-      type: Opaque
-      stringData:
-        EPFL_MIGRATION_KEYID: "{{ s3_epfl_migration_credentials.keyId }}"
-        EPFL_MIGRATION_ACCESSSECRET: "{{ s3_epfl_migration_credentials.accessSecret }}"
-        RESTIC_PASSWORD: "{{ s3_epfl_migration_credentials.resticPassword }}"
-
 - name: Pull secret for the OLM operator
   kubernetes.core.k8s:
     definition:
