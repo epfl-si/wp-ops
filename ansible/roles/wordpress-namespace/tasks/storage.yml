@@ -69,6 +69,52 @@
             storage: 10Gi
         storageClassName: wordpress-nfs-data
 
+
+- when:
+    - _storage_managed
+    - inventory_deployment_stage == "test"
+  name: PersistentVolume/wordpress-data-prod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: wordpress-data-prod
+      spec:
+        accessModes:
+          - ReadOnlyMany
+        capacity:
+          storage: 1Gi
+        volumeMode: Filesystem
+        storageClassName: ""
+        nfs:
+          server: "{{ storage_nas['production'].nfs_server }}"
+          path: "{{ storage_nas['production'].path }}/wordpress-data"
+        claimRef:
+          kind: PersistentVolumeClaim
+          namespace: "{{ inventory_namespace }}"
+          name: wordpress-data-prod
+
+- name: PersistentVolumeClaim/wordpress-data-prod
+  when: >-
+    inventory_deployment_stage == "test"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wordpress-data-prod
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadOnlyMany
+        resources:
+          requests:
+            storage: 1Gi
+
+
 # During the transition period, we can read from the old volumes:
 
 - when: _storage_managed
