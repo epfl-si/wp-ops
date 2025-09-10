@@ -121,18 +121,6 @@
                     menu-api is returning slow requests for refresh at the 95th percentile on the route {% raw -%}{{ $labels.route }}{%- endraw %},
                     with a response time greater than {{ _menuapi_95_pct_threshold_update_requests }} seconds over the last five minutes.
                     This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
-              - alert: MenuApiSitemapNotGenerated
-                expr: >
-                  sitemap_generation{job="menu-api", namespace="{{ inventory_namespace }}"} == 0
-                for: "{{ _menuapi_sitemap_generation_days }}d"
-                labels:
-                  severity: critical
-                  sendto: telegram
-                annotations:
-                  summary: "MenuAPI Sitemap not generated"
-                  description: >-
-                    menu-api is not generating sitemap for www.epfl.ch.
-                    This condition has persisted for at least {{ _menuapi_sitemap_generation_days }} days.
           - name: php-fpm-alerts
             rules:
               - alert: PhpFpmHighProcessRequestDuration
@@ -257,4 +245,3 @@
     _menuapi_95_pct_threshold_update_requests: 2
     _menuapi_slow_requests_duration_minutes: 3
     _menuapi_count_pods_duration_minutes: 3
-    _menuapi_sitemap_generation_days: 3
