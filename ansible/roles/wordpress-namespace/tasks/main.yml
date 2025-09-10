@@ -119,17 +119,6 @@
     - wp
     - wp.cron
 
-- name: "sitemap"
-  include_tasks:
-    file: sitemap.yml
-    apply:
-      tags:
-        - wp
-        - wp.sitemap
-  tags:
-    - wp
-    - wp.sitemap
-
 - name: "WordPress operator"
   include_tasks:
     file: wp-operator.yml
