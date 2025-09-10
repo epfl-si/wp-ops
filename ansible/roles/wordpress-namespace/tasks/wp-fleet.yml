@@ -1,0 +1,52 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+- name: CronJob/wp-fleet
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: wp-fleet
+        namespace:  "{{ inventory_namespace }}"
+      spec:
+        schedule: "15 * * * *"
+        timeZone: "Europe/Zurich"
+        jobTemplate:
+          spec:
+            template:
+              metadata:
+                labels:
+                  app: wp-fleet
+              spec:
+                # The serviceAccount is managed by the OLM controller in wp-operator/operator-namespaced.yaml,
+                # because it requires rights that a human operator doesn't have
+                serviceAccountName: wp-fleet
+                containers:
+                  - name: wp-fleet
+                    image: "quay-its.epfl.ch/svc0041/wp-fleet:{{ _wp_fleet_tag }}"
+                    imagePullPolicy: Always
+                    env:
+                      - name: K8S_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                    command:
+                      - python3
+                      - /wp-fleet.py
+                    resources:
+                      requests:
+                        cpu: '{{ _cpu_request }}'
+                        memory: 512Mi
+                imagePullSecrets:
+                  - name: "{{ quay_puller_secret_name }}"
+                restartPolicy: OnFailure
+        concurrencyPolicy: Forbid
+  vars:
+    _cpu_request: >-
+      {{ "200m" if inventory_deployment_stage == "production"
+      else "50m" }}
+    _wp_fleet_tag: >-
+      {{ "prod" if inventory_deployment_stage == "production"
+      else "latest" }}
