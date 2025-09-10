@@ -119,6 +119,17 @@
     - wp
     - wp.cron
 
+- name: "wp-fleet"
+  include_tasks:
+    file: wp-fleet.yml
+    apply:
+      tags:
+        - wp
+        - wp.fleet
+  tags:
+    - wp
+    - wp.fleet
+
 - name: "WordPress operator"
   include_tasks:
     file: wp-operator.yml
