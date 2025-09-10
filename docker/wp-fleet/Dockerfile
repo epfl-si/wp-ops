@@ -4,18 +4,27 @@
 # Kubernetes's API.
 # See https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 
-FROM ubuntu:noble
+FROM ubuntu:noble AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN set -e -x; apt-get -qy update; \
+    apt-get --no-install-recommends -qy install \
+        python3 \
+        mariadb-client \
+     && rm -rf /var/lib/apt/lists/*; # from 1.12GB to 869MB
+
+FROM base AS build
 
 RUN set -e -x; apt-get -qy update; \
     apt-get --no-install-recommends -qy install \
         curl \
         git \
         less \
-        mariadb-client \
-        python3 \
+        libmariadb-dev \
         python3-pip \
+        python3-dev \
+        build-essential \
      && rm -rf /var/lib/apt/lists/*; # from 1.12GB to 869MB
 
 RUN set -e -x; cd /usr/local/bin/ ; \
@@ -25,4 +34,10 @@ RUN set -e -x; cd /usr/local/bin/ ; \
 COPY ./requirements.txt .
 RUN pip3 install -r ./requirements.txt --break-system-packages
 
-ADD wp-fleet.py /
+
+FROM base AS run
+
+COPY --from=build /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=build /usr/local/bin/kubectl /usr/local/bin/kubectl
+
+ADD wp-fleet.py wordpresssites.py /
