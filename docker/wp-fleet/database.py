@@ -85,7 +85,8 @@ class MariaDB:
             restore['restore']['s3']['secretKeyName'] = backup['spec']['storage']['s3']['accessKeyIdSecretKeyRef']['name']
             restore['restore']['s3']['wordpresssiteSource'] = wordpresssite['metadata']['name']
             restore_cr = json.dumps(restore, indent=2, ensure_ascii=False)
-
+            # TODO the JSON must be correctly formatted by the library
+            # TODO update the restore tags with the new of the CRD
             cls.cursor.execute(f'''
            INSERT INTO sites_index (uid,name,hostname,path,mariadb,database,wp_cr,wp_cr_restore) 
            values (
