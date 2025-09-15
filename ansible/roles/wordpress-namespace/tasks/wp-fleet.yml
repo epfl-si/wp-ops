@@ -11,7 +11,7 @@
         name: wp-fleet
         namespace:  "{{ inventory_namespace }}"
       spec:
-        schedule: "15 * * * *"
+        schedule: "17 1 * * *"
         timeZone: "Europe/Zurich"
         jobTemplate:
           spec:
