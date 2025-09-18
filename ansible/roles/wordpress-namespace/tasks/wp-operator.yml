@@ -22,6 +22,7 @@
         namespace: "{{ inventory_namespace }}"
       data:
         MARIADB-RESTORE: "{{ mariadb_name }}-restore"
+        MENU_API_HOST: "menu-api"
 
 - name: Pull secret for the OLM operator
   kubernetes.core.k8s:
