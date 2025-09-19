@@ -40,4 +40,4 @@ FROM base AS run
 COPY --from=build /usr/local/lib/python3.12 /usr/local/lib/python3.12
 COPY --from=build /usr/local/bin/kubectl /usr/local/bin/kubectl
 
-ADD wp-fleet.py wordpresssites.py /
+ADD wp-fleet.py wordpresssites.py database.py /
