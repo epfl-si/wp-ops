@@ -78,23 +78,22 @@ class MariaDB:
             wp_cr = json.dumps(wp, indent=2, ensure_ascii=False)
 
             restore = wp
-            restore['restore'] = {}
-            restore['restore']['s3'] = {}
-            restore['restore']['s3']['bucket'] = backup['spec']['storage']['s3']['bucket']
-            restore['restore']['s3']['endpoint'] = backup['spec']['storage']['s3']['endpoint']
-            restore['restore']['s3']['secretKeyName'] = backup['spec']['storage']['s3']['accessKeyIdSecretKeyRef']['name']
-            restore['restore']['wpDbBackupRef'] = {}
-            restore['restore']['wpDbBackupRef']['mariaDBLookup'] = {}
-            restore['restore']['wpDbBackupRef']['mariaDBLookup']['mariadbNameSource'] = database["spec"]["mariaDbRef"]["name"]
-            restore['restore']['wpDbBackupRef']['mariaDBLookup']['mariadbSecretName'] = 'mariadb'
-            restore['restore']['wpDbBackupRef']['mariaDBLookup']['databaseNameSource'] = database["metadata"]["name"]
-            restore['restore']['wpDbBackupRef']['mariaDBLookup']['urlSource'] = f"https://{wordpresssite['spec']['hostname']}{wordpresssite['spec']['path']}"
-            restore['restore']['mediaPersistentVolumeClaim'] = {}
-            restore['restore']['mediaPersistentVolumeClaim']['claimName'] = 'wordpress-data'
-            restore['restore']['mediaPersistentVolumeClaim']['subPath'] = wordpresssite['metadata']['name']
+            restore['spec']['restore'] = {}
+            restore['spec']['restore']['s3'] = {}
+            restore['spec']['restore']['s3']['bucket'] = backup['spec']['storage']['s3']['bucket']
+            restore['spec']['restore']['s3']['endpoint'] = backup['spec']['storage']['s3']['endpoint']
+            restore['spec']['restore']['s3']['secretKeyName'] = backup['spec']['storage']['s3']['accessKeyIdSecretKeyRef']['name']
+            restore['spec']['restore']['wpDbBackupRef'] = {}
+            restore['spec']['restore']['wpDbBackupRef']['mariaDBLookup'] = {}
+            restore['spec']['restore']['wpDbBackupRef']['mariaDBLookup']['mariadbNameSource'] = database["spec"]["mariaDbRef"]["name"]
+            restore['spec']['restore']['wpDbBackupRef']['mariaDBLookup']['mariadbSecretName'] = 'mariadb'
+            restore['spec']['restore']['wpDbBackupRef']['mariaDBLookup']['databaseNameSource'] = database["metadata"]["name"]
+            restore['spec']['restore']['wpDbBackupRef']['mariaDBLookup']['urlSource'] = f"https://{wordpresssite['spec']['hostname']}{wordpresssite['spec']['path']}"
+            restore['spec']['restore']['mediaPersistentVolumeClaim'] = {}
+            restore['spec']['restore']['mediaPersistentVolumeClaim']['claimName'] = 'wordpress-data'
+            restore['spec']['restore']['mediaPersistentVolumeClaim']['subPath'] = wordpresssite['metadata']['name']
             restore_cr = json.dumps(restore, indent=2, ensure_ascii=False)
             # TODO the JSON must be correctly formatted by the library
-            # TODO update the restore tags with the new of the CRD
             cls.cursor.execute(f'''
            INSERT INTO sites_index (uid,name,hostname,path,mariadb,database,wp_cr,wp_cr_restore) 
            values (
