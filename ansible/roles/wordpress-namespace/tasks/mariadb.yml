@@ -150,14 +150,14 @@
         namespace: "{{ inventory_namespace }}"
       spec:
         storage:
-          size: 1Gi
+          size: 1Mi
           storageClassName: "{{ mariadb_storage_class }}"
           volumeClaimTemplate:
             accessModes:
               - ReadWriteOnce
             resources:
               requests:
-                storage: 1Gi
+                storage: 1Mi
             storageClassName: "{{ mariadb_storage_class }}"
         resources:
           requests:
