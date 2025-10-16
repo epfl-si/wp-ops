@@ -97,7 +97,7 @@
                     The menu-api deployment hasn't had the desired number of pods since {{ _menuapi_count_pods_duration_minutes }} minutes.
               - alert: MenuApiSlowRequests
                 expr: >
-                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh", route!="/refreshSingleMenu"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_read_requests }}
+                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route!="/refresh", route!="/refreshSingleMenu", route!="/getSitemap"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_read_requests }}
                 for: "{{ _menuapi_slow_requests_duration_minutes }}m"
                 labels:
                   severity: critical
@@ -110,7 +110,7 @@
                     This condition has persisted for at least {{ _menuapi_slow_requests_duration_minutes }} minutes.
               - alert: MenuApiSlowRequestsForRefresh
                 expr: >
-                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route=~"/refresh|/refreshSingleMenu"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_update_requests }}
+                  histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="menu-api", namespace="{{ inventory_namespace }}", route!="/favicon.ico", route=~"/refresh|/refreshSingleMenu|/getSitemap"}[{{ _menuapi_slow_requests_window_minutes }}m])) by (le, route)) > {{ _menuapi_95_pct_threshold_update_requests }}
                 for: "{{ _menuapi_slow_requests_duration_minutes }}m"
                 labels:
                   severity: critical
