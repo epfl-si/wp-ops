@@ -14,7 +14,7 @@
         name: opdo-ca
         namespace: "{{ inventory_namespace }}"
       data:
-        opdo-ca.crt: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_{{ inventory_namespace }}/OPDo_{{ inventory_namespace }}/OPDo_ca_{{ inventory_namespace }}.crt') }}"
+        opdo-ca.crt: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_{{ inventory_deployment_stage }}/OPDo_{{ inventory_deployment_stage }}/OPDo_ca_{{ inventory_deployment_stage }}.crt') }}"
 
 - name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
