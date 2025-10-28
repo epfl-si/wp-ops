@@ -1,0 +1,5 @@
+_epfl_opdo_secrets: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_prod/OPDO_Secrets.yaml') | from_yaml }}"
+
+opdo:
+  url: "{{ _epfl_opdo_secrets[inventory_deployment_stage]['url'] }}"
+  api_key: "{{ _epfl_opdo_secrets[inventory_deployment_stage]['api_key'] }}"
