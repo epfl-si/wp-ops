@@ -4,6 +4,18 @@
   - image-vars.yml
   - ../../../vars/quay-vars.yml
 
+- name: ConfigMap/opdo-ca
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: opdo-ca
+        namespace: "{{ inventory_namespace }}"
+      data:
+        opdo-ca.crt: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_{{ inventory_namespace }}/OPDo_{{ inventory_namespace }}/OPDo_ca_{{ inventory_namespace }}.crt') }}"
+
 - name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
     state: present

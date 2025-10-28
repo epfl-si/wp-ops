@@ -139,6 +139,8 @@
               - name: smtp-password
                 mountPath: /secrets/
                 readOnly: true
+              - name: opdo-ca
+                mountPath: /usr/local/share/ca-certificates
             env:
               - name: SEARCH_INSIDE_WP_API_HASHED_TOKEN
                 valueFrom:
@@ -182,6 +184,9 @@
           # - name: wp-nginx
           #   configMap:
           #     name: wp-nginx
+          - name: opdo-ca
+            configMap:
+              name: opdo-ca
           - name: kube-api-access
             projected:
               defaultMode: 420
