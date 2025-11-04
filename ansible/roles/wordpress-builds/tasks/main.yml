@@ -108,3 +108,13 @@
         - wp.continuous-integration
         - wp.continuous-integration.rebuild
         - wp.continuous-integration.restart
+
+- name: Fruit deployments
+  include_tasks:
+    file: kong.yml
+    apply:
+      tags:
+        - wp.kong.configuration
+  tags:
+    - wp.kong.configuration
+    - wp.kong.deployments
