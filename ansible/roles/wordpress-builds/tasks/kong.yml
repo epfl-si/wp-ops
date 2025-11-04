@@ -31,6 +31,8 @@
         | from_yaml }}
   vars:
     _deployment_name: "wp-nginx-{{ item.name }}"
+  tags:
+    - wp.kong.deployments
 
 - name: "Continuous integration targets (“fruit salad”): Services"
   loop: "{{ wp_nginx_ci_flavors }}"
