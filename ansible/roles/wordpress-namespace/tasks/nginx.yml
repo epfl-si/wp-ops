@@ -3,6 +3,7 @@
   with_items:
   - image-vars.yml
   - ../../../vars/quay-vars.yml
+  - opdo-vars.yml
 
 - name: ConfigMap/opdo-ca
   kubernetes.core.k8s:
@@ -14,7 +15,7 @@
         name: opdo-ca
         namespace: "{{ inventory_namespace }}"
       data:
-        opdo-ca.crt: "{{ lookup('pipe', 'keybase fs read /keybase/team/epfl_wp_{{ inventory_deployment_stage }}/OPDo_{{ inventory_deployment_stage }}/OPDo_ca_{{ inventory_deployment_stage }}.crt') }}"
+        opdo-ca.crt: "{{ certificate[inventory_deployment_stage] }}"
 
 - name: ConfigMap/wp-nginx
   kubernetes.core.k8s:
