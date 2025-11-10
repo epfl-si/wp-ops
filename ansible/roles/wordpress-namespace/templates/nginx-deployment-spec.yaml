@@ -29,7 +29,7 @@
 
 # spec:
     replicas: {{ 2 if inventory_deployment_stage == "production"
-                 else 1 }}
+                 else 2 }}
     selector:
       matchLabels:
         app: "{{ app_label }}"
