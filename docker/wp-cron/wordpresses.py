@@ -215,4 +215,14 @@ class WordpressSite:
             **out
         }
 
-
+    def run_action_scheduler_runner(self):
+        try:
+            # see https://actionscheduler.org/wp-cli/
+            cmdline = ['wp', f'--ingress={self._ingress_name()}', 'action-scheduler', 'run', '--batch-size=50',
+                       '--group=opdo_log']
+            self._do_run_wp(cmdline)
+            cmdline = ['wp', f'--ingress={self._ingress_name()}', 'action-scheduler', 'clean',
+                       '--status=complete,canceled', "--before='60 days ago'", '--force']
+            self._do_run_wp(cmdline)
+        except Exception:
+            logging.exception("Error running wp action scheduler runner")
