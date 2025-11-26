@@ -17,7 +17,7 @@
           app.kubernetes.io/version: "redirector-{{ apache_redirector_image_tag }}"
           team: isas-fsd
       spec:
-        replicas: 1
+        replicas: 2
         selector:
           matchLabels:
             app: apache-redirector
