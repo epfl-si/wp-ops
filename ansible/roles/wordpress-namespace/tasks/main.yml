@@ -221,3 +221,12 @@
     - report-uri
     - report-uri.startbuild
     - report-uri.restart
+
+- name: OPDO
+  include_tasks:
+    file: opdo.yml
+    apply:
+      tags:
+        - wp-opdo
+  tags:
+    - wp-opdo

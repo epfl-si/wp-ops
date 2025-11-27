@@ -1,0 +1,67 @@
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - opdo-vars.yml
+
+- name: ClusterLogForwarder/opdo_logs
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: observability.openshift.io/v1
+      kind: ClusterLogForwarder
+      metadata:
+        name: instance
+      spec:
+        serviceAccount: default
+
+        ####################################################
+        # INPUT: Collect only logs from your specific pod
+        ####################################################
+        inputs:
+          - name: wp-nginx-logs
+            type: application
+            application:
+              selector:
+                matchLabels:
+                  app: wp-nginx
+
+        ####################################################
+        # PIPELINE: Filter only logs that have the tag
+        ####################################################
+        pipelines:
+          - name: opdo-logs-to-es
+            inputRefs: [wp-nginx-logs]
+            outputRefs: [http-api]
+
+        # Filter logs by tag in the log record
+        filters:
+          type: expression
+          expression: '.tag == "opdo_log"'
+
+        ####################################################
+        # OUTPUT: Send to your HTTP API endpoint
+        ####################################################
+        outputs:
+          - name: external-es
+            type: elasticsearch
+            elasticsearch:
+              index: '{.log_type||"undefined"}'
+              url: "{{ opdo.url }}"
+              version: 8
+              authentication:
+                token:
+                  from: secret
+                  secret:
+                    name: opdo-client
+                    key: OPDO_API_KEY
+            tls:
+              ca:
+                key: opdo-ca.crt
+                secretName: opdo-ca
+      # TODO:
+      #      tuning:
+      #        deliveryMode: AtLeastOnce
+      #        compression: gzip  # or none?
+      #        maxWrite: 25
+      #        minRetryDuration: 2m
+      #        maxRetryDuration: 30m
