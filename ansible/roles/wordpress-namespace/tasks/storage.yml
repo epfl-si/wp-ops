@@ -69,6 +69,22 @@
             storage: 10Gi
         storageClassName: wordpress-nfs-data
 
+- name: PersistentVolumeClaim/wordpress-audit
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: wordpress-audit
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: wordpress-nfs-data
 
 - when:
     - _storage_managed
