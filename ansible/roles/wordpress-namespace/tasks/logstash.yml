@@ -27,16 +27,15 @@
                 volumeMounts:
                   - name: opdo-ca
                     mountPath: /usr/local/share/ca-certificates
-                  - name: wordpress-data
-                    mountPath: /wp-data/audit-logs
-                    subPath: audit-logs
+                  - name: wordpress-audit
+                    mountPath: /wp-audit
                 envFrom:
                   - secretRef:
                       name: opdo-client
             volumes:
-              - name: wordpress-data
+              - name: wordpress-audit
                 persistentVolumeClaim:
-                  claimName: wordpress-data
+                  claimName: wordpress-audit
               - name: opdo-ca
                 configMap:
                   name: opdo-ca
