@@ -139,6 +139,8 @@
               - name: smtp-password
                 mountPath: /secrets/
                 readOnly: true
+              - name: wordpress-audit
+                mountPath: /wp-audit/
             env:
               - name: SEARCH_INSIDE_WP_API_HASHED_TOKEN
                 valueFrom:
@@ -188,6 +190,9 @@
           - name: opdo-ca
             configMap:
               name: opdo-ca
+          - name: wordpress-audit
+            persistentVolumeClaim:
+              claimName: wordpress-audit
           - name: kube-api-access
             projected:
               defaultMode: 420
