@@ -288,7 +288,7 @@ plugin_canonical_name () {
 #      try_git_switch feature/foo
 #
 # to the end of this script, will try and switch all git checkouts to this branch
-# (and recover gracefully if the branch doesn't exixt).
+# (and recover gracefully if the branch doesn't exist).
 try_git_switch () {
     local repo_url="$1"
 
