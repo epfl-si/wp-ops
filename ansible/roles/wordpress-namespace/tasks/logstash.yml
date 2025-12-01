@@ -1,6 +1,41 @@
 - include_vars: ../../../vars/quay-vars.yml
   tags: always
 
+
+- name: ConfigMap/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: logstash-opdo-pipeline
+      data:
+        pipeline.conf: |
+          input {
+            file {
+              path => "/wp-audit/*.jsonl"
+              sincedb_clean_after => "52 weeks"
+              sincedb_path => "/wp-audit/logstash/data/sincedb"
+              stat_interval => "30 seconds"
+              start_position => "beginning"
+            }
+          }
+          
+          filter {
+            if [source] == "wordpress-opdo" {
+              drop { }
+            }
+          }
+
+          output {
+            stdout {}
+            elasticsearch {
+              ssl => true
+              cacert => "/usr/local/share/ca-certificates/opdo-ca.crt"
+            }
+          }
+
 - name: StatefulSet/LogStash
   kubernetes.core.k8s:
     state: present
@@ -29,9 +64,11 @@
                     mountPath: /usr/local/share/ca-certificates
                   - name: wordpress-audit
                     mountPath: /wp-audit
+                  - name: logstashconfig
+                    mountPath: /usr/share/logstash/config
                 envFrom:
                   - secretRef:
-                      name: opdo-client
+                      name: opdo-logstash
             volumes:
               - name: wordpress-audit
                 persistentVolumeClaim:
@@ -39,3 +76,6 @@
               - name: opdo-ca
                 configMap:
                   name: opdo-ca
+              - name: logstashconfig
+                configMap:
+                  name: logstash-opdo-pipeline
