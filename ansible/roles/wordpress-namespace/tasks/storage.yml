@@ -83,7 +83,8 @@
           - ReadWriteMany
         resources:
           requests:
-            storage: 1Gi
+            storage: >-
+              {{ "1Gi" if inventory_deployment_stage != "production" else "1Mi" }}
         storageClassName: wordpress-nfs-data
 
 - when:
