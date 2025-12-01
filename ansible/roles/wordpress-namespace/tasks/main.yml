@@ -221,3 +221,16 @@
     - report-uri
     - report-uri.startbuild
     - report-uri.restart
+
+- name: LogStash
+  include_tasks:
+    file: logstash.yml
+    apply:
+      tags:
+        - wp
+        - wp.logstash
+        - logstash
+  tags:
+    - wp
+    - wp.logstash
+    - logstash

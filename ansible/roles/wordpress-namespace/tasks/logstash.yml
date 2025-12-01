@@ -1,0 +1,42 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+- name: StatefulSet/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: logstash
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: logstash
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: logstash
+          spec:
+            terminationGracePeriodSeconds: 0
+            containers:
+              - name: logstash
+                image: docker.elastic.co/logstash/logstash:9.2.1
+                volumeMounts:
+                  - name: opdo-ca
+                    mountPath: /usr/local/share/ca-certificates
+                  - name: wordpress-data
+                    mountPath: /wp-data/audit-logs
+                    subPath: audit-logs
+                envFrom:
+                  - secretRef:
+                      name: opdo-client
+            volumes:
+              - name: wordpress-data
+                persistentVolumeClaim:
+                  claimName: wordpress-data
+              - name: opdo-ca
+                configMap:
+                  name: opdo-ca
