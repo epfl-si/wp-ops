@@ -70,7 +70,7 @@ main () {
         install_plugin_wordpress_official polylang
         install_plugin_wordpress_official redirection
     else
-        install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.6.7.zip
+        install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.7.6.zip
         install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
     fi
 
@@ -87,7 +87,7 @@ main () {
         install_plugin_s3 wpforms.1.9.4.zip
         install_plugin_s3 wpforms-surveys-polls.1.15.0.zip
         # Additionally this last one is stuck in the past:
-        install_plugin_s3 wp-media-folder.5.9.13.zip
+        install_plugin_s3 wp-media-folder.6.1.8.zip
     fi
 
     for homemade_or_forked_plugin in \
