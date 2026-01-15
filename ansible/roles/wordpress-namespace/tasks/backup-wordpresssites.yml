@@ -2,7 +2,7 @@
   include_vars: "{{ item }}"
   with_items:
     - ../../../vars/quay-vars.yml
-    - s3-secrets-vars.yml
+    - s3-secrets-{{ inventory_deployment_stage }}.yml
 
 - name: ServiceAccount/backup-wordpresssite
   kubernetes.core.k8s:

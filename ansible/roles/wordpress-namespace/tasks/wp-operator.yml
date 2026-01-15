@@ -2,7 +2,6 @@
   include_vars: "{{ item }}"
   with_items:
   - ../../../vars/quay-vars.yml
-  - s3-secrets-vars.yml
   - mariadb-vars.yml
 
 # Required for quay-vars.yml, above:

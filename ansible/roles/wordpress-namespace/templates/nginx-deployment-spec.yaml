@@ -139,6 +139,8 @@
               - name: smtp-password
                 mountPath: /secrets/
                 readOnly: true
+              - name: opdo-ca
+                mountPath: /usr/local/share/ca-certificates
               - name: wordpress-audit
                 mountPath: /wp-audit/
             env:

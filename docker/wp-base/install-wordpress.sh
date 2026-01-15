@@ -91,8 +91,11 @@ main () {
     fi
 
     for homemade_or_forked_plugin in \
+        openid-connect-generic \
         wordpress.plugin.accred \
+        wordpress.plugin.accred.entra \
         wordpress.plugin.tequila \
+        wp-epfl-openid-configuration \
         wp-gutenberg-epfl \
         wp-plugin-enlighter \
         wp-plugin-epfl-404 \
@@ -288,7 +291,7 @@ plugin_canonical_name () {
 #      try_git_switch feature/foo
 #
 # to the end of this script, will try and switch all git checkouts to this branch
-# (and recover gracefully if the branch doesn't exixt).
+# (and recover gracefully if the branch doesn't exist).
 try_git_switch () {
     local repo_url="$1"
 
