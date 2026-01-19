@@ -2,14 +2,14 @@
   tags: always
 
 
-- name: ConfigMap/LogStash
+- name: ConfigMap/LogStash-pipeline-conf
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: logstash-opdo-pipeline
+        name: logstash-opdo-pipeline-conf
         namespace: "{{ inventory_namespace }}"
       data:
         pipeline.conf: |
@@ -31,11 +31,28 @@
 
           output {
             stdout {}
-            elasticsearch {
-              ssl => true
-              cacert => "/usr/local/share/ca-certificates/opdo-ca.crt"
-            }
           }
+
+- name: ConfigMap/LogStash-pipelines-yml
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: logstash-opdo-pipelines-yml
+        namespace: "{{ inventory_namespace }}"
+      data:
+        logstash.yml: |
+          pipeline:
+            batch:
+              size: ${BATCH_SIZE:50}
+              delay: ${BATCH_DELAY:5000}
+          node:
+            name: "logstash-opdo"
+        pipelines.yml: |
+          - pipeline.id: logstash-opdo
+            path.config: "/etc/logstash/conf.d/pipeline.conf"
 
 - name: StatefulSet/LogStash
   kubernetes.core.k8s:
@@ -65,8 +82,10 @@
                     mountPath: /usr/local/share/ca-certificates
                   - name: wordpress-audit
                     mountPath: /wp-audit
-                  - name: logstashpipeline
+                  - name: logstash-pipeline-conf
                     mountPath: /etc/logstash/conf.d
+                  - name: logstash-pipelines-yml
+                    mountPath: /usr/share/logstash/config
                 envFrom:
                   - secretRef:
                       name: opdo-logstash
@@ -77,6 +96,9 @@
               - name: opdo-ca
                 configMap:
                   name: opdo-ca
-              - name: logstashpipeline
+              - name: logstash-pipeline-conf
                 configMap:
-                  name: logstash-opdo-pipeline
+                  name: logstash-opdo-pipeline-conf
+              - name: logstash-pipelines-yml
+                configMap:
+                  name: logstash-opdo-pipelines-yml
