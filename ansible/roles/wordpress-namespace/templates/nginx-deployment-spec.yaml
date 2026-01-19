@@ -139,8 +139,6 @@
               - name: smtp-password
                 mountPath: /secrets/
                 readOnly: true
-              - name: opdo-ca
-                mountPath: /usr/local/share/ca-certificates
               - name: wordpress-audit
                 mountPath: /wp-audit/
             env:
@@ -189,9 +187,6 @@
           # - name: wp-nginx
           #   configMap:
           #     name: wp-nginx
-          - name: opdo-ca
-            configMap:
-              name: opdo-ca
           - name: wordpress-audit
             persistentVolumeClaim:
               claimName: wordpress-audit
