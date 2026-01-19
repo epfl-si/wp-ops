@@ -27,10 +27,23 @@
             if [source] == "wordpress-opdo" {
               drop { }
             }
+            mutate {
+              rename => { "[host][name]" => "hostname" }
+              remove_field => ["host"]
+            }
           }
 
           output {
             stdout {}
+            elasticsearch {
+              hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOSTS}"]
+              api_key => "${PIPELINE_OUTPUT_ELASTICSEARCH_API_KEY}"
+              index => "${PIPELINE_OUTPUT_ELASTICSEARCH_INDEX}"
+              data_stream => false
+              action => "create"
+              ssl_enabled => true
+              ssl_certificate_authorities => ["/usr/local/share/ca-certificates/opdo-ca.crt"]
+            }
           }
 
 - name: ConfigMap/LogStash-pipelines-yml
