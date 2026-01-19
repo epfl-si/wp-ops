@@ -46,8 +46,8 @@
         logstash.yml: |
           pipeline:
             batch:
-              size: ${BATCH_SIZE:50}
-              delay: ${BATCH_DELAY:5000}
+              size: ${BATCH_SIZE:125}
+              delay: ${BATCH_DELAY:50}
           node:
             name: "logstash-opdo"
         pipelines.yml: |
