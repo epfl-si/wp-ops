@@ -27,16 +27,19 @@
             if [source] == "wordpress-opdo" {
               drop { }
             }
+            json {
+              source => "[event][original]"
+            }
             mutate {
               add_field => {
                 "[agent][name]" => "%{[host][name]}"
               }
-              remove_field => ["host"]
+              remove_field => ["host", "message", "log", "@version", "event"]
             }
           }
 
           output {
-            stdout {}
+            stdout {codec => json}
             elasticsearch {
               hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOSTS}"]
               api_key => "${PIPELINE_OUTPUT_ELASTICSEARCH_API_KEY}"
