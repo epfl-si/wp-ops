@@ -28,7 +28,9 @@
               drop { }
             }
             mutate {
-              rename => { "[host][name]" => "hostname" }
+              add_field => {
+                "[agent][name]" => "%{[host][name]}"
+              }
               remove_field => ["host"]
             }
           }
