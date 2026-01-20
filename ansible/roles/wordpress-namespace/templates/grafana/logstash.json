@@ -2024,7 +2024,7 @@
           "refId": "B"
         }
       ],
-      "title": "$pod - Events processing times",
+      "title": "Events processing times",
       "transparent": true,
       "type": "timeseries"
     },
@@ -2359,7 +2359,7 @@
           "refId": "A"
         }
       ],
-      "title": "Input plugins: Queue Push Waiting Times ($pod)",
+      "title": "Input plugins: Queue Push Waiting Times",
       "transparent": true,
       "type": "timeseries"
     },
@@ -2598,7 +2598,7 @@
         }
       ],
       "timeFrom": "1h",
-      "title": "Pipeline Output events / sec over the last hour ($pod)",
+      "title": "Pipeline Output events / sec over the last hour",
       "transparent": true,
       "type": "timeseries"
     },
@@ -2745,7 +2745,7 @@
           "refId": "C"
         }
       ],
-      "title": "Processed Events I/O Rate ($pod)",
+      "title": "Processed Events I/O Rate",
       "transparent": true,
       "type": "timeseries"
     },
