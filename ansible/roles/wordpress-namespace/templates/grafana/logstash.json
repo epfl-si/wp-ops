@@ -2119,7 +2119,7 @@
             "type": "prometheus"
           },
           "exemplar": true,
-          "expr": "logstash_stats_pipeline_queue_events_count{pod=~\"$pod\",pipeline=~\"$pipeline\"}",
+          "expr": "logstash_stats_pipeline_queue_events_count{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\"}",
           "interval": "",
           "legendFormat": "documents in queue",
           "refId": "A"
@@ -2855,7 +2855,7 @@
             "type": "prometheus"
           },
           "exemplar": false,
-          "expr": "sum(irate(logstash_stats_pipeline_plugin_events_in{pod=\"$pod\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])/increase(logstash_stats_pipeline_plugin_events_duration{pod=\"$pod\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])*1000) by (plugin, plugin_id)",
+          "expr": "sum(irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])/increase(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])*1000) by (plugin, plugin_id)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -2869,7 +2869,7 @@
             "type": "prometheus"
           },
           "exemplar": false,
-          "expr": "irate(logstash_stats_pipeline_plugin_events_in{pod=~\"$pod\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
+          "expr": "irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
           "format": "time_series",
           "hide": true,
           "instant": false,
@@ -2883,24 +2883,25 @@
             "type": "prometheus"
           },
           "exemplar": false,
-          "expr": "rate(logstash_stats_pipeline_plugin_events_out{pod=~\"$pod\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])\n/rate(logstash_stats_pipeline_plugin_events_duration{pod=~\"$pod\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
+          "expr": "rate(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])\n/rate(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
           "hide": true,
           "interval": "",
           "legendFormat": "{{plugin}}",
           "refId": "F"
         }
       ],
-      "title": "Processing Rate for Filters used in Pipeline $pipeline::$filter_plugin ($pod)",
+      "title": "Processing Rate for Filters used in Pipeline $pipeline::$filter_plugin",
       "transparent": true,
       "type": "stat"
     }
   ],
-  "preload": false,
-  "refresh": "",
+  "preload": true,
+  "refresh": "5s",
   "schemaVersion": 42,
   "tags": [
-    "logstash",
-    "telemetry"
+    "opdo",
+    "audit_logs",
+    "security"
   ],
   "templating": {
     "list": [
@@ -2916,30 +2917,6 @@
         "query": "1.0",
         "skipUrlSync": true,
         "type": "constant"
-      },
-      {
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus"
-
-        },
-        "definition": "query_result({app='logstash'})",
-        "includeAll": true,
-        "label": "Replica",
-        "multi": true,
-        "name": "pod",
-        "options": [],
-        "query": {
-          "query": "query_result({app='logstash'})",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/.*pod=\"([^\"]*).*/",
-        "sort": 1,
-        "type": "query"
       },
       {
         "current": {
