@@ -90,6 +90,9 @@
             containers:
               - name: logstash
                 image: docker.elastic.co/logstash/logstash:9.2.1
+                ports:
+                  - containerPort: 9600
+                    name: monitoring
                 volumeMounts:
                   - name: opdo-ca
                     mountPath: /usr/local/share/ca-certificates
@@ -102,6 +105,13 @@
                 envFrom:
                   - secretRef:
                       name: opdo-logstash
+
+              - name: logstash-exporter
+                image: quay-its.epfl.ch/svc0041/logstash-exporter-kuskoman:v1.9.1
+                ports:
+                  - containerPort: 9198
+                    name: metrics
+
             volumes:
               - name: wordpress-audit
                 persistentVolumeClaim:
@@ -115,3 +125,52 @@
               - name: logstash-pipelines-yml
                 configMap:
                   name: logstash-opdo-pipelines-yml
+
+- name: Service/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: logstash
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: logstash
+      spec:
+        selector:
+          app: logstash
+        ports:
+          - name: beats
+            port: 5044
+            targetPort: 5044
+            protocol: TCP
+          - name: monitoring
+            port: 9600
+            targetPort: 9600
+            protocol: TCP
+          - name: metrics
+            port: 9198
+            targetPort: 9198
+            protocol: TCP
+        type: ClusterIP
+
+- name: Monitor/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: logstash-monitor
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: logstash
+        endpoints:
+          - port: metrics
+            interval: 30s
+        namespaceSelector:
+          matchNames:
+            - "{{ inventory_namespace }}"
