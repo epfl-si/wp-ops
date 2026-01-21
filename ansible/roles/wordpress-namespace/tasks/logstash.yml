@@ -41,7 +41,7 @@
           output {
             stdout {codec => json}
             elasticsearch {
-              hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOSTS}"]
+              hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOST1}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST2}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST3}"]
               api_key => "${PIPELINE_OUTPUT_ELASTICSEARCH_API_KEY}"
               index => "${PIPELINE_OUTPUT_ELASTICSEARCH_INDEX}"
               data_stream => false
