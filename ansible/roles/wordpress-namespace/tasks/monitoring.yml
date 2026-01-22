@@ -231,7 +231,7 @@
             rules:
               - alert: LogstashDown
                 expr: >
-                  up{namespace="{{ inventory_namespace }}",job="logstash"}
+                  up{namespace="{{ inventory_namespace }}",job="logstash"} != 1
                 for: 4m
                 labels:
                   severity: critical
