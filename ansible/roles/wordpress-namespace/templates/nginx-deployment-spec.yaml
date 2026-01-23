@@ -147,9 +147,6 @@
                   secretKeyRef:
                     name: search-inside-secret
                     key: wp_api_token
-            envFrom:
-              - secretRef:
-                  name: opdo-client
           - name: php-fpm-exporter
             image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
             resources:
