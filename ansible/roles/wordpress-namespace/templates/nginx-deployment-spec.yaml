@@ -139,8 +139,6 @@
               - name: smtp-password
                 mountPath: /secrets/
                 readOnly: true
-              - name: opdo-ca
-                mountPath: /usr/local/share/ca-certificates
               - name: wordpress-audit
                 mountPath: /wp-audit/
             env:
@@ -149,9 +147,6 @@
                   secretKeyRef:
                     name: search-inside-secret
                     key: wp_api_token
-            envFrom:
-              - secretRef:
-                  name: opdo-client
           - name: php-fpm-exporter
             image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
             resources:
@@ -189,9 +184,6 @@
           # - name: wp-nginx
           #   configMap:
           #     name: wp-nginx
-          - name: opdo-ca
-            configMap:
-              name: opdo-ca
           - name: wordpress-audit
             persistentVolumeClaim:
               claimName: wordpress-audit

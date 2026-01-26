@@ -1,0 +1,181 @@
+- include_vars: ../../../vars/quay-vars.yml
+  tags: always
+
+
+- name: ConfigMap/LogStash-pipeline-conf
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: logstash-audit-logs-pipeline-conf
+        namespace: "{{ inventory_namespace }}"
+      data:
+        audit-logs-to-security.conf: |
+          input {
+            file {
+              path => "/wp-audit/*.jsonl"
+              sincedb_clean_after => "52 weeks"
+              sincedb_path => "/wp-audit/logstash/data/sincedb"
+              stat_interval => "30 seconds"
+              start_position => "beginning"
+            }
+          }
+          
+          filter {
+            if [source] == "wordpress-opdo" {
+              drop { }
+            }
+            json {
+              source => "[event][original]"
+            }
+            mutate {
+              add_field => {
+                "[agent][name]" => "%{[host][name]}"
+              }
+              remove_field => ["host", "message", "log", "@version", "event"]
+            }
+          }
+
+          output {
+            stdout {codec => json}
+            elasticsearch {
+              hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOST1}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST2}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST3}"]
+              api_key => "${PIPELINE_OUTPUT_ELASTICSEARCH_API_KEY}"
+              index => "${PIPELINE_OUTPUT_ELASTICSEARCH_INDEX}"
+              data_stream => false
+              action => "create"
+              ssl_enabled => true
+              ssl_certificate_authorities => ["/usr/local/share/ca-certificates/opdo-ca.crt"]
+            }
+          }
+
+- name: ConfigMap/LogStash-pipelines-yml
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: logstash-configs-yml
+        namespace: "{{ inventory_namespace }}"
+      data:
+        logstash.yml: |
+          pipeline:
+            batch:
+              size: ${BATCH_SIZE:125}
+              delay: ${BATCH_DELAY:50}
+          node:
+            name: "logstash-opdo"
+        pipelines.yml: |
+          - pipeline.id: audit-logs-to-security
+            path.config: "/etc/logstash/conf.d/audit-logs-to-security.conf"
+
+- name: StatefulSet/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: logstash-wordpress
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: logstash
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: logstash
+          spec:
+            terminationGracePeriodSeconds: 0
+            containers:
+              - name: logstash
+                image: docker.elastic.co/logstash/logstash:9.2.1
+                ports:
+                  - containerPort: 9600
+                    name: monitoring
+                volumeMounts:
+                  - name: opdo-ca
+                    mountPath: /usr/local/share/ca-certificates
+                  - name: wordpress-audit
+                    mountPath: /wp-audit
+                  - name: audit-logs-pipeline-conf
+                    mountPath: /etc/logstash/conf.d
+                  - name: configs-yml
+                    mountPath: /usr/share/logstash/config
+                envFrom:
+                  - secretRef:
+                      name: opdo-logstash
+
+              - name: logstash-exporter
+                image: quay-its.epfl.ch/svc0041/logstash-exporter-kuskoman:v1.9.1
+                ports:
+                  - containerPort: 9198
+                    name: metrics
+
+            volumes:
+              - name: wordpress-audit
+                persistentVolumeClaim:
+                  claimName: wordpress-audit
+              - name: opdo-ca
+                configMap:
+                  name: opdo-ca
+              - name: audit-logs-pipeline-conf
+                configMap:
+                  name: logstash-audit-logs-pipeline-conf
+              - name: configs-yml
+                configMap:
+                  name: logstash-configs-yml
+
+- name: Service/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: logstash
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: logstash
+      spec:
+        selector:
+          app: logstash
+        ports:
+          - name: beats
+            port: 5044
+            targetPort: 5044
+            protocol: TCP
+          - name: monitoring
+            port: 9600
+            targetPort: 9600
+            protocol: TCP
+          - name: metrics
+            port: 9198
+            targetPort: 9198
+            protocol: TCP
+        type: ClusterIP
+
+- name: Monitor/LogStash
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: logstash-monitor
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: logstash
+        endpoints:
+          - port: metrics
+            interval: 30s
+        namespaceSelector:
+          matchNames:
+            - "{{ inventory_namespace }}"

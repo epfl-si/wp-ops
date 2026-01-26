@@ -227,6 +227,35 @@
                     The Prometheus target {{ $labels.endpoint }} (job: {{ $labels.job }}, pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     has been down for over 3 minutes.
                     {%- endraw %}
+          - name: logstash-alerts
+            rules:
+              - alert: LogstashDown
+                expr: >
+                  up{namespace="{{ inventory_namespace }}",job="logstash"} != 1
+                for: 4m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "Logstash is down."
+                  description: >-
+                    {% raw -%}
+                    Logstash exporter cannot be reached for over 4 minutes.
+                    {%- endraw %}
+              - alert: LogstashQueueTooLarge
+                expr: >
+                  logstash_stats_queue_events_count{namespace="{{ inventory_namespace }}",job="logstash"} > 500
+                for: 5m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "Logstash queue is getting too big"
+                  description: >-
+                    {% raw -%}
+                    Queue has {{ $value }} events for more than 5 minutes.
+                    It may mean that the receiving server is no more available.
+                    {%- endraw %}
   vars:
     _499s_threshold: 1
     _499s_rate_window_minutes: 2
