@@ -44,6 +44,7 @@
               hosts => ["${PIPELINE_OUTPUT_ELASTICSEARCH_HOST1}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST2}", "${PIPELINE_OUTPUT_ELASTICSEARCH_HOST3}"]
               api_key => "${PIPELINE_OUTPUT_ELASTICSEARCH_API_KEY}"
               index => "${PIPELINE_OUTPUT_ELASTICSEARCH_INDEX}"
+              manage_template => false
               data_stream => false
               action => "create"
               ssl_enabled => true
