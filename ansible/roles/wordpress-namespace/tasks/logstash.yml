@@ -24,9 +24,6 @@
           }
           
           filter {
-            if [source] == "wordpress-opdo" {
-              drop { }
-            }
             json {
               source => "[event][original]"
             }
