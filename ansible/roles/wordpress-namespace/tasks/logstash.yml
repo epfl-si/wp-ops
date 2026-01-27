@@ -94,10 +94,10 @@
                 image: docker.elastic.co/logstash/logstash:9.2.1
                 resources:
                   limits:
-                    memory: 800Mi
+                    memory: "{{ '800Mi' if inventory_namespace == 'svc0041p-wordpress' else '256Mi' }}"
                   requests:
                     cpu: 10m
-                    memory: 512Mi
+                    memory: "{{ '512Mi' if inventory_namespace == 'svc0041p-wordpress' else '128Mi' }}"
                 ports:
                   - containerPort: 9600
                     name: monitoring
@@ -118,10 +118,10 @@
                 image: quay-its.epfl.ch/svc0041/logstash-exporter-kuskoman:v1.9.1
                 resources:
                   limits:
-                    memory: 256Mi
+                    memory: "{{ '128Mi' if inventory_namespace == 'svc0041p-wordpress' else '64Mi' }}"
                   requests:
                     cpu: 5m
-                    memory: 128Mi
+                    memory: "{{ '64Mi' if inventory_namespace == 'svc0041p-wordpress' else '32Mi' }}"
                 ports:
                   - containerPort: 9198
                     name: metrics
