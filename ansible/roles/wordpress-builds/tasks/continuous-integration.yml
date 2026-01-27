@@ -79,6 +79,9 @@
             - wp-plugin-epfl-restauration
             - wp-plugin-epfl-cache-control
             - wordpress.plugin.accred
+            - wordpress.plugin.accred.entra
+            - wp-epfl-openid-configuration
+            - openid-connect-generic
             - wp-plugin-epfl-translate
             - wp-plugin-epfl-menus
             - wp-plugin-pushgateway
