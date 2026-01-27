@@ -1,0 +1,30 @@
+- name: "Mirror the Python 3.13 base image"
+  include_tasks:
+    file: ../../tasks/_mirror.yml
+  vars:
+    mirror_name: "python"
+    mirror_from: "docker.io/library/python"
+    mirror_tags: ["3.13-slim"]
+
+- name: Create BuildConfig for the python prometheus exporter
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: build.openshift.io/v1
+      kind: BuildConfig
+      metadata:
+        name: prometheus-exporter-in-python
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        source:
+          type: Dockerfile
+          dockerfile: "{{ lookup('template', 'prometheus-exporter-in-python-dockerFile') }}"
+        strategy:
+          type: Docker
+        output:
+          to:
+            kind: DockerImage
+            name: >-
+              {{ ansible_quay_hostname
+              }}/{{ quay_organization
+              }}/prometheus-exporter-in-python:latest
