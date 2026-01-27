@@ -242,19 +242,20 @@
                     {% raw -%}
                     Logstash exporter cannot be reached for over 4 minutes.
                     {%- endraw %}
-              - alert: LogstashQueueTooLarge
+              - alert: LogstashAuditLogsNotProcessing
                 expr: >
-                  logstash_stats_queue_events_count{namespace="{{ inventory_namespace }}",job="logstash"} > 500
-                for: 5m
+                  logstash_stats_pipeline_queue_events_count{namespace="{{ inventory_namespace }}",pipeline=~"audit-logs-to-security"} > 0
+                for: 4h
                 labels:
                   severity: warning
                   sendto: telegram
                 annotations:
-                  summary: "Logstash queue is getting too big"
+                  summary: "Logstash queue for sending the audit logs to the security departement has not been empty for 4 hours"
                   description: >-
                     {% raw -%}
-                    Queue has {{ $value }} events for more than 5 minutes.
-                    It may mean that the receiving server is no more available.
+                    The queue to send the audit logs (OPDo) has never reached emptiness for over 4 hours.
+                    The receiving server may be down or lagging behind.
+                    Current queue size: {{ $value }}
                     {%- endraw %}
   vars:
     _499s_threshold: 1
