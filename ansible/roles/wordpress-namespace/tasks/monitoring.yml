@@ -250,7 +250,7 @@
                   severity: warning
                   sendto: telegram
                 annotations:
-                  summary: "Logstash queue for sending the audit logs to the security departement has not been empty for 4 hours"
+                  summary: "Logstash queue for sending the audit logs to the security department has not been empty for 4 hours"
                   description: >-
                     {% raw -%}
                     The queue to send the audit logs (OPDo) has never reached emptiness for over 4 hours.
