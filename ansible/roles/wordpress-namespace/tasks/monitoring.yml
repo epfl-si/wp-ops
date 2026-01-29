@@ -244,7 +244,7 @@
                     {%- endraw %}
               - alert: LogstashAuditLogsNotProcessing
                 expr: >
-                  logstash_stats_pipeline_queue_events_count{namespace="{{ inventory_namespace }}",pipeline=~"audit-logs-to-security"} > 0
+                  logstash_stats_pipeline_events_in{namespace="{{ inventory_namespace }}",pipeline=~'audit-logs-to-security'} - logstash_stats_pipeline_events_out{namespace="{{ inventory_namespace }}",pipeline=~'audit-logs-to-security'} > 0
                 for: 4h
                 labels:
                   severity: warning
