@@ -25,7 +25,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 96,
+  "id": 102,
   "links": [],
   "panels": [
     {
@@ -57,7 +57,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "fieldConfig": {
         "defaults": {
@@ -149,7 +148,186 @@
           "refId": "B"
         }
       ],
-      "title": "Total Events In/Out",
+      "title": "Increasing Total Events In/Out",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": true,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 6956,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'} - logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'}",
+          "format": "table",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Lagginess (Out - In)",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "IN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OUT"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 6955,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "sum(logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'})",
+          "legendFormat": "IN",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'})",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "OUT",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Pipeline events In / Out",
       "transparent": true,
       "type": "stat"
     },
@@ -159,7 +337,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 15
       },
       "id": 6793,
       "panels": [],
@@ -169,7 +347,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "",
       "fieldConfig": {
@@ -209,7 +386,7 @@
         "h": 6,
         "w": 10,
         "x": 0,
-        "y": 8
+        "y": 16
       },
       "id": 6765,
       "options": {
@@ -312,7 +489,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "Successful Writes to Elasticsearch/OpenSearch",
       "fieldConfig": {
@@ -339,7 +515,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 16
       },
       "id": 6919,
       "options": {
@@ -365,6 +541,7 @@
           "datasource": {
             "type": "prometheus"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (pipeline, plugin, plugin_id) (logstash_stats_pipeline_plugin_documents_successes{plugin!=\"stdout\"})",
           "format": "time_series",
@@ -388,7 +565,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "fieldConfig": {
         "defaults": {
@@ -440,7 +616,7 @@
         "h": 5,
         "w": 10,
         "x": 0,
-        "y": 14
+        "y": 22
       },
       "id": 6775,
       "options": {
@@ -550,7 +726,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "Failed Writes to Elasticsearch/OpenSearch",
       "fieldConfig": {
@@ -590,7 +765,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 22
       },
       "id": 6952,
       "options": {
@@ -643,7 +818,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 27
       },
       "id": 6763,
       "panels": [
@@ -758,7 +933,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 28
           },
           "id": 2461,
           "maxPerRow": 3,
@@ -842,7 +1017,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 28
       },
       "id": 2459,
       "panels": [
@@ -912,7 +1087,7 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 21
+            "y": 36
           },
           "id": 6747,
           "options": {
@@ -1010,7 +1185,7 @@
             "h": 7,
             "w": 9,
             "x": 8,
-            "y": 21
+            "y": 36
           },
           "id": 2464,
           "options": {
@@ -1113,7 +1288,7 @@
             "h": 6,
             "w": 7,
             "x": 17,
-            "y": 21
+            "y": 36
           },
           "id": 2463,
           "options": {
@@ -1166,7 +1341,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 29
       },
       "id": 953,
       "panels": [
@@ -1236,7 +1411,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 22
+            "y": 37
           },
           "id": 2286,
           "options": {
@@ -1376,7 +1551,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 22
+            "y": 37
           },
           "id": 2287,
           "options": {
@@ -1516,7 +1691,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 22
+            "y": 37
           },
           "id": 2288,
           "options": {
@@ -1646,7 +1821,7 @@
             "h": 7,
             "w": 6,
             "x": 0,
-            "y": 28
+            "y": 43
           },
           "id": 1599,
           "options": {
@@ -1747,7 +1922,7 @@
             "h": 7,
             "w": 6,
             "x": 6,
-            "y": 28
+            "y": 43
           },
           "id": 1435,
           "options": {
@@ -1859,7 +2034,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 28
+            "y": 43
           },
           "id": 2127,
           "options": {
@@ -1909,7 +2084,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "id": 2639,
       "panels": [],
@@ -1919,7 +2094,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "fieldConfig": {
         "defaults": {
@@ -1983,7 +2157,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 31
       },
       "id": 2641,
       "options": {
@@ -2031,7 +2205,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "Documents in Queue",
       "fieldConfig": {
@@ -2094,7 +2267,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 37
       },
       "id": 6954,
       "options": {
@@ -2134,7 +2307,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 44
       },
       "id": 6761,
       "panels": [],
@@ -2144,7 +2317,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "",
       "fieldConfig": {
@@ -2209,7 +2381,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 45
       },
       "hideTimeOverride": false,
       "id": 5934,
@@ -2261,7 +2433,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "fieldConfig": {
         "defaults": {
@@ -2325,7 +2496,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 52
       },
       "id": 2978,
       "options": {
@@ -2369,7 +2540,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 59
       },
       "id": 6795,
       "panels": [],
@@ -2380,7 +2551,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "An \"output event\" is a 20MB \"bulk\" send in most cases",
       "fieldConfig": {
@@ -2445,7 +2615,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 60
       },
       "id": 6745,
       "options": {
@@ -2486,7 +2656,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "An \"output event\" is a 20MB \"bulk\" send in most cases",
       "fieldConfig": {
@@ -2551,7 +2720,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 66
       },
       "hideTimeOverride": false,
       "id": 6098,
@@ -2608,7 +2777,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 73
       },
       "id": 6813,
       "panels": [],
@@ -2619,7 +2788,6 @@
     {
       "datasource": {
         "type": "prometheus"
-
       },
       "description": "",
       "fieldConfig": {
@@ -2684,7 +2852,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 74
       },
       "id": 2817,
       "options": {
@@ -2750,149 +2918,149 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 80
       },
       "id": 162,
-      "panels": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-RdYlGr"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "Infinity": {
+                      "color": "#808080",
+                      "index": 2,
+                      "text": "–"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "color": "#808080",
+                      "index": 0,
+                      "text": "–"
+                    }
+                  },
+                  "type": "special"
+                },
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "color": "#808080",
+                      "index": 1,
+                      "text": "–"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#299c46",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 159
+          },
+          "id": 2,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "repeat": "pod",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": false,
+              "expr": "sum(irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])/increase(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])*1000) by (plugin, plugin_id)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{plugin}} ({{plugin_id}})",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": false,
+              "expr": "irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{plugin}}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": false,
+              "expr": "rate(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])\n/rate(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
+              "hide": true,
+              "interval": "",
+              "legendFormat": "{{plugin}}",
+              "refId": "F"
+            }
+          ],
+          "title": "Processing Rate for Filters used in Pipeline $pipeline::$filter_plugin",
+          "transparent": true,
+          "type": "stat"
+        }
+      ],
       "repeat": "pipeline",
       "title": "Pipeline Filters ($pipeline)",
       "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus"
-
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-RdYlGr"
-          },
-          "mappings": [
-            {
-              "options": {
-                "Infinity": {
-                  "color": "#808080",
-                  "index": 2,
-                  "text": "–"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "color": "#808080",
-                  "index": 0,
-                  "text": "–"
-                }
-              },
-              "type": "special"
-            },
-            {
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "color": "#808080",
-                  "index": 1,
-                  "text": "–"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#299c46",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 73
-      },
-      "id": 2,
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.0",
-      "repeat": "pod",
-      "repeatDirection": "h",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": false,
-          "expr": "sum(irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])/increase(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])*1000) by (plugin, plugin_id)",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{plugin}} ({{plugin_id}})",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": false,
-          "expr": "irate(logstash_stats_pipeline_plugin_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
-          "format": "time_series",
-          "hide": true,
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{plugin}}",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": false,
-          "expr": "rate(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])\n/rate(logstash_stats_pipeline_plugin_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\",plugin=~\"$filter_plugin\",plugin_type='filter'}[$__range])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "{{plugin}}",
-          "refId": "F"
-        }
-      ],
-      "title": "Processing Rate for Filters used in Pipeline $pipeline::$filter_plugin",
-      "transparent": true,
-      "type": "stat"
     }
   ],
   "preload": true,
@@ -2921,15 +3089,14 @@
       {
         "current": {
           "text": [
-            "logstash-opdo"
+            "All"
           ],
           "value": [
-            "logstash-opdo"
+            "$__all"
           ]
         },
         "datasource": {
           "type": "prometheus"
-
         },
         "definition": "query_result(logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"})",
         "description": "Logstash Pipeline",
@@ -2950,16 +3117,13 @@
       },
       {
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
         },
         "datasource": {
           "type": "prometheus"
-
         },
         "definition": "query_result(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",plugin_type='input'})",
         "includeAll": true,
@@ -2977,16 +3141,13 @@
       },
       {
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
         },
         "datasource": {
           "type": "prometheus"
-
         },
         "definition": "query_result(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",plugin_type='filter'})",
         "includeAll": true,
@@ -3011,7 +3172,6 @@
         },
         "datasource": {
           "type": "prometheus"
-
         },
         "definition": "query_result(logstash_stats_pipeline_plugin_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",plugin_type='output'})",
         "includeAll": true,
@@ -3050,13 +3210,13 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Logstash",
   "uid": "wordpress-logstash",
-  "version": 3
+  "version": 2
 }
 {% endraw %}
