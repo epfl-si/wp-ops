@@ -242,6 +242,19 @@
                     {% raw -%}
                     Logstash exporter cannot be reached for over 4 minutes.
                     {%- endraw %}
+              - alert: LogstashHealthStatus
+                expr: >
+                  logstash_info_status{namespace="{{ inventory_namespace }}",service="logstash",status=~"yellow|red"}
+                for: 4m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "Logstash health status is not looking good."
+                  description: >-
+                    {% raw -%}
+                    Logstash service status has been {{ $labels.status }} for more than 4 minutes. 
+                    {%- endraw %}
               - alert: LogstashAuditLogsNotProcessing
                 expr: >
                   logstash_stats_pipeline_events_in{namespace="{{ inventory_namespace }}",pipeline=~'audit-logs-to-security'} - logstash_stats_pipeline_events_out{namespace="{{ inventory_namespace }}",pipeline=~'audit-logs-to-security'} > 0
