@@ -1,0 +1,11 @@
+FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/python:3.13-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir prometheus-client
+
+EXPOSE 9105
+
+USER nobody
+
+ENTRYPOINT ["python", "/app/script.py"]
