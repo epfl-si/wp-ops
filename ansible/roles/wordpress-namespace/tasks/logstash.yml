@@ -197,6 +197,10 @@
             port: 5044
             targetPort: 5044
             protocol: TCP
+          - name: timestamps
+            port: 9105
+            targetPort: 9105
+            protocol: TCP
           - name: monitoring
             port: 9600
             targetPort: 9600
@@ -222,6 +226,8 @@
             app: logstash
         endpoints:
           - port: metrics
+            interval: 30s
+          - port: timestamps
             interval: 30s
         namespaceSelector:
           matchNames:
