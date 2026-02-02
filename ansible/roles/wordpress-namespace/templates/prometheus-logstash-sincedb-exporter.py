@@ -41,12 +41,11 @@ def get_last_modified_timestamp_files_from_dir(dir_path):
 
 def collect():
     """Collect metrics from sincedb file."""
-    # last touched file from WP
     latest_modified_file_timestamp = get_last_modified_timestamp_files_from_dir(LOG_ROOT)
     sincedb_last_modified_timestamp = parse_sincedb_last_modified(SINCE_DB_PATH)
 
-    if latest_modified_file_timestamp and sincedb_last_modified_timestamp:
-        lag_gauge.set(latest_modified_file_timestamp - sincedb_last_modified_timestamp)
+    if sincedb_last_modified_timestamp and latest_modified_file_timestamp:
+        lag_gauge.set(sincedb_last_modified_timestamp - latest_modified_file_timestamp)
     else:
         lag_gauge.set(float('nan'))
 
