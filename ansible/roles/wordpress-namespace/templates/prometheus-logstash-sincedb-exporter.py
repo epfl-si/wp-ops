@@ -7,7 +7,6 @@ import os
 import time
 import logging
 from pathlib import Path
-from datetime import datetime
 from prometheus_client import start_http_server, Gauge
 
 
@@ -16,13 +15,19 @@ LOG_ROOT = os.getenv("LOG_ROOT", "/wp-audit")
 PORT = int(os.getenv("EXPORTER_PORT", "9105"))
 INTERVAL = int(os.getenv("SCRAPE_INTERVAL", "30"))
 
-lag_gauge = Gauge(
-    "logstash_files_modification_time_delta_with_sincedb_seconds",
-    "Modified time difference between the latest audit log file and sincedb file in seconds",
+
+sincedb_last_modified_counter = Gauge(
+    "logstash_last_modified_sincedb_timestamp",
+    "mtime timestamp of the sincedb",
+)
+
+last_modified_audit_files_counter = Gauge(
+    "logstash_last_modified_audit_files_timestamp",
+    "mtime timestamp of the last audit logs file.",
 )
 
 
-def parse_sincedb_last_modified(path):
+def get_sincedb_last_modified(path):
     path = Path(path)
     mtime = path.stat().st_mtime
     return mtime
@@ -42,12 +47,16 @@ def get_last_modified_timestamp_files_from_dir(dir_path):
 def collect():
     """Collect metrics from sincedb file."""
     latest_modified_file_timestamp = get_last_modified_timestamp_files_from_dir(LOG_ROOT)
-    sincedb_last_modified_timestamp = parse_sincedb_last_modified(SINCE_DB_PATH)
-
-    if sincedb_last_modified_timestamp and latest_modified_file_timestamp:
-        lag_gauge.set(sincedb_last_modified_timestamp - latest_modified_file_timestamp)
+    if last_modified_audit_files_counter:
+        last_modified_audit_files_counter.set(latest_modified_file_timestamp)
     else:
-        lag_gauge.set(float('nan'))
+        last_modified_audit_files_counter.set(float('nan'))
+
+    sincedb_last_modified_timestamp = get_sincedb_last_modified(SINCE_DB_PATH)
+    if sincedb_last_modified_timestamp:
+        sincedb_last_modified_counter.set(sincedb_last_modified_timestamp)
+    else:
+        sincedb_last_modified_counter.set(float('nan'))
 
 
 if __name__ == "__main__":
