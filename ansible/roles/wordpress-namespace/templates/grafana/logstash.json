@@ -25,7 +25,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 102,
+  "id": 0,
   "links": [],
   "panels": [
     {
@@ -162,21 +162,44 @@
           "color": {
             "mode": "thresholds"
           },
-          "fieldMinMax": true,
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "In sync"
+                }
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "result": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "Out of sync"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "yellow",
                 "value": 0
               },
               {
-                "color": "red",
-                "value": 1
+                "color": "green",
+                "value": 0
               }
             ]
-          }
+          },
+          "unit": "dtdhms"
         },
         "overrides": []
       },
@@ -186,21 +209,23 @@
         "x": 0,
         "y": 7
       },
-      "id": 6956,
+      "id": 6957,
       "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
       },
       "pluginVersion": "12.3.0",
       "targets": [
@@ -210,16 +235,15 @@
             "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
           },
           "editorMode": "code",
-          "expr": "logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'} - logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'}",
-          "format": "table",
+          "expr": "logstash_last_modified_sincedb_timestamp - logstash_last_modified_audit_files_timestamp",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Lagginess (Out - In)",
+      "title": "Last modified timestamps processed",
       "transparent": true,
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -332,12 +356,279 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "dateTimeAsSystem"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 15
+      },
+      "id": 6957,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "logstash_last_modified_sincedb_timestamp * 1000",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SinceDb modified timestamp ",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "dateTimeAsSystem"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 15
+      },
+      "id": 6959,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "logstash_last_modified_sincedb_timestamp * 1000",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Last modified sincedb timestamp ",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "dateTimeAsSystem"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 15
+      },
+      "id": 6958,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "logstash_last_modified_audit_files_timestamp * 1000",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Last modified audit log timestamp ",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": true,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 6956,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+          },
+          "editorMode": "code",
+          "expr": "logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'} - logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~'$pipeline'}",
+          "format": "table",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Lagginess (Out - In)",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "id": 6793,
       "panels": [],
@@ -386,7 +677,7 @@
         "h": 6,
         "w": 10,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "id": 6765,
       "options": {
@@ -513,9 +804,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 16
+        "w": 14,
+        "x": 10,
+        "y": 24
       },
       "id": 6919,
       "options": {
@@ -616,7 +907,7 @@
         "h": 5,
         "w": 10,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "id": 6775,
       "options": {
@@ -763,9 +1054,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 12,
-        "x": 12,
-        "y": 22
+        "w": 14,
+        "x": 10,
+        "y": 36
       },
       "id": 6952,
       "options": {
@@ -818,7 +1109,331 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 35
+      },
+      "id": 2459,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 9,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 67
+          },
+          "id": 6747,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "logstash_stats_process_cpu_percent{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
+              "interval": "",
+              "legendFormat": "cpu_pct ({{pod}})",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Utilization %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 9,
+            "x": 8,
+            "y": 67
+          },
+          "id": 2464,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "logstash_stats_process_mem_total_virtual{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
+              "interval": "",
+              "legendFormat": "vmem ({{pod}})",
+              "refId": "A"
+            }
+          ],
+          "title": "Logstash Process Total Virtual Memory",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 10,
+                  "type": "log"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 7,
+            "x": 17,
+            "y": 67
+          },
+          "id": 2463,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "logstash_stats_process_max_file_descriptors{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
+              "interval": "",
+              "legendFormat": "max_fds ({{pod}})",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "logstash_stats_process_open_file_descriptors{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
+              "interval": "",
+              "legendFormat": "open_fds ({{pod}})",
+              "refId": "B"
+            }
+          ],
+          "title": "Logstash FIle Descriptors",
+          "transparent": true,
+          "type": "timeseries"
+        }
+      ],
+      "title": "Process Metrics (All Selected Replicas)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
       },
       "id": 6763,
       "panels": [
@@ -933,7 +1548,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 28
+            "y": 59
           },
           "id": 2461,
           "maxPerRow": 3,
@@ -1017,331 +1632,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
-      },
-      "id": 2459,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 9,
-                "gradientMode": "hue",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 8,
-            "x": 0,
-            "y": 36
-          },
-          "id": 6747,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus"
-              },
-              "exemplar": true,
-              "expr": "logstash_stats_process_cpu_percent{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
-              "interval": "",
-              "legendFormat": "cpu_pct ({{pod}})",
-              "refId": "A"
-            }
-          ],
-          "title": "CPU Utilization %",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "showValues": false,
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "links": [],
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 9,
-            "x": 8,
-            "y": 36
-          },
-          "id": 2464,
-          "options": {
-            "legend": {
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus"
-              },
-              "exemplar": true,
-              "expr": "logstash_stats_process_mem_total_virtual{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
-              "interval": "",
-              "legendFormat": "vmem ({{pod}})",
-              "refId": "A"
-            }
-          ],
-          "title": "Logstash Process Total Virtual Memory",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "log": 10,
-                  "type": "log"
-                },
-                "showPoints": "never",
-                "showValues": false,
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "links": [],
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 7,
-            "x": 17,
-            "y": 36
-          },
-          "id": 2463,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus"
-              },
-              "exemplar": true,
-              "expr": "logstash_stats_process_max_file_descriptors{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
-              "interval": "",
-              "legendFormat": "max_fds ({{pod}})",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus"
-              },
-              "exemplar": true,
-              "expr": "logstash_stats_process_open_file_descriptors{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}",
-              "interval": "",
-              "legendFormat": "open_fds ({{pod}})",
-              "refId": "B"
-            }
-          ],
-          "title": "Logstash FIle Descriptors",
-          "transparent": true,
-          "type": "timeseries"
-        }
-      ],
-      "title": "Process Metrics (All Selected Replicas)",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 29
+        "y": 42
       },
       "id": 953,
       "panels": [
@@ -1411,7 +1702,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 37
+            "y": 68
           },
           "id": 2286,
           "options": {
@@ -1551,7 +1842,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 37
+            "y": 68
           },
           "id": 2287,
           "options": {
@@ -1691,7 +1982,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 37
+            "y": 68
           },
           "id": 2288,
           "options": {
@@ -1821,7 +2112,7 @@
             "h": 7,
             "w": 6,
             "x": 0,
-            "y": 43
+            "y": 74
           },
           "id": 1599,
           "options": {
@@ -1922,7 +2213,7 @@
             "h": 7,
             "w": 6,
             "x": 6,
-            "y": 43
+            "y": 74
           },
           "id": 1435,
           "options": {
@@ -2034,7 +2325,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 43
+            "y": 74
           },
           "id": 2127,
           "options": {
@@ -2079,227 +2370,228 @@
       "type": "row"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 43
       },
       "id": 2639,
-      "panels": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 39
+          },
+          "id": 2641,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "repeat": "pod",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "avg(irate(logstash_stats_pipeline_events_queue_push_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])/irate(logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])) by (pod, pipeline)",
+              "interval": "",
+              "legendFormat": "avg waiting time ({{pipeline}})",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "avg(irate(logstash_stats_pipeline_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])/irate(logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])) by (pod, pipeline)",
+              "interval": "",
+              "legendFormat": "avg process time  ({{pipeline}})",
+              "refId": "B"
+            }
+          ],
+          "title": "Events processing times",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "description": "Documents in Queue",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 45
+          },
+          "id": 6954,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "repeat": "pod",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "exemplar": true,
+              "expr": "logstash_stats_pipeline_queue_events_count{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\"}",
+              "interval": "",
+              "legendFormat": "documents in queue",
+              "refId": "A"
+            }
+          ],
+          "title": "Pipeline Queue Size ($pipeline)",
+          "type": "timeseries"
+        }
+      ],
       "title": "Pipeline",
       "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "links": [],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 31
-      },
-      "id": 2641,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0",
-      "repeat": "pod",
-      "repeatDirection": "h",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "avg(irate(logstash_stats_pipeline_events_queue_push_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])/irate(logstash_stats_pipeline_events_in{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])) by (pod, pipeline)",
-          "interval": "",
-          "legendFormat": "avg waiting time ({{pipeline}})",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "avg(irate(logstash_stats_pipeline_events_duration{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])/irate(logstash_stats_pipeline_events_out{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[$__range])) by (pod, pipeline)",
-          "interval": "",
-          "legendFormat": "avg process time  ({{pipeline}})",
-          "refId": "B"
-        }
-      ],
-      "title": "Events processing times",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus"
-      },
-      "description": "Documents in Queue",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 37
-      },
-      "id": 6954,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0",
-      "repeat": "pod",
-      "repeatDirection": "h",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "logstash_stats_pipeline_queue_events_count{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\",pipeline=~\"$pipeline\"}",
-          "interval": "",
-          "legendFormat": "documents in queue",
-          "refId": "A"
-        }
-      ],
-      "title": "Pipeline Queue Size ($pipeline)",
-      "type": "timeseries"
     },
     {
       "collapsed": false,
@@ -2988,7 +3280,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 159
+            "y": 190
           },
           "id": 2,
           "maxDataPoints": 100,
@@ -3088,9 +3380,7 @@
       },
       {
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
@@ -3210,13 +3500,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Logstash",
   "uid": "wordpress-logstash",
-  "version": 2
+  "version": 12
 }
 {% endraw %}

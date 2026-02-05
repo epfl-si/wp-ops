@@ -270,6 +270,20 @@
                     The receiving server may be down or lagging behind.
                     Current queue size: {{ $value }}
                     {%- endraw %}
+              - alert: LogstashLastModifiedFilesOutOfSync
+                expr: >
+                  (logstash_last_modified_sincedb_timestamp{namespace="{{ inventory_namespace }}"} - logstash_last_modified_audit_files_timestamp{namespace="{{ inventory_namespace }}"}) < -1800
+                for: 4m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "Logstash sincedb last modified file has not been processed but the audit logs keep being received. Delta between the two is +30 minutes"
+                  description: >-
+                    {% raw -%}
+                    The modified timestamp of the last audit logs is not getting processed by the sincedb file.  
+                    Current lag in seconds: {{ $value }}
+                    {%- endraw %}
   vars:
     _499s_threshold: 1
     _499s_rate_window_minutes: 2

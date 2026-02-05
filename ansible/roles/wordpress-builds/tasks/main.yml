@@ -118,3 +118,12 @@
   tags:
     - wp.kong.configuration
     - wp.kong.deployments
+
+- name: Prometheus Exporter for Python
+  include_tasks:
+    file: prometheus-exporter-with-python.yml
+    apply:
+      tags:
+        - wp.prometheus-exporter-with-python
+  tags:
+    - wp.prometheus-exporter-with-python
