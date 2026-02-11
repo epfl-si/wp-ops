@@ -9,7 +9,7 @@ RUN set -e -x; \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
     add-apt-repository ppa:ondrej/php ; \
     apt -qy update ; \
-    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip}' ; \
+    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip,opentelemetry}' ; \
     apt-get -qy autoremove ; \
     apt-get clean
 
