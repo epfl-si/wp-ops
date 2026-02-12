@@ -20,13 +20,12 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 50,
+  "id": 0,
   "links": [],
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -41,7 +40,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "semi-dark-red",
@@ -75,7 +74,7 @@
         {
           "targetBlank": true,
           "title": "ocpitsp0001",
-          "url": "https://console-openshift-console.apps.ocpitsp0001.xaas.epfl.ch/k8s/ns/svc0041p-wordpress/core~v1~Pod?name=wp-nginx"
+          "url": "https://console-openshift-console.apps.ocpitsp0001.xaas.epfl.ch/k8s/ns/{% endraw %}{{ inventory_namespace }}{% raw %}/core~v1~Pod?name=wp-nginx"
         }
       ],
       "options": {
@@ -83,7 +82,9 @@
         "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -94,16 +95,15 @@
           "valueSize": 150
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "count(kube_pod_status_phase{namespace=\"svc0041p-wordpress\", pod=~\"wp-nginx.*\", phase=\"Running\"})",
+          "expr": "count(kube_pod_status_phase{namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\", pod=~\"wp-nginx.*\", phase=\"Running\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "range": true,
@@ -116,8 +116,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -131,7 +130,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -152,7 +151,9 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -160,23 +161,21 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).svc0041p-wordpress.svc.cluster.local'}[1h]))",
+          "expr": "sum(last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).{% endraw %}{{ inventory_namespace }}{% raw %}.svc.cluster.local'}[1h]))",
           "legendFormat": "Databases",
           "range": true,
           "refId": "A"
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
           "expr": "count(openshift_route_status{route=~\"wp-route.*|wordpress\"})",
@@ -192,8 +191,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -208,7 +206,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -236,7 +234,9 @@
         "namePlacement": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -244,15 +244,14 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).svc0041p-wordpress.svc.cluster.local'}[1h])",
+          "expr": "last_over_time(mysql_global_status_acl_database_grants{instance=~'mariadb-0(.*).{% endraw %}{{ inventory_namespace }}{% raw %}.svc.cluster.local'}[1h])",
           "legendFormat": "{{target}}",
           "range": true,
           "refId": "A"
@@ -276,8 +275,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -305,7 +303,9 @@
       },
       "id": 14,
       "options": {
-        "displayLabels": ["name"],
+        "displayLabels": [
+          "name"
+        ],
         "legend": {
           "displayMode": "list",
           "placement": "right",
@@ -313,25 +313,27 @@
         },
         "pieType": "pie",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
+        "sort": "desc",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}) by (language)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -342,8 +344,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -374,6 +375,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -389,7 +391,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -421,15 +423,14 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}) by (language)",
           "format": "time_series",
           "legendFormat": "pages-{{language}}",
           "range": true,
@@ -437,11 +438,10 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"svc0041p-wordpress\"}) by (language)",
+          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}) by (language)",
           "format": "time_series",
           "hide": false,
           "legendFormat": "posts-{{language}}",
@@ -454,8 +454,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -468,7 +467,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -489,7 +488,9 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -497,15 +498,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"svc0041p-wordpress\"})",
+          "expr": "sum(wp_page_count{post_type=\"page\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"})",
           "range": true,
           "refId": "A"
         }
@@ -515,8 +515,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -529,7 +528,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -550,7 +549,9 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -558,15 +559,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"svc0041p-wordpress\"})",
+          "expr": "sum(wp_page_count{post_type=\"post\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"})",
           "range": true,
           "refId": "A"
         }
@@ -582,15 +582,14 @@
         "x": 0,
         "y": 19
       },
-      "id": 3,
+      "id": 16,
       "panels": [],
-      "title": "Network",
+      "title": "CPU",
       "type": "row"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -621,6 +620,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -636,7 +636,116 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"{% endraw %}{{ inventory_namespace }}{% raw %}\", image!=\"\", pod=~\"wp-nginx-.*\"}[$__rate_interval])) by (pod)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "WP CPU usage",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 3,
+      "panels": [],
+      "title": "Network",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -651,7 +760,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 32
       },
       "id": 4,
       "options": {
@@ -667,15 +776,14 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(irate(container_network_receive_bytes_total{pod=~\"wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)\n",
+          "expr": "sum(irate(container_network_receive_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[5m])) by (pod)\n",
           "range": true,
           "refId": "A"
         }
@@ -685,8 +793,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -717,6 +824,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -732,7 +840,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -747,7 +855,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 32
       },
       "id": 5,
       "options": {
@@ -763,15 +871,14 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "73a57e8b-7679-4a18-915c-292f143448c7"
+            "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(irate(container_network_transmit_bytes_total{pod=~\"wp-nginx.*\", namespace=\"svc0041p-wordpress\"}[5m])) by (pod)",
+          "expr": "sum(irate(container_network_transmit_bytes_total{pod=~\"wp-nginx.*\", namespace=\"{% endraw %}{{ inventory_namespace }}{% raw %}\"}[5m])) by (pod)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -783,20 +890,19 @@
   ],
   "preload": false,
   "refresh": "30s",
-  "schemaVersion": 40,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "✰ WPN ✰",
   "uid": "wpngrfndshbrda",
-  "version": 41,
-  "weekStart": ""
+  "version": 6
 }
 {% endraw %}
