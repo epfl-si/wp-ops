@@ -3,6 +3,7 @@ FROM ubuntu:jammy
 
 ARG PHP_VERSION=8.2
 RUN set -e -x; \
+    export DEBIAN_FRONTEND=noninteractive; \
     apt -qy update ; \
     apt -qy install --no-install-recommends \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
