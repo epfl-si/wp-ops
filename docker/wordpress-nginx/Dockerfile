@@ -1,4 +1,4 @@
-FROM bitnami/nginx-ingress-controller:1.12.1 AS ingress
+FROM bitnamilegacy/nginx-ingress-controller:1.12.1 AS ingress
 FROM quay-its.epfl.ch/svc0041/wp-base:rc
 FROM openresty/openresty:1.27.1.1-3-alpine-fat
 
@@ -32,7 +32,7 @@ RUN chmod 1777 /tmp/nginx/ \
     /var/run/openresty/
 
 ## Uncomment the following line if you want to test out your RBAC live:
-# COPY --from=bitnami/kubectl:latest /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
+# COPY --from=bitnamilegacy/kubectl:latest /opt/bitnamilegacy/kubectl/bin/kubectl /usr/local/bin/kubectl
 
 COPY ./prometheus/prometheus.lua /etc/nginx/lua/prometheus.lua
 COPY ./prometheus/prometheus_keys.lua /etc/nginx/lua/prometheus_keys.lua
