@@ -77,7 +77,7 @@
     namespace:  "{{ inventory_namespace }}"
     src: "{{ item }}"
   with_items:
-    - https://api.hub.tekton.dev/v1/resource/tekton/task/git-clone/0.9/raw
+    - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
     - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
 
 - name: "`Secret/tekton-quay-credentials`"
