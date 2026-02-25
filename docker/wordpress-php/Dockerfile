@@ -1,4 +1,9 @@
 FROM quay-its.epfl.ch/svc0041/wp-base:rc
+
+FROM composer:2.8 AS composer
+COPY composer.json ./
+RUN composer install --ignore-platform-reqs
+
 FROM ubuntu:jammy
 
 ARG PHP_VERSION=8.2
@@ -9,7 +14,7 @@ RUN set -e -x; \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
     add-apt-repository ppa:ondrej/php ; \
     apt -qy update ; \
-    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip}' ; \
+    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip,opentelemetry}' ; \
     apt-get -qy autoremove ; \
     apt-get clean
 
@@ -39,6 +44,8 @@ COPY php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/local.ini
 RUN mkdir -p /wp/nginx-entrypoint/ /wp/nginx-entrypoint.d/
 COPY nginx-entrypoint.php /wp/nginx-entrypoint/nginx-entrypoint.php
 COPY nginx-entrypoint.d/* /wp/nginx-entrypoint.d/
+
+COPY  --from=composer /app/vendor /vendor
 
 # WordPress insists on loading wp-config.php, but in our Web serving
 # workflow, all the setup work is handled by nginx-entrypoint.php:

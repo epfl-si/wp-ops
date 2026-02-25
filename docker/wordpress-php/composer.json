@@ -1,0 +1,12 @@
+{
+	"name": "epfl-si/wordpress-otel",
+        "//": "https://github.com/open-telemetry/opentelemetry-php-contrib/blame/main/examples/instrumentation/Wordpress/composer.json",
+	"description": "Auto-instrumented WordPress",
+	"type": "project",
+	"require": {
+		"open-telemetry/sdk": "^1.13",
+		"open-telemetry/exporter-otlp": "^1.4",
+		"open-telemetry/opentelemetry-auto-slim": "^1.3",
+		"open-telemetry/opentelemetry-auto-psr18": "^1.1"
+	}
+}
