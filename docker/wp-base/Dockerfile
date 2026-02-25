@@ -36,7 +36,7 @@ RUN chmod +x /tmp/install-wordpress.sh
 # `git push`ed something. Here is a way to force a rebuild everytime,
 # regardless of the cached state (on your workstation) or lack thereof
 # (in a cloud build).
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
+# ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
 
 ARG WORDPRESS_VERSION="6.9"
 ARG AWS_ACCESS_KEY_ID
