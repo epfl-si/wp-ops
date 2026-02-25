@@ -61,31 +61,32 @@
       data:
         wp-continuous-integration-config.yaml: |
           REPOSITORIES:
-            - wp-mu-plugins
-            - wp-theme-2018
-            - wp-plugin-epfl-coming-soon
-            - wordpress.plugin.tequila
-            - wp-plugin-epfl-settings
-            - wp-plugin-epfl-remote-content
-            - wp-plugin-epfl-content-filter
-            - wp-plugin-enlighter
-            - wp-plugin-epfl-intranet
-            - wp-plugin-epfl-library
-            - wp-plugin-epfl-diploma-verification
-            - wp-plugin-epfl-partner-universities
-            - wp-plugin-epfl-404
-            - wp-gutenberg-epfl
-            - wp-plugin-epfl-courses-se
-            - wp-plugin-epfl-restauration
-            - wp-plugin-epfl-cache-control
+            - openid-connect-generic
             - wordpress.plugin.accred
             - wordpress.plugin.accred.entra
+            - wordpress.plugin.tequila
             - wp-epfl-openid-configuration
-            - openid-connect-generic
-            - wp-plugin-epfl-translate
-            - wp-plugin-epfl-menus
-            - wp-plugin-pushgateway
+            - wp-gutenberg-epfl
+            - wp-mu-plugins
             - wp-ops
+            - wp-plugin-enlighter
+            - wp-plugin-epfl-404
+            - wp-plugin-epfl-cache-control
+            - wp-plugin-epfl-coming-soon
+            - wp-plugin-epfl-content-filter
+            - wp-plugin-epfl-courses-se
+            - wp-plugin-epfl-diploma-verification
+            - wp-plugin-epfl-intranet
+            - wp-plugin-epfl-library
+            - wp-plugin-epfl-menus
+            - wp-plugin-epfl-partner-universities
+            - wp-plugin-epfl-remote-content
+            - wp-plugin-epfl-restauration
+            - wp-plugin-epfl-settings
+            - wp-plugin-epfl-translate
+            - wp-plugin-pushgateway
+            - wp-theme-2018
+            - wpforms-epfl-payonline
           DEBUG: {{ _debug }}
           NAMESPACE: "svc0041t-wordpress"
   vars:
