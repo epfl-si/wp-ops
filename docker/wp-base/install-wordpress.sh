@@ -117,6 +117,7 @@ main () {
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
 
+
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
 
     for lang in fr_FR de_DE it_IT es_ES el ro_RO; do
