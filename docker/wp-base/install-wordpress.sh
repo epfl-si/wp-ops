@@ -58,7 +58,7 @@ main () {
     hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook very-simple-meta-description \
+        3d-flipbook-dflip-lite very-simple-meta-description \
         ewww-image-optimizer wordpress-importer simple-history ; do
         install_plugin_wordpress_official "$official_plugin"
     done
