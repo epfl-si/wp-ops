@@ -59,7 +59,8 @@ main () {
 
     for official_plugin in \
         flowpaper-lite-pdf-flipbook very-simple-meta-description \
-        ewww-image-optimizer wordpress-importer simple-history ; do
+        ewww-image-optimizer wordpress-importer simple-history \
+        daggerhart-openid-connect-generic; do
         install_plugin_wordpress_official "$official_plugin"
     done
 
