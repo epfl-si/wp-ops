@@ -282,6 +282,7 @@
                 value: "true"
               - name: BUILD_EXTRA_ARGS
                 value: "$(tasks.prep.results.build-extra-args)"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -318,6 +319,7 @@
                 value: "wp-ops/docker/wordpress-nginx"
               - name: VERBOSE
                 value: "true"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -335,6 +337,7 @@
                 value: "wp-ops/docker/wordpress-php"
               - name: VERBOSE
                 value: "true"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -352,6 +355,7 @@
                 value: "wp-ops/docker/wp-cron"
               - name: VERBOSE
                 value: "true"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -369,6 +373,7 @@
                 value: "wp-ops/docker/wp-s3"
               - name: VERBOSE
                 value: "true"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -386,6 +391,7 @@
                 value: "wp-operator"
               - name: VERBOSE
                 value: "true"
+              - "{{ _push_extra_args }}"
             workspaces:
               - name: source
                 workspace: shared-workspace
@@ -450,6 +456,12 @@
                         }
                       }
                     }' && kubectl rollout restart deploy/$(params.target-deployment)
+  vars:
+    _push_extra_args:
+       name: PUSH_EXTRA_ARGS
+       value: >-
+         --retry 10
+         --retry-delay 60s
 
 - name: "Credentials that let {{ wp_base_builder_buildah_service_account }} pull the build-toolbox"
   kubernetes.core.k8s:
