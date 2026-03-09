@@ -5,6 +5,16 @@
   - ../../../vars/quay-vars.yml
   - "opdo-secrets-{{ inventory_deployment_stage }}.yml"
 
+- name: "Mirror the php-fpm exporter image"
+  run_once: true
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: php-fpm_exporter
+    # https://github.com/tonmnn/php-fpm_exporter/pkgs/container/php-fpm_exporter
+    mirror_from: "docker pull ghcr.io/tonmnn/php-fpm_exporter"
+    mirror_tags: ["2"]
+
 - name: ConfigMap/opdo-ca
   kubernetes.core.k8s:
     state: present
