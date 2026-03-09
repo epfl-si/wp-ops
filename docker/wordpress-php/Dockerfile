@@ -1,6 +1,6 @@
 FROM quay-its.epfl.ch/svc0041/wp-base:rc
 
-FROM composer:2.8 AS composer
+FROM quay-its.epfl.ch/svc0041/composer:2.8 AS composer
 COPY composer.json ./
 RUN composer install --ignore-platform-reqs
 

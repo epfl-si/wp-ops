@@ -26,3 +26,11 @@
     mirror_name: openresty
     mirror_from: openresty/openresty
     mirror_tags: ["1.27.*-alpine-fat", "alpine-fat"]
+
+- name: "Mirror the composer image"
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: composer
+    mirror_from: "docker.io/library/composer"
+    mirror_tags: ["2.8"]
