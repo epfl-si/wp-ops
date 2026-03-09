@@ -149,6 +149,7 @@
                     key: wp_api_token
           - name: php-fpm-exporter
             image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
+            imagePullPolicy: Always
             resources:
               requests:
                 cpu: '{{ _request_cpu_monitoring }}'
