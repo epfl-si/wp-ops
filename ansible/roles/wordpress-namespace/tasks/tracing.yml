@@ -1,0 +1,365 @@
+- include_vars: otel-vars.yml
+  tags: always
+
+#####
+# wp-php configs
+#
+- name: Observability - Tracing config environment variables for wp-php
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: otel-php-config
+        namespace: "{{ inventory_namespace }}"
+      data:
+        OTEL_PHP_AUTOLOAD_ENABLED: "true"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+        OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+        OTEL_SERVICE_NAME: "wp-php"
+        OTEL_RESOURCE_ATTRIBUTES: "service.name=wp-php,service.environment={{ inventory_deployment_stage }},service.namespace={{ inventory_namespace }}"
+
+- name: Observability - Tracing config for wp-php, trace only the 20%
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: otel-php-config-sampling-20-percent-only
+        namespace: "{{ inventory_namespace }}"
+      data:
+        OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+        OTEL_TRACES_SAMPLER_ARG: "0.2"
+
+
+#####
+# OTEL Collector
+#
+- name: Observability - Tracing OTEL Collector config
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: otel-collector-config
+        namespace: "{{ inventory_namespace }}"
+      data:
+        otel-collector-config.yaml: |
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+          exporters:
+            debug:
+            otlp/tempo:
+              endpoint: otel-tempo:4327
+              tls:
+                insecure: true
+              retry_on_failure:
+                enabled: true
+                initial_interval: 1s
+                max_interval: 5s
+                max_elapsed_time: 30s
+              sending_queue:
+                enabled: false
+          service:
+            pipelines:
+              traces:
+                receivers: [otlp]
+                exporters: [otlp/tempo,debug]
+
+- name: Observability - Tracing - Collector
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-collector
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-collector
+        template:
+          metadata:
+            labels:
+              app: otel-collector
+          spec:
+            containers:
+              - name: otel-collector
+                image: otel/opentelemetry-collector-contrib:latest
+                args: ["--config=/conf/otel-collector-config.yaml"]
+                volumeMounts:
+                  - name: otel-collector-config-volume
+                    mountPath: /conf
+                ports:
+                  - containerPort: 4317   # OTLP gRPC
+                  - containerPort: 4318   # OTLP HTTP
+            resources:
+              requests:
+                cpu: '2'
+                memory: 128Mi
+            volumes:
+              - name: otel-collector-config-volume
+                configMap:
+                  name: otel-collector-config
+                  items:
+                    - key: otel-collector-config.yaml
+                      path: otel-collector-config.yaml
+
+- name: Observability - Tracing - Collector service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-collector
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          app: otel-collector
+        ports:
+          - name: otlp-grpc
+            port: 4317
+            targetPort: 4317
+          - name: otlp-http
+            port: 4318
+            targetPort: 4318
+
+#####
+# Tempo
+#
+- name: Observability - Tracing - Tempo config
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: otel-tempo-config
+        namespace: "{{ inventory_namespace }}"
+      data:
+        tempo.yaml: |
+          server:
+            http_listen_port: 3200
+      
+          distributor:
+            receivers:
+              otlp:
+                protocols:
+                  grpc:
+                    endpoint: "0.0.0.0:4327"
+                  http:
+                    endpoint: "0.0.0.0:4328"
+          storage:
+            trace:
+              backend: local
+              local:
+                path: /var/tempo/traces
+
+- name: Observability - Tracing - Tempo deployment
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-tempo
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: otel-tempo
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-tempo
+        template:
+          metadata:
+            labels:
+              app: otel-tempo
+          spec:
+            containers:
+              - name: otel-tempo
+                image: grafana/tempo:2.3.1
+                args:
+                  - "-config.file=/etc/tempo/tempo.yaml"
+                ports:
+                  - containerPort: 3200
+                    name: http
+                  - containerPort: 4317
+                    name: otlp-grpc
+                  - containerPort: 4318
+                    name: otlp-http
+                volumeMounts:
+                  - name: otel-tempo-config
+                    mountPath: /etc/tempo
+                  - name: otel-tempo-storage
+                    mountPath: /var/tempo
+            resources:
+              requests:
+                cpu: '2'
+                memory: 128Mi
+            volumes:
+              - name: otel-tempo-config
+                configMap:
+                  name: otel-tempo-config
+              - name: otel-tempo-storage
+                emptyDir: {}
+
+- name: Observability - Tracing - Tempo service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-tempo
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          app: otel-tempo
+        ports:
+          - name: http
+            port: 3200
+            targetPort: 3200
+          - name: otlp-grpc
+            port: 4327
+            targetPort: 4327
+          - name: otlp-http
+            port: 4328
+            targetPort: 4328
+
+#####
+# Grafana
+#
+- name: Observability - Tracing - Grafana config
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: otel-grafana-config
+        namespace: "{{ inventory_namespace }}"
+      data:
+        grafana.ini: |
+          [server]
+          root_url = https://{{ otel_grafana_hostname }}/
+          [auth]
+          # Disable anonymous access
+          disable_login_form = true
+          disable_signout_menu = true
+          [auth.azuread]
+          enabled = true
+          client_id = ${ENTRA_APP_CLIENT_ID}
+          client_secret = ${ENTRA_APP_CLIENT_SECRET}
+          scopes = User.Read openid profile email
+          auth_url = https://login.microsoftonline.com/${ENTRA_APP_TENANT_ID}/oauth2/v2.0/authorize
+          token_url = https://login.microsoftonline.com/${ENTRA_APP_TENANT_ID}/oauth2/v2.0/token
+          allowed_domains = epfl.ch
+          allow_sign_up = true
+          skip_org_role_sync = false
+          allow_assign_grafana_admin = true
+          [users]
+          auto_assign_org_role = Admin
+          [log]
+          level = debug
+          filters = auth.azuread:debug
+
+        datasource.yaml: |
+          apiVersion: 1
+          datasources:
+            - name: Tempo
+              type: tempo
+              access: proxy
+              url: http://otel-tempo:3200
+              isDefault: true
+              editable: true
+
+- name: Observability - Tracing - Grafana deployment
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-grafana
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-grafana
+        template:
+          metadata:
+            labels:
+              app: otel-grafana
+          spec:
+            containers:
+              - name: otel-grafana
+                image: grafana/grafana:12.4.1
+                envFrom:
+                  - secretRef:
+                      name: auth-entra-observability-tracing
+                ports:
+                  - containerPort: 3000
+                volumeMounts:
+                  - name: otel-grafana-config
+                    mountPath: /etc/grafana/grafana.ini
+                    subPath: grafana.ini
+                  - name: otel-grafana-datasource
+                    mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+                    subPath: datasource.yaml
+            resources:
+              requests:
+                cpu: '2'
+                memory: 128Mi
+            volumes:
+              - name: otel-grafana-config
+                configMap:
+                  name: otel-grafana-config
+              - name: otel-grafana-datasource
+                configMap:
+                  name: otel-grafana-config
+
+- name: Observability - Tracing - Grafana service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-grafana
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          app: otel-grafana
+        ports:
+          - port: 3000
+            targetPort: 3000
+        type: ClusterIP
+
+- name: Observability - Tracing - Grafana route
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: otel-grafana
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: "otel-grafana"
+          route: "private"
+        annotations:
+          console.alpha.openshift.io/overview-app-route: "true"
+      spec:
+        host: "{{ otel_grafana_hostname }}"
+        to:
+          kind: Service
+          name: otel-grafana
+          weight: 100
+        port:
+          targetPort: "3000"
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+        wildcardPolicy: None
+

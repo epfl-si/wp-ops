@@ -234,3 +234,14 @@
     - wp
     - wp.logstash
     - logstash
+
+- name: Tracing
+  include_tasks:
+    file: tracing.yml
+    apply:
+      tags:
+        - wp
+        - wp.tracing
+  tags:
+    - wp
+    - wp.tracing
