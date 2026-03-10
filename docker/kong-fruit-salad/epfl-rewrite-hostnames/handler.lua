@@ -24,6 +24,7 @@ function EpflRewriteHostnames:access (conf)
   end
 
   kong.service.request.set_header("Host", conf.hostname_inside)
+  kong.service.request.set_header("X-Kong-Orig-Host", ngx.ctx.hostname_orig)
 end
 
 function EpflRewriteHostnames:header_filter (conf)
