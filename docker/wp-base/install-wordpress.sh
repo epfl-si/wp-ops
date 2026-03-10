@@ -128,7 +128,7 @@ main () {
 }
 
 pick_version () {
-    curl http://api.wordpress.org/core/stable-check/1.0/ | \
+    curl -sSL http://api.wordpress.org/core/stable-check/1.0/ | \
         if [ -n "$alpha" ]; then
             jq -r 'keys[]'
         else
@@ -193,7 +193,7 @@ install_tinymce_advanced_plugin () {
                    $versions | map(select(.key | match("^[0-9.]+$")))
               else $matches end
             | map(.value) | last ' \
-        | xargs -t -i curl -o tinymce-advanced.zip {}
+        | xargs -t -i curl -sSL -o tinymce-advanced.zip {}
 
     mkdir -p "$targetdir"/wp-content/plugins
     ( cd "$targetdir"/wp-content/plugins; unzip ~-/tinymce-advanced.zip )
@@ -223,7 +223,7 @@ install_plugin_zip () {
         mkdir -p "$targetdir"/wp-content/plugins
         cd "$targetdir"/wp-content/plugins
         zip="${plugin_name}.zip"
-        curl -L -o "$zip" "$url"
+        curl -sSL -o "$zip" "$url"
         unzip "$zip"
 
         # Some zip files are packed wrong inside:
@@ -303,7 +303,7 @@ try_git_switch () {
 
 # Install the specified language pack, e.g. fr_FR
 install_language_pack () {
-    curl -s -L -o /tmp/${1}.zip https://downloads.wordpress.org/translation/core/${version}/${1}.zip
+    curl -sSL -o /tmp/${1}.zip https://downloads.wordpress.org/translation/core/${version}/${1}.zip
     mkdir -p ${targetdir}/wp-content/languages/
     unzip /tmp/${1}.zip -d ${targetdir}/wp-content/languages/
 }
