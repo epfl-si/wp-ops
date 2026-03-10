@@ -118,7 +118,7 @@
               - name: MENU_API_HOST
                 value: "menu-api"
           - name: php
-            image: quay-its.epfl.ch/svc0041/wp-php:{{ image_tag }}
+            image: quay-its.epfl.ch/svc0041/wp-php:otel
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
 {% if inventory_deployment_stage == "production" %}
@@ -147,6 +147,9 @@
                   secretKeyRef:
                     name: search-inside-secret
                     key: wp_api_token
+            envFrom:
+              - configMapRef:
+                - name: otel-php-config
           - name: php-fpm-exporter
             image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
             imagePullPolicy: Always
