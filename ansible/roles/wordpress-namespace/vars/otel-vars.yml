@@ -1,0 +1,2 @@
+otel_grafana_hostname: >-
+  {{ 'wp-traces.fsd.team' if inventory_deployment_stage == "production" else 'wp-traces-test.fsd.team' }}
