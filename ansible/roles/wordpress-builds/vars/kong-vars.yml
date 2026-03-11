@@ -7,7 +7,7 @@ kong_base_image_mirrored: >-
   {{ _kong_base_image_mirrored | parse_docker_image_name }}
 
 _kong_fruit_salad_image: >-
-  {{ ansible_quay_hostname }}/{{ quay_organization }}/kong-fruit-salad:{{ kong_base_image_version }}
+  {{ ansible_quay_hostname }}/{{ quay_organization }}/kong-fruit-salad:{{ kong_fruit_salad_version }}
 kong_fruit_salad_image: >-
   {{ _kong_fruit_salad_image | parse_docker_image_name }}
 
