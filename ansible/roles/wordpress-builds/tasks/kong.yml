@@ -7,6 +7,7 @@
     - kong-vars.yml
 
 - name: "Continuous integration targets (“fruit salad”): Deployments"
+  when: wp_kong_skip_deployments is not defined
   loop: "{{ kong_ci_flavors }}"
   kubernetes.core.k8s:
     state: present
