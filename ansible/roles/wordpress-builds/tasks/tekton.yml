@@ -5,7 +5,6 @@
     - build-vars.yml
     - s3-vars.yml
     - build-vars.yml
-    - continuous-integration-vars.yml
     - tekton-vars.yml
 
 - tags: always
@@ -18,13 +17,25 @@
     name: tekton_credentials
     file: tekton-credentials.yml
 
-- name: "`Role/{{ build_service_account }}`"
+
+- name: "`ServiceAccount/{{ build_unprivileged_service_account }}`"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ build_unprivileged_service_account }}"
+        namespace: "{{ inventory_namespace }}"
+      imagePullSecrets:
+        - name: svc0041-svc0041-puller-pull-secret
+
+- name: "`Role/{{ build_unprivileged_service_account }}`"
   kubernetes.core.k8s:
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
-        name: "{{ build_service_account }}"
+        name: "{{ build_unprivileged_service_account }}"
         namespace: "{{ inventory_namespace }}"
       rules:
         - apiGroups: ["tekton.dev"]
@@ -37,21 +48,21 @@
           resources: ["deployments"]
           verbs: ["create", "get", "list", "patch"]
 
-- name: "`RoleBinding/{{ build_service_account }}`"
+- name: "`RoleBinding/{{ build_unprivileged_service_account }}`"
   kubernetes.core.k8s:
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:
-        name: "{{ build_service_account }}"
+        name: "{{ build_unprivileged_service_account }}"
         namespace: "{{ inventory_namespace }}"
       subjects:
         - kind: ServiceAccount
-          name: "{{ build_service_account }}"
+          name: "{{ build_unprivileged_service_account }}"
           namespace: "{{ inventory_namespace }}"
       roleRef:
         kind: Role
-        name: "{{ build_service_account }}"
+        name: "{{ build_unprivileged_service_account }}"
         apiGroup: rbac.authorization.k8s.io
 
 - name: "`Secret/tekton-push`"
@@ -471,13 +482,13 @@
          --retry 10
          --retry-delay 60s
 
-- name: "Credentials that let {{ wp_base_builder_buildah_service_account }} pull the build-toolbox"
+- name: "Credentials that let {{ build_privileged_service_account }} pull the build-toolbox"
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
       kind: ServiceAccount
       metadata:
-        name: "{{ wp_base_builder_buildah_service_account }}"
+        name: "{{ build_privileged_service_account }}"
         namespace: "{{ inventory_namespace }}"
       imagePullSecrets:
       - name: "{{ quay_puller_secret_name }}"
@@ -517,7 +528,7 @@
             backoffLimit: 0
             template:
               spec:
-                serviceAccountName: "{{ build_service_account }}"
+                serviceAccountName: "{{ build_unprivileged_service_account }}"
                 restartPolicy: Never
                 containers:
                   - name: "trigger-oc-pipelinerun-{{ item.suffix }}"
@@ -554,10 +565,10 @@
                           timeouts:
                             pipeline: "1h"
                           taskRunTemplate:
-                            serviceAccountName: "{{ wp_base_builder_buildah_service_account }}"
+                            serviceAccountName: "{{ build_privileged_service_account }}"
                           taskRunSpecs:
                             - pipelineTaskName: prep
-                              serviceAccountName: "{{ build_service_account }}"
+                              serviceAccountName: "{{ build_unprivileged_service_account }}"
                           pipelineRef:
                             name: "{{ pipeline_name }}"
                           params:

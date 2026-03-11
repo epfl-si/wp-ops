@@ -5,10 +5,9 @@
     - build-vars.yml
     - quay-vars.yml
     - kong-vars.yml
-    - continuous-integration-vars.yml
 
 - name: "Continuous integration targets (“fruit salad”): Deployments"
-  loop: "{{ wp_nginx_ci_flavors }}"
+  loop: "{{ kong_ci_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -35,7 +34,7 @@
     - wp.kong.deployments
 
 - name: "Continuous integration targets (“fruit salad”): Services"
-  loop: "{{ wp_nginx_ci_flavors }}"
+  loop: "{{ kong_ci_flavors }}"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -184,7 +183,7 @@
           app: kong-fruit-salad
 
 - name: "Continuous integration targets (“fruit salad”): `Route`s (through Kong)"
-  loop: "{{ wp_nginx_ci_flavors }}"
+  loop: "{{ kong_ci_flavors }}"
   kubernetes.core.k8s:
     definition:
       apiVersion: route.openshift.io/v1

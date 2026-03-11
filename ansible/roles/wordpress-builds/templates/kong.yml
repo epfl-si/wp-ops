@@ -1,6 +1,6 @@
 _format_version: "3.0"
 services:
-{% for flavor in wp_nginx_ci_flavors %}
+{% for flavor in kong_ci_flavors %}
 {#   # Like in the Route objects in ../tasks/continuous-integration.yml: #}
 {%   set hostname = "wp-test-%s" % flavor.name %}
 - name: {{ hostname }}

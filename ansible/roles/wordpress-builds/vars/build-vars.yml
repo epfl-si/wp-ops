@@ -1,3 +1,7 @@
 build_toolbox_image: '{{ ansible_quay_hostname }}/{{ quay_organization }}/build-toolbox'
 
-build_service_account: wp-base-builder
+build_unprivileged_service_account: wp-base-builder
+# Provisioned by OpenShift for running as UID 0 with
+# CAP_SETFCAP (which we couldn't do ourselves); see
+# https://docs.redhat.com/en/documentation/openshift_container_platform/4.8/html/cicd/pipelines#about-taskrun_understanding-openshift-pipelines
+build_privileged_service_account: pipeline
