@@ -100,8 +100,10 @@
     file: kong.yml
     apply:
       tags:
+        - wp.kong
         - wp.kong.configuration
   tags:
+    - wp.kong
     - wp.kong.configuration
     - wp.kong.deployments
 
