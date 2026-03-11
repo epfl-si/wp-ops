@@ -261,7 +261,8 @@
                     if [ -n "$(params.target-deployment)" ]; then
                       kubectl get "deployment/$(params.target-deployment)" -o jsonpath='{ range .spec.template.spec.containers[*]} {.image }{ "\n" }{ end }' | \
                         while read img; do case "$img" in
-                          *-[0-9][0-9][0-9])   :  ;;    # This image is pinned to a specific built; don't touch it
+                          *-[0-9][0-9][0-9])   :  ;;    # Target deployment is pinned to a specific build; don't touch it
+                          *@sha256:*)          :  ;;    # Ditto
                           *wp-nginx*) echo -n "$img" > "$(results.retag-image-nginx.path)" ;;
                           *wp-php*) echo -n "$img" > "$(results.retag-image-php.path)" ;;
                         esac; done
