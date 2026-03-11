@@ -237,6 +237,7 @@
                         esac; done
                     fi
 
+                    rm -rf wp-ops wp-operator || true
                     git clone https://github.com/epfl-si/wp-ops wp-ops
                     if [ -n "$(params.branch-name)" ]; then
                       (cd wp-ops; git checkout "$(params.branch-name)" || true)
