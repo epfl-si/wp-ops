@@ -54,7 +54,7 @@
         name: "{{ build_service_account }}"
         apiGroup: rbac.authorization.k8s.io
 
-- name: wp-base/Secret - Push Secret
+- name: "`Secret/tekton-push`"
   kubernetes.core.k8s:
     definition:
       apiVersion: v1
@@ -64,21 +64,40 @@
         name: tekton-push
         namespace: "{{ inventory_namespace }}"
       data:
-        .dockerconfigjson: "{{ _tekton_push_secret_config | to_json | b64encode }}"
+        # To meet the requirements of `type: kubernetes.io/dockerconfigjson`:
+        .dockerconfigjson: "{{ _docker_config_json }}"
+        # Same stuff, different name for consumption by the `buildah` Tekton task:
+        config.json:       "{{ _docker_config_json }}"
   vars:
     _quay_basic_auth: "{{ build_secrets.quay_push_credentials.name }}:{{ build_secrets.quay_push_credentials.password | eyaml(build_secrets.eyaml_keys) }}"
+    _docker_config_json: "{{ _tekton_push_secret_config | to_json | b64encode }}"
     _tekton_push_secret_config:
       auths:
         "quay-its.epfl.ch":
           "auth": "{{ _quay_basic_auth | b64encode }}"
 
-- name: wp-base/Tekton - Off-the-shelf tasks
+- name: "`git-clone` off-the-shelf task"
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
-    src: "{{ item }}"
-  with_items:
-    - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
-    - https://github.com/openshift-pipelines/tektoncd-catalog/raw/p/tasks/task-buildah/0.6.0/task-buildah.yaml
+    src: https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
+
+- name: "`buildah` task"
+  kubernetes.core.k8s:
+    namespace:  "{{ inventory_namespace }}"
+    definition: "{{ _buildah_task_yaml | from_yaml }}"
+  vars:
+    _buildah_task_vanilla_url: >-
+      https://github.com/tektoncd/catalog/raw/refs/heads/main/task/buildah/0.9/buildah.yaml
+    # To comply with OpenShift security restrictions, we must monkey-patch the
+    # .spec.steps[0].securityContext thusly:
+    _buildah_task_yaml: |
+      {{ lookup("ansible.builtin.url", _buildah_task_vanilla_url, split_lines=False)
+      | regex_replace("^      privileged: true",
+                        """
+            capabilities:
+              add:
+              - SETFCAP
+      """, multiline=True) }}
 
 - name: "`Secret/tekton-quay-credentials`"
   kubernetes.core.k8s:
@@ -279,8 +298,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-base"
-              - name: VERBOSE
-                value: "true"
               - name: BUILD_EXTRA_ARGS
                 value: "$(tasks.prep.results.build-extra-args)"
               - "{{ _push_extra_args }}"
@@ -318,8 +335,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-nginx:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wordpress-nginx"
-              - name: VERBOSE
-                value: "true"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
@@ -336,8 +351,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wordpress-php"
-              - name: VERBOSE
-                value: "true"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
@@ -354,8 +367,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-cron"
-              - name: VERBOSE
-                value: "true"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
@@ -372,8 +383,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-ops/docker/wp-s3"
-              - name: VERBOSE
-                value: "true"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
@@ -390,8 +399,6 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-operator:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-operator"
-              - name: VERBOSE
-                value: "true"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
