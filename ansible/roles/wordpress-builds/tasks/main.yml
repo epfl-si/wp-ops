@@ -10,20 +10,6 @@
     file: ../../../vars/quay-secrets.yml
     name: quay_credentials
 
-- name: "`ServiceAccount/{{ build_service_account }}`"
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: ServiceAccount
-      metadata:
-        name: "{{ build_service_account }}"
-        namespace: "{{ inventory_namespace }}"
-      imagePullSecrets:
-        - name: svc0041-svc0041-puller-pull-secret
-  tags:
-    - wp.build
-    - wp.build.serviceaccount
-
 - name: Mirror images used to build `FROM`
   include_tasks:
     file: mirrors.yml

@@ -10,3 +10,17 @@ _kong_fruit_salad_image: >-
   {{ ansible_quay_hostname }}/{{ quay_organization }}/kong-fruit-salad:{{ kong_base_image_version }}
 kong_fruit_salad_image: >-
   {{ _kong_fruit_salad_image | parse_docker_image_name }}
+
+kong_ci_flavors:
+  - name: apple
+    fruit: '🍎'
+  - name: grapes
+    fruit: '🍇'
+  - name: kiwi
+    fruit: '🥝'
+  - name: lemon
+    fruit: '🍋'
+  - name: orange
+    fruit: '🍊'
+  - name: alpha
+  - name: rc
