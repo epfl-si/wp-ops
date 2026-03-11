@@ -1,2 +1,2 @@
 kong_base_image_version: 3.6
-kong_fruit_salad_version: "{{ kong_base_image_version }}"
+kong_fruit_salad_version: "{{ kong_base_image_version }}-x-kong-orig-host"
