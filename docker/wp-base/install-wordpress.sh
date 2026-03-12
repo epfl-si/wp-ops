@@ -141,6 +141,7 @@ STUB_PLUGIN
 }
 
 pick_version () {
+    echo 6.9.3; return  # XXX
     curl -sSL http://api.wordpress.org/core/stable-check/1.0/ | \
         if [ -n "$alpha" ]; then
             jq -r 'keys[]'
