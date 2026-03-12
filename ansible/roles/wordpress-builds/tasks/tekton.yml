@@ -103,7 +103,7 @@
       {{ lookup("ansible.builtin.url", _upstream_task_url, split_lines=False)
       | from_yaml }}
     _patches:
-      # Comply with OpenShift security restrictions: `privileged` is
+      # Comply with OpenShift security restrictions. `privileged` is
       # forbidden no matter what, whereas `capabilities.add:
       # [SETFCAP]` is permitted to select serviceAccounts (see
       # `taskRunTemplate` below):
@@ -112,6 +112,24 @@
         value:
           capabilities:
             add: [SETFCAP]
+      # We have strong reason to believe that `buildah push --retry` doesn't:
+      - op: replace
+        path: /spec/steps/0/script
+        value: >-
+          {{ _upstream_task_definition.spec.steps[0].script
+          | regex_replace("^", _script_header)
+          | regex_replace("^buildah (.* push)", "_buildah_and_retry \1",
+                          multiline=True)
+          }}
+    _script_header: |
+      set -x
+      _buildah_and_retry () {
+        local attempt
+        for attempt in $(seq 1 10); do
+          buildah "$@" && return
+          sleep 10
+        done
+      }
 
 - name: "`Secret/tekton-quay-credentials`"
   kubernetes.core.k8s:
