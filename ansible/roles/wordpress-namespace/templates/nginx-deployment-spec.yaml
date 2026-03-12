@@ -14,6 +14,11 @@
 #                    serving containers will use
 #    - image_pull_policy
 #                    One of "Always" (the default) or "IfNotPresent"
+#
+# Caller may set the following vars:
+#    - replicas
+#                    The desired number of replicas, default is 2 for
+#                    production and 1 for test environment
 
 {% if inventory_deployment_stage == "production" %}
 {%   set _request_cpu_nginx = "15m" %}
@@ -28,8 +33,8 @@
 {% endif %}
 
 # spec:
-    replicas: {{ 2 if inventory_deployment_stage == "production"
-                 else 2 }}
+    replicas: {{ replicas | default( 2 if inventory_deployment_stage == "production"
+                 else 1 ) | int }}
     selector:
       matchLabels:
         app: "{{ app_label }}"
