@@ -95,20 +95,23 @@
 - name: "`buildah` task"
   kubernetes.core.k8s:
     namespace:  "{{ inventory_namespace }}"
-    definition: "{{ _buildah_task_yaml | from_yaml }}"
+    definition: "{{ _upstream_task_definition | json_patch(_patches) }}"
   vars:
-    _buildah_task_vanilla_url: >-
+    _upstream_task_url: >-
       https://github.com/tektoncd/catalog/raw/refs/heads/main/task/buildah/0.9/buildah.yaml
-    # To comply with OpenShift security restrictions, we must monkey-patch the
-    # .spec.steps[0].securityContext thusly:
-    _buildah_task_yaml: |
-      {{ lookup("ansible.builtin.url", _buildah_task_vanilla_url, split_lines=False)
-      | regex_replace("^      privileged: true",
-                        """
-            capabilities:
-              add:
-              - SETFCAP
-      """, multiline=True) }}
+    _upstream_task_definition: >-
+      {{ lookup("ansible.builtin.url", _upstream_task_url, split_lines=False)
+      | from_yaml }}
+    _patches:
+      # Comply with OpenShift security restrictions: `privileged` is
+      # forbidden no matter what, whereas `capabilities.add:
+      # [SETFCAP]` is permitted to select serviceAccounts (see
+      # `taskRunTemplate` below):
+      - op: replace
+        path: /spec/steps/0/securityContext
+        value:
+          capabilities:
+            add: [SETFCAP]
 
 - name: "`Secret/tekton-quay-credentials`"
   kubernetes.core.k8s:
