@@ -93,6 +93,7 @@
       type: Git
       git:
         uri: "https://github.com/epfl-si/wp-ops"
+        # ref is managed manually
       contextDir: docker/kong-fruit-salad
     buildconfig_rebuild_tags:
       - wp.build.kong.rebuild
