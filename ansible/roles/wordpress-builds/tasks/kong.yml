@@ -26,11 +26,22 @@
                       image_tag=item.name,
                       app_label=_deployment_name,
                       additional_pod_labels=({ "self-service-flavor": item.name }
-                                             if item.fruit | default(False) else {})
+                                             if item.fruit | default(False) else {}),
+                      replicas= 1 if _deployment_replicas > 0 else 0
                       ))
         | from_yaml }}
   vars:
     _deployment_name: "wp-nginx-{{ item.name }}"
+    _deployment_replicas: >-
+      {{
+        (lookup(
+          'kubernetes.core.k8s',
+          kind='Deployment',
+          namespace=inventory_namespace,
+          resource_name=_deployment_name,
+          kubeconfig=k8s_auth_kubeconfig
+        ).resources[0].status.replicas) | default(0)
+      }}
   tags:
     - wp.kong.deployments
 
