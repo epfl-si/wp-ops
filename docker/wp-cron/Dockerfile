@@ -28,7 +28,12 @@ RUN set -e -x; cd /usr/local/bin/ ; \
 COPY ./requirements.txt .
 RUN pip3 install -r ./requirements.txt --break-system-packages
 
+# TODO: we should refactor this as a standalone package
+RUN set -e -x; (cd /tmp; git clone https://github.com/epfl-si/wp-operator); \
+    cp /tmp/wp-operator/wordpresses.py /tmp/wp-operator/wp_kubernetes.py /; \
+    rm -rf /tmp/wp-operator
+
 COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /usr/local/bin/wp /usr/local/bin/wp
 
-ADD wp-cron.py wordpresses.py pushgateway.py /
+ADD wp-cron.py pushgateway.py /

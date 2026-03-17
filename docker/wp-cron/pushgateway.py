@@ -21,7 +21,7 @@ class Pushgateway:
         data = 'wp_cron_%s %d\n' % (status, time_epoch)
 
         # PushGateway endpoint
-        url = f"http://{self._host_port}/metrics/job/wp_cron/wp/{wp.moniker}"
+        url = f"http://{self._host_port}/metrics/job/wp_cron/wp/{wp.name}"
 
         # Send the data using a POST request with the appropriate headers
         response = requests.post(url, data=data, headers={"Content-Type": "text/plain"})
