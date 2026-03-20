@@ -4,23 +4,21 @@ import time
 import argparse
 import logging
 
-from wordpresses import WordpressSite as WordpressSiteBase
+from wordpresses import WordpressSiteWithWpCli
 from pushgateway import Pushgateway
 
-class WordpressSite (WordpressSiteBase):
-    def __init__(self, *args, **kwargs):
-        super(WordpressSite, self).__init__(*args, **kwargs)
+def run_cron(wp, pushgateway):
+    logging.info(f"run_wp_cron on {wp.moniker}")
+    wp.status_set_key('lastCronJobRuntime',
+                        datetime.datetime.now().isoformat())
+    pushgateway.record_start(wp)
+    try:
+        wp.run_wp_cli(['cron', 'event', 'run', '--due-now'])
+        pushgateway.record_success(wp)
+    except Exception:
+        logging.exception("Error running wp cron")
+        pushgateway.record_failure(wp)
 
-    def run_cron(self, pushgateway):
-        self.status_set_key('lastCronJobRuntime',
-                            datetime.datetime.now().isoformat())
-        pushgateway.record_start(self)
-        try:
-            self.run_wp_cli(['cron', 'event', 'run', '--due-now'])
-            pushgateway.record_success(self)
-        except Exception:
-            logging.exception("Error running wp cron")
-            pushgateway.record_failure(self)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Wordpress wp cron executor")
@@ -41,11 +39,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     pushgateway = Pushgateway(args.pushgateway)
 
-    for wordpresssite in WordpressSite.all(
+    for wp in WordpressSiteWithWpCli.all(
             namespace=os.getenv('K8S_NAMESPACE')):
-        print(wordpresssite.moniker)
-        wordpresssite.run_cron(pushgateway)
-        wordpresssite.update_php_status()
+        run_cron(wp, pushgateway)
+        wp.update_php_status()
 
     if args.daemon:
         print("All done. I am going to sleep", flush=True)
