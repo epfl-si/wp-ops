@@ -8,7 +8,7 @@ from wordpresses import WordpressSiteWithWpCli
 from pushgateway import Pushgateway
 
 def run_cron(wp, pushgateway):
-    logging.info(f"run_wp_cron on {wp.moniker}")
+    logging.info(f"run_cron on {wp.moniker}")
     wp.status_set_key('lastCronJobRuntime',
                         datetime.datetime.now().isoformat())
     pushgateway.record_start(wp)
