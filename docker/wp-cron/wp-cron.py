@@ -4,12 +4,12 @@ import time
 import argparse
 import logging
 
-from wordpresses import WordpressSite as WordpressSiteBase
+from wordpresses import WordpressSite
 from pushgateway import Pushgateway
 
-class WordpressSite (WordpressSiteBase):
+class WordpressSiteWithCron (WordpressSite):
     def __init__(self, *args, **kwargs):
-        super(WordpressSite, self).__init__(*args, **kwargs)
+        super(WordpressSiteWithCron, self).__init__(*args, **kwargs)
 
     def run_cron(self, pushgateway):
         self.status_set_key('lastCronJobRuntime',
