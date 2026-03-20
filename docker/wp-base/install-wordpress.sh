@@ -96,6 +96,7 @@ main () {
         wordpress.plugin.accred \
         wordpress.plugin.accred.entra \
         wordpress.plugin.tequila \
+        wp-epfl-openid-configuration \
         wp-gutenberg-epfl \
         wp-plugin-enlighter \
         wp-plugin-epfl-404 \
@@ -116,6 +117,7 @@ main () {
         ; do
         install_plugin_git "https://github.com/epfl-si/$homemade_or_forked_plugin"
     done
+
 
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
 
