@@ -92,10 +92,7 @@ main () {
     fi
 
     for homemade_or_forked_plugin in \
-        openid-connect-generic \
-        wordpress.plugin.accred \
         wordpress.plugin.accred.entra \
-        wordpress.plugin.tequila \
         wp-gutenberg-epfl \
         wp-plugin-enlighter \
         wp-plugin-epfl-404 \
@@ -118,19 +115,6 @@ main () {
     done
 
     install_plugin_zip wpforms-epfl-payonline https://github.com/epfl-si/wpforms-epfl-payonline/releases/latest/download/wpforms-epfl-payonline.zip
-
-    # https://github.com/epfl-si/wp-mu-plugins/blob/master/epfl-openid-configuration.php now replaces this plugin:
-    mkdir "$targetdir"/wp-content/plugins/wp-epfl-openid-configuration
-    cat <<'STUB_PLUGIN' > "$targetdir"/wp-content/plugins/wp-epfl-openid-configuration/epfl-openid-configuration.php
-<?php
-/*
-    Plugin Name: EPFL-OpenID-Configuration
-    Description: Obsolete; please do not use
-    Version:     0.0.0
-    Author:      EPFL SI
-*/
-
-STUB_PLUGIN
 
     for lang in fr_FR de_DE it_IT es_ES el ro_RO; do
         install_language_pack $lang
