@@ -33,4 +33,4 @@
   vars:
     mirror_name: composer
     mirror_from: "docker.io/library/composer"
-    mirror_tags: ["2.8"]
+    mirror_tags: ["2.9"]
