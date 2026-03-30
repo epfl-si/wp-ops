@@ -124,11 +124,13 @@
     _script_header: |
       set -x
       _buildah_and_retry () {
-        local attempt
+        local attempt lasterror
         for attempt in $(seq 1 10); do
           buildah "$@" && return
+          lasterror=$?
           sleep 10
         done
+        exit $lasterror
       }
 
 - name: "`Secret/tekton-quay-credentials`"
