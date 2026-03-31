@@ -9,7 +9,7 @@
   vars:
     mirror_name: ubuntu
     mirror_from: "docker.io/library/ubuntu"
-    mirror_tags: ["noble", "latest", "jammy", "focal"]
+    mirror_tags: ["noble", "latest", "jammy"]
 
 - name: "Mirror the wp-nginx base image"
   include_tasks:
