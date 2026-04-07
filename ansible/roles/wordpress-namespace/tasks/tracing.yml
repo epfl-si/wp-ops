@@ -99,10 +99,12 @@
                 ports:
                   - containerPort: 4317   # OTLP gRPC
                   - containerPort: 4318   # OTLP HTTP
-            resources:
-              requests:
-                cpu: '2'
-                memory: 128Mi
+                resources:
+                  requests:
+                    cpu: '2'
+                    memory: 128Mi
+                  limits:
+                    memory: 256Mi
             volumes:
               - name: otel-collector-config-volume
                 configMap:
@@ -197,10 +199,12 @@
                     mountPath: /etc/tempo
                   - name: otel-tempo-storage
                     mountPath: /var/tempo
-            resources:
-              requests:
-                cpu: '2'
-                memory: 128Mi
+                resources:
+                  requests:
+                    cpu: '2'
+                    memory: 128Mi
+                  limits:
+                    memory: 256Mi
             volumes:
               - name: otel-tempo-config
                 configMap:
@@ -233,6 +237,15 @@
 #####
 # Grafana
 #
+- name: Adding a Entra ID instance (manual tasks)
+  ansible.builtin.pause:
+    prompt: |
+      
+      At this point, you should have your Entra info setup:
+        Tenant Id
+        Client Id
+        App Client Secret
+
 - name: Observability - Tracing - Grafana config
   kubernetes.core.k8s:
     definition:
@@ -309,10 +322,12 @@
                   - name: otel-grafana-datasource
                     mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
                     subPath: datasource.yaml
-            resources:
-              requests:
-                cpu: '2'
-                memory: 128Mi
+                resources:
+                  requests:
+                    cpu: '2'
+                    memory: 128Mi
+                  limits:
+                    memory: 256Mi
             volumes:
               - name: otel-grafana-config
                 configMap:
