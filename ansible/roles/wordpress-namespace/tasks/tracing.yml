@@ -12,25 +12,17 @@
       metadata:
         name: otel-php-config
         namespace: "{{ inventory_namespace }}"
-      data:
-        OTEL_PHP_AUTOLOAD_ENABLED: "true"
-        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-        OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
-        OTEL_SERVICE_NAME: "wp-php"
-        OTEL_RESOURCE_ATTRIBUTES: "service.name=wp-php,service.environment={{ inventory_deployment_stage }},service.namespace={{ inventory_namespace }}"
-
-- name: Observability - Tracing config for wp-php, trace only the 20%
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: otel-php-config-sampling-20-percent-only
-        namespace: "{{ inventory_namespace }}"
-      data:
-        OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
-        OTEL_TRACES_SAMPLER_ARG: "0.2"
-
+      data: "{{ _data_common if inventory_deployment_stage == 'test' else (_data_common | combine(_data_sample_20percent)) }}"
+  vars:
+    _data_common:
+      OTEL_PHP_AUTOLOAD_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "wp-php"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=wp-php,service.environment={{ inventory_deployment_stage }},service.namespace={{ inventory_namespace }}"
+    _data_sample_20percent:
+      OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+      OTEL_TRACES_SAMPLER_ARG: "0.2"
 
 #####
 # OTEL Collector
