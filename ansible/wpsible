@@ -35,6 +35,11 @@ fatal () {
 }
 
 ensure_ansible () {
+    # Skip on NixOS
+    if [ -f /etc/os-release ] && grep -q '^ID=nixos' /etc/os-release; then
+        return 0
+    fi
+
     if ! test -f ansible-deps-cache/.versions 2>/dev/null; then
         curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/install.sh | \
             SUITCASE_DIR=$PWD/ansible-deps-cache SUITCASE_ANSIBLE_REQUIREMENTS=requirements.yml \
