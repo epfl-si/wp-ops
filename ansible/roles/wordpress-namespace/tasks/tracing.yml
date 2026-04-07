@@ -45,7 +45,6 @@
                 http:
                   endpoint: 0.0.0.0:4318
           exporters:
-            debug:
             otlp/tempo:
               endpoint: otel-tempo:4327
               tls:
@@ -61,7 +60,7 @@
             pipelines:
               traces:
                 receivers: [otlp]
-                exporters: [otlp/tempo,debug]
+                exporters: [otlp/tempo]
 
 - name: Observability - Tracing - Collector
   kubernetes.core.k8s:
@@ -267,9 +266,6 @@
           allow_assign_grafana_admin = true
           [users]
           auto_assign_org_role = Admin
-          [log]
-          level = debug
-          filters = auth.azuread:debug
 
         datasource.yaml: |
           apiVersion: 1
