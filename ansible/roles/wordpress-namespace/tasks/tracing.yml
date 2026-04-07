@@ -228,15 +228,6 @@
 #####
 # Grafana
 #
-- name: Adding a Entra ID instance (manual tasks)
-  ansible.builtin.pause:
-    prompt: |
-      
-      At this point, you should have your Entra info setup:
-        Tenant Id
-        Client Id
-        App Client Secret
-
 - name: Observability - Tracing - Grafana config
   kubernetes.core.k8s:
     definition:
