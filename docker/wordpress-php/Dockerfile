@@ -6,7 +6,7 @@ RUN composer install --ignore-platform-reqs
 
 FROM ubuntu:jammy
 
-ARG PHP_VERSION=8.5
+ARG PHP_VERSION=8.4
 RUN set -e -x; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt -qy update ; \
