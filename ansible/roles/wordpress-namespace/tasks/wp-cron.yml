@@ -39,6 +39,8 @@
                       requests:
                         cpu: '{{ _cpu_request }}'
                         memory: 512Mi
+                      limits:
+                        memory: 4Gi
                 imagePullSecrets:
                   - name: "{{ quay_puller_secret_name }}"
                 restartPolicy: OnFailure
