@@ -92,7 +92,7 @@
                   - containerPort: 4318   # OTLP HTTP
                 resources:
                   requests:
-                    cpu: '2'
+                    cpu: '0.1'
                     memory: 256Mi
                   limits:
                     memory: 512Mi
@@ -192,10 +192,10 @@
                     mountPath: /var/tempo
                 resources:
                   requests:
-                    cpu: '2'
-                    memory: 512Mi
-                  limits:
+                    cpu: '0.4'
                     memory: 1024Mi
+                  limits:
+                    memory: 2048Mi
             volumes:
               - name: otel-tempo-config
                 configMap:
@@ -303,7 +303,7 @@
                     subPath: datasource.yaml
                 resources:
                   requests:
-                    cpu: '2'
+                    cpu: '0.1'
                     memory: 128Mi
                   limits:
                     memory: 256Mi
