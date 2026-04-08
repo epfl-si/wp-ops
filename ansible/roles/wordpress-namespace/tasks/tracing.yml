@@ -50,7 +50,7 @@
               tls:
                 insecure: true
               retry_on_failure:
-                enabled: true
+                enabled: false
                 initial_interval: 1s
                 max_interval: 5s
                 max_elapsed_time: 30s
