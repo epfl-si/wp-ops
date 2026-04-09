@@ -50,5 +50,8 @@
       {{ "200m" if inventory_deployment_stage == "production"
       else "50m" }}
     _wp_cron_tag: >-
-      {{ "prod" if inventory_deployment_stage == "production"
+      {{ "2026-138" if inventory_deployment_stage == "production"
       else "latest" }}
+# Reactivate this once wp-cron is stabilized
+#      {{ "prod" if inventory_deployment_stage == "production"
+#      else "latest" }}
