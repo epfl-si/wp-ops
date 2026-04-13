@@ -15,7 +15,11 @@ RUN PIPX_BIN_DIR=/usr/local/bin pipx install awscli
 ######################################################################
 
 COPY wp-cli-config.yml /wp/wp-cli/
-RUN curl -o /wp/wp-cli/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+COPY patch-wp-cli.sh /tmp
+RUN set -e -x; \
+    curl -o /wp/wp-cli/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar ; \
+    bash -x /tmp/patch-wp-cli.sh /wp/wp-cli/wp-cli.phar ; \
+    rm /tmp/patch-wp-cli.sh
 
 COPY wp.sh /usr/local/bin/wp
 
