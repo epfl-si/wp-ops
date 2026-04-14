@@ -35,8 +35,7 @@ fatal () {
 }
 
 ensure_ansible () {
-    # Skip on NixOS
-    if [ -f /etc/os-release ] && grep -q '^ID=nixos' /etc/os-release; then
+    if [[ "${SKIP_ANSIBLE_SUITECASE,,}" = "true" || "$SKIP_ANSIBLE_SUITECASE" == "1" ]]; then
         return 0
     fi
 
