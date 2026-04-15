@@ -31,10 +31,10 @@
       - wp.clinic
   tags:
     - wp.build
-    - wp.clinic
     - wp.build.clinic
-    - wp.clinic.rebuild
     - wp.build.clinic.rebuild
+    - wp.clinic
+    - wp.clinic.rebuild
 
 - name: wp-base/Tekton
   include_tasks:
