@@ -41,10 +41,10 @@
     buildconfig_description: Image with git, jq, bash etc. for build-related tasks
     buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}"
     buildconfig_source:
-      dockerfile: >-
-        FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }} AS wp-php
+      dockerfile: |
+        FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}
         RUN ls
-        RUN chmod 755 /wp
+        RUN chmod a+rwX -R /wp
     buildconfig_rebuild_tags:
     - wp.clinic.rebuild
     - wp.build.clinic.rebuild
