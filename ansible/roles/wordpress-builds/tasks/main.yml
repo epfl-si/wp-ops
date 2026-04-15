@@ -45,6 +45,8 @@
         FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}
         RUN ls
         RUN chmod a+rwX -R /wp
+        RUN apt -qy update; \
+            apt -qy install vim
     buildconfig_rebuild_tags:
     - wp.clinic.rebuild
     - wp.build.clinic.rebuild
