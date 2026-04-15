@@ -20,32 +20,9 @@
     buildconfig_description: Image with git, jq, bash etc. for build-related tasks
     buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}"
     buildconfig_source:
-      dockerfile: |
-        FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}
-        RUN touch /wp/clinic-marker \
-            && echo date -Iseconds > /wp/clinic-marker
-        # Install some conveniance tools
-        RUN apt-get update \
-            && apt-get install -y --no-install-recommends \
-                bash \
-                ca-certificates \
-                curl \
-                dnsutils \
-                file \
-                git \
-                htop \
-                iputils-ping \
-                jq \
-                less \
-                lsof \
-                tcpdump \
-                traceroute \
-                vim \
-                wget \
-            && rm -rf /var/lib/apt/lists/*
-        # Chmod the WordPress volume
-        RUN chmod a+rwX -R /wp
-
+      type: Git
+      git:
+        uri: https://github.com/epfl-si/wp-clinic
     buildconfig_rebuild_tags:
     - wp.build.clinic.rebuild
     - wp.clinic.rebuild
