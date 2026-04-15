@@ -3,7 +3,6 @@
   with_items:
     - build-vars.yml
     - quay-vars.yml
-    - ../../wordpress-namespace/vars/image-vars.yml
 
 # Required for quay-vars.yml, above:
 - tags: always
@@ -22,9 +21,9 @@
     - wp.build
     - wp.build.mirrors
 
-- name: Clinic image
+- name: WP-Clinic Builder
   include_tasks:
-    file: _buildconfig.yml
+    file: clinic.yml
     apply:
       tags:
       - wp.build
@@ -34,20 +33,6 @@
     - wp.build
     - wp.clinic
     - wp.build.clinic
-    - wp.clinic.rebuild
-    - wp.build.clinic.rebuild
-  vars:
-    buildconfig_name: clinic
-    buildconfig_description: Image with git, jq, bash etc. for build-related tasks
-    buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}"
-    buildconfig_source:
-      dockerfile: |
-        FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}
-        RUN ls
-        RUN chmod a+rwX -R /wp
-        RUN apt -qy update; \
-            apt -qy install vim
-    buildconfig_rebuild_tags:
     - wp.clinic.rebuild
     - wp.build.clinic.rebuild
 
