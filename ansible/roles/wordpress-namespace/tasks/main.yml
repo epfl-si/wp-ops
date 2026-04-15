@@ -245,3 +245,16 @@
   tags:
     - wp
     - wp.tracing
+
+- name: Clinic
+  when: >-
+    inventory_deployment_stage == "test"
+  include_tasks:
+    file: clinic.yml
+    apply:
+      tags:
+        - wp
+        - wp.clinic
+  tags:
+    - wp
+    - wp.clinic
