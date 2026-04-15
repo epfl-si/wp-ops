@@ -18,11 +18,14 @@
   vars:
     buildconfig_name: clinic
     buildconfig_description: Image with git, jq, bash etc. for build-related tasks
-    buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-php:{{ nginx_deployment_images_tag }}"
+    buildconfig_args:
+    - name: WP_PHP_IMAGE_VERSION
+      value: "{{ nginx_deployment_images_tag }}"
     buildconfig_source:
       type: Git
       git:
         uri: https://github.com/epfl-si/wp-clinic
+    buildconfig_register_built: build_clinic
     buildconfig_rebuild_tags:
     - wp.build.clinic.rebuild
     - wp.clinic.rebuild

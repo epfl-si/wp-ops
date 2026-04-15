@@ -26,8 +26,24 @@
                       replicas=1
                       ))
         | from_yaml }}
+  register: deployment_clinic
 
-- name: "Services/wp-clinic"
+- name: Redeploy wp-clinic
+  tags: always  # but see below with wp.clinic.restart
+  when: >-
+    (
+      (build_clinic | default({}) is changed)
+      and not
+      (deployment_clinic | default({}) is changed)
+    )
+    or ("wp.clinic.restart" in ansible_run_tags)
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      kubectl -n {{ inventory_namespace }} rollout restart deploy/wp-clinic
+
+- name: Service/wp-clinic
   kubernetes.core.k8s:
     state: present
     definition:
@@ -50,7 +66,8 @@
           app: wp-clinic
         type: ClusterIP
 
-- name: "Routes/wp-clinic"
+- name: Route/wp-clinic
+  when: wp_clinic_url is defined
   kubernetes.core.k8s:
     definition:
       apiVersion: v1

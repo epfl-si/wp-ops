@@ -15,7 +15,7 @@
 #  - buildconfig_description
 #        The image description visible in the Quay UI
 #
-#  - buildconfig_base             (mandatory)
+#  - buildconfig_base
 #        The image to use as the base, i.e. substitute the first `FROM` line
 #        in the Dockerfile with.
 #
@@ -25,6 +25,13 @@
 #  - buildconfig_rebuild_tags
 #        One or more tags that should force a rebuild of the image when
 #        present
+#
+#  - buildconfig_args
+#        The value for buildconfig.spec.strategy.dockerStrategy.buildArgs
+#
+#  - buildconfig_register_built
+#        The variable to set if the image is rebuilt
+#
 
 - tags: always
   include_vars: "{{ item }}"
@@ -69,9 +76,11 @@
         strategy:
           type: Docker
           dockerStrategy:
-            from:   # Override the Dockerfile's `FROM` line
-              kind: DockerImage
-              name: "{{ buildconfig_base }}"
+            from: >-
+              {{ { "kind": "DockerImage", "name": buildconfig_base }
+              if buildconfig_base is defined 
+              else None }}
+            buildArgs: "{{ buildconfig_args | default([]) }}"
         output:
           to:
             kind: DockerImage
@@ -87,6 +96,7 @@
             memory: "256Mi"
 
 - name: Build {{ buildconfig_name }} now
+  register: _buildconfig_built
   tags: "{{ buildconfig_rebuild_tags | default([]) }}"
   when: >-
     (_buildconfig_buildconfig | default({}) is changed)
@@ -104,3 +114,7 @@
       {{ ((_buildconfig_rebuild_tags + ansible_run_tags) | count)
       != (dict.fromkeys(_buildconfig_rebuild_tags + ansible_run_tags) | count)
       }}
+
+- when: buildconfig_register_built is defined
+  set_fact: >-
+    {{ { buildconfig_register_built: _buildconfig_built } }}
