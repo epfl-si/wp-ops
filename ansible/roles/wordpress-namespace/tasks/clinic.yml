@@ -1,0 +1,72 @@
+# For certain bugs in production, we need to be able to debug the code.
+# The wp-clinic deployment will have a chmod 755 on the /wp directory
+
+- name: "Deployment/wp-clinic"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wp-clinic
+        namespace: "{{ inventory_namespace }}"
+      spec: >-
+        {{ lookup("template", "nginx-deployment-spec.yaml",
+                  template_vars=dict(
+                      image_tag=latest,
+                      app_label="wp-clinic",
+                      replicas=1
+                      ))
+        | from_yaml }}
+
+- name: "Services/wp-clinic"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: wp-clinic
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: wp-clinic
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+          - name: "80"
+            port: 80
+            protocol: TCP
+            targetPort: 8000
+        selector:
+          app: wp-clinic
+        type: ClusterIP
+
+- name: "Routes/wp-clinic"
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Route
+      metadata:
+        name: wp-clinic
+        namespace: '{{ inventory_namespace }}'
+        labels:
+          app: wp-clinic
+          route: private
+        annotations:
+          haproxy.router.openshift.io/balance: roundrobin
+          haproxy.router.openshift.io/disable_cookies: 'true'
+      spec:
+        host: "{{ _host }}"
+        path: "{{ _path }}"
+        to:
+          kind: Service
+          name: wp-clinic
+        port:
+          targetPort: 80
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+  vars:
+    _host: "{{ wp_clinic_url | urlsplit('hostname') }}"
+    _path: "{{ wp_clinic_url | urlsplit('path') }}"
