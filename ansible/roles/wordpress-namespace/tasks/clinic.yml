@@ -1,5 +1,10 @@
 # For certain bugs in production, we need to be able to debug the code.
 # The wp-clinic deployment will have a chmod 755 on the /wp directory
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - image-vars.yml
+    - ../../../vars/quay-vars.yml
 
 - name: "Deployment/wp-clinic"
   kubernetes.core.k8s:
@@ -13,7 +18,8 @@
       spec: >-
         {{ lookup("template", "nginx-deployment-spec.yaml",
                   template_vars=dict(
-                      image_tag=latest,
+                      image_tag=nginx_deployment_images_tag,
+                      wp_php_image="quay-its.epfl.ch/svc0041/clinic:latest",
                       app_label="wp-clinic",
                       replicas=1
                       ))
