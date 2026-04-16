@@ -2,6 +2,12 @@ FROM ubuntu:jammy AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Change the Ubuntu archive and security mirrors to ETHZ
+RUN sed -i \
+    's|http://archive.ubuntu.com/ubuntu|http://ubuntu.ethz.ch/ubuntu|g; \
+     s|http://security.ubuntu.com/ubuntu|http://ubuntu.ethz.ch/ubuntu|g' \
+     /etc/apt/sources.list
+
 RUN apt-get -qy update
 RUN apt-get -qy install curl
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
