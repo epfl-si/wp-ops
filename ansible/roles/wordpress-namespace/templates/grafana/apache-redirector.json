@@ -457,7 +457,11 @@
   "preload": false,
   "refresh": "1m",
   "schemaVersion": 40,
-  "tags": [],
+  "tags": [
+    "Apache",
+    "WordPress",
+    "Redirector"
+  ],
   "templating": {
     "list": []
   },

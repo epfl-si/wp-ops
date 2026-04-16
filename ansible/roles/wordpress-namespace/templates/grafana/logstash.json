@@ -3293,9 +3293,11 @@
   "refresh": "5s",
   "schemaVersion": 42,
   "tags": [
-    "opdo",
-    "audit_logs",
-    "security"
+    "OPdO",
+    "audit",
+    "logs",
+    "security",
+    "WordPress"
   ],
   "templating": {
     "list": [

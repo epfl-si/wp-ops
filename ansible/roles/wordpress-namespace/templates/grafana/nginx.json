@@ -741,7 +741,11 @@
   "preload": false,
   "refresh": "10s",
   "schemaVersion": 40,
-  "tags": [],
+  "tags": [
+    "Nginx",
+    "HTTP",
+    "WordPress"
+  ],
   "templating": {
     "list": [
       {

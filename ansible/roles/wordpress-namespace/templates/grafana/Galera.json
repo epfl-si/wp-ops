@@ -1437,9 +1437,10 @@
   "refresh": "1m",
   "schemaVersion": 40,
   "tags": [
-    "mysql",
-    "galera",
-    "mariadb"
+    "MySQL",
+    "Galera",
+    "MariaDB",
+    "WordPress"
   ],
   "templating": {
     "list": [
