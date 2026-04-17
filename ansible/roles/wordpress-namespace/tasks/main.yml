@@ -255,7 +255,9 @@
       tags:
         - wp
         - wp.clinic
+        - wp.clinic.destroy
   tags:
     - wp
     - wp.clinic
     - wp.clinic.restart
+    - wp.clinic.destroy

@@ -10,7 +10,9 @@
 
 - name: "Deployment/wp-clinic"
   kubernetes.core.k8s:
-    state: present
+    state: >-
+      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
+         else "present" }}
     definition:
       apiVersion: apps/v1
       kind: Deployment
@@ -45,7 +47,9 @@
 
 - name: Service/wp-clinic
   kubernetes.core.k8s:
-    state: present
+    state: >-
+      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
+         else "present" }}
     definition:
       apiVersion: v1
       kind: Service
@@ -67,8 +71,13 @@
         type: ClusterIP
 
 - name: Route/wp-clinic
-  when: wp_clinic_url is defined
+  when: >-
+    wp_clinic_url is defined
+    or ("wp.clinic.destroy" in ansible_run_tags)
   kubernetes.core.k8s:
+    state: >-
+      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
+         else "present" }}
     definition:
       apiVersion: v1
       kind: Route
@@ -93,5 +102,6 @@
           termination: edge
           insecureEdgeTerminationPolicy: Redirect
   vars:
-    _host: "{{ wp_clinic_url | urlsplit('hostname') }}"
-    _path: "{{ wp_clinic_url | urlsplit('path') }}"
+    _url: "{{ wp_clinic_url if wp_clinic_url is defined else ''}}"
+    _host: "{{ _url | urlsplit('hostname') }}"
+    _path: "{{ _url | urlsplit('path') }}"
