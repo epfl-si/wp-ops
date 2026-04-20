@@ -9,11 +9,41 @@
     - image-vars.yml
     - ../../../vars/quay-vars.yml
 
+
+
+- name: " Destroy Deployment/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
+- name: " Destroy Service/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Service
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
+- name: " Destroy Route/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Route
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
 - name: "Deployment/wp-clinic"
   kubernetes.core.k8s:
-    state: >-
-      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
-         else "present" }}
+    state: present
     definition:
       apiVersion: apps/v1
       kind: Deployment
@@ -30,6 +60,8 @@
                       ))
         | from_yaml }}
   register: deployment_clinic
+  tags:
+    - wp.clinic.create
 
 - name: Redeploy wp-clinic
   tags: always  # but see below with wp.clinic.restart
@@ -48,9 +80,7 @@
 
 - name: Service/wp-clinic
   kubernetes.core.k8s:
-    state: >-
-      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
-         else "present" }}
+    state: present
     definition:
       apiVersion: v1
       kind: Service
@@ -70,15 +100,14 @@
         selector:
           app: wp-clinic
         type: ClusterIP
+  tags:
+    - wp.clinic.create
 
 - name: Route/wp-clinic
   when: >-
     wp_clinic_url is defined
-    or ("wp.clinic.destroy" in ansible_run_tags)
   kubernetes.core.k8s:
-    state: >-
-      {{ "absent" if "wp.clinic.destroy" in ansible_run_tags
-         else "present" }}
+    state: present
     definition:
       apiVersion: v1
       kind: Route
@@ -106,3 +135,5 @@
     _url: "{{ wp_clinic_url if wp_clinic_url is defined else ''}}"
     _host: "{{ _url | urlsplit('hostname') }}"
     _path: "{{ _url | urlsplit('path') }}"
+  tags:
+    - wp.clinic.create
