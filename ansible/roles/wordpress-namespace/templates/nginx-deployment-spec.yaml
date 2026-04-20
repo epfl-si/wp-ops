@@ -125,11 +125,9 @@
               - name: MENU_API_HOST
                 value: "menu-api"
           - name: php
-{% if wp_php_image is defined %}
-            image: {{ wp_php_image }}
-{% else %}
-            image: quay-its.epfl.ch/svc0041/wp-php:{{ image_tag }}
-{% endif %}
+            image: >-
+              {{ wp_php_image
+              | default("quay-its.epfl.ch/svc0041/wp-php:" + image_tag) }}
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
 {% if inventory_deployment_stage == "production" %}
