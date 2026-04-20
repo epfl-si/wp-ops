@@ -1,6 +1,7 @@
-# For certain bugs in production, we need to be able to debug the code.
-# The wp-clinic deployment will have a chmod 755 on the /wp directory
-# wpsible -t wp.build.clinic -e "wp_clinic_url=https://wpn-test.epfl.ch/scientastic"
+# The wp-clinic pods allow writing to all files in the `/wp` directory for
+# debugging purposes (including debugging in production when required).
+# wpsible -t wp.clinic.create -e "wp_clinic_url=https://wpn-test.epfl.ch/scientastic"
+# wpsible -t wp.clinic.destroy
 
 - tags: always
   include_vars: "{{ item }}"
