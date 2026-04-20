@@ -253,11 +253,9 @@
     file: clinic.yml
     apply:
       tags:
-        - wp
         - wp.clinic
-        - wp.clinic.destroy
   tags:
-    - wp
     - wp.clinic
     - wp.clinic.restart
+    - wp.clinic.create
     - wp.clinic.destroy
