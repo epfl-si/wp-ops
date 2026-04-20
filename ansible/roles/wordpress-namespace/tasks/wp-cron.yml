@@ -40,7 +40,7 @@
                         cpu: '{{ _cpu_request }}'
                         memory: 512Mi
                       limits:
-                        memory: 4Gi
+                        memory: "{{ _resources_limits }}"
                 imagePullSecrets:
                   - name: "{{ quay_puller_secret_name }}"
                 restartPolicy: OnFailure
@@ -49,6 +49,9 @@
     _cpu_request: >-
       {{ "200m" if inventory_deployment_stage == "production"
       else "50m" }}
+    _resources_limits: >-
+      {{ "4Gi" if inventory_deployment_stage == "production"
+      else "2Gi" }}
     _wp_cron_tag: >-
       {{ "prod" if inventory_deployment_stage == "production"
       else "latest" }}
