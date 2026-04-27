@@ -1,0 +1,31 @@
+- tags: always
+  include_vars: ../../wordpress-namespace/vars/image-vars.yml
+
+- name: Clinic image
+  include_tasks:
+    file: _buildconfig.yml
+    apply:
+      tags:
+      - wp.build
+      - wp.build.clinic
+      - wp.clinic
+  tags:
+  - wp.build
+  - wp.build.clinic
+  - wp.build.clinic.rebuild
+  - wp.clinic
+  - wp.clinic.rebuild
+  vars:
+    buildconfig_name: clinic
+    buildconfig_description: Image with git, jq, bash etc. for build-related tasks
+    buildconfig_args:
+    - name: WP_PHP_IMAGE_VERSION
+      value: "{{ nginx_deployment_images_tag }}"
+    buildconfig_source:
+      type: Git
+      git:
+        uri: https://github.com/epfl-si/wp-clinic
+    buildconfig_register_built: build_clinic
+    buildconfig_rebuild_tags:
+    - wp.build.clinic.rebuild
+    - wp.clinic.rebuild

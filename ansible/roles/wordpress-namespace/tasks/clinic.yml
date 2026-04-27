@@ -1,0 +1,139 @@
+# The wp-clinic pods allow writing to all files in the `/wp` directory for
+# debugging purposes (including debugging in production when required).
+# wpsible -t wp.clinic.create -e "wp_clinic_url=https://wpn-test.epfl.ch/scientastic"
+# wpsible -t wp.clinic.destroy
+
+- tags: always
+  include_vars: "{{ item }}"
+  with_items:
+    - image-vars.yml
+    - ../../../vars/quay-vars.yml
+
+
+
+- name: " Destroy Deployment/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
+- name: " Destroy Service/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Service
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
+- name: " Destroy Route/wp-clinic"
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Route
+    namespace: "{{ inventory_namespace }}"
+    name: wp-clinic
+  tags:
+    - wp.clinic.destroy
+
+- name: "Deployment/wp-clinic"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: wp-clinic
+        namespace: "{{ inventory_namespace }}"
+      spec: >-
+        {{ lookup("template", "nginx-deployment-spec.yaml",
+                  template_vars=dict(
+                      image_tag=nginx_deployment_images_tag,
+                      wp_php_image="quay-its.epfl.ch/svc0041/clinic:latest",
+                      app_label="wp-clinic",
+                      replicas=1
+                      ))
+        | from_yaml }}
+  register: deployment_clinic
+  tags:
+    - wp.clinic.create
+
+- name: Redeploy wp-clinic
+  tags: always  # but see below with wp.clinic.restart
+  when: >-
+    (
+      (build_clinic | default({}) is changed)
+      and not
+      (deployment_clinic | default({}) is changed)
+    )
+    or ("wp.clinic.restart" in ansible_run_tags)
+  shell:
+    cmd: |
+      set -e -x
+      export KUBECONFIG=$K8S_AUTH_KUBECONFIG
+      kubectl -n {{ inventory_namespace }} rollout restart deploy/wp-clinic
+
+- name: Service/wp-clinic
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: wp-clinic
+        namespace: "{{ inventory_namespace }}"
+        labels:
+          app: wp-clinic
+        annotations:
+          authors: isas-fsd
+      spec:
+        ports:
+          - name: "80"
+            port: 80
+            protocol: TCP
+            targetPort: 8000
+        selector:
+          app: wp-clinic
+        type: ClusterIP
+  tags:
+    - wp.clinic.create
+
+- name: Route/wp-clinic
+  when: >-
+    wp_clinic_url is defined
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Route
+      metadata:
+        name: wp-clinic
+        namespace: '{{ inventory_namespace }}'
+        labels:
+          app: wp-clinic
+          route: public
+        annotations:
+          haproxy.router.openshift.io/balance: roundrobin
+          haproxy.router.openshift.io/disable_cookies: 'true'
+      spec:
+        host: "{{ _host }}"
+        path: "{{ _path }}"
+        to:
+          kind: Service
+          name: wp-clinic
+        port:
+          targetPort: 80
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+  vars:
+    _url: "{{ wp_clinic_url if wp_clinic_url is defined else ''}}"
+    _host: "{{ _url | urlsplit('hostname') }}"
+    _path: "{{ _url | urlsplit('path') }}"
+  tags:
+    - wp.clinic.create

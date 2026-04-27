@@ -12,6 +12,8 @@
 #    - image_tag
 #                    The part of the image name after the colon, that the
 #                    serving containers will use
+#    - wp_php_image
+#                    For `clinic` usages we want to use the clinic quay repository with "latest" tag
 #    - image_pull_policy
 #                    One of "Always" (the default) or "IfNotPresent"
 #
@@ -123,7 +125,9 @@
               - name: MENU_API_HOST
                 value: "menu-api"
           - name: php
-            image: quay-its.epfl.ch/svc0041/wp-php:{{ image_tag }}
+            image: >-
+              {{ wp_php_image
+              | default("quay-its.epfl.ch/svc0041/wp-php:" + image_tag) }}
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
 {% if inventory_deployment_stage == "production" %}

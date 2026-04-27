@@ -21,32 +21,20 @@
     - wp.build
     - wp.build.mirrors
 
-- name: Toolbox image
+- name: WP-Clinic Builder
   include_tasks:
-    file: _buildconfig.yml
+    file: clinic.yml
     apply:
       tags:
       - wp.build
-      - wp.build.toolbox
-      - wp.toolbox
+      - wp.build.clinic
+      - wp.clinic
   tags:
     - wp.build
-    - wp.toolbox
-    - wp.build.toolbox
-    - wp.toolbox.rebuild
-    - wp.build.toolbox.rebuild
-  vars:
-    buildconfig_name: build-toolbox
-    buildconfig_description: Image with git, jq, bash etc. for build-related tasks
-    buildconfig_base: "{{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:noble"
-    buildconfig_source:
-      type: Git
-      git:
-        uri: "https://github.com/epfl-si/wp-ops"
-      contextDir: docker/build-toolbox
-    buildconfig_rebuild_tags:
-    - wp.toolbox.rebuild
-    - wp.build.toolbox.rebuild
+    - wp.build.clinic
+    - wp.build.clinic.rebuild
+    - wp.clinic
+    - wp.clinic.rebuild
 
 - name: wp-base/Tekton
   include_tasks:
