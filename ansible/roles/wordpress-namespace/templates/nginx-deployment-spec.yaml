@@ -156,6 +156,11 @@
                   secretKeyRef:
                     name: search-inside-secret
                     key: wp_api_token
+              - name: PEOPLE_BEARER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: people-secret
+                    key: token
             envFrom:
               - configMapRef:
                   name: otel-php-config
