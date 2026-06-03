@@ -39,7 +39,9 @@
                 resources:
                   requests:
                     cpu: "20m"
-                    memory: "400Mi"
+                    memory: "300Mi"
+                  limit:
+                    memory: "300Mi"
                 ports:
                   - containerPort: 8080
                     protocol: TCP
