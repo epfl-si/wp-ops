@@ -168,9 +168,11 @@
             image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
             imagePullPolicy: Always
             resources:
+              limits:
+                memory: '64Mi'
               requests:
                 cpu: '{{ _request_cpu_monitoring }}'
-                memory: '256Mi'
+                memory: '64Mi'
               # This fits under the default (LimitRange-imposed) limits
               # even for production; so we don't need `limits:` here.
             ports:
