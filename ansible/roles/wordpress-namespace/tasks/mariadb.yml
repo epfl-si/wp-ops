@@ -18,16 +18,22 @@
       spec:
         name: mariadb-operator
         resources:
+          limits:
+            memory: 1Gi
           requests:
             cpu: 100m
-            memory: 100M
+            memory: 1Gi
         webhook:
           resources:
+            limits:
+              memory: 100M
             requests:
               cpu: 100m
               memory: 100M
         certController:
          resources:
+           limits:
+             memory: 100M
            requests:
              cpu: 100m
              memory: 100M
@@ -74,9 +80,11 @@
           exporter:
             image: quay-its.epfl.ch/svc0041/mysqld-exporter:v0.15.1
             resources:
+              limits:
+                memory: 32Mi
               requests:
                 cpu: 50m
-                memory: 64Mi
+                memory: 32Mi
 
 - name: "Backup/{{ mariadb_name }} (Backups scheduling)"
   with_sequence: >-
@@ -114,7 +122,7 @@
             cpu: >-
               {{ "200m" if inventory_deployment_stage == "production"
                  else "50m" }}
-            memory: 64Mi
+            memory: 512Mi
         maxRetention: 8760h
         storage:
           s3:
@@ -164,9 +172,9 @@
             cpu: >-
               {{ "500m" if inventory_deployment_stage == "production"
                  else "50m" }}
-            memory: 200Mi
+            memory: 256Mi
           limits:
-            memory: 2Gi
+            memory: 256Mi
         rootPasswordSecretKeyRef:
           name: mariadb
           key: root-password
@@ -176,9 +184,11 @@
           exporter:
             image: quay-its.epfl.ch/svc0041/mysqld-exporter:v0.15.1
             resources:
+              limits:
+                memory: 32Mi
               requests:
                 cpu: 50m
-                memory: 64Mi
+                memory: 32Mi
 
 - name: "Backup/{{ mariadb_name }}-fleet (Backups scheduling)"
   kubernetes.core.k8s:
@@ -208,12 +218,12 @@
         resources:
           limits:
             cpu: 300m
-            memory: 512Mi
+            memory: 256Mi
           requests:
             cpu: >-
               {{ "200m" if inventory_deployment_stage == "production"
                  else "50m" }}
-            memory: 64Mi
+            memory: 256Mi
         # This is the default:
         maxRetention: 720h
         storage:
