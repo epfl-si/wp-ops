@@ -121,6 +121,13 @@
           | regex_replace("^buildah (.* push)", "_buildah_and_retry \1",
                           multiline=True)
           }}
+      - op: replace
+        path: /spec/steps/0/computeResources
+        value:
+          requests:
+            memory: "1600Mi"
+          limits:
+            memory: "1600Mi"
     _script_header: |
       set -x
       _buildah_and_retry () {
@@ -185,6 +192,11 @@
           - name: WORKSPACES_DOCKERCONFIG_PATH
             value: $(workspaces.dockerconfig.path)
           image: "{{ build_toolbox_image }}"
+          computeResources:
+            limits:
+              memory: "128Mi"
+            requests:
+              memory: "128Mi"
           imagePullPolicy: Always
           script: |
             #!/bin/bash
@@ -238,6 +250,11 @@
               - name: sed
                 image: "{{ build_toolbox_image }}"
                 imagePullPolicy: Always
+                computeResources:
+                  limits:
+                    memory: "128Mi"
+                  requests:
+                    memory: "128Mi"
                 env:
                   - name: QUAY_API_BEARER_TOKEN
                     valueFrom:
@@ -483,6 +500,11 @@
                 - name: patch-and-rollout
                   image: "{{ build_toolbox_image }}"
                   imagePullPolicy: Always
+                  computeResources:
+                    limits:
+                      memory: "128Mi"
+                    requests:
+                      memory: "128Mi"
                   script: |
                     kubectl patch deployment $(params.target-deployment) --patch='{
                       "spec":
@@ -594,6 +616,11 @@
                             serviceAccountName: "{{ build_privileged_service_account }}"
                           taskRunSpecs:
                             - pipelineTaskName: prep
+                              computeResources:
+                                requests:
+                                  memory: "1600Mi"
+                                limits:
+                                  memory: "1600Mi"
                               serviceAccountName: "{{ build_unprivileged_service_account }}"
                           pipelineRef:
                             name: "{{ pipeline_name }}"
