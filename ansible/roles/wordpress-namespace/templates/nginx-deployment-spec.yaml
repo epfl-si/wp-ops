@@ -84,10 +84,8 @@
               - --http-port=8000
               - --https-port=8443
             resources:
-{% if inventory_deployment_stage == "production" %}
               limits:
-                memory: {{ _request_ram }}
-{% endif %}
+                memory: '{{ _request_ram }}'
               requests:
                 cpu: '{{ _request_cpu_nginx }}'
                 memory: '{{ _request_ram }}'
