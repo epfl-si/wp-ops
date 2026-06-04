@@ -29,9 +29,11 @@
                   - containerPort: 9091
                     name: metrics
                 resources:
+                  limits:
+                    memory: "80Mi"
                   requests:
                     cpu: "100m"
-                    memory: "64Mi"
+                    memory: "80Mi"
                 readinessProbe:
                   httpGet:
                     path: /-/ready
