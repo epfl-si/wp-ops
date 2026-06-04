@@ -29,6 +29,8 @@
                   - containerPort: 9091
                     name: metrics
                 resources:
+                  limits:
+                    memory: 64Mi
                   requests:
                     cpu: "100m"
                     memory: "64Mi"
