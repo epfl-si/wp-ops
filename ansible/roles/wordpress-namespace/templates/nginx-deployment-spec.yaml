@@ -128,10 +128,8 @@
               | default("quay-its.epfl.ch/svc0041/wp-php:" + image_tag) }}
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
-{% if inventory_deployment_stage == "production" %}
               limits:
-                memory: {{ _request_ram }}
-{% endif %}
+                memory: '{{ _request_ram }}'
               requests:
                 cpu: '{{ _request_cpu_php }}'
                 memory: '{{ _request_ram }}'
