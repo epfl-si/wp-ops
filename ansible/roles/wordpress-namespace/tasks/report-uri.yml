@@ -60,9 +60,11 @@
             kind: DockerImage
             name: "{{ report_uri_image }}"
         resources:
+          limits:
+            memory: "64Mi"
           requests:
             cpu: "100m"
-            memory: "256Mi"
+            memory: "64Mi"
 
 - name: Report URI - Start build
   when: >
