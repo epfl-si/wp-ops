@@ -91,9 +91,11 @@
               }}:{{ buildconfig_push_tag | default("latest") }}
         serviceAccount: builder
         resources:
+          limits:
+            memory: "1024Mi"
           requests:
             cpu: "100m"
-            memory: "256Mi"
+            memory: "1024Mi"
 
 - name: Build {{ buildconfig_name }} now
   register: _buildconfig_built
