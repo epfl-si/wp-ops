@@ -172,9 +172,9 @@
             cpu: >-
               {{ "500m" if inventory_deployment_stage == "production"
                  else "50m" }}
-            memory: 256Mi
+            memory: "{{ _memory }}"
           limits:
-            memory: 256Mi
+            memory: "{{ _memory }}"
         rootPasswordSecretKeyRef:
           name: mariadb
           key: root-password
@@ -189,6 +189,10 @@
               requests:
                 cpu: 50m
                 memory: 32Mi
+  vars:
+    _memory: >-
+      {{ "1Gi" if item == "restore"
+         else "312Mi" }}
 
 - name: "Backup/{{ mariadb_name }}-fleet (Backups scheduling)"
   kubernetes.core.k8s:
