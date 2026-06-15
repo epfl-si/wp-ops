@@ -95,7 +95,7 @@
                     cpu: '0.1'
                     memory: 256Mi
                   limits:
-                    memory: 512Mi
+                    memory: 256Mi
             volumes:
               - name: otel-collector-config-volume
                 configMap:
@@ -193,7 +193,7 @@
                 resources:
                   requests:
                     cpu: '0.4'
-                    memory: 1024Mi
+                    memory: 2048Mi
                   limits:
                     memory: 2048Mi
             volumes:
@@ -304,7 +304,7 @@
                 resources:
                   requests:
                     cpu: '0.1'
-                    memory: 128Mi
+                    memory: 256Mi
                   limits:
                     memory: 256Mi
             volumes:
