@@ -29,10 +29,9 @@
           name: wordpress-data
 
 - name: NfsSubdirProvisioner's
-  with_items:
-    - data
-    - db
-    - build
+  with_items: >-
+    {{ ["data", "db"]
+    + (["build"] if inventory_deployment_stage == "test" else []) }}
   kubernetes.core.k8s:
     state: present
     definition:
