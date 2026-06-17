@@ -28,7 +28,7 @@
           namespace: "{{ inventory_namespace }}"
           name: wordpress-data
 
-- name: NfsSubdirExternalProvisioner's
+- name: NfsSubdirProvisioner's
   with_items:
     - data
     - db
