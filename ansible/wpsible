@@ -89,7 +89,17 @@ done
 
 set -e
 
-ensure_ansible
+# check for the suitcase, unless running
+# inside a devenv shell
+case "$SKIP_ANSIBLE_SUITCASE" in
+  true | True | TRUE | 1)
+    # Do nothing if it matches
+    ;;
+  *)
+    ensure_ansible
+    ;;
+esac
+
 case "$mode" in
     install-only) : ;;
     ansible-playbook)
