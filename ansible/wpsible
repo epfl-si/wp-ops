@@ -89,7 +89,12 @@ done
 
 set -e
 
-ensure_ansible
+# check for the suitcase, unless running
+# inside a devenv shell
+if [ -z "${DEVENV_ROOT:-}" ]; then
+    ensure_ansible
+fi
+
 case "$mode" in
     install-only) : ;;
     ansible-playbook)
