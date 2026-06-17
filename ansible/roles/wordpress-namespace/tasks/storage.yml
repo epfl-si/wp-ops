@@ -32,6 +32,7 @@
   with_items:
     - data
     - db
+    - build
   kubernetes.core.k8s:
     state: present
     definition:
