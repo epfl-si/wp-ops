@@ -89,6 +89,8 @@ main () {
         install_plugin_s3 wpforms-surveys-polls.1.15.0.zip
         # Additionally this last one is stuck in the past:
         install_plugin_s3 wp-media-folder.5.9.13.zip
+        # shorthand for mediacom : https://support.shorthand.com/en/articles/183-installing-the-shorthand-for-wordpress-plugin
+        install_plugin_s3 the-shorthand-editor.zip
     fi
 
     for homemade_or_forked_plugin in \
