@@ -71,7 +71,9 @@ main () {
         install_plugin_wordpress_official polylang
         install_plugin_wordpress_official redirection
     else
-        install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.8.1.zip
+        # The 3.8 polylang version is not anymore compatible with our polylang-cli:
+        # - default_language variable is not present anymore
+        install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.7.8.zip
         install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
     fi
 
