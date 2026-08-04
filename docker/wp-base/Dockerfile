@@ -29,6 +29,9 @@ RUN set -e -x; \
 
 COPY wp.sh /usr/local/bin/wp
 
+RUN mkdir /wp/wp-cli/packages; \
+    wp --allow-root package install https://github.com/epfl-si/polylang-cli/archive/master.zip
+
 ######################################################################
 # Install and patch WordPresses and dependencies
 ######################################################################
