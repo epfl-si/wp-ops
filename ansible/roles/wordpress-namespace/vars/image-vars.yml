@@ -3,3 +3,12 @@ image_pull_secret_name: "svc0041-svc0041-puller-pull-secret"
 nginx_deployment_images_tag: "2026-294"
 
 apache_redirector_image_tag: "2025-007"
+
+# Tag for the standalone, shadow wp-controller Deployment (see
+# tasks/wp-controller.yml). Independent from nginx_deployment_images_tag:
+# wp-controller isn't built by the Tekton pipeline yet at the tag pinned
+# above, and has its own release cadence. Push `latest` with `make image`
+# from https://github.com/epfl-si/wp-controller, or bump this to a dated
+# tag once the Tekton build (see wordpress-builds/tasks/tekton.yml) has
+# produced and validated one.
+wp_controller_image_tag: "2026-002"
