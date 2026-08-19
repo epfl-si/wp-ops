@@ -18,8 +18,15 @@
 #                    same image)
 #
 # Caller may set the following vars:
+#    - additional_pod_labels
+#                    A dict of keys and values to attach to the pod template
+#    - wp_php_image
+#                    For `clinic` usages we want to use the clinic quay repository with "latest" tag
 #    - image_pull_policy
 #                    One of "Always" (the default) or "IfNotPresent"
+#    - replicas
+#                    The desired number of replicas, default is 2 for
+#                    production and 1 for test environment
 
 {% if inventory_deployment_stage == "production" %}
 {%   set _request_cpu_php = "1" %}
@@ -32,7 +39,8 @@
 {% endif %}
 
 # spec:
-    replicas: 1
+    replicas: {{ replicas | default( 2 if inventory_deployment_stage == "production"
+                 else 1 ) | int }}
     selector:
       matchLabels:
         app: "{{ app_label }}"
@@ -42,8 +50,30 @@
       metadata:
         labels:
           app: "{{ app_label }}"
+{% if additional_pod_labels is defined %}
+{%   for k,v in additional_pod_labels.items() %}
+          {{ k }}: {{ v }}
+{%   endfor %}
+{% endif %}
       spec:
+{% if not inventory_has_only_one_worker_node | default(False) %}
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app: "{{ app_label }}"
+                topologyKey: kubernetes.io/hostname
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      app: "{{ app_label }}"
+                  topologyKey: topology.kubernetes.io/zone
+{% endif %}
         serviceAccountName: wp-controller
+        automountServiceAccountToken: false
         containers:
           - name: wp-controller
             image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-controller:{{ image_tag }}"
@@ -74,6 +104,9 @@
               - name: wordpress-data
                 mountPath: /wp-data/
                 readOnly: true
+              - name: kube-api-access
+                mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+                readOnly: true
             securityContext:
               runAsNonRoot: true
               allowPrivilegeEscalation: false
@@ -90,7 +123,8 @@
                 port: http
           - name: php
             image: >-
-              quay-its.epfl.ch/svc0041/wp-php:{{ php_image_tag }}
+              {{ wp_php_image
+              | default("quay-its.epfl.ch/svc0041/wp-php:" + php_image_tag) }}
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
               limits:
@@ -161,6 +195,24 @@
           - name: wordpress-audit
             persistentVolumeClaim:
               claimName: wordpress-audit
+          - name: kube-api-access
+            projected:
+              defaultMode: 420
+              sources:
+              - serviceAccountToken:
+                  expirationSeconds: 3600
+                  path: token
+              - configMap:
+                  items:
+                  - key: ca.crt
+                    path: ca.crt
+                  name: kube-root-ca.crt
+              - downwardAPI:
+                  items:
+                  - fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                    path: namespace
           - name: wordpress-authentication
             secret:
               secretName: wordpress-authentication
