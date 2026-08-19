@@ -29,10 +29,12 @@
 #                    production and 1 for test environment
 
 {% if inventory_deployment_stage == "production" %}
+{%   set _request_cpu_controller = "15m" %}
 {%   set _request_cpu_php = "1" %}
 {%   set _request_cpu_monitoring = "100m" %}
 {%   set _request_ram = "1Gi" %}
 {% else %}
+{%   set _request_cpu_controller = "10m" %}
 {%   set _request_cpu_php = "10m" %}
 {%   set _request_cpu_monitoring = "20m" %}
 {%   set _request_ram = "256Mi" %}
@@ -91,10 +93,10 @@
                 value: INFO
             resources:
               limits:
-                memory: '256Mi'
+                memory: '{{ _request_ram }}'
               requests:
-                cpu: '10m'
-                memory: '256Mi'
+                cpu: '{{ _request_cpu_controller }}'
+                memory: '{{ _request_ram }}'
             ports:
               - name: http
                 containerPort: 8080
