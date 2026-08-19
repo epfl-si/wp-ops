@@ -98,6 +98,9 @@
             ports:
               - name: http
                 containerPort: 8080
+              - name: nginx-metrics
+                containerPort: 9145
+                protocol: TCP
             volumeMounts:
               - name: fpm-socket
                 mountPath: /run/php-fpm
