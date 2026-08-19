@@ -319,6 +319,11 @@
                       (cd wp-operator; git checkout "$(params.branch-name)" || true)
                     fi
 
+                    git clone https://github.com/epfl-si/wp-controller.git
+                    if [ -n "$(params.branch-name)" ]; then
+                      (cd wp-controller; git checkout "$(params.branch-name)" || true)
+                    fi
+
                     dockerfiles="$(find . -name Dockerfile)"
                     sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
                       $dockerfiles
@@ -451,6 +456,22 @@
                 value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-operator:$(tasks.prep.results.build-tag)"
               - name: CONTEXT
                 value: "wp-operator"
+              - "{{ _push_extra_args }}"
+            workspaces:
+              - name: source
+                workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: build-wp-controller
+            runAfter: [ build-wp-base ]
+            taskRef:
+              kind: Task
+              name: buildah
+            params:
+              - name: IMAGE
+                value: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-controller:$(tasks.prep.results.build-tag)"
+              - name: CONTEXT
+                value: "wp-controller"
               - "{{ _push_extra_args }}"
             workspaces:
               - name: source
