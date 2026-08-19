@@ -94,3 +94,36 @@
         selector:
           app: wp-controller
         type: ClusterIP
+
+- name: PodDisruptionBudget/wp-controller
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: wp-controller
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        minAvailable: 1
+        selector:
+          matchLabels:
+            app: wp-controller
+
+- name: PodMonitor/wp-controller
+  when: inventory_deployment_stage == "production"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: PodMonitor
+      metadata:
+        name: wp-controller
+        namespace: "{{ inventory_namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: wp-controller
+        podMetricsEndpoints:
+          - port: php-fpm-metrics
+          - port: nginx-metrics
