@@ -80,6 +80,17 @@
     - wp.web
     - wp.nginx
 
+- name: "wp-controller"
+  when: >-
+    inventory_deployment_stage == "test"
+  include_tasks:
+    file: wp-controller.yml
+    apply:
+      tags:
+        - wp.controller
+  tags:
+    - wp.controller
+
 - name: WordPress (Apache) redirector
   include_tasks:
     file: redirector.yml
