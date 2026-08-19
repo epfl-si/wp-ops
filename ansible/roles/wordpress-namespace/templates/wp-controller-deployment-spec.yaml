@@ -1,0 +1,169 @@
+# This template renders to the "spec" sub-structure of the wp-controller
+# Deployment — a shadow deployment that stands up wp-controller (see
+# https://github.com/epfl-si/wp-controller) alongside the existing wp-nginx
+# Deployment (nginx.yml / nginx-deployment-spec.yaml), without touching it.
+# wp-controller is meant to eventually replace the "nginx" container over
+# there, so the `php` and `php-fpm-exporter` containers below are kept
+# byte-for-byte identical to their wp-nginx counterparts.
+#
+# Caller should set the following vars:
+#
+#    - app_label     The value for the `app=` label that all pods will
+#                    bear, as a string
+#    - image_tag     The part of the image name after the colon, that the
+#                    wp-controller container will use
+#    - php_image_tag The part of the image name after the colon, that the
+#                    php serving container will use (same tag as the
+#                    wp-nginx Deployment's php container, since it is the
+#                    same image)
+#
+# Caller may set the following vars:
+#    - image_pull_policy
+#                    One of "Always" (the default) or "IfNotPresent"
+
+{% if inventory_deployment_stage == "production" %}
+{%   set _request_cpu_php = "1" %}
+{%   set _request_cpu_monitoring = "100m" %}
+{%   set _request_ram = "1Gi" %}
+{% else %}
+{%   set _request_cpu_php = "10m" %}
+{%   set _request_cpu_monitoring = "20m" %}
+{%   set _request_ram = "256Mi" %}
+{% endif %}
+
+# spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: "{{ app_label }}"
+    strategy:
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: "{{ app_label }}"
+      spec:
+        serviceAccountName: wp-controller
+        containers:
+          - name: wp-controller
+            image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-controller:{{ image_tag }}"
+            imagePullPolicy: {{ image_pull_policy | default("Always") }}
+            env:
+              - name: WATCH_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: NGINX_CONF_PATH
+                value: /etc/nginx/conf.d/wordpress.conf
+              - name: RELOAD_DEBOUNCE_SECONDS
+                value: "2"
+              - name: LOG_LEVEL
+                value: INFO
+            resources:
+              limits:
+                memory: '256Mi'
+              requests:
+                cpu: '10m'
+                memory: '256Mi'
+            ports:
+              - name: http
+                containerPort: 8080
+            volumeMounts:
+              - name: fpm-socket
+                mountPath: /run/php-fpm
+              - name: wordpress-data
+                mountPath: /wp-data/
+                readOnly: true
+            securityContext:
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+            livenessProbe:
+              httpGet:
+                path: /healthz
+                port: http
+              initialDelaySeconds: 5
+            readinessProbe:
+              httpGet:
+                path: /healthz
+                port: http
+          - name: php
+            image: >-
+              quay-its.epfl.ch/svc0041/wp-php:{{ php_image_tag }}
+            imagePullPolicy: {{ image_pull_policy | default("Always") }}
+            resources:
+              limits:
+                memory: '{{ _request_ram }}'
+              requests:
+                cpu: '{{ _request_cpu_php }}'
+                memory: '{{ _request_ram }}'
+            volumeMounts:
+              - name: wordpress-data
+                mountPath: /wp-data/
+              - name: fpm-socket
+                mountPath: /run/php-fpm
+              - name: wordpress-authentication
+                mountPath: /wp-nonces
+                readOnly: true
+              - name: smtp-password
+                mountPath: /secrets/
+                readOnly: true
+              - name: wordpress-audit
+                mountPath: /wp-audit/
+            env:
+              - name: SEARCH_INSIDE_WP_API_HASHED_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: search-inside-secret
+                    key: wp_api_token
+              - name: PEOPLE_BEARER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: people-secret
+                    key: token
+            envFrom:
+              - configMapRef:
+                  name: otel-php-config
+          - name: php-fpm-exporter
+            image: quay-its.epfl.ch/svc0041/php-fpm_exporter:2
+            imagePullPolicy: Always
+            resources:
+              limits:
+                memory: '64Mi'
+              requests:
+                cpu: '{{ _request_cpu_monitoring }}'
+                memory: '64Mi'
+            ports:
+              - name: php-fpm-metrics
+                containerPort: 9253
+                protocol: TCP
+            livenessProbe:
+              httpGet:
+                scheme: HTTP
+                path: /metrics
+                port: 9253
+              initialDelaySeconds: 5
+              timeoutSeconds: 3
+            args:
+              - --phpfpm.fix-process-count
+              - --log.level
+              - debug
+        imagePullSecrets:
+          - name: "{{ quay_puller_secret_name }}"
+        restartPolicy: Always
+        volumes:
+          - name: fpm-socket
+            emptyDir: {}
+          - name: wordpress-data
+            persistentVolumeClaim:
+              claimName: wordpress-data
+          - name: wordpress-audit
+            persistentVolumeClaim:
+              claimName: wordpress-audit
+          - name: wordpress-authentication
+            secret:
+              secretName: wordpress-authentication
+          - name: smtp-password
+            secret:
+              secretName: smtp-password
