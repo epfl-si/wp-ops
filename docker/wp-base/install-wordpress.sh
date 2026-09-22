@@ -58,9 +58,14 @@ main () {
     hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook very-simple-meta-description \
-        ewww-image-optimizer wordpress-importer simple-history \
-        daggerhart-openid-connect-generic; do
+        block-finder \
+        daggerhart-openid-connect-generic \
+        ewww-image-optimizer \
+        flowpaper-lite-pdf-flipbook \
+        simple-history \
+        very-simple-meta-description \
+        wordpress-importer  \
+        ; do
         install_plugin_wordpress_official "$official_plugin"
     done
 
