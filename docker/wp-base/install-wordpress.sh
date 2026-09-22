@@ -58,9 +58,14 @@ main () {
     hotfix_tinymce_advanced_classic_paragraph
 
     for official_plugin in \
-        flowpaper-lite-pdf-flipbook very-simple-meta-description \
-        ewww-image-optimizer wordpress-importer simple-history \
-        daggerhart-openid-connect-generic; do
+        block-finder \
+        daggerhart-openid-connect-generic \
+        ewww-image-optimizer \
+        flowpaper-lite-pdf-flipbook \
+        simple-history \
+        very-simple-meta-description \
+        wordpress-importer  \
+        ; do
         install_plugin_wordpress_official "$official_plugin"
     done
 
@@ -70,13 +75,11 @@ main () {
     if [ -n "$alpha" ]; then
         install_plugin_wordpress_official polylang
         install_plugin_wordpress_official redirection
-        install_plugin_wordpress_official block-finder
     else
         # The 3.8 polylang version is not anymore compatible with our polylang-cli:
         # - default_language variable is not present anymore
         install_plugin_zip polylang https://downloads.wordpress.org/plugin/polylang.3.7.8.zip
         install_plugin_zip redirection https://downloads.wordpress.org/plugin/redirection.5.5.2.zip
-        install_plugin_zip block-finder https://downloads.wordpress.org/plugin/block-finder.1.1.1.zip 
     fi
 
     # Some of these plugins are commercial plugins that we pay for;
