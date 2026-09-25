@@ -6,6 +6,15 @@
     - s3-secrets-{{ inventory_deployment_stage }}.yml
     - ../../../vars/quay-vars.yml
 
+- name: "Mirror the MariaDB image"
+  run_once: true
+  include_tasks:
+    file: _mirror.yml
+  vars:
+    mirror_name: mariadb
+    mirror_from: "docker-registry1.mariadb.com/library/mariadb"
+    mirror_tags: ["11.4.4"]
+
 - name: 'MariaDBOperator/mariadb-operator'
   kubernetes.core.k8s:
     state: present
@@ -53,6 +62,9 @@
         labels:
           wp-auto-allocate: 'true'
       spec:
+        image: quay-its.epfl.ch/svc0041/mariadb:11.4.4
+        imagePullSecrets:
+        - name: "{{ quay_puller_secret_name }}"
         storage:
           size: 1Gi
           storageClassName: "{{ mariadb_storage_class }}"
@@ -157,6 +169,9 @@
         name: "{{ mariadb_name }}-{{ item }}"
         namespace: "{{ inventory_namespace }}"
       spec:
+        image: quay-its.epfl.ch/svc0041/mariadb:11.4.4
+        imagePullSecrets:
+        - name: "{{ quay_puller_secret_name }}"
         storage:
           size: 1Mi
           storageClassName: "{{ mariadb_storage_class }}"
