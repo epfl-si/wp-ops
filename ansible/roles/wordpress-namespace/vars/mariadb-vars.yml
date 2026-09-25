@@ -1,6 +1,9 @@
 ---
 mariadb_name: mariadb
 mariadb_storage_class: wordpress-nfs-db
+mariadb_image:
+  upstream: docker-registry1.mariadb.com/library/mariadb
+  mirrored: quay-its.epfl.ch/svc0041/mariadb
 number_of_mariadb: 5
 _fleet_name: wp-fleet
 

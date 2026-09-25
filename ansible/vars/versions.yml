@@ -1,2 +1,3 @@
 kong_base_image_version: 3.6
 kong_fruit_salad_version: "{{ kong_base_image_version }}"
+mariadb_version: 11.4.4
