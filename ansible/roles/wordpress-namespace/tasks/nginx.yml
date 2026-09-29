@@ -12,7 +12,7 @@
   vars:
     mirror_name: php-fpm_exporter
     # https://github.com/tonmnn/php-fpm_exporter/pkgs/container/php-fpm_exporter
-    mirror_from: "docker pull ghcr.io/tonmnn/php-fpm_exporter"
+    mirror_from: "ghcr.io/tonmnn/php-fpm_exporter"
     mirror_tags: ["2"]
 
 - name: ConfigMap/opdo-ca
