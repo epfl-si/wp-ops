@@ -48,7 +48,7 @@ RUN chmod +x /tmp/install-wordpress.sh
 # (in a cloud build).
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" /tmp/cachebuster
 
-ARG WORDPRESS_VERSION="6.9.9"
+ARG WORDPRESS_VERSION="6.9"
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 RUN set -e -x; case $WORDPRESS_VERSION in                                 \
