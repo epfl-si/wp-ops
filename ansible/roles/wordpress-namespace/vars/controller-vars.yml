@@ -1,5 +1,0 @@
-# Testing aid: when true, the wp-nginx container (wp-controller) appends an
-# invalid directive to every generated nginx config, to exercise its
-# config-rejection path (the live config is never replaced). Leave false
-# outside of tests.
-wp_nginx_force_invalid_config: false
