@@ -1,5 +1,6 @@
 # This template renders to the “spec” sub-structure of a
-# WordPress nginx deployment.
+# WordPress nginx deployment (the nginx container is driven by wp-controller:
+# see docker/wordpress-nginx/Dockerfile).
 #
 # Caller should set the following vars:
 #
@@ -74,15 +75,6 @@
           - name: nginx
             image: quay-its.epfl.ch/svc0041/wp-nginx:{{ image_tag }}
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
-            command:
-              - /nginx-ingress-controller
-              - --disable-leader-election
-              - --controller-class=epfl.ch/ingress-wordpress
-              - --watch-namespace=$(POD_NAMESPACE)
-              - --configmap=$(POD_NAMESPACE)/wp-nginx
-              - --watch-ingress-without-class=false
-              - --http-port=8000
-              - --https-port=8443
             resources:
               limits:
                 memory: '{{ _request_ram }}'
@@ -90,10 +82,15 @@
                 cpu: '{{ _request_cpu_nginx }}'
                 memory: '{{ _request_ram }}'
             ports:
-              - containerPort: 8000
+              - name: http
+                containerPort: 8000
                 protocol: TCP
               - name: nginx-metrics
                 containerPort: 9145
+                protocol: TCP
+              # wp-controller's own metrics (uptime, config_valid, last sync...)
+              - name: ctrl-metrics
+                containerPort: 9190
                 protocol: TCP
             volumeMounts:
               - name: wordpress-data
@@ -104,24 +101,58 @@
               - name: kube-api-access
                 mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                 readOnly: true
-              # Uncomment the next three lines to embug the nginx configuration
-              # (see also similar comments elsewhere in the file):
+              # Uncomment the next fifteen lines to debug the nginx configuration
+              # (see also similar comments elsewhere in the file; the controller
+              # must be restarted to pick up a change in wordpress.conf.j2):
               # - name: wp-nginx
-              #   mountPath: /etc/nginx/template
+              #   mountPath: /app/src/templates/wordpress.conf.j2
+              #   subPath: wordpress.conf.j2
+              #   readOnly: true
+              # - name: wp-nginx
+              #   mountPath: /etc/nginx/conf.d/generic.conf
+              #   subPath: generic.conf
+              #   readOnly: true
+              # - name: wp-nginx
+              #   mountPath: /etc/nginx/snippets/fastcgi.conf
+              #   subPath: fastcgi.conf
               #   readOnly: true
             env:
-              - name: POD_NAME
+              - name: WATCH_NAMESPACE
                 valueFrom:
                   fieldRef:
-                    apiVersion: v1
-                    fieldPath: metadata.name
-              - name: POD_NAMESPACE
-                valueFrom:
-                  fieldRef:
-                    apiVersion: v1
                     fieldPath: metadata.namespace
-              - name: MENU_API_HOST
-                value: "menu-api"
+              - name: NGINX_CONF_PATH
+                value: /etc/nginx/conf.d/wordpress.conf
+              - name: RELOAD_DEBOUNCE_SECONDS
+                value: "2"
+              - name: RELOAD_MAX_WAIT_SECONDS
+                value: "30"
+              - name: SITE_LOOKUP_RETRY_SECONDS
+                value: "10"
+              - name: SITE_LOOKUP_RETRY_TIMEOUT_SECONDS
+                value: "120"
+              - name: METRICS_PORT
+                value: "9190"
+              - name: REJECTED_CONFIG_DIR
+                value: /etc/nginx/errors
+              - name: REJECTED_CONFIG_KEEP
+                value: "5"
+              - name: LOG_LEVEL
+                value: INFO
+            securityContext:
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+            livenessProbe:
+              httpGet:
+                path: /healthz
+                port: http
+              initialDelaySeconds: 5
+            readinessProbe:
+              httpGet:
+                path: /healthz
+                port: http
           - name: php
             image: >-
               {{ wp_php_image
@@ -195,7 +226,7 @@
           - name: wordpress-data
             persistentVolumeClaim:
               claimName: wordpress-data
-          # Uncomment the next three lines to embug the nginx configuration
+          # Uncomment the next three lines to debug the nginx configuration
           # (see also similar comments elsewhere in the file):
           # - name: wp-nginx
           #   configMap:

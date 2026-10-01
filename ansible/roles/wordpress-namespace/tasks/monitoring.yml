@@ -184,6 +184,82 @@
                     {% raw -%}
                     (pod: {{ $labels.pod }}, instance: {{ $labels.instance }})
                     {%- endraw %}
+          # Metrics of wp-controller itself (the `ctrl-metrics` port, see
+          # nginx-deployment-spec.yaml), as opposed to nginx's request
+          # metrics above.
+          - name: wp-controller-alerts
+            rules:
+              - alert: WpControllerInvalidNginxConfig
+                # nginx keeps serving the previous config, so sites go stale
+                expr: >
+                  wp_controller_config_valid{namespace="{{ inventory_namespace }}"} == 0
+                for: 2m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "WP Controller generated an invalid nginx config"
+                  description: >-
+                    {% raw -%}
+                    The last nginx configuration was rejected by `nginx -t` for more than 2 minutes: nginx keeps running the previous one, so new or changed sites are not served.
+                    The rejected config is kept in /etc/nginx/errors.
+                    (pod: {{ $labels.pod }})
+                    {%- endraw %}
+              - alert: WpControllerNginxDown
+                expr: >
+                  wp_controller_nginx_up{namespace="{{ inventory_namespace }}"} == 0
+                for: 2m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "nginx is not running in wp-controller"
+                  description: >-
+                    {% raw -%}
+                    The nginx process managed by wp-controller has not been running for more than 2 minutes.
+                    (pod: {{ $labels.pod }})
+                    {%- endraw %}
+              - alert: WpControllerSyncErrors
+                expr: >
+                  sum by (pod, result) (increase(wp_controller_syncs_total{result=~"error|reload_failed", namespace="{{ inventory_namespace }}"}[10m])) > 0
+                for: 5m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "wp-controller sync failures"
+                  description: >-
+                    {% raw -%}
+                    wp-controller has been failing to sync ({{ $labels.result }}) for at least 5 minutes.
+                    (pod: {{ $labels.pod }})
+                    {%- endraw %}
+              - alert: WpControllerSitesPending
+                # A WordpressSite waiting for wp-operator to provision its
+                # Database/User/Secret (the controller retries for 2 minutes)
+                expr: >
+                  wp_controller_sites{state="pending", namespace="{{ inventory_namespace }}"} > 0
+                for: 15m
+                labels:
+                  severity: warning
+                  sendto: telegram
+                annotations:
+                  summary: "WordpressSites are not served by wp-controller"
+                  description: >-
+                    {% raw -%}
+                    {{ $value }} WordpressSite(s) have been pending (no Database/User/Secret yet) for more than 15 minutes and are not in the nginx config.
+                    (pod: {{ $labels.pod }})
+                    {%- endraw %}
+              - alert: WpControllerMetricsAbsent
+                expr: >
+                  absent(wp_controller_nginx_up{namespace="{{ inventory_namespace }}"})
+                for: 5m
+                labels:
+                  severity: critical
+                  sendto: telegram
+                annotations:
+                  summary: "No wp-controller metrics"
+                  description: >-
+                    wp-controller has exposed no metrics for more than 5 minutes: it is down, crash-looping or not scraped.
           - name: mariadb-alerts
             rules:
               - alert: MariaDbTooManyRestarts
