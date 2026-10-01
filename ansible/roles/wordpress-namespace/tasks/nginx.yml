@@ -48,23 +48,6 @@
       #   fastcgi.conf: >-
       #     {{ lookup("file", "../../../../../wp-controller/src/templates/fastcgi.conf") }}
 
-- name: ConfigMap/wp-nginx-flags
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: wp-nginx-flags
-        namespace: "{{ inventory_namespace }}"
-      data:
-        # Testing aid; read by wp-controller while it runs (no restart). Flip
-        # it without Ansible with:
-        #   oc patch configmap wp-nginx-flags --type merge \
-        #      -p '{"data": {"force-invalid-config": "true"}}'
-        # The next playbook run resets it to the variable's value.
-        force-invalid-config: "{{ wp_nginx_force_invalid_config | string | lower }}"
-
 - name: ServiceAccount/wp-nginx
   kubernetes.core.k8s:
     state: present
@@ -96,11 +79,6 @@
           verbs: ["list", "watch"]
         - apiGroups: [""]
           resources: ["secrets"]
-          verbs: ["list", "watch"]
-        # The flags ConfigMap above, watched so that editing it takes effect
-        # without restarting the pod.
-        - apiGroups: [""]
-          resources: ["configmaps"]
           verbs: ["list", "watch"]
         - apiGroups: [""]
           resources: ["events"]

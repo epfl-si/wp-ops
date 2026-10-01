@@ -1,7 +1,5 @@
-# Testing aid: initial value of the `force-invalid-config` flag in
-# ConfigMap/wp-nginx-flags. When true, the wp-nginx container (wp-controller)
-# appends an invalid directive to every generated nginx config, to exercise
-# its config-rejection path (the live config is never replaced). It can be
-# flipped on a running pod without restarting it (see tasks/nginx.yml); leave
-# false outside of tests.
-wp_nginx_force_invalid_config: true
+# Testing aid: when true, the wp-nginx container (wp-controller) appends an
+# invalid directive to every generated nginx config, to exercise its
+# config-rejection path (the live config is never replaced). Leave false
+# outside of tests.
+wp_nginx_force_invalid_config: false
