@@ -96,7 +96,7 @@
           - name: "80"
             port: 80
             protocol: TCP
-            targetPort: 8000
+            targetPort: 8080
         selector:
           app: wp-clinic
         type: ClusterIP

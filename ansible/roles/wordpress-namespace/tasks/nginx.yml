@@ -2,6 +2,7 @@
   include_vars: "{{ item }}"
   with_items:
   - image-vars.yml
+  - controller-vars.yml
   - ../../../vars/quay-vars.yml
   - "opdo-secrets-{{ inventory_deployment_stage }}.yml"
 
@@ -36,15 +37,67 @@
       metadata:
         name: wp-nginx
         namespace: "{{ inventory_namespace }}"
-      data:
-        allow-snippet-annotations: "true"
-        annotations-risk-level: Critical
-        # Uncomment the next four lines to embug the nginx configuration
-        # (see also similar comments elsewhere in the file):
-        # nginx.tmpl: >-
-        #   {{ lookup("file", "../../../../docker/wordpress-nginx/nginx.tmpl") }}
-        # wordpress_fastcgi.conf: >-
-        #  {{ lookup("file", "../../../../docker/wordpress-nginx/wordpress_fastcgi.conf") }}
+      # Empty unless debugging. Uncomment the next lines (and the matching
+      # ones in ../templates/nginx-deployment-spec.yaml) to test an nginx
+      # configuration from a local checkout of wp-controller:
+      # data:
+      #   wordpress.conf.j2: >-
+      #     {{ lookup("file", "../../../../../wp-controller/src/templates/wordpress.conf.j2") }}
+      #   generic.conf: >-
+      #     {{ lookup("file", "../../../../../wp-controller/src/templates/generic.conf") }}
+      #   fastcgi.conf: >-
+      #     {{ lookup("file", "../../../../../wp-controller/src/templates/fastcgi.conf") }}
+
+- name: ServiceAccount/wp-nginx
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: wp-nginx
+        namespace: "{{ inventory_namespace }}"
+
+- name: Role/wp-nginx
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: wp-nginx
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ["wordpress.epfl.ch"]
+          resources: ["wordpresssites"]
+          verbs: ["get", "list", "watch", "patch"]
+        - apiGroups: ["k8s.mariadb.com"]
+          resources: ["databases", "users"]
+          verbs: ["list"]
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["list"]
+        - apiGroups: [""]
+          resources: ["events"]
+          verbs: ["create", "patch"]
+
+- name: RoleBinding/wp-nginx
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: wp-nginx
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: wp-nginx
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: wp-nginx
 
 - name: "Deployment/wp-nginx"
   kubernetes.core.k8s:
@@ -65,6 +118,7 @@
         | from_yaml }}
 
 - name: PodDisruptionBudget/wp-nginx
+  when: inventory_deployment_stage == "production"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -80,7 +134,6 @@
             app: wp-nginx
 
 - name: PodMonitor/wp-nginx
-  when: inventory_deployment_stage == "production"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -96,6 +149,7 @@
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
+          - port: controller-metrics
 
 - name: "Service/wp-nginx"
   kubernetes.core.k8s:
@@ -115,7 +169,7 @@
         - name: "80"
           port: 80
           protocol: TCP
-          targetPort: 8000
+          targetPort: 8080
         selector:
           app: wp-nginx
         type: ClusterIP
