@@ -22,12 +22,13 @@ for url in "${urls[@]}"; do
     echo "Site id : $site_id"
 
     readarray -t k8s_info < <(curl https://wp-veritas.epfl.ch/api/v2/sites/$site_id | jq -r '.kubernetesExtraInfo.ingressName, .kubernetesExtraInfo.databaseRef')
-    ingress="${k8s_info[0]}"
-    echo "Ingress : $ingress"
+    # The WordpressSite has the same name as its ingress in wp-veritas
+    site="${k8s_info[0]}"
+    echo "WordpressSite : $site"
     mariadb_prod_host="${k8s_info[1]}"
     echo "MariaDB prod host : $mariadb_prod_host"
 
-    mariadb_test_host=$(kubectl get ingress/$ingress -o yaml | grep WP_DB_HOST | tr -s ' ' | cut -d ' ' -f 4 | tr -d ';')
+    mariadb_test_host=$(kubectl get databases.k8s.mariadb.com "wp-db-$site" -o jsonpath='{.spec.mariaDbRef.name}')
     echo "MariaDB test host : $mariadb_test_host"
 
     echo "Applying restore ..."
@@ -36,7 +37,7 @@ for url in "${urls[@]}"; do
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Restore
 metadata:
-  name: "restore-db-$ingress-$date"
+  name: "restore-db-$site-$date"
   namespace: svc0041t-wordpress
 spec:
   mariaDbRef:
@@ -59,7 +60,7 @@ spec:
       key: accessSecret
     tls:
       enabled: true
-  database: "wp-db-$ingress"
+  database: "wp-db-$site"
   targetRecoveryTime: # if empty then takes last restore
   args:
     - --verbose
@@ -73,7 +74,7 @@ EOF
     rm "$kind_restore"
 
     echo "Replace 'www.epfl.ch' by 'wpn-test.epfl.ch'"
-    wp --ingress=$ingress search-replace "https://www.epfl.ch" "https://wpn-test.epfl.ch"
+    wp --site=$site search-replace "https://www.epfl.ch" "https://wpn-test.epfl.ch"
 done
 
 # update menu

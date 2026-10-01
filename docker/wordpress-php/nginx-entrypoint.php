@@ -156,9 +156,9 @@ define('DISALLOW_FILE_MODS', 1);
 // Define the EPFL_SITE_UPLOADS_DIR constant to mesh with the
 // corresponding filter in our mu-plugins.
 // 💡 `$_SERVER['WP_UPLOADS_DIRNAME']` is transmitted by the operator
-// (via the Ingress object). $_SERVER['WP_SITE_NAME'] used to be
-// used for the same purpose, and can still be found in “old-form”
-// Ingress objects.
+// (via the WordpressSite, rendered into the nginx config by
+// wp-controller). $_SERVER['WP_SITE_NAME'] used to be used for the same
+// purpose, in “old-form” Ingress objects.
 define('EPFL_SITE_UPLOADS_DIR',
        '/wp-data/' . $_SERVER['WP_UPLOADS_DIRNAME'] . '/uploads');
 
