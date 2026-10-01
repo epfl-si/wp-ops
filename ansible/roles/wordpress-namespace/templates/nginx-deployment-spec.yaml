@@ -89,7 +89,7 @@
                 containerPort: 9145
                 protocol: TCP
               # wp-controller's own metrics (uptime, config_valid, last sync...)
-              - name: controller-metrics
+              - name: ctrl-metrics
                 containerPort: 9190
                 protocol: TCP
             volumeMounts:
