@@ -2,7 +2,6 @@
   include_vars: "{{ item }}"
   with_items:
   - image-vars.yml
-  - controller-vars.yml
   - ../../../vars/quay-vars.yml
   - "opdo-secrets-{{ inventory_deployment_stage }}.yml"
 

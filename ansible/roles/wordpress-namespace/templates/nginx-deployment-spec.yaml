@@ -137,8 +137,6 @@
                 value: /etc/nginx/errors
               - name: REJECTED_CONFIG_KEEP
                 value: "5"
-              - name: FORCE_INVALID_CONFIG
-                value: "{{ wp_nginx_force_invalid_config | default(false) | string | lower }}"
               - name: LOG_LEVEL
                 value: INFO
             securityContext:
