@@ -137,11 +137,8 @@
                 value: /etc/nginx/errors
               - name: REJECTED_CONFIG_KEEP
                 value: "5"
-              # Runtime flags (force-invalid-config...) are read from this
-              # ConfigMap, so that flipping one doesn't restart the pod: see
-              # ConfigMap/wp-nginx-flags in ../tasks/nginx.yml
-              - name: FLAGS_CONFIGMAP_NAME
-                value: wp-nginx-flags
+              - name: FORCE_INVALID_CONFIG
+                value: "{{ wp_nginx_force_invalid_config | default(false) | string | lower }}"
               - name: LOG_LEVEL
                 value: INFO
             securityContext:
