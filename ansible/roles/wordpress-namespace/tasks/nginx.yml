@@ -149,7 +149,7 @@
         podMetricsEndpoints:
           - port: php-fpm-metrics
           - port: nginx-metrics
-          - port: controller-metrics
+          - port: ctrl-metrics
 
 - name: "Service/wp-nginx"
   kubernetes.core.k8s:
