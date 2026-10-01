@@ -32,7 +32,7 @@ RUN set -ex; mkdir -p /etc/nginx/snippets /etc/nginx/lua; \
 # (wp-includes/wp-admin/wp-content plugins/themes) and PHP error pages.
 COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 
-# nginx listens on :8080 (see src/templates/wordpress.conf.j2), not :80,
+# nginx listens on :8000 (see src/templates/wordpress.conf.j2), not :80,
 # so it can bind without any capability or root privileges - a capability
 # grant is unreliable across clusters (SCC policy, CRI-O ambient-capability
 # support). It still needs to write its pid, logs and the config we

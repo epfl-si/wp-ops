@@ -83,7 +83,7 @@
                 memory: '{{ _request_ram }}'
             ports:
               - name: http
-                containerPort: 8080
+                containerPort: 8000
                 protocol: TCP
               - name: nginx-metrics
                 containerPort: 9145
