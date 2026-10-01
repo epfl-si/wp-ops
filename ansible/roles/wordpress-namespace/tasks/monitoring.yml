@@ -198,7 +198,7 @@
                   severity: critical
                   sendto: telegram
                 annotations:
-                  summary: "wp-controller generated an invalid nginx config"
+                  summary: "WP Controller generated an invalid nginx config"
                   description: >-
                     {% raw -%}
                     The last nginx configuration was rejected by `nginx -t` for more than 2 minutes: nginx keeps running the previous one, so new or changed sites are not served.
