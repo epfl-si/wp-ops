@@ -64,7 +64,7 @@
         - name: "80"
           port: 80
           protocol: TCP
-          targetPort: 8080
+          targetPort: 8000
         selector:
           app: "{{ _service_name }}"
         type: ClusterIP
