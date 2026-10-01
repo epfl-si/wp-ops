@@ -11,21 +11,13 @@
     mirror_from: "docker.io/library/ubuntu"
     mirror_tags: ["noble", "latest", "jammy"]
 
-- name: "Mirror the wp-nginx base image"
+- name: "Mirror the Python 3.13 base images"
   include_tasks:
     file: _mirror.yml
   vars:
-    mirror_name: nginx-ingress-controller
-    mirror_from: docker.io/bitnamilegacy/nginx-ingress-controller
-    mirror_tags: ["1", "1.12", "1.12.?", "latest"]
-
-- name: "Mirror the openresty image"
-  include_tasks:
-    file: _mirror.yml
-  vars:
-    mirror_name: openresty
-    mirror_from: openresty/openresty
-    mirror_tags: ["1.27.*-alpine-fat", "alpine-fat"]
+    mirror_name: python
+    mirror_from: "docker.io/library/python"
+    mirror_tags: ["3.13-slim", "3.13-trixie"]
 
 - name: "Mirror the composer image"
   include_tasks:
