@@ -33,9 +33,9 @@ RUN set -ex; mkdir -p /etc/nginx/snippets /etc/nginx/lua; \
 COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 
 # nginx listens on :8000 (see src/templates/wordpress.conf.j2), not :80,
-# so it can bind without any capability or root privileges - a capability
-# grant is unreliable across clusters (SCC policy, CRI-O ambient-capability
-# support). It still needs to write its pid, logs and the config we
+# so it can bind without any capability or root privileges: OpenShift 4's
+# restricted SCC grants none, and CRI-O's ambient-capability support can't be
+# relied upon. It still needs to write its pid, logs and the config we
 # generate at runtime.
 #
 # Group is set to root (GID 0) and made read/write/execute, not just
