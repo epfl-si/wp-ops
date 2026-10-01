@@ -226,7 +226,7 @@
           - name: wordpress-data
             persistentVolumeClaim:
               claimName: wordpress-data
-          # Uncomment the next three lines to debug the nginx configuration
+          # Uncomment the next three lines to embug the nginx configuration
           # (see also similar comments elsewhere in the file):
           # - name: wp-nginx
           #   configMap:

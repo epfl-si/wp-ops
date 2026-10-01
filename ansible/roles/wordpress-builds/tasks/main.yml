@@ -17,11 +17,9 @@
       tags:
         - wp.build
         - wp.build.mirrors
-        - wp.prometheus-exporter-with-python  # Needs the `python` mirror
   tags:
     - wp.build
     - wp.build.mirrors
-    - wp.prometheus-exporter-with-python
 
 - name: WP-Clinic Builder
   include_tasks:
