@@ -1,6 +1,44 @@
 - include_vars: ../../../vars/quay-vars.yml
   tags: always
 
+# Additional to Role/wp-cron and RoleBinding/wp-cron, which wp-operator's OLM
+# controller manages (do not redefine those here): what `wp` (docker/wp-base/wp.sh)
+# reads to find a site's database, through the objects' ownerReferences.
+- name: Role/wp-cron-sites
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: wp-cron-sites
+        namespace: "{{ inventory_namespace }}"
+      rules:
+        - apiGroups: ["k8s.mariadb.com"]
+          resources: ["databases", "users"]
+          verbs: ["get", "list"]
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["get"]
+
+- name: RoleBinding/wp-cron-sites
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: wp-cron-sites
+        namespace: "{{ inventory_namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: wp-cron
+          namespace: "{{ inventory_namespace }}"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: wp-cron-sites
+
 - name: CronJob/wp-cron
   kubernetes.core.k8s:
     state: present
