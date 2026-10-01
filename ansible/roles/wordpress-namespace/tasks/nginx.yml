@@ -71,12 +71,15 @@
         - apiGroups: ["wordpress.epfl.ch"]
           resources: ["wordpresssites"]
           verbs: ["get", "list", "watch", "patch"]
+        # Read-only lookup of the Database/User that wp-operator provisions for
+        # each WordpressSite, and of the Secret with its password: listed on
+        # each sync and also watched, so that a change triggers a re-sync.
         - apiGroups: ["k8s.mariadb.com"]
           resources: ["databases", "users"]
-          verbs: ["list"]
+          verbs: ["list", "watch"]
         - apiGroups: [""]
           resources: ["secrets"]
-          verbs: ["list"]
+          verbs: ["list", "watch"]
         - apiGroups: [""]
           resources: ["events"]
           verbs: ["create", "patch"]
