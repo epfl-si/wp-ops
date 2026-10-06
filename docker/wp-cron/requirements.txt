@@ -1,2 +1,2 @@
-kubernetes
+kubernetes==35.0.*
 requests
