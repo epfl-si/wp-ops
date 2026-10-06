@@ -70,9 +70,7 @@
         - apiGroups: ["wordpress.epfl.ch"]
           resources: ["wordpresssites"]
           verbs: ["get", "list", "watch", "patch"]
-        # Read-only lookup of the Database/User that wp-operator provisions for
-        # each WordpressSite, and of the Secret with its password: listed on
-        # each sync and also watched, so that a change triggers a re-sync.
+        # Need to read DB credentials to pass them to PHP:
         - apiGroups: ["k8s.mariadb.com"]
           resources: ["databases", "users"]
           verbs: ["list", "watch"]

@@ -38,11 +38,8 @@ COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 # relied upon. It still needs to write its pid, logs and the config we
 # generate at runtime.
 #
-# Group is set to root (GID 0) and made read/write/execute, not just
-# wp-controller's own group: on OpenShift the container actually runs as
-# an arbitrary, unpredictable UID assigned by the namespace's SCC - the
-# image's USER/UID is ignored - and the only thing OpenShift guarantees
-# about that UID is that it belongs to GID 0.
+# Group is set to root (GID 0) to match OpenShift doctrine of not granting “true”
+# root.
 RUN groupadd -r wp-controller && useradd -r -m -g wp-controller wp-controller \
     && mkdir -p /etc/nginx/errors /tmp/nginx/client_body /tmp/nginx/proxy /tmp/nginx/fastcgi /tmp/nginx/uwsgi /tmp/nginx/scgi \
     && chown -R wp-controller:0 /etc/nginx/conf.d /etc/nginx/snippets /etc/nginx/errors /tmp/nginx /var/log/nginx /run \

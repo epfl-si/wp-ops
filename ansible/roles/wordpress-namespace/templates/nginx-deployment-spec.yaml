@@ -1,6 +1,6 @@
 # This template renders to the “spec” sub-structure of a
-# WordPress nginx deployment (the nginx container is driven by wp-controller:
-# see docker/wordpress-nginx/Dockerfile).
+# WordPress nginx deployment. nginx is driven by wp-controller;
+# see docker/wordpress-nginx/Dockerfile.
 #
 # Caller should set the following vars:
 #
