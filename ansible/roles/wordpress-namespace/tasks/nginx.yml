@@ -57,16 +57,14 @@
         name: wp-nginx
         namespace: "{{ inventory_namespace }}"
 
-# Additional to Role/wp-nginx and RoleBinding/wp-nginx (ingress-nginx's own rights),
-# which wp-operator's OLM controller manages: do not redefine those here.
-- name: Role/wp-nginx-sites
+- name: Role/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
-        name: wp-nginx-sites
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
       rules:
         - apiGroups: ["wordpress.epfl.ch"]
@@ -85,14 +83,14 @@
           resources: ["events"]
           verbs: ["create", "patch"]
 
-- name: RoleBinding/wp-nginx-sites
+- name: RoleBinding/wp-nginx
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:
-        name: wp-nginx-sites
+        name: wp-nginx
         namespace: "{{ inventory_namespace }}"
       subjects:
         - kind: ServiceAccount
@@ -101,7 +99,7 @@
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: Role
-        name: wp-nginx-sites
+        name: wp-nginx
 
 - name: "Deployment/wp-nginx"
   kubernetes.core.k8s:
