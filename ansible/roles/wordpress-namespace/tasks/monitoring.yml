@@ -190,7 +190,8 @@
           - name: wp-controller-alerts
             rules:
               - alert: WpControllerInvalidNginxConfig
-                # nginx keeps serving the previous config, so sites go stale
+                # nginx keeps serving the previous config, until it no longer can
+                # (i.e. pod restarts). This requires prompt action.
                 expr: >
                   wp_controller_config_valid{namespace="{{ inventory_namespace }}"} == 0
                 for: 2m
@@ -201,7 +202,7 @@
                   summary: "WP Controller generated an invalid nginx config"
                   description: >-
                     {% raw -%}
-                    The last nginx configuration was rejected by `nginx -t` for more than 2 minutes: nginx keeps running the previous one, so new or changed sites are not served.
+                    The last nginx configuration was rejected by `nginx -t` for more than 2 minutes: nginx keeps running the previous one, but restarting the pods will cause an outage.
                     The rejected config is kept in /etc/nginx/errors.
                     (pod: {{ $labels.pod }})
                     {%- endraw %}
@@ -259,7 +260,7 @@
                 annotations:
                   summary: "No wp-controller metrics"
                   description: >-
-                    wp-controller has exposed no metrics for more than 5 minutes: it is down, crash-looping or not scraped.
+                    wp-controller metrics have been unavailable for more than 5 minutes. Pehaps the pod is down, crash-looping or not being scraped.
           - name: mariadb-alerts
             rules:
               - alert: MariaDbTooManyRestarts
