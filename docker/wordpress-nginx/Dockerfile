@@ -32,12 +32,6 @@ RUN set -ex; mkdir -p /etc/nginx/snippets /etc/nginx/lua; \
 # (wp-includes/wp-admin/wp-content plugins/themes) and PHP error pages.
 COPY --from=quay-its.epfl.ch/svc0041/wp-base:rc /wp /wp
 
-# nginx listens on :8000 (see src/templates/wordpress.conf.j2), not :80,
-# so it can bind without any capability or root privileges: OpenShift 4's
-# restricted SCC grants none, and CRI-O's ambient-capability support can't be
-# relied upon. It still needs to write its pid, logs and the config we
-# generate at runtime.
-#
 # Group is set to root (GID 0) to match OpenShift doctrine of not granting “true”
 # root.
 RUN groupadd -r wp-controller && useradd -r -m -g wp-controller wp-controller \
