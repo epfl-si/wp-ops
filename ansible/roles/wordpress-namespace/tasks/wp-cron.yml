@@ -30,6 +30,15 @@
         - apiGroups: ["networking.k8s.io"]
           resources: ["ingresses"]
           verbs: ["get", "list", "watch"]
+        - apiGroups: ["k8s.mariadb.com"]
+          resources: ["databases", "users"]
+          verbs: ["list", "watch"]
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["list", "watch"]
+        - apiGroups: [""]
+          resources: ["events"]
+          verbs: ["create", "patch"]
 
 - name: RoleBinding/wp-cron
   kubernetes.core.k8s:
