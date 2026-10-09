@@ -133,7 +133,7 @@ pick_version () {
         else
             jq -r 'keys[] | select(match("^'"$version"'"))'
         fi | \
-            sort -n -r | head -1
+            sort -r -V | head -1
 }
 
 delete_stock_wp_content () {
