@@ -37,6 +37,13 @@
 {%   set _request_ram = "256Mi" %}
 {% endif %}
 
+{% set _wp_nginx_image = "quay-its.epfl.ch/svc0041/wp-nginx:" + image_tag %}
+{% if wp_php_image is defined %}
+{%   set _wp_php_image = wp_php_image %}
+{% else %}
+{%   set _wp_php_image = "quay-its.epfl.ch/svc0041/wp-php:" + image_tag %}
+{% endif %}
+
 # spec:
     replicas: {{ replicas | default( 2 if inventory_deployment_stage == "production"
                  else 1 ) | int }}
@@ -75,7 +82,7 @@
         automountServiceAccountToken: false
         containers:
           - name: nginx
-            image: quay-its.epfl.ch/svc0041/wp-nginx:{{ image_tag }}
+            image: "{{ _wp_nginx_image }}"
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
               limits:
@@ -156,9 +163,7 @@
                 path: /healthz
                 port: http
           - name: php
-            image: >-
-              {{ wp_php_image
-              | default("quay-its.epfl.ch/svc0041/wp-php:" + image_tag) }}
+            image: "{{ _wp_php_image }}"
             imagePullPolicy: {{ image_pull_policy | default("Always") }}
             resources:
               limits:
