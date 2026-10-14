@@ -319,17 +319,15 @@
                       (cd wp-operator; git checkout "$(params.branch-name)" || true)
                     fi
 
-                    dockerfiles="$(find . -name Dockerfile)"
-                    sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
-                      $dockerfiles
-                    sed -i "s;FROM quay-its.epfl.ch/svc0041/wp-cron:latest;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:$TAG;g" \
-                      $dockerfiles                    
-                    sed -i "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
-                      $dockerfiles
-                    sed -i 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
-                      $dockerfiles
-                    sed -i 's;FROM python:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/python:;g' \
-                      $dockerfiles
+                    for dockerfile in $(find . -name Dockerfile); do
+                      sed -i \
+                        -e "s;FROM quay-its.epfl.ch/svc0041/wp-base:rc;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
+                        -e "s;FROM quay-its.epfl.ch/svc0041/wp-cron:latest;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:$TAG;g" \
+                        -e "s;--from=quay-its.epfl.ch/svc0041/wp-base:rc;--from={{ ansible_quay_hostname }}/{{ quay_organization }}/wp-base:$TAG;g" \
+                        -e 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
+                        -e 's;FROM python:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/python:;g' \
+                        $dockerfile
+                    done
                     if [ -n "$(params.branch-name)" ]; then
                       echo "try_git_switch '$(params.branch-name)'" >> wp-ops/docker/wp-base/install-wordpress.sh
                     fi
