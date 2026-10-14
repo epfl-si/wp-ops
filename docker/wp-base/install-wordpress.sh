@@ -283,7 +283,8 @@ plugin_canonical_name () {
     esac
 }
 
-# This function is meant to make it easier to create a testing image. It unused in a pristine build.
+# This function is meant to make it easier to create a testing image.
+# Pristine builds do not use it.
 #
 # Appending a call like
 #
