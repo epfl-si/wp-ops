@@ -327,6 +327,7 @@
                         -e 's;FROM ubuntu:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/ubuntu:;g' \
                         -e 's;FROM python:;FROM {{ ansible_quay_hostname }}/{{ quay_organization }}/python:;g' \
                         $dockerfile
+                        echo "ENV BUILD_TAG=$TAG" >> $dockerfile
                     done
                     if [ -n "$(params.branch-name)" ]; then
                       echo "try_git_switch '$(params.branch-name)'" >> wp-ops/docker/wp-base/install-wordpress.sh
