@@ -14,7 +14,9 @@
 #                    The part of the image name after the colon, that the
 #                    serving containers will use
 #    - wp_php_image
-#                    For `clinic` usages we want to use the clinic quay repository with "latest" tag
+#                    (Optional) The image to use for the `wp-php` container;
+#                    defaults to a computation similar to the `wp-nginx` one,
+#                    i.e. using `image_tag` as the suffix
 #    - image_pull_policy
 #                    One of "Always" (the default) or "IfNotPresent"
 #
