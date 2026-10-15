@@ -533,7 +533,7 @@
       metadata:
         name: "{{ build_privileged_service_account }}"
         namespace: "{{ inventory_namespace }}"
-      # We expect this ServiceAccount to exist already (becaus OpenShift created it);
+      # We expect this ServiceAccount to exist already (because OpenShift created it);
       # we just want to throw in the following tweak:
       imagePullSecrets:
       - name: "{{ quay_puller_secret_name }}"
