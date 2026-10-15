@@ -538,7 +538,7 @@
       imagePullSecrets:
       - name: "{{ quay_puller_secret_name }}"
 
-- name: wp-base/Tekton - CronJob for periodic builds
+- name: "`CronJob`s for periodic builds"
   with_items:
     - suffix: rc
       schedule: "0 1 * * *"
