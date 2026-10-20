@@ -12,6 +12,7 @@ RUN set -e -x; apt-get -qy update; \
     apt-get --no-install-recommends -qy install \
         curl \
         git \
+        jq \
         less \
         mariadb-client \
         php-cli \
