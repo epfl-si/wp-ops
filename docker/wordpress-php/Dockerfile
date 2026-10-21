@@ -13,7 +13,7 @@ RUN set -e -x; \
     apt -qy install --no-install-recommends \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
     apt -qy update ; \
-    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip,opentelemetry,grpc,protobuf}' ; \
+    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip}' ; \
     apt-get -qy autoremove ; \
     apt-get clean
 
