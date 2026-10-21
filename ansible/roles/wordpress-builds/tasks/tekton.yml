@@ -133,7 +133,7 @@
       _buildah_and_retry () {
         local attempt lasterror
         for attempt in $(seq 1 10); do
-          buildah "$@" && return
+          buildah --format v2s2 "$@" && return
           lasterror=$?
           sleep 10
         done
