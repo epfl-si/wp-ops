@@ -1,4 +1,4 @@
-FROM ubuntu:jammy AS builder
+FROM ubuntu:resolute AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,11 +9,10 @@ RUN sed -i \
      /etc/apt/sources.list
 
 RUN apt-get -qy update
-RUN apt-get -qy install curl
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get -qy install \
     php-cli php-curl php-gd php-ldap php-mbstring php-mysql php-xml php-zip \
-    composer pipx nodejs yarn jq unzip patch git
+    composer pipx nodejs jq unzip patch git nodejs npm curl
+RUN npm install -g corepack
 RUN PIPX_BIN_DIR=/usr/local/bin pipx install awscli
 
 ######################################################################

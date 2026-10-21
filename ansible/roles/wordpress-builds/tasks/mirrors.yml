@@ -9,7 +9,7 @@
   vars:
     mirror_name: ubuntu
     mirror_from: "docker.io/library/ubuntu"
-    mirror_tags: ["noble", "latest", "jammy"]
+    mirror_tags: ["noble", "latest", "resolute"]
 
 - name: "Mirror the Python 3.13 base images"
   include_tasks:

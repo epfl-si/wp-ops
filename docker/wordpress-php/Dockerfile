@@ -4,15 +4,14 @@ FROM quay-its.epfl.ch/svc0041/composer:2.9 AS composer
 COPY composer.json ./
 RUN composer install --ignore-platform-reqs
 
-FROM ubuntu:jammy
+FROM ubuntu:resolute
 
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.5
 RUN set -e -x; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt -qy update ; \
     apt -qy install --no-install-recommends \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
-    add-apt-repository ppa:ondrej/php ; \
     apt -qy update ; \
     bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip,opentelemetry,grpc,protobuf}' ; \
     apt-get -qy autoremove ; \
