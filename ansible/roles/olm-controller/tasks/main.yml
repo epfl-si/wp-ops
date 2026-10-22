@@ -45,7 +45,7 @@
 
         If you don't see WordPress operator, then go to
 
-        https://console-openshift-console.apps.okd-test.fsd.team/operatorhub/ns/openshift-operators?keyword=wordpress
+        https://console-openshift-console.apps.okd-test.fsd.team/catalog/ns/openshift-operators?keyword=wordpress
 
         and install it from there. 
 
