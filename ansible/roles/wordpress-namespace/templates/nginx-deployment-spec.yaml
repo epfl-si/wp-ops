@@ -195,6 +195,10 @@
                   secretKeyRef:
                     name: people-secret
                     key: token
+              - name: OTEL_RESOURCE_ATTRIBUTES
+                value: service.name=wp-php,{#
+                   #}service.environment={{ inventory_deployment_stage }},{#
+                   #}service.namespace={{ inventory_namespace }}
             envFrom:
               - configMapRef:
                   name: otel-php-config
