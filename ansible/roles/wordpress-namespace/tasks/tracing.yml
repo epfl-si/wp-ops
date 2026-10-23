@@ -19,7 +19,6 @@
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "wp-php"
-      OTEL_RESOURCE_ATTRIBUTES: "service.name=wp-php,service.environment={{ inventory_deployment_stage }},service.namespace={{ inventory_namespace }}"
     _data_sample_20percent:
       OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
       OTEL_TRACES_SAMPLER_ARG: "0.2"
