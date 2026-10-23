@@ -5,7 +5,9 @@
 # Caller should set the following vars:
 #
 #    - app_label     The value for the `app=` label that all pods will
-#                    bear, as a string
+#                    bear, as a string; also used as the value of the
+#                    OpenTelemetry `epfl.deployment.label`
+#                    resource attribute.
 #    - additional_pod_labels
 #                    A dict of keys and values to attach to the pod template
 #    - additional_deployment_annotations
@@ -198,7 +200,8 @@
               - name: OTEL_RESOURCE_ATTRIBUTES
                 value: service.name=wp-php,{#
                    #}service.environment={{ inventory_deployment_stage }},{#
-                   #}service.namespace={{ inventory_namespace }}
+                   #}service.namespace={{ inventory_namespace }},{#
+                   #}epfl.deployment.label={{ app_label }}
             envFrom:
               - configMapRef:
                   name: otel-php-config
