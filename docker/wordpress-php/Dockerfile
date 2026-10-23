@@ -10,10 +10,17 @@ ARG PHP_VERSION=8.5
 RUN set -e -x; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt -qy update ; \
+    apt -qy install --no-install-recommends ca-certificates curl lsb-release ; \
+    curl -fsSLo /tmp/sury-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb ; \
+    dpkg -i /tmp/sury-keyring.deb ; \
+    rm -f /tmp/sury-keyring.deb ; \
+    echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(. /etc/os-release && echo "$VERSION_CODENAME") main" \
+        > /etc/apt/sources.list.d/php.list ; \
+    apt -qy update ; \
     apt -qy install --no-install-recommends \
         msmtp  msmtp-mta software-properties-common gpg-agent ; \
     apt -qy update ; \
-    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip}' ; \
+    bash -c 'apt -qy install php${PHP_VERSION}-{fpm,cli,curl,gd,ldap,mbstring,mysql,xml,zip,opentelemetry,grpc,protobuf}' ; \
     apt-get -qy autoremove ; \
     apt-get clean
 
