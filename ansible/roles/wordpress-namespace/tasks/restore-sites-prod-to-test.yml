@@ -16,9 +16,18 @@
         name: restore-sites-prod-to-test
         namespace: "{{ inventory_namespace }}"
       rules:
-        - apiGroups: ['networking.k8s.io']
+        - apiGroups: ['wordpress.epfl.ch']
           resources:
-            - ingresses
+            - wordpresssites
+          verbs: ['get']
+        - apiGroups: ['k8s.mariadb.com']
+          resources:
+            - databases
+            - users
+          verbs: ['get', 'list']
+        - apiGroups: ['']
+          resources:
+            - secrets
           verbs: ['get']
         - apiGroups: ['k8s.mariadb.com']
           resources:
