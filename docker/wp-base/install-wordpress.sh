@@ -87,9 +87,6 @@ main () {
     # accessible, resp. we can't find them on the Internet anymore; so
     # we keep them on our S3-compatible Scality server.
     if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
-        # find-my-blocks: changed authors in the 3.6.x release cycle,
-        # new author dropped our previous contributions
-        install_plugin_s3 find-my-blocks-3.5.6.zip
         # Paid-for plugins - pretty much *the* reason why we
         # build in our private cloud.
         install_plugin_s3 wpforms.1.9.4.zip
