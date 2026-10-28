@@ -21,12 +21,9 @@ for url in "${urls[@]}"; do
     site_id=$(curl https://wp-veritas.epfl.ch/api/v2/sites\?siteUrl=$url | jq -r '.[0] | .id')
     echo "Site id : $site_id"
 
-    readarray -t k8s_info < <(curl https://wp-veritas.epfl.ch/api/v2/sites/$site_id | jq -r '.kubernetesExtraInfo.wordpressSiteName, .kubernetesExtraInfo.databaseName, .kubernetesExtraInfo.databaseRef')
-    site="${k8s_info[0]}"
+    read -r site database mariadb_prod_host < <(curl https://wp-veritas.epfl.ch/api/v2/sites/$site_id | jq -r '.kubernetesExtraInfo | "\(.wordpressSiteName) \(.databaseName) \(.databaseRef)"')
     echo "WordpressSite : $site"
-    database="${k8s_info[1]}"
     echo "Database : $database"
-    mariadb_prod_host="${k8s_info[2]}"
     echo "MariaDB prod host : $mariadb_prod_host"
 
     mariadb_test_host=$(kubectl get databases.k8s.mariadb.com "$database" -o jsonpath='{.spec.mariaDbRef.name}')
