@@ -21,8 +21,7 @@ for url in "${urls[@]}"; do
     site_id=$(curl https://wp-veritas.epfl.ch/api/v2/sites\?siteUrl=$url | jq -r '.[0] | .id')
     echo "Site id : $site_id"
 
-    readarray -t k8s_info < <(curl https://wp-veritas.epfl.ch/api/v2/sites/$site_id | jq -r '.kubernetesExtraInfo.ingressName, .kubernetesExtraInfo.databaseRef')
-    # The WordpressSite has the same name as its ingress in wp-veritas
+    readarray -t k8s_info < <(curl https://wp-veritas.epfl.ch/api/v2/sites/$site_id | jq -r '.kubernetesExtraInfo.wordpressSiteName, .kubernetesExtraInfo.databaseRef')
     site="${k8s_info[0]}"
     echo "WordpressSite : $site"
     mariadb_prod_host="${k8s_info[1]}"
