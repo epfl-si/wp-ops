@@ -422,6 +422,25 @@
                 workspace: shared-workspace
               - name: dockerconfig
                 workspace: dockerconfig
+          - name: tag-wp-cron-latest
+            runAfter: [ build-wp-cron ]
+            when:
+              - input: "$(params.explicit-stem)"
+                operator: in
+                values: [""]
+            taskRef:
+              kind: Task
+              name: oci-retag
+            params:
+              - name: tagFrom
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron@$(tasks.build-wp-cron.results.IMAGE_DIGEST)
+              - name: tagTo
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-cron:latest
+            workspaces:
+              - name: dockerconfig
+                workspace: dockerconfig
           - name: build-wp-s3
             runAfter: [ build-wp-cron ]
             taskRef:
@@ -436,6 +455,25 @@
             workspaces:
               - name: source
                 workspace: shared-workspace
+              - name: dockerconfig
+                workspace: dockerconfig
+          - name: tag-wp-s3-latest
+            runAfter: [ build-wp-s3 ]
+            when:
+              - input: "$(params.explicit-stem)"
+                operator: in
+                values: [""]
+            taskRef:
+              kind: Task
+              name: oci-retag
+            params:
+              - name: tagFrom
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3@$(tasks.build-wp-s3.results.IMAGE_DIGEST)
+              - name: tagTo
+                value: >-
+                  {{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:latest
+            workspaces:
               - name: dockerconfig
                 workspace: dockerconfig
           - name: build-wp-operator
