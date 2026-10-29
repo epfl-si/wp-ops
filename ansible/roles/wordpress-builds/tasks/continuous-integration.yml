@@ -65,6 +65,7 @@
             - wp-epfl-openid-configuration
             - wp-gutenberg-epfl
             - wp-mu-plugins
+            - wp-operator
             - wp-ops
             - wp-plugin-enlighter
             - wp-plugin-epfl-404
