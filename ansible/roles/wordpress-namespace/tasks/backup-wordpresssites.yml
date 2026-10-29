@@ -65,8 +65,8 @@
                 serviceAccountName: backup-wordpresssite
                 containers:
                   - name: backup-wordpresssite-cron
-                    image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:2025-293"
-                    imagePullPolicy: IfNotPresent
+                    image: "{{ ansible_quay_hostname }}/{{ quay_organization }}/wp-s3:latest"
+                    imagePullPolicy: Always
                     command: ["/bin/bash"]
                     args: ["/wordpresssites-backup.sh"]
                     resources:
