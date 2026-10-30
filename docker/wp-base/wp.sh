@@ -137,12 +137,6 @@ configure_site () {
 declare -a wp_cli_args
 while [ "$#" -gt 0 ]; do
   case "$1" in
-      --ingress)
-          configure_ingress "$2"
-          shift; shift ;;
-      --ingress=*)
-          configure_ingress "$(echo "$1" |cut -d= -f2-)"
-          shift ;;
       --site)
           configure_site "$2"
           shift; shift ;;
