@@ -32,7 +32,7 @@
           verbs: ["list", "watch"]
         - apiGroups: [""]
           resources: ["secrets"]
-          verbs: ["list", "watch"]
+          verbs: ["get", "list", "watch"]
         - apiGroups: [""]
           resources: ["events"]
           verbs: ["create", "patch"]
